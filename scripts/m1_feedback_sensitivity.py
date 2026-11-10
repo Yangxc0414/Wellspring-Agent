@@ -173,18 +173,78 @@ def run(project: Path, limit: int = 50) -> dict:
     }
 
 
+def run_next_actions_measurement(project: Path, run_id: str) -> dict:
+    """M1 第二半: the end-to-end flip on the real consumer (research_next_actions).
+
+    Baseline counterfactual = the raw loop-capsule.json advice (what a host saw
+    before the verdict-bus migration); wired = what research_next_actions returns
+    now.  行为改变 = the stale re-sign advice is gone and a fresh verdict action
+    took its place.
+    """
+    from research_agent.mcp_server import _next_actions
+
+    target = Path(project) / "runs" / run_id
+    capsule_path = target / "loop-capsule.json"
+    raw_advice: list = []
+    if capsule_path.is_file():
+        try:
+            payload = json.loads(capsule_path.read_text(encoding="utf-8"))
+            raw_advice = [
+                str(a.get("command") or "")
+                for a in (payload.get("next_actions") or [])
+                if isinstance(a, dict)
+            ]
+        except (OSError, ValueError):
+            raw_advice = []
+    wired = _next_actions(Path(project), run_id)
+    wired_texts = [str(a.get("command") or a.get("cli") or "") for a in wired]
+    stale_in_baseline = any("closure sign" in text for text in raw_advice)
+    stale_in_wired = any("closure sign" in text for text in wired_texts)
+    fresh_actions = [str(a.get("action") or "") for a in wired if a.get("kind") == "verdict_action"]
+    return {
+        "schema_version": "m1-next-actions-e2e-0.1",
+        "run_id": run_id,
+        "baseline_counterfactual": {
+            "capsule_next_actions": raw_advice[:5],
+            "stale_resign_advice": stale_in_baseline,
+        },
+        "wired": {
+            "actions": [
+                {"kind": str(a.get("kind") or ""), "action": str(a.get("action") or "")}
+                for a in wired
+            ],
+            "stale_resign_advice": stale_in_wired,
+            "verdict_actions": fresh_actions,
+        },
+        "behavior_changed": bool(stale_in_baseline and not stale_in_wired and fresh_actions),
+        "boundary": (
+            "one signed E2E run; the flip is baseline (stale capsule advice) vs wired "
+            "(verdict-bus actions) through the real research_next_actions consumer"
+        ),
+    }
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", required=True)
     parser.add_argument("--output-dir", default="")
     parser.add_argument("--limit", type=int, default=50)
+    parser.add_argument(
+        "--next-actions-measurement",
+        default="",
+        help="run id: measure the end-to-end next-actions flip instead of the class sensitivity",
+    )
     args = parser.parse_args(argv)
-    result = run(Path(args.project), limit=args.limit)
+    if args.next_actions_measurement:
+        result = run_next_actions_measurement(Path(args.project), args.next_actions_measurement)
+    else:
+        result = run(Path(args.project), limit=args.limit)
     text = json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True)
     if args.output_dir:
         out = Path(args.output_dir)
         out.mkdir(parents=True, exist_ok=True)
-        (out / "result.json").write_text(text + "\n", encoding="utf-8")
+        name = "e2e-next-actions.json" if args.next_actions_measurement else "result.json"
+        (out / name).write_text(text + "\n", encoding="utf-8")
     print(text)
     return 0
 

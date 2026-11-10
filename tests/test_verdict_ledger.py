@@ -203,5 +203,34 @@ class ConsumerMigrationTest(unittest.TestCase):
             self.assertEqual(self._summary(root), {})
 
 
+class NextActionsWiringTest(unittest.TestCase):
+    """M1 第二半：决策表接入 research_next_actions——判定改变下一步行动。"""
+
+    def _actions(self, root: Path):
+        from research_agent.mcp_server import _next_actions
+
+        return _next_actions(root, "RUN-TEST-01")
+
+    def test_signed_run_advises_verify_bundle_not_re_sign(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root, signed=True, capsule_blockers=["CLOSURE_UNSIGNED"])
+            actions = self._actions(root)
+            verdict_actions = [a for a in actions if a.get("kind") == "verdict_action"]
+            self.assertTrue(any(a["action"] == "verify_bundle" for a in verdict_actions))
+            for action in actions:
+                self.assertNotIn("closure sign", str(action.get("command") or action.get("cli") or ""))
+            row = next(a for a in verdict_actions if a["action"] == "verify_bundle")
+            self.assertTrue(row["source_sha256"])
+
+    def test_draft_run_advises_claim_sign_human(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root, signed=False, capsule_blockers=[], closure_status="ready")
+            actions = self._actions(root)
+            verdict_actions = [a for a in actions if a.get("kind") == "verdict_action"]
+            self.assertTrue(any(a["action"] == "claim_sign_human" for a in verdict_actions))
+
+
 if __name__ == "__main__":
     unittest.main()

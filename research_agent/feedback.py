@@ -156,6 +156,91 @@ register_loop(
 )
 
 
+def _observe_t6b_falsification(project: Path, limit: int = 50) -> List[Dict[str, Any]]:
+    """T6b 证伪/反事实（审计项 → 记录化 proposal 的第一步，71-图① 对照）。
+
+    Observation: executed studies bind a falsification condition in
+    study-origin.json; the loop reads that condition together with the study's
+    claim status.  The auto-back-pointer into hypothesis GENERATION is roadmap;
+    v1 records the constraint a future generation must carry.
+    """
+    from .storage import read_json as _read_json
+
+    root = Path(project).resolve()
+    observations: List[Dict[str, Any]] = []
+    studies = root / "studies"
+    if not studies.is_dir():
+        return observations
+    for origin_path in sorted(studies.glob("*/study-origin.json"))[-max(1, min(int(limit), 200)):]:
+        try:
+            origin = _read_json(origin_path)
+        except (OSError, ValueError):
+            origin = {}
+        if not isinstance(origin, dict):
+            origin = {}
+        study_dir = origin_path.parent
+        claim_path = study_dir / "claim.json"
+        claim_status = "absent"
+        if claim_path.is_file():
+            try:
+                claim_payload = _read_json(claim_path)
+                claim_status = str((claim_payload or {}).get("status") or "absent")
+            except (OSError, ValueError):
+                claim_status = "unreadable"
+        falsification = str(origin.get("falsification") or "")
+        observations.append(
+            {
+                "loop_id": "t6b_falsification",
+                "subject": _rel(root, study_dir),
+                "state": "falsification_bound" if falsification else "no_falsification_bound",
+                "falsification": falsification,
+                "idea_id": str(origin.get("idea_id") or ""),
+                "claim_status": claim_status,
+                "source_path": _rel(root, origin_path),
+                "source_sha256": _sha256(origin_path),
+            }
+        )
+    return observations
+
+
+def _propose_t6b_falsification(observation: Dict[str, Any]) -> List[Dict[str, Any]]:
+    falsification = str(observation.get("falsification") or "")
+    if observation.get("state") == "falsification_bound":
+        constraint = "carry the executed falsification condition into new hypotheses: " + falsification[:240]
+    else:
+        constraint = (
+            "bind a falsification condition before the next study is executed "
+            "(study-origin.falsification is empty for %s)" % observation.get("subject")
+        )
+    return [
+        {
+            "loop_id": "t6b_falsification",
+            "kind": "generation_constraint",
+            "read_only": True,
+            "subject": str(observation.get("subject") or ""),
+            "constraint": constraint,
+            "human_action": "",
+        }
+    ]
+
+
+def _apply_t6b_falsification(proposal: Dict[str, Any], observation: Dict[str, Any], project: Path) -> Dict[str, Any]:
+    return {
+        "effect": "recorded_constraint",
+        "state": str(observation.get("state") or ""),
+        "constraint": str(proposal.get("constraint") or ""),
+    }
+
+
+register_loop(
+    "t6b_falsification",
+    _observe_t6b_falsification,
+    _propose_t6b_falsification,
+    _gate_lineage_reverify,  # same read-only-only gate discipline
+    _apply_t6b_falsification,
+)
+
+
 def run_feedback(project: Path, loops: Optional[List[str]] = None, limit: int = 50) -> Dict[str, Any]:
     """Run the explicitly enabled loops; with none enabled, write nothing anywhere."""
     root = Path(project).resolve()

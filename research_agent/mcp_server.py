@@ -3254,6 +3254,42 @@ def _loop_capsule_summary(target: Path) -> Dict[str, Any]:
     }
 
 
+def _verdict_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
+    """Fresh verdict-derived actions from the bus (71-§5 步 3 第二半).
+
+    The decision table runs over the project's verdict rows; only this run's
+    subjects surface, and each entry carries the source artifact binding so a
+    host can audit where the action came from.  Additive by design: kind=
+    "verdict_action" distinguishes them from the recomputed loop advice.
+    """
+    try:
+        from .feedback import verdict_action_table
+        from .verdict_ledger import collect
+
+        rows = collect(project, limit=50).get("rows") or []
+    except (OSError, ValueError):
+        return []
+    subjects = ("runs/" + run_id, "runs/" + run_id + "/claim")
+    src = {str(row.get("subject") or ""): row for row in rows}
+    actions: List[Dict[str, Any]] = []
+    for item in verdict_action_table(rows).get("actions") or []:
+        if item.get("subject") not in subjects:
+            continue
+        row = src.get(item.get("subject") or "") or {}
+        actions.append(
+            {
+                "kind": "verdict_action",
+                "action": item.get("action"),
+                "basis": item.get("basis"),
+                "subject": item.get("subject"),
+                "source": "verdict-ledger",
+                "source_path": str(row.get("source_path") or ""),
+                "source_sha256": str(row.get("source_sha256") or ""),
+            }
+        )
+    return actions
+
+
 def _next_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
     target = run_dir(project, run_id)
     task = _read_task(target)
@@ -3275,8 +3311,9 @@ def _next_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
             for action in (support_action, gold_action, experiment_action)
             if action
         ]
-        if actions or study_actions:
-            return actions + study_actions
+        verdict_actions = _verdict_actions(project, run_id)
+        if actions or study_actions or verdict_actions:
+            return actions + study_actions + verdict_actions
         # A task-less run can still carry a capsule: pointing the human at the directory
         # would be weaker advice than the artifacts already support.
         capsule_actions = [
@@ -3285,7 +3322,7 @@ def _next_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
             if isinstance(action, dict) and action.get("command")
         ]
         if capsule_actions:
-            return capsule_actions
+            return capsule_actions + verdict_actions
         return [
             {
                 "kind": "inspect",
@@ -3423,32 +3460,44 @@ def _next_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
     gate_map = {
         str(item.get("gate")): item for item in gates if isinstance(item, dict)
     }
-    if status == "needs_human" and "S5" in gate_map and "claim/claim.json" not in artifacts:
-        dataset = "iris"
-        run_context = _read_json(target / "run-context.json")
-        request = run_context.get("request") if isinstance(run_context.get("request"), dict) else {}
-        dataset = str(request.get("run_dataset") or dataset)
-        actions.append(
-            {
-                "kind": "human_gate",
-                "gate": "S5b",
-                "message": "Inspect RunCapsule/EA and sign the claim in the CLI; then resume with claim_file.",
-                "cli": (
-                    'python -m research_agent run claim --capsule "%s" --ea "%s" '
-                    '--statement "<claim statement>" --human-reason "<reason>" '
-                    '--scope S5/demo/%s --output-dir "%s"'
-                    % (
-                        target / "run" / "run-capsule.json",
-                        target / "run" / "ea.json",
-                        dataset,
-                        target / "claim",
-                    )
-                ),
-                "resume": {"claim_file": _relative(project, target / "claim" / "claim.json")},
-            }
+    if status == "needs_human" and "S5" in gate_map:
+        # fresh claim status, not the task.json artifacts snapshot: a delegated claim
+        # signature can land after task.json was written
+        claim_payload = _read_json(target / "claim" / "claim.json")
+        claim_signed = isinstance(claim_payload, dict) and str(claim_payload.get("status") or "") in (
+            "supported",
+            "approved",
         )
+        if not claim_signed:
+            dataset = "iris"
+            run_context = _read_json(target / "run-context.json")
+            request = run_context.get("request") if isinstance(run_context.get("request"), dict) else {}
+            dataset = str(request.get("run_dataset") or dataset)
+            actions.append(
+                {
+                    "kind": "human_gate",
+                    "gate": "S5b",
+                    "message": "Inspect RunCapsule/EA and sign the claim in the CLI; then resume with claim_file.",
+                    "cli": (
+                        'python -m research_agent run claim --capsule "%s" --ea "%s" '
+                        '--statement "<claim statement>" --human-reason "<reason>" '
+                        '--scope S5/demo/%s --output-dir "%s"'
+                        % (
+                            target / "run" / "run-capsule.json",
+                            target / "run" / "ea.json",
+                            dataset,
+                            target / "claim",
+                        )
+                    ),
+                    "resume": {"claim_file": _relative(project, target / "claim" / "claim.json")},
+                }
+            )
     closure_report = target / "closure" / "closure-report.json"
-    if closure_report.is_file() and "closure-signature/signature.json" not in artifacts:
+    # fresh filesystem check, not the task.json artifacts snapshot: a delegated
+    # signature can land after task.json was written, and advising a second
+    # closure sign over a signed closure is exactly the drift the verdict bus exists
+    # to expose
+    if closure_report.is_file() and not (target / "closure-signature" / "signature.json").is_file():
         actions.append(
             {
                 "kind": "human_gate",
@@ -3500,6 +3549,7 @@ def _next_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
                 "run_id": target.name,
             }
         )
+    actions.extend(_verdict_actions(project, run_id))
     return actions
 
 

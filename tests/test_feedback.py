@@ -120,6 +120,35 @@ class FeedbackPortTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 run_feedback(root, loops=["not_a_loop"])
 
+    def test_t6b_falsification_loop_records_constraint(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root)
+            studies = root / "studies" / "STUDY-iris"
+            _write(
+                studies / "study-origin.json",
+                {"idea_id": "IDEA-01", "falsification": "if the gated run accepts no fewer bogus steps on held-out tasks, the gate adds no selection value"},
+            )
+            _write(studies / "claim.json", {"status": "approved"})
+            ledger = run_feedback(root, loops=["t6b_falsification"])
+            self.assertEqual(ledger["status"], "ran")
+            row = ledger["rows"][0]
+            self.assertEqual(row["observation"]["state"], "falsification_bound")
+            self.assertIn("carry the executed falsification condition", row["proposal"]["constraint"])
+            self.assertEqual(row["gate_decision"]["decision"], "auto_allowed")
+            self.assertEqual(row["effect"]["effect"], "recorded_constraint")
+
+    def test_t6b_flags_missing_falsification(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root)
+            studies = root / "studies" / "STUDY-iris"
+            _write(studies / "study-origin.json", {"idea_id": "IDEA-01", "falsification": ""})
+            ledger = run_feedback(root, loops=["t6b_falsification"])
+            row = ledger["rows"][0]
+            self.assertEqual(row["observation"]["state"], "no_falsification_bound")
+            self.assertIn("bind a falsification condition", row["proposal"]["constraint"])
+
     def test_gate_rejects_mutating_proposals(self):
         decision = _gate_lineage_reverify(
             {"kind": "rewrite_claim", "read_only": False, "subject": "runs/RUN-TEST-01"}
