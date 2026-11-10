@@ -2,9 +2,15 @@
 
 ## Current status
 
-**There is no root `LICENSE` file yet.** Original code and documentation in this repository are
-therefore **not yet granted under an open-source license**; absent a license, default copyright
-applies. Do not describe a public copy as "open source" until the owner selects and adds a license.
+**The code license is chosen: Apache-2.0.** The root `LICENSE` file is committed
+(2026-11-11), `pyproject.toml` and `apps/web/package.json` carry the `license` field, and a
+`NOTICE` file records the bundled-material attribution pointer. Original code in this repository
+**is granted under Apache-2.0**; do not strip the license from a public copy.
+
+Still pending: the documentation license (the design documents `00-`…`72-` are thesis material;
+publishing them separately wants a CC BY 4.0 decision) and the optional PyMuPDF distribution
+decision below. Until a doc-license decision is published, the documents ship with the runtime
+under the repository's Apache-2.0 grant as part of the source distribution.
 
 This file is a decision record and a release checklist, not legal advice.
 
@@ -26,9 +32,10 @@ out of the public repository.
 
 Before publishing the first public tag:
 
-- [ ] Add the chosen `LICENSE` text at the repository root.
-- [ ] Add `license` to `pyproject.toml` and `apps/web/package.json`.
-- [ ] Update the README badge/statement from "pending" to the chosen license.
+- [x] Add the chosen `LICENSE` text at the repository root. (2026-11-11, Apache-2.0)
+- [x] Add `license` to `pyproject.toml` and `apps/web/package.json`.
+- [x] Update the README badge/statement from "pending" to the chosen license.
+- [x] Add a `NOTICE` file pointing at `THIRD_PARTY_NOTICES.md` as the attribution record.
 - [ ] Confirm every contributor has agreed to the chosen license (or the contribution is owned by
       the repository owner).
 - [ ] Exclude or clarify all local-only trees listed in `THIRD_PARTY_NOTICES.md`:
@@ -51,8 +58,10 @@ Before publishing the first public tag:
 - External skills: the caller supplies them; this repository does not redistribute them.
 - Journal sample PDFs/DOCX and conference HTML captures: publisher copyright; local reference only.
 
-## Until the decision is made
+## Until the remaining decisions are made
 
-- The repository may be used locally for research and evaluation.
-- Do not redistribute it as a whole, and do not describe it as licensed open source.
-- The security and evidence-governance rules still apply to all local use.
+- The code may be redistributed under Apache-2.0 with the LICENSE and NOTICE files intact.
+- The documentation-license decision (CC BY 4.0) and the PyMuPDF distribution path are still
+  open; do not present the design documents as separately licensed until that decision is
+  published.
+- The security and evidence-governance rules still apply to all use.
