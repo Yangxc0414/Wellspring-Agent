@@ -207,3 +207,109 @@ def run_feedback(project: Path, loops: Optional[List[str]] = None, limit: int = 
 def read_ledger(path: Path) -> Dict[str, Any]:
     """Read a previously written feedback ledger."""
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+ACTION_SCHEMA = "verdict-action-0.1"
+
+_ACTION_BOUNDARY = (
+    "deterministic decision table: verdict rows -> one proposed action per subject; "
+    "same-subject conflicts and invariant violations escalate to a human instead of "
+    "guessing a winner; pure and wall-clock free, so the same rows always produce "
+    "the same actions"
+)
+
+
+def _action_for(kind: str, status: str) -> str:
+    if kind == "closure":
+        if status == "signed":
+            return "verify_bundle"
+        if status == "ready":
+            return "closure_sign_human"
+        return "inspect_run"
+    if kind == "claim":
+        if status == "signed":
+            return "closure_check"
+        if status == "draft":
+            return "claim_sign_human"
+        return "complete_run_first"
+    if kind == "experiment":
+        if status == "signed":
+            return "verify_bundle"
+        if status == "ready_for_human_signature":
+            return "experiment_sign_human"
+        return "run_experiment_closure"
+    if kind == "study":
+        if status == "signed":
+            return "closed_study"
+        if status == "ready_for_human_signature":
+            return "study_sign_human"
+        return "run_study_closure"
+    if kind == "snapshot_drift":
+        # the drift row means the capsule snapshot is stale; the summary consumer
+        # already re-derives through the bus, so the action is: trust the override,
+        # never the snapshot
+        return "verdict_bus_authoritative"
+    return "inspect_artifacts"
+
+
+def verdict_action_table(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Deterministically propose the next action per subject from verdict rows.
+
+    借鉴点（71-§4.2 设计输入 3）：grade-iterate 的 verdict_reader 是纯函数决策表，
+    预算/状态改变建议动作；这里同型——同一 subject 的判定互相矛盾、或出现不变量
+    违例（closure signed 而 claim 未签）时，升级为 escalate_conflict 交人工裁决，
+    不猜哪边对。
+    """
+    by_subject: Dict[str, Dict[str, str]] = {}
+    for row in rows:
+        subject = str(row.get("subject") or "")
+        kind = str(row.get("kind") or "")
+        status = str(row.get("status") or "")
+        if not subject or not kind:
+            continue
+        slot = by_subject.setdefault(subject, {})
+        if kind in slot and slot[kind] != status:
+            # same subject, same kind, two verdicts: the table does not guess
+            slot[kind] = "__conflict__"
+        else:
+            slot[kind] = status
+    actions = []
+    for subject in sorted(by_subject):
+        slot = by_subject[subject]
+        conflict = any(status == "__conflict__" for status in slot.values())
+        if not conflict and slot.get("closure") == "signed" and slot.get("claim") not in (None, "signed"):
+            # invariant violation: a signed closure over an unsigned claim cannot be
+            # acted on; escalate instead of picking a winner
+            conflict = True
+        if conflict:
+            action, basis = "escalate_conflict", "conflicting verdicts for one subject"
+        else:
+            # the earliest unfinished stage wins: claim -> closure -> bundle
+            claim_status = slot.get("claim")
+            closure_status = slot.get("closure")
+            if closure_status is not None:
+                action, basis = _action_for("closure", closure_status), {"kind": "closure", "status": closure_status}
+            elif claim_status is not None:
+                action, basis = _action_for("claim", claim_status), {"kind": "claim", "status": claim_status}
+            else:
+                drift_status = slot.get("snapshot_drift")
+                exp_status = slot.get("experiment")
+                study_status = slot.get("study")
+                if drift_status is not None:
+                    action, basis = _action_for("snapshot_drift", drift_status), {"kind": "snapshot_drift", "status": drift_status}
+                elif exp_status is not None:
+                    action, basis = _action_for("experiment", exp_status), {"kind": "experiment", "status": exp_status}
+                elif study_status is not None:
+                    action, basis = _action_for("study", study_status), {"kind": "study", "status": study_status}
+                else:
+                    action, basis = "inspect_artifacts", {}
+        actions.append({"subject": subject, "action": action, "basis": basis})
+    counts: Dict[str, int] = {}
+    for item in actions:
+        counts[item["action"]] = counts.get(item["action"], 0) + 1
+    return {
+        "schema_version": ACTION_SCHEMA,
+        "actions": actions,
+        "counts": counts,
+        "boundary": _ACTION_BOUNDARY,
+    }

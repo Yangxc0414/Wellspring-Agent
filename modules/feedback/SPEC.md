@@ -2,8 +2,8 @@
 id: feedback
 name: 反馈端口
 stage: S5–S16
-version: 0.1.0
-status: draft
+version: 0.2.0
+status: pilot
 owner: research-agent
 inputs:
   - ProjectDirectory
@@ -58,4 +58,5 @@ invariants:
 
 ## Changelog
 
+- 2026-11-11 · v0.2.0 · status=pilot · 新增确定性决策表 `verdict_action_table(rows)`（71-§4.2 设计输入 3 的落点：verdict 行 → 每 subject 一个建议动作；同 subject 判定矛盾或不变量违例——closure signed 而 claim 未签——升级 `escalate_conflict` 交人工，不猜赢家；`snapshot_drift` → `verdict_bus_authoritative`）；`scripts/m1_feedback_sensitivity.py` 五类反馈（real/stale/shuffled/noisy/contradictory）判别力 harness，预注册判据下实测 E2E 项目 verdict=supported（real 1.0 / 退化均值 0.333 / 矛盾 5/5 升级）。边界：测的是决策表判别力，行动表尚未接入 next_actions 消费者。tests/test_feedback 增 VerdictActionTableTest 6 项 + M1HarnessTest，升 minor。
 - 2026-11-11 · v0.1.0 · status=draft · 初始实现：注册表 + `lineage_reverify` 环（71-§5 步 2 的第一条环，图① 反馈环 B 的回指侧）；验收测试钉「关闭全部环 = 与今日行为逐字节一致」（默认零写入，投影不受模块存在影响）+ 环运行的确定性 + gate 对改动类 proposal 默认拒绝；tests/test_feedback 6 项。

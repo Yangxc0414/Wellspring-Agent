@@ -1,7 +1,7 @@
 {
   "schema_version": "workspace-0.1",
   "source": "modules/*/SPEC.md",
-  "generated_at": "2026-11-10T18:04:43+00:00",
+  "generated_at": "2026-11-10T22:20:13+00:00",
   "count": 28,
   "agents": [
     {
@@ -1079,8 +1079,8 @@
       "id": "feedback",
       "name": "反馈端口",
       "stage": "S5–S16",
-      "version": "0.1.0",
-      "status": "draft",
+      "version": "0.2.0",
+      "status": "pilot",
       "owner": "research-agent",
       "outputs": [
         "FeedbackLedger"

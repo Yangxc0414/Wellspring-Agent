@@ -127,5 +127,98 @@ class FeedbackPortTest(unittest.TestCase):
         self.assertEqual(decision["decision"], "rejected")
 
 
+class VerdictActionTableTest(unittest.TestCase):
+    """决策表：verdict 行 → 确定性动作；矛盾与不变量违例升级人工。"""
+
+    def _row(self, subject, kind, status):
+        return {"subject": subject, "kind": kind, "status": status}
+
+    def test_signed_closure_maps_to_verify_bundle(self):
+        from research_agent.feedback import verdict_action_table
+
+        table = verdict_action_table(
+            [
+                self._row("runs/R-1", "claim", "signed"),
+                self._row("runs/R-1", "closure", "signed"),
+            ]
+        )
+        self.assertEqual(table["actions"][0]["action"], "verify_bundle")
+        self.assertEqual(table["actions"][0]["basis"], {"kind": "closure", "status": "signed"})
+
+    def test_ready_closure_with_signed_claim_maps_to_closure_sign_human(self):
+        from research_agent.feedback import verdict_action_table
+
+        table = verdict_action_table(
+            [
+                self._row("runs/R-1", "claim", "signed"),
+                self._row("runs/R-1", "closure", "ready"),
+            ]
+        )
+        self.assertEqual(table["actions"][0]["action"], "closure_sign_human")
+
+    def test_claim_draft_maps_to_claim_sign_human(self):
+        from research_agent.feedback import verdict_action_table
+
+        table = verdict_action_table([self._row("runs/R-1", "claim", "draft")])
+        self.assertEqual(table["actions"][0]["action"], "claim_sign_human")
+
+    def test_conflicting_statuses_escalate(self):
+        from research_agent.feedback import verdict_action_table
+
+        table = verdict_action_table(
+            [
+                self._row("runs/R-1", "closure", "signed"),
+                self._row("runs/R-1", "closure", "missing"),
+            ]
+        )
+        self.assertEqual(table["actions"][0]["action"], "escalate_conflict")
+
+    def test_signed_closure_over_unsigned_claim_escalates(self):
+        from research_agent.feedback import verdict_action_table
+
+        table = verdict_action_table(
+            [
+                self._row("runs/R-1", "claim", "draft"),
+                self._row("runs/R-1", "closure", "signed"),
+            ]
+        )
+        self.assertEqual(table["actions"][0]["action"], "escalate_conflict")
+
+    def test_deterministic(self):
+        from research_agent.feedback import verdict_action_table
+
+        rows = [
+            self._row("runs/R-1", "claim", "signed"),
+            self._row("runs/R-2", "claim", "draft"),
+            self._row("runs/R-2", "closure", "ready"),
+        ]
+        self.assertEqual(
+            json.dumps(verdict_action_table(rows), sort_keys=True),
+            json.dumps(verdict_action_table(list(reversed(rows))), sort_keys=True),
+        )
+
+
+class M1HarnessTest(unittest.TestCase):
+    def test_harness_runs_and_reports_a_verdict(self):
+        import importlib.util
+        from tests.test_verdict_ledger import _fabricate_run
+
+        spec = importlib.util.spec_from_file_location(
+            "m1_feedback_sensitivity", str(Path(__file__).resolve().parents[1] / "scripts" / "m1_feedback_sensitivity.py")
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root, signed=True, capsule_blockers=["CLOSURE_UNSIGNED"])
+            out = root / "m1"
+            result = module.run(root)
+            self.assertIn(result["verdict"], ("supported", "not_supported"))
+            self.assertEqual(result["metrics"]["real_match_rate"], 1.0)
+            self.assertGreater(result["metrics"]["contradictory_escalations"], 0)
+            module.main(["--project", str(root), "--output-dir", str(out)])
+            self.assertTrue((out / "result.json").is_file())
+
+
 if __name__ == "__main__":
     unittest.main()
