@@ -3196,6 +3196,45 @@ def _loop_capsule_summary(target: Path) -> Dict[str, Any]:
     capsule = _read_json(target / "loop-capsule.json")
     if not isinstance(capsule, dict):
         return {}
+    # The capsule is a run-time snapshot: a delegated signature can land after it was
+    # written, so the snapshot may still say CLOSURE_UNSIGNED over an already-signed
+    # closure.  Re-derive that one verdict from the single-point producer (verdict
+    # ledger) and override the stale blocker — a host following blockers must never
+    # be pointed at re-signing a signed closure.
+    override = None
+    blockers = [str(item) for item in (capsule.get("blockers") or [])]
+    actions = [item for item in (capsule.get("next_actions") or []) if isinstance(item, dict)]
+    if "CLOSURE_UNSIGNED" in blockers:
+        try:
+            from .loop_capsule import project_root_for_run
+            from .verdict_ledger import collect
+
+            project_root = project_root_for_run(target)
+            ledger = collect(project_root, limit=50) if project_root is not None else None
+        except (OSError, ValueError):
+            ledger = None
+        row = next(
+            (
+                item
+                for item in (ledger or {}).get("rows") or []
+                if item.get("kind") == "closure" and item.get("subject") == "runs/" + target.name
+            ),
+            None,
+        )
+        if row and row.get("status") == "signed":
+            override = {
+                "snapshot": "CLOSURE_UNSIGNED",
+                "recomputed": "signed",
+                "source": "verdict-ledger",
+                "source_path": row.get("source_path") or "",
+                "source_sha256": row.get("source_sha256") or "",
+            }
+            blockers = [item for item in blockers if item != "CLOSURE_UNSIGNED"]
+            actions = [
+                item
+                for item in actions
+                if "closure sign" not in str(item.get("command") or "")
+            ]
     nodes = [
         item for item in (capsule.get("nodes") or [])
         if isinstance(item, dict)
@@ -3203,16 +3242,14 @@ def _loop_capsule_summary(target: Path) -> Dict[str, Any]:
     return {
         "path": "loop-capsule.json",
         "run_id": str(capsule.get("run_id") or ""),
-        "status": "blocked" if capsule.get("blockers") else "ready_for_human_review",
+        "status": "blocked" if blockers else "ready_for_human_review",
         "nodes": {
             str(item.get("id")): str(item.get("status") or "")
             for item in nodes
         },
-        "blockers": list(capsule.get("blockers") or []),
-        "next_actions": [
-            item for item in (capsule.get("next_actions") or [])
-            if isinstance(item, dict)
-        ][:8],
+        "blockers": blockers,
+        "verdict_override": override,
+        "next_actions": actions[:8],
         "boundary": str(capsule.get("boundary") or ""),
     }
 

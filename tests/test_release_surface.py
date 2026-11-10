@@ -14,9 +14,15 @@ class ReleaseSurfaceTest(unittest.TestCase):
         report = release_check.check_release(ROOT)
         self.assertEqual(report["blockers"], [])
         self.assertEqual(report["status"], "ok")
+        # the license decision was made (Apache-2.0, root LICENSE committed): a missing
+        # license must regress to a visible warning, and its presence must be recorded
+        self.assertFalse(
+            any(item.get("kind") == "license" and "pending" in str(item.get("status", "")) for item in report["warnings"]),
+            "a chosen root LICENSE must clear the pending-license warning",
+        )
         self.assertTrue(
-            any(item.get("kind") == "license" for item in report["warnings"]),
-            "a pending root LICENSE must stay visible as a warning",
+            any(item.get("kind") == "license" and item.get("status") == "root LICENSE present" for item in report["info"]),
+            "the release surface must record that the root LICENSE exists",
         )
 
     def test_public_release_requires_a_chosen_license(self):
@@ -54,7 +60,7 @@ class ReleaseSurfaceTest(unittest.TestCase):
         for token in ("AstraDraw", "PyMuPDF", "CC BY-NC", "CycleResearcher"):
             self.assertIn(token, notices)
         licensing = (ROOT / "LICENSING.md").read_text(encoding="utf-8")
-        self.assertIn("There is no root `LICENSE` file yet", licensing)
+        self.assertIn("The code license is chosen: Apache-2.0", licensing)
 
 
 if __name__ == "__main__":

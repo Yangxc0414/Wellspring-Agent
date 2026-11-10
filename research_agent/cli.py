@@ -911,6 +911,25 @@ def _cmd_verdicts_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_feedback_run(args: argparse.Namespace) -> int:
+    from .feedback import registered_loops, run_feedback
+
+    loops = [item.strip() for item in (args.loops or "").split(",") if item.strip()]
+    try:
+        result = run_feedback(Path(args.project), loops=loops or None, limit=args.limit)
+    except (OSError, ValueError) as exc:
+        raise SystemExit(str(exc))
+    _print_json(result)
+    return 0
+
+
+def _cmd_feedback_list(args: argparse.Namespace) -> int:
+    from .feedback import _LOOPS
+
+    _print_json({"loops": [{"id": loop_id, "propose": "observe->propose->gate->apply->record"} for loop_id in sorted(_LOOPS)]})
+    return 0
+
+
 def _cmd_experiment_closure(args: argparse.Namespace) -> int:
     from .experiment_closure import (
         ExperimentClosureError,
@@ -4895,6 +4914,24 @@ def build_parser() -> argparse.ArgumentParser:
     verdicts_show = verdicts_sub.add_parser("show", help="print a previously collected ledger")
     verdicts_show.add_argument("--ledger", required=True)
     verdicts_show.set_defaults(func=_cmd_verdicts_show)
+
+    feedback_parser = sub.add_parser(
+        "feedback", help="pluggable feedback loops: observe -> propose -> gate (default reject) -> apply -> record"
+    )
+    feedback_sub = feedback_parser.add_subparsers(dest="feedback_command", required=True)
+    feedback_list = feedback_sub.add_parser("list", help="list registered feedback loops")
+    feedback_list.set_defaults(func=_cmd_feedback_list)
+    feedback_run = feedback_sub.add_parser(
+        "run", help="run the explicitly enabled loops; with none enabled nothing is written"
+    )
+    feedback_run.add_argument("--project", required=True)
+    feedback_run.add_argument(
+        "--loops",
+        default="",
+        help="comma-separated loop ids to enable (default: none — disabled, writes nothing)",
+    )
+    feedback_run.add_argument("--limit", type=int, default=50)
+    feedback_run.set_defaults(func=_cmd_feedback_run)
 
     innovation_parser = sub.add_parser("innovation", help="multi-role innovation review over a run")
     innovation_sub = innovation_parser.add_subparsers(dest="innovation_command", required=True)

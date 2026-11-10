@@ -269,6 +269,7 @@ python -m unittest discover -s tests -v
 
 - [ ] `SPEC.md` 的 version/changelog 已更新；
 - [ ] 改过 `modules/*/SPEC.md` 或 CLI 命令面后，跑过 `python -m research_agent workspace export`：`tests/test_workspace.py` 拿已提交的 `apps/web/public/*.json` 与实时 registry 比对，规格升版而忘记重导出会让全量套件在最后一步红掉；
+- [ ] 新增/删除 CLI 命令后，还必须跑 `python -m research_agent plugin export`：`plugin/manifest.json` 的命令计数与工具面是派生物，`tests/test_plugin_bundle.py` 会逐文件比对——两次踩坑（verdicts 命令组）证明这一步不会有人提醒；
 - [ ] 目标模块测试通过，未破坏其他模块；
 - [ ] 输出仍遵守 `fixture_mode` / `span-only` / no-claim 边界；
 - [ ] 没有新增未使用依赖；
@@ -316,6 +317,7 @@ python -m unittest discover -s tests -v
 | autopilot | S2–S16（委托门） | `research_agent/autopilot.py` + `cli_autopilot.py` | `modules/autopilot/SPEC.md` |
 | mandate | META（只读委托投影） | `research_agent/mandate.py` | `modules/mandate/SPEC.md` |
 | verdict-ledger | S5–S16（判定总线） | `research_agent/verdict_ledger.py` | `modules/verdict-ledger/SPEC.md` |
+| feedback | S5–S16（反馈端口） | `research_agent/feedback.py` | `modules/feedback/SPEC.md` |
 | ccfa-audit | S4 | `research_agent/ccfa_audit.py` + `cli_design.py` | `modules/ccfa-audit/SPEC.md` |
 
 每个模块的测试在 `tests/`；完整纵切见 `research_agent/pipeline.py`。`research_agent/vendor/astradraw/` 是从本地完整复制的第三方绘图工作流，**不要改上游脚本**；需要适配时只改 `research_agent/adapters/astradraw_renderer.py` 与 `svg_audit.py`。

@@ -1,0 +1,13 @@
+Research Agent / Wellspring-Agent
+Copyright 2026 Yangxc0414
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Bundled material and third-party attribution (AstraDraw vendor trim, PyMuPDF
+licensing path, research snapshots, journal sample media) is recorded in
+THIRD_PARTY_NOTICES.md at the repository root. That file is the authoritative
+attribution record for this distribution; this NOTICE only points at it.
+
+The strategy-projection figures (figures/01-04.png) are exports of the owner's
+own research deck; the design documents 00-72 are the owner's thesis material
+shipped as text source.

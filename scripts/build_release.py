@@ -25,6 +25,8 @@ SYNC_FILES = (
     "requirements-dev.txt",
     ".gitignore",
     ".dockerignore",
+    "LICENSE",
+    "NOTICE",
     "apps/web/package.json",
     "apps/web/package-lock.json",
     "apps/web/tsconfig.json",

@@ -2,8 +2,8 @@
 id: verdict-ledger
 name: 判定总线
 stage: S5–S16
-version: 0.1.0
-status: draft
+version: 0.2.0
+status: pilot
 owner: research-agent
 inputs:
   - ProjectDirectory
@@ -48,7 +48,7 @@ invariants:
 
 - v1 不读 rsi 账本（租约撤销 / regressed 事件的判定入账放到下一版；其账本位置不在项目目录内）。
 - v1 的 snapshot_drift 只覆盖 closure 方向的「已签但快照仍说未签」；反向（快照没报、实际未签）与 claim/experiment/study 方向的漂移登记为 roadmap。
-- 不迁移现有消费者：`loop_ledger` / `research_status` / 工作台改读总线是下一版（71-§5 步 1 验收的另一半），本模块先保证总线本身确定、可审计。
+- 消费者迁移（v0.2.0 完成）：`mcp_server._loop_capsule_summary`（research_status / next_actions 的 capsule 摘要）在读到 CLOSURE_UNSIGNED 时先经判定总线重算，已签则**移除该 stale blocker、过滤 stale 的 closure sign 建议并附 `verdict_override`**；快照与重算一致时输出与迁移前逐字节语义一致（`verdict_override=null`）。`loop_ledger` 经查已从产物重算（G5 直接查 signature 文件），无需迁移；`mandate.py`（SPEC 规定"不重新计算门禁"）与前端 ContextPanel 的迁移登记为 roadmap。
 
 ## Minimal Change Workflow
 
@@ -58,4 +58,5 @@ invariants:
 
 ## Changelog
 
+- 2026-11-11 · v0.2.0 · status=pilot · 消费者迁移第一步：`mcp_server._loop_capsule_summary`（research_status 与 research_next_actions 的 capsule 摘要）在快照含 CLOSURE_UNSIGNED 时经判定总线重算 closure 判定——已签则移除 stale blocker、过滤 stale 的 closure sign 建议、附 `verdict_override`（含来源 sha256）；快照一致时 `verdict_override=null`、输出语义与迁移前一致。`loop_ledger` 审计结果：已从产物重算（G5 直接查 signature 文件），无需迁移；mandate（SPEC 规定不重算）与前端登记 roadmap。实测 E2E RUN-E2E-02：迁移前摘要 status=blocked + 建议重签；迁移后 blockers 无 CLOSURE_UNSIGNED + override.recomputed=signed。tests/test_verdict_ledger 新增 ConsumerMigrationTest 3 项（覆盖 override、一致快照不动、缺 capsule），升 minor。
 - 2026-11-11 · v0.1.0 · status=draft · 初始实现：closure/claim/experiment/study 四类判定行 + snapshot_drift（E2E 实测发现：autopilot 代签后 loop-capsule 仍报 CLOSURE_UNSIGNED，next_actions 指向对已签闭包的重复签署）；判定全部复用 closure_profiles.detect_project_profiles 单点，本模块零新判定；tests/test_verdict_ledger 钉确定性（两次收集逐字节一致）、来源 sha256 绑定、drift 行为。

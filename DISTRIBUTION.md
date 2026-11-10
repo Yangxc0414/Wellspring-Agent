@@ -39,11 +39,11 @@ python scripts/build_release.py --check    # 只报告 drift，不写盘（CI �
 | `manuscript/`（未发表投稿）、第三方参考仓库、`.mcp.json`/`.env` | 未发表/无授权/含本机路径与密钥 |
 | `node_modules / dist / test-results` | 构建产物不入库（含历史 dist 的陈旧 bundle 问题） |
 
-## 4. 发布前必做（来自 LICENSING.md 决策记录）
+## 4. 发布前置（LICENSING.md 决策记录）
 
-1. 选择并加入根目录 `LICENSE`（推荐 Apache-2.0；文档若发布用 CC BY 4.0）；
-2. `pyproject.toml` 与 `apps/web/package.json` 补 `license` 字段；
-3. 加入 `LICENSE` 之前，任何副本不得描述为 "open source"。
+1. ✅ 根目录 `LICENSE` 已选定 **Apache-2.0** 并入库（2026-11-11，随 `LICENSE` + `NOTICE` 分发）；文档若单独发布仍待 CC BY 4.0 决策；
+2. ✅ `pyproject.toml` 与 `apps/web/package.json` 已带 `license` 字段；
+3. `THIRD_PARTY_NOTICES.md` 是第三方归属的权威记录（`NOTICE` 指向它）；`research_agent/vendor/astradraw/` 仍按裁剪规则 excluded from redistribution。
 
 ## 5. 最小自检
 

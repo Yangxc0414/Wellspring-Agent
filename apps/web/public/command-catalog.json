@@ -1,9 +1,9 @@
 {
   "schema_version": "workspace-0.1",
-  "generated_at": "2026-11-10T16:58:30+00:00",
-  "count": 215,
+  "generated_at": "2026-11-10T18:04:43+00:00",
+  "count": 217,
   "curated": 51,
-  "derived": 164,
+  "derived": 166,
   "commands": [
     {
       "id": "study.baseline",
@@ -803,6 +803,24 @@
       "label": "sweep status",
       "syntax": "python -m research_agent experiment sweep-status",
       "description": "usage: research_agent experiment sweep-status [-h] --project PROJECT\n                                              --experiment-id EXPERIMENT_ID",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "feedback.list",
+      "group": "feedback",
+      "label": "list",
+      "syntax": "python -m research_agent feedback list",
+      "description": "usage: research_agent feedback list [-h]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "feedback.run",
+      "group": "feedback",
+      "label": "run",
+      "syntax": "python -m research_agent feedback run",
+      "description": "usage: research_agent feedback run [-h] --project PROJECT [--loops LOOPS]\n                                   [--limit LIMIT]",
       "safety": "catalog_only",
       "curated": false
     },

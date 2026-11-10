@@ -127,7 +127,7 @@ python scripts/setup_mcp.py --host workbuddy --write ~/wb-mcp.json
 
 | 文件 | 作用 |
 | --- | --- |
-| [`LICENSING.md`](LICENSING.md) | 许可证决策记录与发布前检查；**当前根 `LICENSE` 尚未选定，因此还不能对外宣称已开源授权** |
+| [`LICENSING.md`](LICENSING.md) | 许可证决策记录与发布前检查；**代码许可已选定 Apache-2.0（2026-11-11，根 `LICENSE` + `NOTICE` 入库并随发行分发）**；文档单独发布仍待 CC BY 4.0 决策 |
 | [`SECURITY.md`](SECURITY.md) | API key 只走环境变量、本地实验/外部 Skill/MCP/HTTP 的执行边界与漏洞报告方式 |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | SPEC-first 工作流、模块版本规则、离线测试与外部适配器规则 |
 | [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | AstraDraw、PyMuPDF、外部 Skill、研究快照与模板素材的许可边界 |

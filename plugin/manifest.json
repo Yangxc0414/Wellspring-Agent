@@ -77,7 +77,7 @@
     "research_number_provenance",
     "research_study_baseline"
   ],
-  "cli_commands": 215,
+  "cli_commands": 217,
   "prompts": [
     "start-research",
     "review-draft",

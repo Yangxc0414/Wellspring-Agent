@@ -1,8 +1,8 @@
 {
   "schema_version": "workspace-0.1",
   "source": "modules/*/SPEC.md",
-  "generated_at": "2026-11-10T16:58:30+00:00",
-  "count": 27,
+  "generated_at": "2026-11-10T18:04:43+00:00",
+  "count": 28,
   "agents": [
     {
       "id": "literature",
@@ -1076,6 +1076,32 @@
       "spec": "modules/autopilot/SPEC.md"
     },
     {
+      "id": "feedback",
+      "name": "反馈端口",
+      "stage": "S5–S16",
+      "version": "0.1.0",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "FeedbackLedger"
+      ],
+      "tools": [
+        "feedback.list",
+        "feedback.run"
+      ],
+      "gates": [
+        "G5"
+      ],
+      "invariants": [
+        "默认关闭：未显式启用任何环时，本模块不写任何文件、任何投影输出与不存在本模块时逐字节一致",
+        "每条环 observe → propose → gate → apply → record；gate 对会改动任何受门禁产物（claim/EA/closure/signature/export）的 proposal 一律默认拒绝",
+        "v1 只允许只读 effect（重验 + 记录回执）；任何自动改写都是 roadmap 且必须先注册 SAFE_SCOPES 式准入",
+        "账本行确定性：不含墙钟字段；同一批产物跑两次环，行内容逐字节一致（来源 sha256 绑定）",
+        "反思不是环：只产出文本而不改变下一步动作的机制不进入本注册表（71-图① 底注口径）"
+      ],
+      "spec": "modules/feedback/SPEC.md"
+    },
+    {
       "id": "judge",
       "name": "证据支持审稿",
       "stage": "S5b–S13",
@@ -1212,8 +1238,8 @@
       "id": "verdict-ledger",
       "name": "判定总线",
       "stage": "S5–S16",
-      "version": "0.1.0",
-      "status": "draft",
+      "version": "0.2.0",
+      "status": "pilot",
       "owner": "research-agent",
       "outputs": [
         "VerdictLedger"

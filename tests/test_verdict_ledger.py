@@ -29,6 +29,7 @@ def _fabricate_run(
     closure_status: str = "ready",
     closure_in_run_subdir: bool = False,
 ) -> Path:
+    _write(root / "project.json", {"schema_version": "project-0.1", "name": "verdict-test"})
     run = root / "runs" / run_id
     _write(run / "run" / "run-capsule.json", {"schema_version": "run-capsule-0.1", "status": "completed"})
     _write(run / "run" / "ea.json", {"schema_version": "ea-0.1"})
@@ -152,6 +153,54 @@ class VerdictLedgerTest(unittest.TestCase):
             drive = tmp.split(":")[0] + ":"
             self.assertNotIn(drive, text)
             self.assertNotIn(tmp.replace("\\", "/"), text.replace("\\", "/"))
+
+
+class ConsumerMigrationTest(unittest.TestCase):
+    """research_status 的 capsule 摘要必须读判定总线：已签闭包不得再喊 closure sign。"""
+
+    def _summary(self, root: Path):
+        from research_agent.mcp_server import _loop_capsule_summary
+
+        return _loop_capsule_summary(root / "runs" / "RUN-TEST-01")
+
+    def test_signed_closure_overrides_stale_snapshot_blocker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root, signed=True, capsule_blockers=["CLOSURE_UNSIGNED", "FIXTURE_ONLY"])
+            summary = self._summary(root)
+            self.assertNotIn("CLOSURE_UNSIGNED", summary["blockers"])
+            self.assertIn("FIXTURE_ONLY", summary["blockers"])
+            override = summary["verdict_override"]
+            self.assertEqual(override["recomputed"], "signed")
+            self.assertEqual(override["snapshot"], "CLOSURE_UNSIGNED")
+            self.assertTrue(override["source_sha256"])
+            for action in summary["next_actions"]:
+                self.assertNotIn("closure sign", str(action.get("command") or ""))
+
+    def test_consistent_snapshot_is_untouched(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root, signed=False, capsule_blockers=["CLOSURE_UNSIGNED"], closure_status="ready")
+            capsule_payload = {
+                "run_id": "RUN-TEST-01",
+                "blockers": ["CLOSURE_UNSIGNED"],
+                "next_actions": [{"owner": "human", "gate": "G5", "command": "python -m research_agent closure sign --report x"}],
+                "nodes": [],
+                "boundary": "test",
+            }
+            (root / "runs" / "RUN-TEST-01" / "loop-capsule.json").write_text(
+                json.dumps(capsule_payload, ensure_ascii=False), encoding="utf-8"
+            )
+            summary = self._summary(root)
+            self.assertIsNone(summary["verdict_override"])
+            self.assertEqual(summary["blockers"], ["CLOSURE_UNSIGNED"])
+            self.assertEqual(len(summary["next_actions"]), 1)
+
+    def test_missing_capsule_returns_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            root.joinpath("runs", "RUN-TEST-01").mkdir(parents=True)
+            self.assertEqual(self._summary(root), {})
 
 
 if __name__ == "__main__":

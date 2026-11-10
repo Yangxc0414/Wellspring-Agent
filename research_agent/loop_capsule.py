@@ -61,6 +61,15 @@ def _project_root_for_run(root: Path) -> Optional[Path]:
     return candidate if (candidate / "project.json").is_file() else None
 
 
+def project_root_for_run(root: Path) -> Optional[Path]:
+    """Public alias: the project directory a run directory belongs to.
+
+    verdict-ledger consumers re-derive verdicts for one run and need the same
+    project root this module already resolves; keep one definition.
+    """
+    return _project_root_for_run(root)
+
+
 def _experiment_links(root: Path, run_id: str) -> List[Dict[str, Any]]:
     project = root.parent.parent if root.parent.name == "runs" else None
     experiments = project / "experiments" if project is not None else None
