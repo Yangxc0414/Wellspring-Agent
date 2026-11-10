@@ -177,25 +177,11 @@ export function Conversation() {
   const autoScroll = useWorkspaceStore((state) => state.preferences.autoScroll);
   const reduceMotion = useWorkspaceStore((state) => state.preferences.reduceMotion);
   const threadRef = useRef<HTMLDivElement>(null);
-  const stickToBottom = useRef(true);
   const messageCount = task?.messages.length ?? 0;
   const autoIndex = task?.auto.index ?? 0;
 
-  // Track whether the reader is near the bottom. New content only auto-scrolls
-  // when they are, so runtime poll backfill never yanks a reader who scrolled up.
-  useEffect(() => {
-    const el = threadRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
-
   useEffect(() => {
     if (!autoScroll || !threadRef.current) return;
-    if (!stickToBottom.current) return;
     threadRef.current.scrollTo({
       top: threadRef.current.scrollHeight,
       behavior: reduceMotion ? "auto" : "smooth"

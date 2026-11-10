@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, DragEvent } from "react";
 import { formatBytes } from "../domain/utils";
-import {
-  IMAGE_EXTENSIONS,
-  MARKDOWN_EXTENSIONS,
-  TEXT_EXTENSIONS,
-  extensionOf,
-  usePreviewStore
-} from "../state/previewStore";
-import { useCopyToClipboard } from "../hooks/ui";
+import { usePreviewStore } from "../state/previewStore";
 import { Icon } from "./Icon";
 import { RichText } from "./RichText";
 
 const MAX_TEXT_BYTES = 512 * 1024;
+const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"]);
+const MARKDOWN_EXTENSIONS = new Set(["md", "markdown"]);
+const TEXT_EXTENSIONS = new Set([
+  "txt", "md", "markdown", "json", "csv", "tsv", "js", "mjs", "cjs", "ts", "tsx", "jsx",
+  "py", "java", "c", "h", "cpp", "hpp", "rs", "go", "css", "html", "xml", "yaml", "yml",
+  "toml", "ini", "cfg", "log", "sh", "bash", "sql", "tex", "bib", "r", "m"
+]);
 
 type PreviewContent =
   | { kind: "empty" }
@@ -21,13 +21,18 @@ type PreviewContent =
   | { kind: "image" | "pdf" | "binary"; url: string }
   | { kind: "error"; message: string };
 
+function extensionOf(name: string): string {
+  const index = name.lastIndexOf(".");
+  return index >= 0 ? name.slice(index + 1).toLowerCase() : "";
+}
+
 export function PreviewWindow() {
   const { files, activeId, open, dock, refreshKey, addFiles, setActive, step, close, refresh, clear, toggleDock } =
     usePreviewStore();
   const active = files.find((item) => item.id === activeId) ?? files[0];
   const activeIndex = active ? files.findIndex((item) => item.id === active.id) : -1;
   const [content, setContent] = useState<PreviewContent>({ kind: "empty" });
-  const [copied, copyText] = useCopyToClipboard();
+  const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -91,7 +96,13 @@ export function PreviewWindow() {
 
   const copyPath = async () => {
     if (!active) return;
-    await copyText(`local://${active.path}`);
+    try {
+      await navigator.clipboard.writeText(`local://${active.path}`);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      setCopied(false);
+    }
   };
 
   return (

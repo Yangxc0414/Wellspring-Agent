@@ -847,6 +847,16 @@ export async function requestAutomationPlan(input: {
   });
 }
 
+export async function runBackendSkill(
+  skillId: "literature-brief" | "hypothesis-triage" | "protocol-review" | "evidence-boundary",
+  payload: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+  return request<Record<string, unknown>>("/api/workspace/actions/skill", {
+    method: "POST",
+    body: JSON.stringify({ skill_id: skillId, payload })
+  });
+}
+
 export function runtimeBaseLabel(): string {
   return runtimeBase || "same-origin /api";
 }

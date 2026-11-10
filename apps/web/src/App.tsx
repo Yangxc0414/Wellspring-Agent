@@ -92,7 +92,7 @@ export default function App() {
           actions.cancelPermission();
           return;
         }
-        if (ui.paletteOpen || ui.modelOpen || ui.pluginsOpen || ui.skillsOpen || ui.newTaskOpen || ui.filesOpen) {
+        if (ui.paletteOpen || ui.modelOpen || ui.pluginsOpen || ui.skillsOpen || ui.newTaskOpen) {
           actions.closeOverlays();
           return;
         }

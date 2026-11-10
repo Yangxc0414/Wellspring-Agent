@@ -33,7 +33,7 @@ python scripts/build_release.py --check    # 只报告 drift，不写盘（CI �
 
 | 排除 | 原因 |
 | --- | --- |
-| `figures/`、`docs/`（审计截图）、PDF/DOCX/PPTX 二进制 | 媒体不是源；integrity 测试限定 bundle < 40 MB（source-sized） |
+| `figures/`（根目录旧综述图）、`docs/`（审计截图）、PDF/DOCX/PPTX 二进制 | 媒体不是源；integrity 测试限定 bundle < 40 MB（source-sized）。例外：README 引用的四张策略图 PNG（`figures/01–04`）为 release-owned 媒体，直接入库并进 MANIFEST 计账 |
 | `research_agent/vendor/astradraw/` 大部分 | 第三方本地拷贝，无再分发授权；只保留 renderer/components/references/examples 与目录广告所需的 scene（THIRD_PARTY_NOTICES.md） |
 | `research_agent/web/data/`、`runtime_data/` | 运行产物与研究数据（私有） |
 | `manuscript/`（未发表投稿）、第三方参考仓库、`.mcp.json`/`.env` | 未发表/无授权/含本机路径与密钥 |

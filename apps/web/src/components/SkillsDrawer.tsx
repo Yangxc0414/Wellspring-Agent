@@ -4,7 +4,6 @@ import { importRuntimeSkills, loadRuntimeSkills, loadSkillUsage, loadSkillVersio
 import { parseSkillFiles, scanSkillDirectory } from "../domain/skillImport";
 import { skillActivationLabel } from "../domain/skillRouting";
 import type { Skill } from "../domain/types";
-import { useDialogFocus } from "../hooks/ui";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import { Icon } from "./Icon";
 
@@ -38,14 +37,10 @@ export function SkillsDrawer() {
   const [versions, setVersions] = useState<Record<string, string> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLElement>(null);
-  useDialogFocus(dialogRef, true);
 
   useEffect(() => {
-    let cancelled = false;
     loadRuntimeSkills()
       .then((snapshot) => {
-        if (cancelled) return;
         setRuntimeCatalog({
           count: snapshot.count,
           enabled: snapshot.skills.filter((skill) => skill.enabled).length
@@ -53,35 +48,21 @@ export function SkillsDrawer() {
         setRuntimeCatalogError("");
       })
       .catch(() => {
-        if (cancelled) return;
         setRuntimeCatalog(null);
         setRuntimeCatalogError("runtime 未连接；仅显示浏览器本地目录");
       });
     loadSkillUsage()
       .then((snapshot) => {
-        if (cancelled) return;
         const failed = Object.values(snapshot.skills).reduce(
           (sum, item) => sum + item.fail + item.blocked,
           0
         );
         setUsage({ total: snapshot.count, failed });
       })
-      .catch(() => {
-        if (cancelled) return;
-        setUsage(null);
-      });
+      .catch(() => setUsage(null));
     loadSkillVersions()
-      .then((snapshot) => {
-        if (cancelled) return;
-        setVersions(snapshot.active);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setVersions(null);
-      });
-    return () => {
-      cancelled = true;
-    };
+      .then((snapshot) => setVersions(snapshot.active))
+      .catch(() => setVersions(null));
   }, []);
 
   useEffect(() => {
@@ -231,7 +212,7 @@ export function SkillsDrawer() {
     <div className="drawer-layer" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) close();
     }}>
-      <aside className="plugin-drawer skills-drawer" role="dialog" aria-modal="true" aria-label="Skills 技能面板" ref={dialogRef}>
+      <aside className="plugin-drawer skills-drawer" role="dialog" aria-modal="true" aria-label="Skills 技能面板">
         <header className="drawer-head">
           <div>
             <span className="eyebrow">SKILLS / LOCAL</span>

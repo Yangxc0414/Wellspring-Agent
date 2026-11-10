@@ -12,7 +12,6 @@ import {
   type RuntimeModelSnapshot
 } from "../adapters/modelRuntime";
 import { useAllModelProfiles } from "../state/modelStore";
-import { useDismissable } from "../hooks/ui";
 import { Icon } from "./Icon";
 
 const THINKING_LABELS: Record<string, string> = {
@@ -79,7 +78,21 @@ export function ModelPicker({
     };
   }, [open, runtime]);
 
-  useDismissable(rootRef, open, () => setOpen(false));
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
 
   return (
     <div className="model-picker" ref={rootRef}>

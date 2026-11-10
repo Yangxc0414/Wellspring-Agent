@@ -1,8 +1,7 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import { PLUGIN_PRESETS } from "../domain/catalog";
 import type { Plugin } from "../domain/types";
-import { useDialogFocus } from "../hooks/ui";
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { Icon } from "./Icon";
 
@@ -27,8 +26,6 @@ export function PluginsDrawer() {
   const plugins = useWorkspaceStore((state) => state.plugins);
   const actions = useWorkspaceStore((state) => state.actions);
   const [form, setForm] = useState(() => presetForm("github"));
-  const dialogRef = useRef<HTMLElement>(null);
-  useDialogFocus(dialogRef, true);
 
   const calls = task?.toolCalls ?? [];
   const close = () => actions.setUI({ pluginsOpen: false });
@@ -60,7 +57,7 @@ export function PluginsDrawer() {
     <div className="drawer-layer" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) close();
     }}>
-      <aside className="plugin-drawer" role="dialog" aria-modal="true" aria-label="插件与 MCP" ref={dialogRef}>
+      <aside className="plugin-drawer" role="dialog" aria-modal="true" aria-label="插件与 MCP">
         <header className="drawer-head">
           <div>
             <span className="eyebrow">PLUGINS / MCP</span>

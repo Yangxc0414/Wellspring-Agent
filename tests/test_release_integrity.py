@@ -83,6 +83,9 @@ class ReleaseIntegrityTest(unittest.TestCase):
         on_disk = {
             p.relative_to(here).as_posix() for p in RELEASE.rglob("*") if p.is_file()
         }
+        # the release folder is itself a git repository; its object store is version-control
+        # internals, not bundle content, and would otherwise read as unexplained
+        on_disk = {rel for rel in on_disk if not rel.startswith(".git/")}
         on_disk.discard("MANIFEST.txt")
         unexplained = sorted(on_disk - tracked)
         self.assertEqual(unexplained, [], "untracked files inside the release bundle")

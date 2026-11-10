@@ -30,6 +30,15 @@ export function formatBytes(bytes: number): string {
   return `${bytes} B`;
 }
 
+export function formatDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const today = new Date();
+  const sameDay = date.toDateString() === today.toDateString();
+  if (sameDay) return date.toISOString().slice(11, 16);
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
 export function relativeTime(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;

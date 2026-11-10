@@ -1,6 +1,5 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { useCopyToClipboard } from "../hooks/ui";
 import { Icon } from "./Icon";
 
 type Block =
@@ -111,13 +110,23 @@ function parse(text: string): Block[] {
 }
 
 function CodeBlock({ code, lang }: { code: string; lang: string }) {
-  const [copied, copy] = useCopyToClipboard();
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   return (
     <div className="rich-code">
       <div className="rich-code-head">
         <span>{lang || "code"}</span>
-        <button type="button" onClick={() => void copy(code)} aria-label="复制代码">
+        <button type="button" onClick={copy} aria-label="复制代码">
           <Icon name={copied ? "check" : "copy"} size={11} />
           {copied ? "已复制" : "复制"}
         </button>

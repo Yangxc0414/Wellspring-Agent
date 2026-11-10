@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   loadCriticPanel,
   loadHostModelTurns,
@@ -127,31 +127,17 @@ export function HostModelPanel() {
   const [queue, setQueue] = useState<HostModelQueue | null>(null);
   const [panel, setPanel] = useState<CriticPanel | null>(null);
   const [error, setError] = useState("");
-  const refreshSeq = useRef(0);
 
   const refresh = useCallback(() => {
-    // Guard against late responses: a stale turn list must not overwrite a fresh one
-    // after a rapid refresh cycle.
-    const requestId = ++refreshSeq.current;
     loadHostModelTurns("", 20)
       .then((result) => {
-        if (refreshSeq.current !== requestId) return;
         setQueue(result);
         setError("");
       })
-      .catch((value: unknown) => {
-        if (refreshSeq.current !== requestId) return;
-        setError(String(value));
-      });
+      .catch((value: unknown) => setError(String(value)));
     loadCriticPanel()
-      .then((value) => {
-        if (refreshSeq.current !== requestId) return;
-        setPanel(value);
-      })
-      .catch(() => {
-        if (refreshSeq.current !== requestId) return;
-        setPanel(null);
-      });
+      .then(setPanel)
+      .catch(() => setPanel(null));
   }, []);
 
   useEffect(() => {
