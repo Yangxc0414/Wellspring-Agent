@@ -73,7 +73,7 @@ jobs:
           else
             echo "requirements-dev.txt not present; skipping."
           fi
-      - name: Full offline suite (advisory: needs local-only research data)
+      - name: Full offline suite (advisory; needs local-only research data)
         env:
           PYTHONIOENCODING: utf-8
         run: |
