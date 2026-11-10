@@ -1,9 +1,9 @@
 {
   "schema_version": "workspace-0.1",
-  "generated_at": "2026-11-10T05:43:44+00:00",
-  "count": 201,
+  "generated_at": "2026-11-10T10:54:40+00:00",
+  "count": 213,
   "curated": 51,
-  "derived": 150,
+  "derived": 162,
   "commands": [
     {
       "id": "study.baseline",
@@ -1163,6 +1163,114 @@
       "label": "fixture",
       "syntax": "python -m research_agent rsi fixture",
       "description": "usage: research_agent rsi fixture [-h] [--ledger LEDGER]\n                                  [--output-dir OUTPUT_DIR] [--tasks TASKS]\n                                  [--approve]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.agent",
+      "group": "rsi",
+      "label": "agent",
+      "syntax": "python -m research_agent rsi gen.agent",
+      "description": "usage: research_agent rsi gen agent [-h] --label LABEL [--artifact ARTIFACT]\n                                    [--episodes EPISODES]\n                                    [--status {proposed,adopted}]\n                                    [--note NOTE] [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.close",
+      "group": "rsi",
+      "label": "close",
+      "syntax": "python -m research_agent rsi gen.close",
+      "description": "usage: research_agent rsi gen close [-h] --id ID --status\n                                    {adopted,reverted,superseded}\n                                    [--commit COMMIT] [--note NOTE]\n                                    [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.compare",
+      "group": "rsi",
+      "label": "compare",
+      "syntax": "python -m research_agent rsi gen.compare",
+      "description": "usage: research_agent rsi gen compare [-h] --left LEFT --right RIGHT\n                                      [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.export",
+      "group": "rsi",
+      "label": "export",
+      "syntax": "python -m research_agent rsi gen.export",
+      "description": "usage: research_agent rsi gen export [-h] [--out OUT] [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.list",
+      "group": "rsi",
+      "label": "list",
+      "syntax": "python -m research_agent rsi gen.list",
+      "description": "usage: research_agent rsi gen list [-h] [--kind {agent,platform}]\n                                   [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.propose",
+      "group": "rsi",
+      "label": "propose",
+      "syntax": "python -m research_agent rsi gen.propose",
+      "description": "usage: research_agent rsi gen propose [-h] --label LABEL --patch PATCH\n                                      [--note NOTE] [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.snapshot",
+      "group": "rsi",
+      "label": "snapshot",
+      "syntax": "python -m research_agent rsi gen.snapshot",
+      "description": "usage: research_agent rsi gen snapshot [-h] --label LABEL [--commit COMMIT]\n                                       [--note NOTE]\n                                       [--fingerprint FINGERPRINT]\n                                       [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.verify",
+      "group": "rsi",
+      "label": "verify",
+      "syntax": "python -m research_agent rsi gen.verify",
+      "description": "usage: research_agent rsi gen verify [-h] [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.harness2.probe",
+      "group": "rsi",
+      "label": "probe",
+      "syntax": "python -m research_agent rsi harness2.probe",
+      "description": "usage: research_agent rsi harness2 probe [-h] [--root ROOT] [--python PYTHON]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.harness2.record",
+      "group": "rsi",
+      "label": "record",
+      "syntax": "python -m research_agent rsi harness2.record",
+      "description": "usage: research_agent rsi harness2 record [-h] [--artifact ARTIFACT]\n                                          [--ledger LEDGER] [--scope SCOPE]\n                                          [--policy-path POLICY_PATH]\n                                          [--generation GENERATION]\n                                          [--gen-path GEN_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.harness2.run",
+      "group": "rsi",
+      "label": "run",
+      "syntax": "python -m research_agent rsi harness2.run",
+      "description": "usage: research_agent rsi harness2 run [-h] [--root ROOT] [--python PYTHON]\n                                       [--output OUTPUT] [--artifact ARTIFACT]\n                                       [--k K]\n                                       [--mode {parallel,sequential,both}]\n                                       [--adapter {demo,science}]\n                                       [--timeout TIMEOUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.harness2.status",
+      "group": "rsi",
+      "label": "status",
+      "syntax": "python -m research_agent rsi harness2.status",
+      "description": "usage: research_agent rsi harness2 status [-h] [--artifact ARTIFACT]",
       "safety": "catalog_only",
       "curated": false
     },

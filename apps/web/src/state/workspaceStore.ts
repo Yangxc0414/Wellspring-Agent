@@ -71,7 +71,11 @@ const defaultUI: UIState = {
   sidebarOpen: false,
   contextOpen: false,
   contextCollapsed: false,
-  welcomeOpen: true,
+  // Wellspring-Agent is an agent product: the workbench opens straight into the tool
+  // surface (task thread + context panel), not a marketing welcome screen. New
+  // sessions start from TopBar "新会话" / Sidebar / command palette, which route back
+  // to WelcomeHome on demand.
+  welcomeOpen: false,
   skillsOpen: false,
   draftAccess: "ask",
   draftProfileId: "glm-5.3-flash",

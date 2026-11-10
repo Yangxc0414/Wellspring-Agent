@@ -1,6 +1,6 @@
 {
   "schema_version": "evolution-policy-0.1",
-  "generated_at": "2026-11-10T05:43:44+00:00",
+  "generated_at": "2026-11-10T10:54:40+00:00",
   "enabled": true,
   "scopes": [
     {
@@ -44,6 +44,15 @@
       "label": "S5 种子预算",
       "kind": "process",
       "description": "S5 协议验证的种子数预算。注册在此是为了让准入门管得到它：种子只能由有效租约给出，撤销后立刻失效；它不改变任何门禁判定或签核。",
+      "enabled": true,
+      "effective": true,
+      "allowed_by_master": true
+    },
+    {
+      "id": "harness2.harness",
+      "label": "Harness² 组件面",
+      "kind": "process",
+      "description": "由 Harness²（递归 harness 改进）提出的 c1..c8 组件改动：system prompt、guardrails、memory、tool guidance、subagents、skills、scripts、plugins。注册在此是为了让准入门管得到它：候选仍须 dry-run、public/hidden 评测、人签与租约；平台不实现也不自动套用这些改动，且组件路径命中 claim/evidence/gate/closure 等不可变面时一律拒绝。",
       "enabled": true,
       "effective": true,
       "allowed_by_master": true

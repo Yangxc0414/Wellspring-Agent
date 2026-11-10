@@ -67,6 +67,7 @@ RELEASE_OWNED = (
 # Root documents copied only when they exist here; release-only documents (README,
 # DISTRIBUTION, LICENSING, ...) are owned by the release folder and left untouched.
 SYNC_DOCS = (
+    "apps/web/index.html",
     "PRODUCTION-READINESS.md",
     "ARCHITECTURE.md",
     "AGENTS.md",

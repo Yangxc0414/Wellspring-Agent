@@ -1,7 +1,7 @@
 {
   "schema_version": "orchestration-0.1",
   "action": "collaboration-plan",
-  "generated_at": "2026-11-10T05:43:44+00:00",
+  "generated_at": "2026-11-10T10:54:40+00:00",
   "topic": "",
   "source": "fixture",
   "topology": "fan-out → fan-in → sequential → human gate (+ advisory lane)",
@@ -561,7 +561,8 @@
       "literature.query_planner": true,
       "orchestrator.facet_budget": true,
       "literature.retrieval.budget": true,
-      "experiment.run.seeds": true
+      "experiment.run.seeds": true,
+      "harness2.harness": true
     },
     "locked": [
       {
