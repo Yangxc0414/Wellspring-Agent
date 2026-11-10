@@ -1,5 +1,7 @@
 # Research Agent · 静态站点
 
+> **定位（2026-11-11）：本仓库（research-agent）是早期 demo / 静态展示项目；智能体产品本体在 [Wellspring-Agent](https://github.com/Yangxc0414/Wellspring-Agent)（打开前端即工作台 + CLI + MCP），开发一律以产品仓库定位为准。**
+>
 > **2026-10-24 起，主工作台迁移为 `site/app/`**：源码在 `apps/web/`（Vite + React + TypeScript），
 > 单页会话、RUN/EVIDENCE/EVOLUTION、模型/插件/指导、字体缩放、各模型 Token 用量、全屏设置与使用统计（热力图/趋势/模型用量）、证据沿袭（变更影响/stale propagation）与受治理全自动均在新应用内；`site/agent/`
 > 是旧版单文件实现，仅保留历史链接。构建：`cd apps/web && npm run build:site`。

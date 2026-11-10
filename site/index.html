@@ -117,6 +117,8 @@
 .lp-hero h1{font-size:44px;line-height:1.2;font-weight:800;letter-spacing:-.01em;margin:0 0 18px}
 .lp-hero h1 span{background:linear-gradient(90deg,#2563eb,#0f766e);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lp-lede{max-width:760px;margin:0 auto 28px;font-size:16px;line-height:1.8;color:#5b6472}
+.lp-lede a,.lp-foot a{color:#1d4ed8;font-weight:600;text-decoration:none;border-bottom:1px solid #c7d7f5}
+.lp-foot a{border-bottom:none}
 .lp-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:30px}
 .lp-btn{font-size:14px;font-weight:700;padding:12px 22px;border-radius:10px;text-decoration:none}
 .lp-btn.primary{background:#2563eb;color:#fff;box-shadow:0 6px 20px rgba(37,99,235,.3)}
@@ -177,7 +179,7 @@
   <section class="lp-hero">
     <span class="lp-badge">静态演示镜像 · STATIC DEMO · 无真实执行</span>
     <h1>把科研自动化，<br>做成一条<span>可核验的证据链</span>。</h1>
-    <p class="lp-lede">Research Agent 是一个证据可审计、能力可插拔、流程可组合的科研智能体运行时：文献检索、独立复现、科研写作与核验接成闭环，并在冻结模型权重下做受治理的程序级自改进。本页是产品介绍；具体的科研智能体在下方按钮进入的子页中运行。</p>
+    <p class="lp-lede">Research Agent 是一个证据可审计、能力可插拔、流程可组合的科研智能体运行时：文献检索、独立复现、科研写作与核验接成闭环，并在冻结模型权重下做受治理的程序级自改进。本页是 <b>早期 demo / 静态展示镜像</b>（无真实执行）；智能体产品本体是 <a href="https://github.com/Yangxc0414/Wellspring-Agent">Wellspring-Agent</a>——打开前端即工作台 + 本地 CLI + MCP，真实执行只在产品仓库的本地 runtime / CLI。</p>
     <div class="lp-cta">
       <a class="lp-btn primary" href="./app/">进入科研工作台 →</a>
       <a class="lp-btn ghost" href="./innovation/">看 105 秒创新演示</a>
@@ -187,11 +189,11 @@
       <span>span-only 证据</span><span>独立重跑复现</span><span>升级人签 · 降级自动</span><span>MCP / HTTP / CLI</span><span>host-model 无外部 key</span>
     </div>
     <div class="lp-stats" aria-label="当前实现规模">
-      <div><b>6</b><span>模块 SPEC</span></div>
+      <div><b>28</b><span>模块 SPEC</span></div>
       <div><b>46</b><span>MCP 工具</span></div>
-      <div><b>1300+</b><span>自动测试</span></div>
-      <div><b>9</b><span>门禁</span></div>
-      <div><b>4</b><span>反馈环</span></div>
+      <div><b>1300+</b><span>自动测试用例</span></div>
+      <div><b>4</b><span>人工门 · G1/G2/S5b/G5</span></div>
+      <div><b>1/4</b><span>反馈环已自动闭环</span></div>
     </div>
     <p class="lp-stats-note">数字截至 2026-11，随版本变化；测试数取自已记录的判定，不写成宣传口径。</p>
   </section>
@@ -203,8 +205,8 @@
       <p>每个按钮进入一个具体的科研智能体页面；真实执行、模型调用与人工签署只在本地 CLI / runtime。</p>
     </div>
     <div class="rel-grid">
-      <a class="rel-card" href="./app/"><b>Agent 工作台</b><span>可部署的对话式科研工作台：证据、自进化、签署视图。</span><em>./app/</em></a>
-      <a class="rel-card" href="./demo/"><b>研究运行控制台</b><span>9 阶段对象流 / 指令流 / 失败分支的 SIM 回放。</span><em>./demo/</em></a>
+      <a class="rel-card" href="./app/"><b>Agent 工作台（构建产物预览）</b><span>Wellspring-Agent 产品的对话式科研工作台：证据、自进化、签署视图；真实执行需本地 runtime。</span><em>./app/</em></a>
+      <a class="rel-card" href="./demo/"><b>研究运行控制台</b><span>9 幕叙事压缩的 SIM 回放（门禁对齐 S0–S16 canonical）：对象流 / 指令流 / 失败分支。</span><em>./demo/</em></a>
       <a class="rel-card" href="./innovation/"><b>创新点七幕演示</b><span>把创新点变成七个可看见的状态，105 秒 walkthrough。</span><em>./innovation/</em></a>
       <a class="rel-card" href="./qoder/"><b>接入矩阵</b><span>Qoder / Claude Code / Cursor / Cline / Codex CLI … 同一份工具表与门禁。</span><em>./qoder/</em></a>
       <a class="rel-card" href="./rsi/"><b>自进化接缝</b><span>执行交给 Harness²，平台只留判据、台账与人签；含一次真实运行的账本。</span><em>./rsi/</em></a>
@@ -538,7 +540,7 @@
       <h4>门禁口径（canonical）· 四张图与所有子页共用</h4>
       <p>四个人工门：<code>G1 想法选择 = S3</code> · <code>G2 设计批准 = S4</code> · <code>S5b 结果人签 = S5c</code> · <code>G5 闭包签署 = S16</code>。升级人签、降级自动；自动门（Q0 / Q1 / G3 / G4）未过走默认拒绝，不静默放行；四个门都不能由模型代签。</p>
       <p>图① 的「人门·假设选择 / 设计批准·契约 / 签署」分别对应 G1 / G2 / <b>S5b 结果签署</b>，青色「统计 / 复现门」是自动门。<b>G5 闭包签署在导出边界</b>（图③ 核验外部结果之后的授权收口），不在图① 的七阶段投影内 —— 不要把两者混读；图③ 的「必要时人签」落到实现就是 G2 / S5b。</p>
-      <p>四条反馈（T6b 证伪 / 反事实、信念修订 / 假设再激活、同质化监测、溯源 / 失效传播）都<b>回指更早阶段并改变下一步动作</b>，而不是只写反思文本。子页 <a href="./demo/">18 阶段全链</a>、<a href="./qoder/">接入闭环</a>、<a href="./innovation/">七幕演示</a> 与自进化循环按同一套语义绘制，门禁标签不另造口径。</p>
+      <p>四条反馈（T6b 证伪 / 反事实、信念修订 / 假设再激活、同质化监测、溯源 / 失效传播）都<b>回指更早阶段并改变下一步动作</b>，而不是只写反思文本。子页 <a href="./demo/">S0–S16 全链</a>、<a href="./qoder/">接入闭环</a>、<a href="./innovation/">七幕演示</a> 与自进化循环按同一套语义绘制，门禁标签不另造口径。</p>
     </div>
     <div class="strategy-map">
       <h4>研究主线 · 四条策略 × 三个方向 × 四个可证伪问题（1110 组会口径）</h4>
@@ -554,6 +556,23 @@
         <div class="sm-row"><span class="sm-key">里程碑</span><p><b>M0</b> 最小证据闭合实例（能签署且变更锁导出）→ <b>M1</b> 五类反馈对照（Q2）→ <b>M2</b> 四存储策略 + 失效探针（Q3/N4）→ <b>M3</b> 论文与外部评审。每步的验收都是「可失败的」：达不到就重述口径，不换指标。</p></div>
         <div class="sm-row"><span class="sm-key">四不做</span><p>不追端到端生成（42% 实验失败、基线幻觉 90% 的赛道）；<b>不重造度量</b>（ARS / CCFA 信封借来用）；不照搬静态 skill 目录；不放开无约束自主执行——人工门留在假设选择、设计批准、签署三处，自动化只跑门与门之间。</p></div>
         <div class="sm-row"><span class="sm-key">工程借鉴</span><p>控制面 / 执行面分离、两级过滤（程序快层 → 语义慢层）、任务线程直通、异步推理、存算分离、独立外部监督——来自 DeepSeek 两篇工程文章（非同行评审，只作设计参照）。</p></div>
+      </div>
+    </div>
+    <div class="strategy-map">
+      <h4>接下来做什么 · 一个总线 + 四个端口（71 号设计文档 · 2026-11-10 立项）</h4>
+      <p class="sm-lede">四图对照的结论：四条反馈环只有「溯源 / 失效传播」一条真实自动闭环，其余是审计项或 roadmap。解耦设计把"判定改变下一步行动"做成<b>可插拔、可单独开关与测量的对象</b>——这正是四条策略的实验台。</p>
+      <div class="sm-strategies">
+        <div class="sm-strategy"><b>第一步 · 判定总线（Verdict Ledger）<em>只读投影</em></b><span>append-only 判定账本：三态判定 / closure blockers / lineage stale / rsi regressed / 护栏拦截统一入账；消费者（next_actions、反馈环、autopilot）只读总线。生产者不变、门禁语义不变、缺失 fail-closed。</span></div>
+        <div class="sm-strategy"><b>第二步 · FeedbackPort（反馈环一等化）<em>默认拒绝</em></b><span>observe → propose → gate → apply → record；T6b 证伪 / 信念修订 / 溯源失效 / 同质化各为一个可开关实现。可失败的验收：关闭全部环 = 与今日行为逐字节一致。</span></div>
+        <div class="sm-strategy"><b>第三步 · M1 五类反馈对照<em>Q2 · 诊断实验</em></b><span>真实 / 打乱 / 过时 / 含噪 / 矛盾五类反馈跑在 FeedbackPort 上——反馈敏感性与信息价值一致 → 切口不成立，如实记录。</span></div>
+        <div class="sm-strategy"><b>第四步 · MemoryWritePort + M2<em>方向 A · 第一切口</em></b><span>记忆写入收敛一个端口，全存 / 全不存 / 重放后存 / 独立验证后存四策略可插拔对照；类型化记忆图谱等 M2 结果出来再定型，不提前固化。</span></div>
+        <div class="sm-strategy"><b>第五步 · ExecPort + waitpoints<em>图③ 骨架</em></b><span>三执行面（平台 3.8 / Harness² 3.12 桥 / 外部 host）统一抽象；事件进 waitpoint → 程序快层相关性检查 → 判定总线 → 下一次 run 消费。不引入常驻进程，autopilot 单次委托语义不动。</span></div>
+        <div class="sm-strategy"><b>贯穿 · 接入面收尾<em>Zcode / Qoder / Codex</em></b><span>SKILL.md 第 0 步 = 先比 build fingerprint 再读结果（宿主里"测过"默认测的是历史快照）；接入矩阵随发行同步，产品仓自证 46 工具 ready + 零签名入口。</span></div>
+      </div>
+      <div class="sm-rows">
+        <div class="sm-row"><span class="sm-key">已实测基线</span><p>search-study 三态判定（区间跨零即「不可判定」）· 复现计数 + 功效阶梯（会推翻自己的旧结论）· 护栏开火率 8.1% · Host-as-Model 零 key 闭环 · autopilot 单次委托 · 46 工具零签名入口。</p></div>
+        <div class="sm-row"><span class="sm-key">四个问题</span><p><b>Q1</b> 指标收益与独立证据是否脱钩（优先预实验）· <b>Q2</b> 反馈何时真改变行动 · <b>Q3</b> 一次成功何时值得沉淀为经验 · <b>Q4</b> 自主循环是否越走越窄。</p></div>
+        <div class="sm-row"><span class="sm-key">出处</span><p><a href="https://github.com/Yangxc0414/research-agent/blob/main/71-四图对照与解耦设计-判定总线与反馈环一等化.md">71-四图对照与解耦设计</a>（四图逐环节对照 + 可失败的验收）· 逐项实测读数见仓库 docs/fact-baseline.md。</p></div>
       </div>
     </div>
     <p class="fineprint">门禁与读法以上方 canonical 卡片为准；demo 阶段映射 G1=S3 · G2=S4 · S5b=S5c · G5=S16，各子页投影的标签均映射到此统一口径。</p>
@@ -603,10 +622,10 @@
   <section class="lp-section" id="boundary">
     <div class="lp-bound">
       <b>边界与诚实声明</b>
-      本公开站为静态镜像：无真实 LLM、实验执行、claim 签名或 runtime job；数值来自 CACHED 快照或 SIM 演示。人工门（G1/G2/claim/closure/export）只在本地 CLI。fixture 与模拟分数不得当作真实证据；不提供代写、伪造数据/引用、规避检测或自动投稿。AI 生成内容是草稿，科学决策与署名责任由作者/PI 保留。
+      本公开站为静态镜像：无真实 LLM、实验执行、claim 签名或 runtime job；数值来自 CACHED 快照或 SIM 演示。人工门（G1/G2/claim/closure/export）只在本地 CLI。本仓库（research-agent）定位为早期 demo / 展示项目，智能体产品本体在 <a href="https://github.com/Yangxc0414/Wellspring-Agent">Wellspring-Agent</a>，开发一律以产品仓库定位为准。fixture 与模拟分数不得当作真实证据；不提供代写、伪造数据/引用、规避检测或自动投稿。AI 生成内容是草稿，科学决策与署名责任由作者/PI 保留。
     </div>
   </section>
 </main>
-<footer class="lp-foot">Research Agent · 证据闭合的科研智能体运行时 · 静态产品演示页</footer>
+<footer class="lp-foot">Research Agent · demo 展示镜像 · 智能体产品：<a href="https://github.com/Yangxc0414/Wellspring-Agent">Wellspring-Agent</a>（打开前端即工作台）</footer>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Research Agent · 证据闭合的科研自动化</title>
-<meta name="description" content="Research Agent 运行回放：9 阶段运行台、18 阶段主链、证据工作台与自进化演示；全部为 SIM，不调用模型、不产生真实 claim。" />
+<meta name="description" content="Research Agent 运行回放：9 幕叙事运行台、S0–S16 全链主图、证据工作台与自进化演示；全部为 SIM，不调用模型、不产生真实 claim。" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M8 11l8-4 8 4v10l-8 4-8-4z' fill='none' stroke='white' stroke-width='1.8'/%3E%3C/svg%3E" />
 <style>
   :root{
@@ -2233,7 +2233,7 @@
         </svg>
         </div>
         <p class="scroll-hint">左右滑动查看完整证据流</p>
-        <p class="map-foot">与主页《过程可信主循环》同一语义：实线前向、虚线反馈一律回指更早阶段且改变下一步动作；红方块 = 人工门（G2 / S5b / G5），青方块 = 自动门（Q0）。本图是五节点压缩视图，G1 想法选择（S3）与其余阶段见下方 18 阶段全链；失效传播终点是 S5c 确证复验，G5 在导出前 fail-closed 阻断，不把「流向导出」画成反馈。</p>
+        <p class="map-foot">与主页《过程可信主循环》同一语义：实线前向、虚线反馈一律回指更早阶段且改变下一步动作；红方块 = 人工门（G2 / S5b / G5），青方块 = 自动门（Q0）。本图是五节点压缩视图，G1 想法选择（S3）与其余阶段见下方 S0–S16 全链；失效传播终点是 S5c 确证复验，G5 在导出前 fail-closed 阻断，不把「流向导出」画成反馈。</p>
       </div>
     </div>
   </section>
@@ -2844,7 +2844,7 @@
           </button>
         </div>
         <div class="diagram-scroll scroll-pipeline">
-          <svg id="pipeline-svg" viewBox="0 0 1180 300" role="img" aria-label="S0 到 S16 的 18 阶段流程图：实线为前向，彩色虚线为回指更早阶段的反馈环，红色为人工门、青色为自动门"></svg>
+          <svg id="pipeline-svg" viewBox="0 0 1180 300" role="img" aria-label="S0 到 S16 的全链流程图：实线为前向，彩色虚线为回指更早阶段的反馈环，红色为人工门、青色为自动门"></svg>
         </div>
         <p class="scroll-hint">左右滑动查看 18 个阶段</p>
         <div class="pipeline-legend" aria-label="流程图图例">
@@ -3980,7 +3980,7 @@
 
   // Grounded in 09-系统架构 / 17-上层微服务 / 11-自进化；S 段与门禁为真实契约。
   // 9 阶段 rail 是叙事压缩，但门禁标签不自造口径：四个 canonical 人门必须落在与
-  // 主页 / 18 阶段全链一致的阶段上，其余为自动门或过程标记。
+  // 主页 / S0–S16 全链一致的阶段上，其余为自动门或过程标记。
   const STAGE_CONTRACTS = [
     {
       service:"Workflow · Orchestrator", svc:"Workflow", owner:"Planner", inv:"INV-3", sref:"S0 / S4 · G2′",

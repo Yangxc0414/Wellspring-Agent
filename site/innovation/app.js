@@ -1,4 +1,4 @@
-// Six acts; the hero promises a "90 秒演示", so each act gets 15s (6*15=90). The previous 6.2s
+// Seven acts; the hero button promises a "105 秒演示", so each act gets 15s (7*15=105). The previous 6.2s
 // made the whole auto-run ~37s, contradicting the button copy and rushing dense acts.
 const ACT_MS = 15000;
 const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

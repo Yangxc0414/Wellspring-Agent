@@ -29,7 +29,8 @@ function copyDocs() {
     ["README.md", "README.md"],
     ["16-科研Skill生态调研与动态流程编排.md", "16-科研Skill生态调研.md"],
     ["17-基于Skill契约的上层微服务架构.md", "17-上层微服务架构.md"],
-    ["18-GitHub Pages部署与多智能体Skill设计.md", "18-GitHub Pages部署与多智能体Skill设计.md"]
+    ["18-GitHub Pages部署与多智能体Skill设计.md", "18-GitHub Pages部署与多智能体Skill设计.md"],
+    ["71-四图对照与解耦设计-判定总线与反馈环一等化.md", "71-四图对照与解耦设计.md"]
   ];
   const copied = [];
   for (const [source, target] of docs) {

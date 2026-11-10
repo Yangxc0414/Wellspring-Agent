@@ -1,11 +1,12 @@
 {
-  "built_at": "2026-11-10T13:41:40.674Z",
-  "demo_sha256_16": "d72a37fc64e82138",
+  "built_at": "2026-11-10T16:03:52.802Z",
+  "demo_sha256_16": "17c6b5283fddf49a",
   "docs": [
     "README.md",
     "16-科研Skill生态调研.md",
     "17-上层微服务架构.md",
-    "18-GitHub Pages部署与多智能体Skill设计.md"
+    "18-GitHub Pages部署与多智能体Skill设计.md",
+    "71-四图对照与解耦设计.md"
   ],
   "data_files": [
     "build.json",

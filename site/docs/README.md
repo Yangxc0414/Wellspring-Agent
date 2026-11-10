@@ -3,6 +3,7 @@
 > 一套证据可审计、能力可插拔、可被 Qoder / Claude Code / Zcode / HTTP / Python 调用的科研运行时。  
 > 不是“全自动投稿机器”；人工门由人签，或由人写一次 `autopilot-policy.json` 后由 `autopilot` 在边界内代签（签名标 `delegated`、带策略哈希），投稿仍然不做。
 
+> **项目定位**：本仓库（`research-agent`）是**早期 demo / 展示项目**——策略论证页、七幕创新演示与静态镜像；智能体产品在 [`Wellspring-Agent`](https://github.com/Yangxc0414/Wellspring-Agent)（打开前端即工作台 + CLI + MCP）。两者是不同的产品，开发一律以产品仓库的定位为准。
 > **证据状态（2026-10-31，读任何搜索研究结论前先看）**：首要指标
 > `improvement_per_evaluation` 数的是**改进事件**，底层 accuracy 有 1.0 上限。新种子 65–96 的
 > 64 种子预注册扩样（97–160）显示：memory×archive 交互在 raw 计数上 **4/4** 复制，但
