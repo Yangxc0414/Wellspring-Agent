@@ -1,0 +1,1073 @@
+{
+  "run_id": "PIPE-20261024T050235Z-e3a30a",
+  "topic": "钙钛矿 界面 钝化 稳定性",
+  "status": "needs_human",
+  "fixture_mode": true,
+  "modules": {
+    "literature": {
+      "run_id": "PIPE-20261024T050235Z-e3a30a-lit",
+      "module": "literature",
+      "spec_version": "0.1.6",
+      "status": "ok",
+      "query_plan": {
+        "question": "钙钛矿 界面 钝化 稳定性",
+        "subqueries": [
+          "钙钛矿 界面 钝化 稳定性",
+          "钙钛矿 界面 钝化 稳定性 review",
+          "钙钛矿 界面 钝化 稳定性 method",
+          "钙钛矿 界面 钝化 稳定性 综述",
+          "钙钛矿 界面 钝化 稳定性 方法"
+        ],
+        "source_scope": [
+          "fixture"
+        ],
+        "filters": {
+          "full_text_only": true,
+          "spec_version": "0.1.6"
+        }
+      },
+      "hits": [
+        {
+          "source_id": "FX-001",
+          "title": "Fixture Paper A: Interface passivation and humidity stability",
+          "year": 2025,
+          "venue": "Fixture Venue (synthetic)",
+          "doi": null,
+          "abstract": "A synthetic record describing interface passivation and damp-heat stability. Only for pipeline tests.",
+          "full_text": true,
+          "license": "fixture-only",
+          "fixture": true
+        },
+        {
+          "source_id": "FX-002",
+          "title": "Fixture Paper B: Reproducibility of passivation protocols",
+          "year": 2024,
+          "venue": "Fixture Workshop (synthetic)",
+          "doi": null,
+          "abstract": "A synthetic record about protocol reproducibility and reporting completeness.",
+          "full_text": true,
+          "license": "fixture-only",
+          "fixture": true
+        },
+        {
+          "source_id": "FX-003",
+          "title": "Fixture Paper C: A review without full text",
+          "year": 2023,
+          "venue": "Fixture Review (synthetic)",
+          "doi": null,
+          "abstract": "A synthetic abstract-only record used to verify that abstracts never become spans or evidence.",
+          "full_text": false,
+          "license": "fixture-only",
+          "fixture": true
+        }
+      ],
+      "spans": [
+        {
+          "span_id": "FX-001-S01-01",
+          "source_id": "FX-001",
+          "section": "Results",
+          "text": "在 85°C/85%RH 的 fixture 条件下，对照组的稳定性为 420 h，界面钝化组为 780 h。",
+          "start": 0,
+          "end": 55,
+          "fixture": true
+        },
+        {
+          "span_id": "FX-001-S01-02",
+          "source_id": "FX-001",
+          "section": "Results",
+          "text": "该数值仅用于测试流程，不是真实实验结果。",
+          "start": 55,
+          "end": 75,
+          "fixture": true
+        },
+        {
+          "span_id": "FX-001-S02-01",
+          "source_id": "FX-001",
+          "section": "Limitations",
+          "text": "Fixture 数据只验证检索、定位和覆盖回执，不支持任何材料科学结论。",
+          "start": 0,
+          "end": 36,
+          "fixture": true
+        },
+        {
+          "span_id": "FX-002-S01-01",
+          "source_id": "FX-002",
+          "section": "Method",
+          "text": "Fixture 协议要求记录温度、湿度、样本量和停止条件；缺少任一项时，结果只能标为未判定。",
+          "start": 0,
+          "end": 46,
+          "fixture": true
+        },
+        {
+          "span_id": "FX-002-S02-01",
+          "source_id": "FX-002",
+          "section": "Results",
+          "text": "在 fixture 的三次重复中，只有两次满足预注册的记录完整性检查，因此不宣称稳定性提升。",
+          "start": 0,
+          "end": 46,
+          "fixture": true
+        }
+      ],
+      "coverage": {
+        "queries": 5,
+        "sources_found": 3,
+        "sources_read": 2,
+        "spans_extracted": 5,
+        "gaps": [
+          {
+            "code": "full_text_unavailable",
+            "message": "FX-003 has no full text; abstract is not evidence"
+          },
+          {
+            "code": "thin_full_text_coverage",
+            "message": "fewer than 3 full texts were read"
+          }
+        ],
+        "warnings": [
+          "fixture_mode: synthetic data for pipeline tests only; not real evidence",
+          "S1 outputs spans, not claims; spans must pass Q0/Claim Curator before use",
+          "spec status=pilot; this run is development-only"
+        ],
+        "source_scope": [
+          "fixture"
+        ]
+      },
+      "warnings": [
+        "fixture_mode: synthetic data for pipeline tests only; not real evidence",
+        "S1 outputs spans, not claims; spans must pass Q0/Claim Curator before use",
+        "spec status=pilot; this run is development-only"
+      ],
+      "fixture_mode": true
+    },
+    "idea": {
+      "run_id": "PIPE-20261024T050235Z-e3a30a-idea",
+      "module": "idea",
+      "spec_version": "0.1.0",
+      "status": "candidates_need_human",
+      "candidates": [
+        {
+          "idea_id": "IDEA-01",
+          "title": "可证伪方向 01：围绕「在 85°C/85%RH 的 fixture 条件下，对照组的稳定性为 420 h，界面钝化组为 780…」",
+          "hypothesis": "若改变该方向中的机制/条件，则在固定协议、同 baseline、同预算下，主指标应出现可测变化；机制与指标需人工补全。",
+          "falsification": "预注册协议下主指标无改善或反向，或效应不超出预注册最小效应。",
+          "evidence_refs": [
+            "FX-001-S01-01"
+          ],
+          "status": "candidate"
+        },
+        {
+          "idea_id": "IDEA-02",
+          "title": "可证伪方向 02：围绕「该数值仅用于测试流程，不是真实实验结果。」",
+          "hypothesis": "若改变该方向中的机制/条件，则在固定协议、同 baseline、同预算下，主指标应出现可测变化；机制与指标需人工补全。",
+          "falsification": "预注册协议下主指标无改善或反向，或效应不超出预注册最小效应。",
+          "evidence_refs": [
+            "FX-001-S01-02"
+          ],
+          "status": "candidate"
+        },
+        {
+          "idea_id": "IDEA-03",
+          "title": "可证伪方向 03：围绕「Fixture 数据只验证检索、定位和覆盖回执，不支持任何材料科学结论。」",
+          "hypothesis": "若改变该方向中的机制/条件，则在固定协议、同 baseline、同预算下，主指标应出现可测变化；机制与指标需人工补全。",
+          "falsification": "预注册协议下主指标无改善或反向，或效应不超出预注册最小效应。",
+          "evidence_refs": [
+            "FX-001-S02-01"
+          ],
+          "status": "candidate"
+        }
+      ],
+      "warnings": [
+        "candidate frames only; no novelty ranking, no Claim, no automatic G1",
+        "mechanism and metric must be filled by a human before design freeze",
+        "spec status=pilot; development-only"
+      ]
+    },
+    "experiment": {
+      "design_id": "PIPE-20261024T050235Z-e3a30a-design",
+      "question": "钙钛矿 界面 钝化 稳定性",
+      "hypothesis": "StandardScaler + logistic regression exceeds the majority-class baseline on the fixed protocol.",
+      "baseline": "majority class",
+      "primary_metric": "湿热稳定性",
+      "controls": [
+        "未钝化对照"
+      ],
+      "seeds": 3,
+      "budget": "3 seeds x stratified split",
+      "stopping_rule": "预注册后由人冻结；主指标、样本量、停止条件不得事后修改",
+      "evidence_refs": [
+        "FX-001-S01-01",
+        "FX-001-S01-02",
+        "FX-001-S02-01",
+        "FX-002-S01-01"
+      ],
+      "status": "ready_for_g2",
+      "warnings": [
+        "design draft only; G2 must be signed by a human",
+        "no run, no metric, no Claim is produced by this module",
+        "spec status=pilot; development-only"
+      ]
+    },
+    "run": {
+      "capsule": {
+        "run_id": "RUN-20261024T050236Z-7d1748",
+        "protocol_id": "P-pipeline-s5",
+        "protocol_sha256": "7c2a65937aba356beb65c86354ed367918df5349d8470223a08c0bc5039347a0",
+        "dataset_id": "sklearn:iris:150x4",
+        "dataset_sha256": "1f80b2c8b93dc1aa46b83a78fa3dcdbbe7a58a04d43ea9f2417a1a4ab82c6fb5",
+        "code_sha256": "e828458cee0463c188f21849c05d198be388a38347acc08f38895f03dee55941",
+        "model": "logistic_regression",
+        "seeds": [
+          17,
+          18,
+          19
+        ],
+        "test_size": 0.3,
+        "metric_name": "accuracy",
+        "metrics_by_seed": [
+          {
+            "seed": 17,
+            "accuracy": 0.9111111111111111
+          },
+          {
+            "seed": 18,
+            "accuracy": 0.9555555555555556
+          },
+          {
+            "seed": 19,
+            "accuracy": 1.0
+          }
+        ],
+        "mean": 0.9555555555555556,
+        "std": 0.03628873693012116,
+        "environment": {
+          "python": "3.8.7",
+          "sklearn": "1.3.2",
+          "numpy": "1.24.4"
+        },
+        "status": "completed",
+        "artifacts": {
+          "metrics": "research_agent\\web\\data\\run\\metrics.json",
+          "capsule": "research_agent\\web\\data\\run\\run-capsule.json"
+        },
+        "created_at": "2026-10-24T05:02:36+00:00",
+        "warnings": [
+          "iris is a protocol-validation dataset; not thesis scientific evidence",
+          "single dataset/model; no generalization or SOTA claim"
+        ]
+      },
+      "evidence": {
+        "artifact_id": "EA-02dff3b6148e",
+        "kind": "metric",
+        "run_id": "RUN-20261024T050236Z-7d1748",
+        "path": "research_agent\\web\\data\\run\\metrics.json",
+        "sha256": "4b4966e85a00984693d128c4eccf6a81332bb12b3aaeebbbc68321c614143ce0",
+        "source": "run",
+        "captured_at": "2026-10-24T05:02:36+00:00",
+        "immutable": true,
+        "scope": "S5/demo/iris"
+      },
+      "paths": {
+        "capsule": "research_agent\\web\\data\\run\\run-capsule.json",
+        "metrics": "research_agent\\web\\data\\run\\metrics.json",
+        "ea": "research_agent\\web\\data\\run\\ea.json"
+      },
+      "status": "completed",
+      "claim_draft": "research_agent\\web\\data\\run\\claim-draft.json",
+      "active_harness": {},
+      "result_figure": {
+        "figure_id": "PIPE-20261024T050235Z-e3a30a-result",
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"840\" height=\"380\" viewBox=\"0 0 840 380\" role=\"img\" aria-labelledby=\"fig-title fig-desc\"><title id=\"fig-title\">Result: sklearn:iris:150x4 / accuracy</title><desc id=\"fig-desc\">Data-backed result figure from RunCapsule RUN-20261024T050236Z-7d1748; seeds [17, 18, 19]. Not peer-reviewed and not a schematic.</desc><rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/><line x1=\"80\" y1=\"70\" x2=\"80\" y2=\"300\" stroke=\"#344054\"/><line x1=\"80\" y1=\"300\" x2=\"760\" y2=\"300\" stroke=\"#344054\"/><text x=\"72\" y=\"74\" text-anchor=\"end\" font-family=\"Arial\" font-size=\"12\" fill=\"#475467\">1.05</text><text x=\"72\" y=\"300\" text-anchor=\"end\" font-family=\"Arial\" font-size=\"12\" fill=\"#475467\">-0.05</text><rect x=\"167.3\" y=\"99.0\" width=\"24.0\" height=\"201.0\" fill=\"#3B6FB6\"/><rect x=\"394.0\" y=\"89.7\" width=\"24.0\" height=\"210.3\" fill=\"#3B6FB6\"/><rect x=\"620.7\" y=\"80.5\" width=\"24.0\" height=\"219.5\" fill=\"#3B6FB6\"/><text x=\"193.3\" y=\"322\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"12\" fill=\"#475467\">seed 17</text><text x=\"420.0\" y=\"322\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"12\" fill=\"#475467\">seed 18</text><text x=\"646.7\" y=\"322\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"12\" fill=\"#475467\">seed 19</text></svg>",
+        "manifest": {
+          "figure_id": "PIPE-20261024T050235Z-e3a30a-result",
+          "kind": "result_data",
+          "schematic": false,
+          "run_id": "RUN-20261024T050236Z-7d1748",
+          "dataset_id": "sklearn:iris:150x4",
+          "metric_name": "accuracy",
+          "seeds": [
+            17,
+            18,
+            19
+          ],
+          "method_series": "accuracy",
+          "baseline_series": null,
+          "svg_sha256": "0df056b1543fb8755123412df517d3768c0b4b8fd7fbd0c54e02700f8dbb7dd8",
+          "data_sha256": "fd328d6de1900a7af214debf7ea6aa7cff75357e9a1d1bb9ff278c848903c8c2",
+          "evidence_refs": [
+            "EA-02dff3b6148e"
+          ],
+          "audit": {
+            "ok": true,
+            "errors": [],
+            "warnings": [],
+            "checks": {
+              "root": true,
+              "size": true,
+              "ids_unique": true,
+              "text_count": 5,
+              "image_count": 0,
+              "role_img": true,
+              "labelled": true,
+              "has_title": true,
+              "has_desc": true,
+              "aria_targets": true
+            }
+          }
+        },
+        "paths": {
+          "svg": "research_agent\\web\\data\\run\\result-figure.svg",
+          "manifest": "research_agent\\web\\data\\run\\result-figure.manifest.json"
+        }
+      }
+    },
+    "figure": {
+      "figure_id": "PIPE-20261024T050235Z-e3a30a-figure",
+      "scene": {
+        "schema_version": 1,
+        "id": "PIPE-20261024T050235Z-e3a30a-figure",
+        "component": "research-agent-module-graph",
+        "style": "modern",
+        "width": 1440,
+        "height": 388,
+        "scientific_notes": [
+          "Schematic module graph; not an experimental result and not a data plot.",
+          "Node positions and colors are illustrative; they do not encode measured effects.",
+          "Evidence references: FX-001-S01-01, FX-001-S01-02, FX-001-S02-01, FX-002-S01-01"
+        ],
+        "objects": [
+          {
+            "id": "title",
+            "type": "text",
+            "role": "label",
+            "x": 54,
+            "y": 24,
+            "width": 1332,
+            "height": 44,
+            "text": "研究运行时：从证据到稿件",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 30,
+            "fill": "#172033",
+            "bold": true
+          },
+          {
+            "id": "subtitle",
+            "type": "text",
+            "role": "label",
+            "x": 54,
+            "y": 74,
+            "width": 1332,
+            "height": 30,
+            "text": "模块关系示意图；不是实验结果",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 13,
+            "fill": "#667085"
+          },
+          {
+            "id": "lit",
+            "type": "rect",
+            "role": "module",
+            "x": 54,
+            "y": 118,
+            "width": 204,
+            "height": 70,
+            "radius": 10,
+            "fill": "#EEF4FF",
+            "stroke": "#3B6FB6",
+            "strokeWidth": 2.0
+          },
+          {
+            "id": "lit-label",
+            "type": "text",
+            "role": "label",
+            "x": 68,
+            "y": 134,
+            "width": 176,
+            "height": 44,
+            "text": "文献调研\n5 spans",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 16,
+            "fill": "#1D3F6E",
+            "bold": true
+          },
+          {
+            "id": "idea",
+            "type": "rect",
+            "role": "module",
+            "x": 316,
+            "y": 118,
+            "width": 204,
+            "height": 70,
+            "radius": 10,
+            "fill": "#F3EEFF",
+            "stroke": "#7059B8",
+            "strokeWidth": 2.0
+          },
+          {
+            "id": "idea-label",
+            "type": "text",
+            "role": "label",
+            "x": 330,
+            "y": 134,
+            "width": 176,
+            "height": 44,
+            "text": "假设收敛\n3 candidates",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 16,
+            "fill": "#3F2F78",
+            "bold": true
+          },
+          {
+            "id": "design",
+            "type": "rect",
+            "role": "module",
+            "x": 578,
+            "y": 118,
+            "width": 204,
+            "height": 70,
+            "radius": 10,
+            "fill": "#EAF8F5",
+            "stroke": "#2F8A78",
+            "strokeWidth": 2.0
+          },
+          {
+            "id": "design-label",
+            "type": "text",
+            "role": "label",
+            "x": 592,
+            "y": 134,
+            "width": 176,
+            "height": 44,
+            "text": "实验设计\nready_for_g2",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 16,
+            "fill": "#1D5B50",
+            "bold": true
+          },
+          {
+            "id": "figure",
+            "type": "rect",
+            "role": "module",
+            "x": 840,
+            "y": 118,
+            "width": 204,
+            "height": 70,
+            "radius": 10,
+            "fill": "#FFF2EC",
+            "stroke": "#C56856",
+            "strokeWidth": 2.0
+          },
+          {
+            "id": "figure-label",
+            "type": "text",
+            "role": "label",
+            "x": 854,
+            "y": 134,
+            "width": 176,
+            "height": 44,
+            "text": "科研绘图\nSVG + manifest",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 16,
+            "fill": "#7E3A2C",
+            "bold": true
+          },
+          {
+            "id": "paper",
+            "type": "rect",
+            "role": "module",
+            "x": 1102,
+            "y": 118,
+            "width": 204,
+            "height": 70,
+            "radius": 10,
+            "fill": "#FFF7E8",
+            "stroke": "#B67A22",
+            "strokeWidth": 2.0
+          },
+          {
+            "id": "paper-label",
+            "type": "text",
+            "role": "label",
+            "x": 1116,
+            "y": 134,
+            "width": 176,
+            "height": 44,
+            "text": "论文契约\nslots pending",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 16,
+            "fill": "#6E4A16",
+            "bold": true
+          },
+          {
+            "id": "grant",
+            "type": "rect",
+            "role": "module",
+            "x": 1102,
+            "y": 218,
+            "width": 204,
+            "height": 70,
+            "radius": 10,
+            "fill": "#F2F4F8",
+            "stroke": "#667085",
+            "strokeWidth": 2.0
+          },
+          {
+            "id": "grant-label",
+            "type": "text",
+            "role": "label",
+            "x": 1116,
+            "y": 234,
+            "width": 176,
+            "height": 44,
+            "text": "基金申报\nNSFC",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 16,
+            "fill": "#344054",
+            "bold": true
+          },
+          {
+            "id": "edge-lit-idea-00",
+            "type": "polyline",
+            "role": "connector",
+            "points": [
+              [
+                258,
+                153.0
+              ],
+              [
+                316,
+                153.0
+              ]
+            ],
+            "stroke": "#8A96A8",
+            "strokeWidth": 1.8,
+            "dashed": false,
+            "endArrow": true
+          },
+          {
+            "id": "edge-label-lit-idea-00",
+            "type": "text",
+            "role": "label",
+            "x": 243.0,
+            "y": 127.0,
+            "width": 88,
+            "height": 20,
+            "text": "spans",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "edge-idea-design-01",
+            "type": "polyline",
+            "role": "connector",
+            "points": [
+              [
+                520,
+                153.0
+              ],
+              [
+                578,
+                153.0
+              ]
+            ],
+            "stroke": "#8A96A8",
+            "strokeWidth": 1.8,
+            "dashed": false,
+            "endArrow": true
+          },
+          {
+            "id": "edge-label-idea-design-01",
+            "type": "text",
+            "role": "label",
+            "x": 505.0,
+            "y": 127.0,
+            "width": 88,
+            "height": 20,
+            "text": "G1",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "edge-design-figure-02",
+            "type": "polyline",
+            "role": "connector",
+            "points": [
+              [
+                782,
+                153.0
+              ],
+              [
+                840,
+                153.0
+              ]
+            ],
+            "stroke": "#8A96A8",
+            "strokeWidth": 1.8,
+            "dashed": false,
+            "endArrow": true
+          },
+          {
+            "id": "edge-label-design-figure-02",
+            "type": "text",
+            "role": "label",
+            "x": 767.0,
+            "y": 127.0,
+            "width": 88,
+            "height": 20,
+            "text": "schematic",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "edge-figure-paper-03",
+            "type": "polyline",
+            "role": "connector",
+            "points": [
+              [
+                1044,
+                153.0
+              ],
+              [
+                1102,
+                153.0
+              ]
+            ],
+            "stroke": "#8A96A8",
+            "strokeWidth": 1.8,
+            "dashed": false,
+            "endArrow": true
+          },
+          {
+            "id": "edge-label-figure-paper-03",
+            "type": "text",
+            "role": "label",
+            "x": 1029.0,
+            "y": 127.0,
+            "width": 88,
+            "height": 20,
+            "text": "figure_ref",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "edge-design-grant-04",
+            "type": "polyline",
+            "role": "connector",
+            "points": [
+              [
+                782,
+                153.0
+              ],
+              [
+                1102,
+                253.0
+              ]
+            ],
+            "stroke": "#8A96A8",
+            "strokeWidth": 1.8,
+            "dashed": true,
+            "endArrow": true
+          },
+          {
+            "id": "edge-label-design-grant-04",
+            "type": "text",
+            "role": "label",
+            "x": 898.0,
+            "y": 177.0,
+            "width": 88,
+            "height": 20,
+            "text": "evidence map",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "legend-0",
+            "type": "rect",
+            "role": "legend",
+            "x": 54,
+            "y": 346,
+            "width": 12,
+            "height": 12,
+            "radius": 3,
+            "fill": "#EEF4FF",
+            "stroke": "#3B6FB6",
+            "strokeWidth": 1.2
+          },
+          {
+            "id": "legend-label-0",
+            "type": "text",
+            "role": "label",
+            "x": 72,
+            "y": 343,
+            "width": 60,
+            "height": 20,
+            "text": "文献",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "legend-1",
+            "type": "rect",
+            "role": "legend",
+            "x": 146,
+            "y": 346,
+            "width": 12,
+            "height": 12,
+            "radius": 3,
+            "fill": "#F3EEFF",
+            "stroke": "#7059B8",
+            "strokeWidth": 1.2
+          },
+          {
+            "id": "legend-label-1",
+            "type": "text",
+            "role": "label",
+            "x": 164,
+            "y": 343,
+            "width": 60,
+            "height": 20,
+            "text": "假设",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "legend-2",
+            "type": "rect",
+            "role": "legend",
+            "x": 238,
+            "y": 346,
+            "width": 12,
+            "height": 12,
+            "radius": 3,
+            "fill": "#EAF8F5",
+            "stroke": "#2F8A78",
+            "strokeWidth": 1.2
+          },
+          {
+            "id": "legend-label-2",
+            "type": "text",
+            "role": "label",
+            "x": 256,
+            "y": 343,
+            "width": 60,
+            "height": 20,
+            "text": "实验",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "legend-3",
+            "type": "rect",
+            "role": "legend",
+            "x": 330,
+            "y": 346,
+            "width": 12,
+            "height": 12,
+            "radius": 3,
+            "fill": "#FFF2EC",
+            "stroke": "#C56856",
+            "strokeWidth": 1.2
+          },
+          {
+            "id": "legend-label-3",
+            "type": "text",
+            "role": "label",
+            "x": 348,
+            "y": 343,
+            "width": 60,
+            "height": 20,
+            "text": "图表",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "legend-4",
+            "type": "rect",
+            "role": "legend",
+            "x": 422,
+            "y": 346,
+            "width": 12,
+            "height": 12,
+            "radius": 3,
+            "fill": "#FFF7E8",
+            "stroke": "#B67A22",
+            "strokeWidth": 1.2
+          },
+          {
+            "id": "legend-label-4",
+            "type": "text",
+            "role": "label",
+            "x": 440,
+            "y": 343,
+            "width": 60,
+            "height": 20,
+            "text": "稿件",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          },
+          {
+            "id": "legend-5",
+            "type": "rect",
+            "role": "legend",
+            "x": 514,
+            "y": 346,
+            "width": 12,
+            "height": 12,
+            "radius": 3,
+            "fill": "#F2F4F8",
+            "stroke": "#667085",
+            "strokeWidth": 1.2
+          },
+          {
+            "id": "legend-label-5",
+            "type": "text",
+            "role": "label",
+            "x": 532,
+            "y": 343,
+            "width": 60,
+            "height": 20,
+            "text": "基金",
+            "fontFamily": "Microsoft YaHei",
+            "fontSize": 10,
+            "fill": "#667085"
+          }
+        ]
+      },
+      "manifest": {
+        "figure_id": "PIPE-20261024T050235Z-e3a30a-figure",
+        "title": "研究运行时：从证据到稿件",
+        "schematic": true,
+        "kind": "module_graph",
+        "style": "modern",
+        "scene_sha256": "1494e857783c9c8a130e4a9d8d1450094685e3f0e4133f4a95a6ab90d0577d0a",
+        "svg_sha256": "992702528d58f902c7297539e420b69f254660592fea1c57ad4951de3f4e69cf",
+        "evidence_refs": [
+          "FX-001-S01-01",
+          "FX-001-S01-02",
+          "FX-001-S02-01",
+          "FX-002-S01-01"
+        ],
+        "provenance": {
+          "generator": "research_agent.figure",
+          "spec_version": "0.1.2",
+          "astradraw_source": "research_agent/vendor/astradraw",
+          "style": "modern",
+          "evidence_refs": [
+            "FX-001-S01-01",
+            "FX-001-S01-02",
+            "FX-001-S02-01",
+            "FX-002-S01-01"
+          ],
+          "schematic": true
+        },
+        "audit": {
+          "ok": true,
+          "errors": [],
+          "warnings": [],
+          "checks": {
+            "root": true,
+            "size": true,
+            "ids_unique": true,
+            "text_count": 19,
+            "image_count": 0,
+            "role_img": true,
+            "labelled": true,
+            "has_title": true,
+            "has_desc": true,
+            "aria_targets": true
+          }
+        }
+      },
+      "audit": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "checks": {
+          "root": true,
+          "size": true,
+          "ids_unique": true,
+          "text_count": 19,
+          "image_count": 0,
+          "role_img": true,
+          "labelled": true,
+          "has_title": true,
+          "has_desc": true,
+          "aria_targets": true
+        }
+      },
+      "status": "schematic_ready"
+    },
+    "paper": {
+      "title": "工作稿：钙钛矿 界面 钝化 稳定性",
+      "profile": {
+        "language": "zh",
+        "venue_type": "zh_core_journal",
+        "citation_style": "GB/T 7714-2015",
+        "sections": [
+          "摘要",
+          "引言",
+          "相关工作",
+          "方法",
+          "实验设计",
+          "结果",
+          "讨论",
+          "结论"
+        ]
+      },
+      "sections": [
+        "摘要",
+        "引言",
+        "相关工作",
+        "方法",
+        "实验设计",
+        "结果",
+        "讨论",
+        "结论"
+      ],
+      "slots": [
+        {
+          "slot_id": "method.protocol",
+          "section": "方法",
+          "required_evidence": "G2 Protocol / DesignCard / TaskSpec",
+          "status": "pending_evidence"
+        },
+        {
+          "slot_id": "result.primary",
+          "section": "结果",
+          "required_evidence": "EA + supported Claim + MetricRecord",
+          "status": "pending_evidence"
+        },
+        {
+          "slot_id": "result.figure",
+          "section": "结果",
+          "required_evidence": "FigureManifest + Figure data / run data",
+          "status": "bound_figure"
+        },
+        {
+          "slot_id": "limitation",
+          "section": "讨论",
+          "required_evidence": "EvidenceCard scope / validity threats",
+          "status": "pending_evidence"
+        },
+        {
+          "slot_id": "citation.related",
+          "section": "相关工作",
+          "required_evidence": "verified bibliography (DOI/Crossref)",
+          "status": "pending_evidence"
+        }
+      ],
+      "claims": [],
+      "status": "needs_evidence",
+      "warnings": [
+        "scaffold only: no result claims, no numbers, no abstract prose",
+        "WritingProfile=zh_core_journal; citation_style=GB/T 7714-2015",
+        "schematic figure is not a result figure; do not bind it to result.figure without data",
+        "all result slots are pending_evidence; export/Closure remains blocked",
+        "result.figure references data-backed FigureManifest; writer does not re-verify data",
+        "figure_refs are schematic; not bound to result.figure"
+      ]
+    },
+    "grant": {
+      "title": "申报草稿：钙钛矿 界面 钝化 稳定性",
+      "scheme": "nsfc",
+      "modules": [
+        "立项依据",
+        "研究内容",
+        "研究基础",
+        "创新点",
+        "预算说明"
+      ],
+      "compliance": [
+        "三模块/页限以当年官方模板为准",
+        "AI 辅助声明",
+        "科学观点由申请人提供"
+      ],
+      "evidence_refs": [
+        "FX-001-S01-01",
+        "FX-001-S01-02",
+        "FX-001-S02-01",
+        "FX-002-S01-01"
+      ],
+      "status": "draft_needs_human",
+      "warnings": [
+        "scheme=国家自然科学基金（NSFC）; scaffold only: no scientific claims, no budget numbers, no submission",
+        "AI assists retrieval/structure/polish; scientific ideas and responsibility stay with the applicant",
+        "official template / page limit must be checked against the current call"
+      ]
+    }
+  },
+  "gates": [
+    {
+      "gate": "Q0",
+      "status": "pending",
+      "reason": "coverage/claim admission not run"
+    },
+    {
+      "gate": "G1",
+      "status": "needs_human",
+      "reason": "idea candidates require human convergence"
+    },
+    {
+      "gate": "G2",
+      "status": "ready",
+      "reason": "design + protocol must be frozen"
+    },
+    {
+      "gate": "G3",
+      "status": "blocked",
+      "reason": "paper contract/figure are provisional"
+    },
+    {
+      "gate": "S5",
+      "status": "needs_human",
+      "reason": "run capsule/EA exist; claim draft needs human signature"
+    },
+    {
+      "gate": "G5",
+      "status": "blocked",
+      "reason": "EA exists but no Claim/Closure; export is closed"
+    }
+  ],
+  "warnings": [
+    "fixture pipeline; no real retrieval, no API, no experiment",
+    "fixture_mode: synthetic data for pipeline tests only; not real evidence",
+    "S1 outputs spans, not claims; spans must pass Q0/Claim Curator before use",
+    "spec status=pilot; this run is development-only",
+    "candidate frames only; no novelty ranking, no Claim, no automatic G1",
+    "mechanism and metric must be filled by a human before design freeze",
+    "spec status=pilot; development-only",
+    "design draft only; G2 must be signed by a human",
+    "no run, no metric, no Claim is produced by this module",
+    "S5 run completed; claim draft requires human signature; result slot stays pending",
+    "figure is schematic; do not bind it to result.figure without run data",
+    "scaffold only: no result claims, no numbers, no abstract prose",
+    "WritingProfile=zh_core_journal; citation_style=GB/T 7714-2015",
+    "schematic figure is not a result figure; do not bind it to result.figure without data",
+    "all result slots are pending_evidence; export/Closure remains blocked",
+    "result.figure references data-backed FigureManifest; writer does not re-verify data",
+    "figure_refs are schematic; not bound to result.figure",
+    "scheme=国家自然科学基金（NSFC）; scaffold only: no scientific claims, no budget numbers, no submission",
+    "AI assists retrieval/structure/polish; scientific ideas and responsibility stay with the applicant",
+    "official template / page limit must be checked against the current call"
+  ],
+  "spec_versions": {
+    "literature": "0.1.6",
+    "idea": "0.1.0",
+    "experiment": "0.1.1",
+    "figure": "0.1.2",
+    "paper": "0.1.5",
+    "grant": "0.1.0",
+    "run": "0.2.0"
+  },
+  "figure_uri": "data/figure.svg",
+  "source": "fixture pipeline; no API, no real experiment"
+}

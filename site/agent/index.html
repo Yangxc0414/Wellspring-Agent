@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Research Agent · Workspace</title>
+  <meta name="description" content="Research Agent 对话式科研工作台（静态预览）：调研、实验与受治理的全自动运行；所有状态为 SIM。" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="canonical" href="../app/" />
+  <meta name="robots" content="noindex" />
+  <link rel="stylesheet" href="../assets/base.css" />
+  <link rel="stylesheet" href="../assets/theme.css" />
+  <link rel="stylesheet" href="./agent.css" />
+</head>
+<body class="agent-page">
+  <a class="ag-skip" href="#ag-thread">跳到会话</a>
+
+  <header class="ag-top">
+    <a class="ag-brand" href="../">
+      <span class="ag-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 7.5 12 11l7-3.5M12 11v9" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="ag-brand-copy"><b>Research Agent</b><small>WORKSPACE · STATIC PREVIEW</small></span>
+    </a>
+
+    <label class="ag-project-switch">
+      <span>TASK</span>
+      <select id="project-select" aria-label="切换项目"></select>
+    </label>
+
+    <div class="ag-modes" role="group" aria-label="工作模式">
+      <button type="button" class="ag-mode is-on" data-mode="research"><b>调研</b><small>RESEARCH</small></button>
+      <button type="button" class="ag-mode" data-mode="experiment"><b>实验</b><small>EXPERIMENT</small></button>
+      <button type="button" class="ag-mode" data-mode="auto"><b>全自动</b><small>GOVERNED AUTO</small></button>
+    </div>
+
+    <div class="ag-top-actions">
+      <button type="button" class="ag-model-chip" id="model-btn" title="模型、上下文与思考强度设置">
+        <span>MODEL</span><b id="model-name">GPT-5</b><em id="model-thinking">medium</em>
+      </button>
+      <span class="ag-sim" title="静态预览：不调用 API、不产生真实实验或 claim">SIM · STATIC</span>
+      <button type="button" class="ag-icon-btn ag-tasks-toggle" id="tasks-btn" title="会话列表" aria-label="打开会话列表">☰</button>
+      <button type="button" class="ag-icon-btn ag-context-toggle" id="context-toggle" title="打开运行上下文" aria-label="打开运行上下文">CTX</button>
+      <button type="button" class="ag-icon-btn" id="new-project-btn" title="新建任务" aria-label="新建任务">＋</button>
+      <button type="button" class="ag-icon-btn" id="palette-btn" title="命令面板（Ctrl/⌘ K）" aria-label="打开命令面板"><span class="ag-kbd">⌘K</span></button>
+      <button type="button" class="ag-icon-btn" id="export-btn" title="导出当前状态 JSON" aria-label="导出当前状态">↧</button>
+    </div>
+  </header>
+
+  <main class="ag-shell">
+    <aside class="ag-side" aria-label="项目与快捷操作">
+      <button type="button" class="ag-new-task" id="new-task-btn"><span aria-hidden="true">＋</span><b>新的任务</b></button>
+      <label class="ag-search">
+        <span aria-hidden="true">⌕</span>
+        <input id="task-search" type="search" placeholder="搜索任务 / 目标 / 工作区…" autocomplete="off" aria-label="搜索任务" />
+      </label>
+
+      <div class="ag-side-head">
+        <span class="ag-kicker">WORKSPACES</span>
+        <span class="ag-count" id="workspace-count">—</span>
+      </div>
+      <nav class="ag-workspace-list" id="workspace-list" aria-label="工作区"></nav>
+
+      <details class="ag-recent-group" id="recent-tasks-group" open>
+        <summary>
+          <span class="ag-triangle" aria-hidden="true"></span>
+          <span class="ag-kicker">RECENT TASKS</span>
+          <b id="task-count">—</b>
+        </summary>
+        <nav class="ag-project-list" id="project-list" aria-label="最近任务"></nav>
+      </details>
+
+      <nav class="ag-side-utilities" aria-label="工具入口">
+        <button type="button" data-utility="site"><span class="ag-util-icon"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.4" stroke="currentColor" stroke-width="1.1"/><path d="M2.8 8h10.4M8 2.6c1.7 1.5 2.5 3.3 2.5 5.4s-.8 3.9-2.5 5.4c-1.7-1.5-2.5-3.3-2.5-5.4S6.3 4.1 8 2.6Z" stroke="currentColor" stroke-width="1.1"/></svg></span><span>站点</span></button>
+        <button type="button" data-utility="auto"><span class="ag-util-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="2.2" y="3" width="11.6" height="10" rx="1.2" stroke="currentColor" stroke-width="1.1"/><path d="m6.5 6.2 3.2 1.8-3.2 1.8V6.2Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg></span><span>自动化</span></button>
+        <button type="button" data-utility="plugins"><span class="ag-util-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="2.4" y="2.4" width="4.4" height="4.4" stroke="currentColor" stroke-width="1.1"/><rect x="9.2" y="2.4" width="4.4" height="4.4" stroke="currentColor" stroke-width="1.1"/><rect x="2.4" y="9.2" width="4.4" height="4.4" stroke="currentColor" stroke-width="1.1"/><path d="M11.4 9.2v4.4M9.2 11.4h4.4" stroke="currentColor" stroke-width="1.1"/></svg></span><span>扩展</span></button>
+        <button type="button" data-utility="more"><span class="ag-util-icon"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.5" cy="8" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="12.5" cy="8" r="1"/></svg></span><span>更多</span></button>
+      </nav>
+
+      <button type="button" class="ag-tools-btn" id="tools-btn" aria-expanded="false" aria-controls="tools-panel">
+        <span class="ag-tools-mark" aria-hidden="true">⚙</span>
+        <span class="ag-tools-copy"><b>设置与工具</b><small id="app-version">v0.1.0 · static</small></span>
+        <span class="ag-triangle" aria-hidden="true"></span>
+      </button>
+
+      <div class="ag-side-foot">
+        <span>NO API · LOCAL STATE ONLY</span>
+        <span id="side-version">workspace v0.1 · seed 2026-10-24</span>
+      </div>
+    </aside>
+
+    <div class="ag-plugin-drawer" id="plugin-drawer" hidden>
+      <div class="ag-plugin-head">
+        <div><span class="ag-kicker">PLUGINS / MCP</span><b>插件与工具连接器</b></div>
+        <button type="button" class="ag-icon-btn" id="plugin-close" aria-label="关闭插件面板">×</button>
+      </div>
+      <div class="ag-plugin-body">
+        <p class="ag-plugin-note">MCP server 只暴露工具；工具结果进入会话前必须逐次批准。密钥/OAuth 留在 runtime，不进入浏览器。当前为静态预览，不发起真实连接。</p>
+        <div class="ag-plugin-list" id="plugin-list"></div>
+
+        <div class="ag-plugin-section">
+          <div class="ag-plugin-label">RECENT TOOL CALLS</div>
+          <div id="plugin-calls"></div>
+        </div>
+
+        <details class="ag-plugin-add" open>
+          <summary><span class="ag-triangle" aria-hidden="true"></span>接入 MCP Server</summary>
+          <form class="ag-plugin-form" id="plugin-form">
+            <label class="ag-field compact"><span>预设</span>
+              <select id="plugin-preset">
+                <option value="github">GitHub MCP · Streamable HTTP / OAuth</option>
+                <option value="custom">Custom Streamable HTTP</option>
+                <option value="local">Local MCP（仅登记，不执行）</option>
+              </select>
+            </label>
+            <label class="ag-field compact"><span>名称</span><input id="plugin-name" value="GitHub MCP" /></label>
+            <label class="ag-field compact"><span>Endpoint URL</span><input id="plugin-url" value="https://api.githubcopilot.com/mcp/" spellcheck="false" /></label>
+            <div class="ag-model-two">
+              <label class="ag-field compact"><span>认证</span><select id="plugin-auth"><option value="oauth">OAuth（runtime）</option><option value="env">Environment / PAT</option><option value="none">None</option></select></label>
+              <label class="ag-field compact"><span>工具集</span><input id="plugin-toolsets" value="repos,issues,pull_requests" /></label>
+            </div>
+            <label class="ag-switch-row compact"><span><b>只读模式</b><small>优先禁止写操作；GitHub 支持只读端点/头</small></span><input type="checkbox" id="plugin-readonly" checked /></label>
+            <div class="ag-plugin-actions">
+              <button type="button" class="ag-btn ag-btn-quiet" id="plugin-test">测试连接（SIM）</button>
+              <button type="submit" class="ag-btn">保存并启用</button>
+            </div>
+          </form>
+        </details>
+      </div>
+    </div>
+
+    <div class="ag-tools-panel" id="tools-panel" hidden>
+      <div class="ag-tools-head">
+        <div><span class="ag-kicker">TOOLS & PERSONALIZATION</span><b>设置与工具</b></div>
+        <button type="button" class="ag-icon-btn" id="tools-close" aria-label="关闭设置">×</button>
+      </div>
+      <div class="ag-tools-section">
+        <div class="ag-tools-label">VERSION</div>
+        <div class="ag-tools-row"><span>Research Agent Workspace</span><b>v0.1.0</b></div>
+        <div class="ag-tools-row"><span>build</span><b>2026-10-24 · static</b></div>
+      </div>
+      <div class="ag-tools-section">
+        <div class="ag-tools-label">PERSONALIZATION</div>
+        <label class="ag-switch-row"><span><b>自动展开运行中</b><small>运行阶段/进行中对话自动展开</small></span><input type="checkbox" id="pref-auto-expand" checked /></label>
+        <label class="ag-switch-row"><span><b>自动滚动新消息</b><small>关闭后保持当前阅读位置</small></span><input type="checkbox" id="pref-auto-scroll" checked /></label>
+        <label class="ag-switch-row"><span><b>减少动效</b><small>关闭入场/过渡动画</small></span><input type="checkbox" id="pref-reduce-motion" /></label>
+      </div>
+      <div class="ag-tools-section">
+        <div class="ag-tools-label">TOOLS</div>
+        <button type="button" class="ag-tools-action" id="tools-model">模型设置 <span>CTX / THINKING</span></button>
+        <button type="button" class="ag-tools-action" id="tools-plugins">插件 / MCP <span>TOOLS</span></button>
+        <a class="ag-tools-action" href="../live/" target="_blank" rel="noopener">运行控制台 <span>SUBPAGE ↗</span></a>
+        <button type="button" class="ag-tools-action" id="tools-export">导出当前状态 <span>JSON</span></button>
+        <a class="ag-tools-action" href="../models/" target="_blank" rel="noopener">Provider / Profile 高级配置 <span>SUBPAGE ↗</span></a>
+        <button type="button" class="ag-tools-action danger" id="tools-reset">重置示例 <span>LOCAL</span></button>
+      </div>
+      <div class="ag-tools-foot">所有设置只保存在本地；不调用 API、不上传对话。</div>
+    </div>
+
+    <section class="ag-main">
+      <header class="ag-thread-head">
+        <div class="ag-thread-main">
+          <span class="ag-kicker" id="thread-kicker">材料实验室 / RESEARCH · S1–S3</span>
+          <div class="ag-task-line"><span class="ag-task-tag">TASK</span><h1 id="thread-title">钙钛矿界面钝化与长期稳定性</h1></div>
+          <p id="thread-goal">验证界面钝化对湿热稳定性的影响，并留下可追溯的证据链。</p>
+        </div>
+        <div class="ag-thread-side">
+          <div class="ag-thread-meta" id="thread-meta"></div>
+          <div class="ag-thread-brief" id="thread-brief"></div>
+        </div>
+      </header>
+
+      <div class="ag-thread" id="ag-thread" role="log" aria-live="polite" aria-label="Agent 会话"></div>
+
+      <div class="ag-composer">
+        <div class="ag-composer-top">
+          <div class="ag-composer-meta">
+            <span class="ag-mode-label" id="composer-mode">调研模式 · 先证据后假设</span>
+            <button type="button" class="ag-plugin-chip" id="plugin-btn" title="插件 / MCP 连接器">
+              <span>PLUGINS</span><b id="plugin-count">0</b>
+            </button>
+          </div>
+          <div class="ag-suggestions" id="suggestions"></div>
+        </div>
+        <div class="ag-input-wrap">
+          <textarea id="composer-input" rows="2" maxlength="4000" placeholder="问一个研究问题，或输入 /auto 启动全自动……" aria-label="给 Research Agent 发消息"></textarea>
+          <button type="button" class="ag-send" id="send-btn" aria-label="发送">发送 <span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="ag-composer-foot">
+          <span>Enter 发送 · Shift+Enter 换行 · / 指令 · ⌘K 面板</span>
+          <span><b>SIM</b> 示例状态，不调用模型 / 不执行真实实验</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="ag-context" aria-label="运行上下文">
+      <div class="ag-context-head">
+        <div class="ag-context-tabs" role="tablist" aria-label="上下文视图">
+          <button type="button" class="ag-ctx-tab is-on" role="tab" aria-selected="true" data-context="run">RUN</button>
+          <button type="button" class="ag-ctx-tab" role="tab" aria-selected="false" data-context="evidence">EVIDENCE</button>
+          <button type="button" class="ag-ctx-tab" role="tab" aria-selected="false" data-context="evolution">EVOLUTION</button>
+        </div>
+        <span class="ag-count" id="context-count">—</span>
+      </div>
+      <div class="ag-context-body" id="context-body"></div>
+      <div class="ag-context-foot" id="context-foot"></div>
+    </aside>
+  </main>
+
+  <dialog class="ag-dialog" id="new-project-dialog">
+    <form method="dialog" id="new-project-form">
+      <div class="ag-dialog-head">
+        <span class="ag-kicker">NEW TASK</span>
+        <button type="button" class="ag-icon-btn" id="close-dialog" aria-label="关闭">×</button>
+      </div>
+      <h2>新建一个任务。</h2>
+      <p>任务会挂到当前工作区；不会上传、不会调用 API。</p>
+      <label class="ag-field"><span>任务名称</span><input id="np-name" maxlength="60" placeholder="例如：钙钛矿界面钝化" required /></label>
+      <label class="ag-field"><span>研究目标</span><textarea id="np-goal" rows="3" maxlength="300" placeholder="用一句话说明要验证什么、产出什么。" required></textarea></label>
+      <div class="ag-dialog-row">
+        <label class="ag-field"><span>工作区</span><select id="np-workspace"></select></label>
+        <label class="ag-field"><span>领域</span>
+          <select id="np-domain">
+            <option>材料科学</option>
+            <option>机器学习</option>
+            <option>生物医学</option>
+            <option>社会科学</option>
+            <option>其他</option>
+          </select>
+        </label>
+      </div>
+      <div class="ag-dialog-row">
+        <label class="ag-field"><span>起始模式</span>
+          <select id="np-mode">
+            <option value="research">调研</option>
+            <option value="experiment">实验</option>
+            <option value="auto">全自动</option>
+          </select>
+        </label>
+      </div>
+      <div class="ag-dialog-actions">
+        <button type="button" class="ag-btn ag-btn-quiet" id="cancel-dialog">取消</button>
+        <button type="submit" class="ag-btn">创建任务</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="ag-dialog ag-model-dialog" id="model-dialog">
+    <form method="dialog" id="model-form">
+      <div class="ag-dialog-head">
+        <span class="ag-kicker">MODEL SETTINGS / STATIC</span>
+        <button type="button" class="ag-icon-btn" id="model-close" aria-label="关闭">×</button>
+      </div>
+      <h2>模型与预算</h2>
+      <p class="ag-model-lede">能力来自模型配置；这里只决定本次用量与压缩。</p>
+
+      <div class="ag-model-grid">
+        <div class="ag-model-list" id="model-profile-list"></div>
+        <div class="ag-model-detail">
+          <div class="ag-capability" id="model-capability"></div>
+
+          <label class="ag-range">
+            <span>最大上下文 <b id="ms-context-value">128k</b></span>
+            <input id="ms-context" type="range" min="8192" max="400000" step="8192" value="128000" />
+            <small id="ms-context-limit">模型上限 400k</small>
+          </label>
+
+          <label class="ag-range">
+            <span>最大回复长度 <b id="ms-reply-value">8k</b></span>
+            <input id="ms-reply" type="range" min="512" max="16384" step="512" value="8192" />
+            <small id="ms-reply-limit">模型上限 16k · 实际发送时不超过</small>
+          </label>
+
+          <div class="ag-setting-block">
+            <div class="ag-setting-head"><span>思考强度</span><b id="ms-thinking-value">medium</b></div>
+            <input id="ms-thinking" type="range" min="0" max="3" step="1" value="2" aria-label="思考强度" />
+            <div class="ag-stop-labels" id="ms-thinking-labels"></div>
+            <small class="ag-setting-note" id="ms-thinking-note"></small>
+          </div>
+
+          <div class="ag-setting-block">
+            <div class="ag-setting-head"><span>上下文压缩</span><b id="ms-compression-value">auto</b></div>
+            <div class="ag-segment" id="ms-compression">
+              <button type="button" data-compression="off">off</button>
+              <button type="button" data-compression="auto" class="is-on">auto</button>
+              <button type="button" data-compression="aggressive">aggressive</button>
+            </div>
+            <details class="ag-advanced">
+              <summary>压缩细节</summary>
+              <label class="ag-range compact">
+                <span>触发阈值 <b id="ms-threshold-value">70%</b></span>
+                <input id="ms-threshold" type="range" min="50" max="95" step="5" value="70" />
+              </label>
+              <div class="ag-model-two">
+                <label class="ag-field compact"><span>保留最近轮数</span><input id="ms-keep" type="number" min="2" max="20" step="1" value="6" /></label>
+                <label class="ag-field compact"><span>摘要 tokens</span><input id="ms-summary" type="number" min="256" max="4096" step="128" value="512" /></label>
+              </div>
+            </details>
+            <small class="ag-setting-note" id="ms-compression-note">约在 90k tokens 时压缩历史；保留最近 6 轮与一份摘要。</small>
+          </div>
+
+          <div class="ag-model-preview" id="ms-preview"></div>
+        </div>
+      </div>
+
+      <div class="ag-dialog-actions">
+        <a class="ag-model-boundary" href="../models/" target="_blank" rel="noopener">Provider / Profile 高级配置 ↗</a>
+        <button type="button" class="ag-btn ag-btn-quiet" id="model-cancel">取消</button>
+        <button type="submit" class="ag-btn">应用</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="ag-palette" id="palette" hidden>
+    <div class="ag-palette-bg" data-close-palette></div>
+    <div class="ag-palette-box" role="dialog" aria-modal="true" aria-label="命令面板">
+      <div class="ag-palette-input"><span>/</span><input id="palette-input" placeholder="搜索动作：调研、实验、自动、证据、回滚…" autocomplete="off" aria-label="搜索命令" /></div>
+      <div class="ag-palette-list" id="palette-list"></div>
+      <div class="ag-palette-foot"><span>↑↓ 选择 · Enter 执行 · Esc 关闭</span><span class="ag-kicker">COMMAND</span></div>
+    </div>
+  </div>
+
+  <div class="ag-toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="./agent.js"></script>
+</body>
+</html>

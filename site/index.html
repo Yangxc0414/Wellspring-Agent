@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Research Agent — 可核验的科研智能体</title>
+<meta name="description" content="Research Agent：把检索、复现、写作、核验接成一条可核验的证据链。公开工作台支持 OpenAlex 真实检索、证据卡、门禁与案例回放；LLM 与实验执行留在本地运行时。" />
+<meta name="keywords" content="科研智能体,证据链,科研自动化,RWMT,证据运营,Research Agent" />
+<meta name="author" content="YXC" />
+<meta name="color-scheme" content="light" />
+<script>document.documentElement.classList.add("js");setTimeout(function(){if(document.body){document.body.classList.add("ready");var b=document.getElementById("boot-cover");if(b){b.remove();}}},2500);</script>
+<meta name="theme-color" content="#f8fbff" />
+<link rel="canonical" href="https://yangxc0414.github.io/research-agent/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Research Agent" />
+<meta property="og:title" content="Research Agent — 可核验的科研智能体" />
+<meta property="og:description" content="把科研自动化，做成一条可核验的证据链。真实 OpenAlex 检索、证据卡、导出门禁与变更回放。" />
+<meta property="og:url" content="https://yangxc0414.github.io/research-agent/" />
+<meta property="og:image" content="https://yangxc0414.github.io/research-agent/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Research Agent — 可核验的科研智能体" />
+<meta name="twitter:description" content="把科研自动化，做成一条可核验的证据链。" />
+<meta name="twitter:image" content="https://yangxc0414.github.io/research-agent/assets/og.png" />
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="stylesheet" href="./assets/base.css" />
+<link rel="stylesheet" href="./assets/theme.css" />
+<link rel="stylesheet" href="./assets/custom.css" />
+<style>
+.site-mode-banner{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:7px 16px;border-bottom:1px solid #e6d7b4;background:#fff8e7;color:#6b5010;font-size:12px;line-height:1.5}
+.site-mode-banner strong{flex:none;font-weight:600;letter-spacing:.03em}
+.site-mode-banner .smb-summary{color:#7a5f22;flex:1;min-width:220px}
+.site-mode-banner .smb-toggle{flex:none;border:1px solid #e0cfa8;background:#fffdf6;color:#8a6d1f;font-size:11px;font-weight:600;padding:2px 12px;border-radius:999px;cursor:pointer;transition:background .15s}
+.site-mode-banner .smb-toggle:hover{background:#fff6dd}
+.site-mode-banner .smb-detail{flex-basis:100%;color:#7a5f22;border-top:1px dashed #e6d7b4;padding-top:6px;margin-top:2px}
+@media (max-width:760px){.site-mode-banner{padding:6px 12px;font-size:11px}.site-mode-banner .smb-summary{min-width:0}}
+@keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.app-main .view.is-active{animation:viewIn .28s ease}
+@media (prefers-reduced-motion:reduce){.app-main .view.is-active{animation:none}}
+.flow-gallery{padding:0;overflow:hidden}
+.flow-convention{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;max-width:920px;margin:0 auto 18px;padding:12px 16px;border:1px solid #e5e9f0;background:#fff;border-radius:12px;font-size:12px;color:#3a4353;font-weight:600}
+.flow-convention span{display:inline-flex;align-items:center;gap:7px}
+.flow-convention i{display:inline-block;width:20px;border-top:2px solid #16181d}
+.flow-convention i.fb{border-top:2px dashed #0f766e}
+.flow-convention i.human{width:10px;height:10px;border:1.5px solid #b91c1c;background:#fecaca;border-radius:2px}
+.flow-convention i.auto{width:10px;height:10px;border:1.5px solid #0f766e;background:#a7f3d0;border-radius:2px}
+.gate-map{max-width:920px;margin:18px auto 0;padding:16px 20px;border:1px solid #e5e9f0;background:#f8fbff;border-radius:14px}
+.gate-map h4{margin:0 0 8px;font-size:14px;font-weight:700;color:#1f2937}
+.gate-map p{margin:0 0 8px;font-size:12.5px;line-height:1.8;color:#5b6472}
+.gate-map p:last-child{margin-bottom:0}
+.gate-map code{font-family:ui-monospace,monospace;font-size:11.5px;background:#eef2ff;color:#1d4ed8;padding:1px 5px;border-radius:4px}
+.gate-map b{color:#1f2937}
+.gate-map a{color:#1d4ed8;text-decoration:underline;text-underline-offset:2px}
+.flow-pane{display:block;margin:0;padding:8px 16px 10px}
+.flow-title{font-size:16px;font-weight:700;color:#1f2937;margin:22px 16px 0}
+.flow-gallery .flow-title:first-of-type{margin-top:14px}
+.flow-pane.is-active{display:block}
+.flow-pane svg{display:block;width:100%;height:auto;max-width:920px;margin:0 auto;font-family:inherit}
+.flow-pane figcaption{margin:12px auto 0;max-width:860px;font-size:12px;line-height:1.7;color:#5b6472;text-align:center}
+.flow-source{margin-top:12px}
+.flow-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+@media (max-width:760px){.flow-pane{padding:12px 8px}.flow-convention{gap:6px 12px;font-size:11px}.gate-map{padding:12px 14px}}
+
+</style>
+<noscript><style>.frame-loading,.app-loader,.boot-cover{display:none!important}</style></noscript>
+
+<style>
+.demo-landing{background:var(--bg,#f8fbff);}
+.demo-top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;padding:12px 20px;border-bottom:1px solid #e5e9f0;background:#fff;position:sticky;top:0;z-index:20}
+.demo-brand{font-weight:700;letter-spacing:.06em;color:#169183;text-decoration:none;font-size:14px}
+.demo-brand span{color:#5f6d80;font-weight:600}
+.demo-nav{display:flex;flex-wrap:wrap;gap:6px}
+.demo-nav a{border:1px solid #dbe4f0;background:#f4f8fd;color:#23406e;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;text-decoration:none}
+.demo-nav a:hover{border-color:#2563eb;color:#2563eb}
+.demo-main{max-width:1240px;margin:0 auto;padding:20px 20px 40px}
+.rel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:16px}
+.rel-card{display:flex;flex-direction:column;gap:6px;border:1px solid #e5e9f0;background:#fff;border-radius:12px;padding:14px 16px;text-decoration:none;color:#1f2937;transition:border-color .15s,transform .15s}
+.rel-card:hover{border-color:#2563eb;transform:translateY(-2px)}
+.rel-card b{font-size:14px}
+.rel-card span{font-size:12px;line-height:1.6;color:#5b6472}
+.rel-card em{font-style:normal;font-family:ui-monospace,monospace;font-size:11px;color:#2563eb}
+.demo-foot{padding:18px 20px;border-top:1px solid #e5e9f0;color:#5f6d80;font-size:12px;text-align:center}
+@media (max-width:760px){.demo-top{padding:10px 12px}.demo-main{padding:14px 12px 30px}}
+</style>
+
+<style>
+.lp{background:#f8fbff;color:#1f2937}
+.lp-nav{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;justify-content:space-between;padding:14px 28px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e5e9f0}
+.lp-brand{font-weight:800;letter-spacing:.08em;font-size:15px;color:#0f766e;text-decoration:none}
+.lp-brand small{color:#5f6d80;font-weight:600;letter-spacing:.02em}
+.lp-menu{display:flex;gap:4px;flex-wrap:wrap}
+.lp-menu a{color:#3a4353;font-size:13px;font-weight:600;text-decoration:none;padding:6px 10px;border-radius:8px}
+.lp-menu a:hover{background:#eef2ff;color:#2563eb}
+.lp-navcta{background:#2563eb;color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:9px;text-decoration:none;box-shadow:0 4px 14px rgba(37,99,235,.28)}
+.lp-navcta:hover{background:#1d4ed8}
+.lp-hero{max-width:1080px;margin:0 auto;padding:72px 24px 48px;text-align:center}
+.lp-badge{display:inline-block;border:1px solid #e6d7b4;background:#fff8e7;color:#8a6d1f;font-size:11.5px;font-weight:700;letter-spacing:.06em;padding:4px 12px;border-radius:999px;margin-bottom:20px}
+.lp-hero h1{font-size:44px;line-height:1.2;font-weight:800;letter-spacing:-.01em;margin:0 0 18px}
+.lp-hero h1 span{background:linear-gradient(90deg,#2563eb,#0f766e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lp-lede{max-width:760px;margin:0 auto 28px;font-size:16px;line-height:1.8;color:#5b6472}
+.lp-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:30px}
+.lp-btn{font-size:14px;font-weight:700;padding:12px 22px;border-radius:10px;text-decoration:none}
+.lp-btn.primary{background:#2563eb;color:#fff;box-shadow:0 6px 20px rgba(37,99,235,.3)}
+.lp-btn.primary:hover{background:#1d4ed8}
+.lp-btn.ghost{border:1px solid #dbe4f0;background:#fff;color:#23406e}
+.lp-btn.ghost:hover{border-color:#2563eb;color:#2563eb}
+.lp-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.lp-chips span{border:1px solid #e5e9f0;background:#fff;color:#5b6472;font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px}
+.lp-section{max-width:1180px;margin:0 auto;padding:44px 24px}
+.lp-sechead{text-align:center;margin-bottom:28px}
+.lp-sechead .index{color:#2563eb;font-size:12px;font-weight:700;letter-spacing:.12em}
+.lp-sechead h2{font-size:30px;font-weight:800;margin:8px 0 10px}
+.lp-sechead p{color:#5b6472;font-size:14px;line-height:1.7;max-width:720px;margin:0 auto}
+.lp-feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.lp-feat{border:1px solid #e5e9f0;background:#fff;border-radius:14px;padding:20px;transition:transform .15s,border-color .15s}
+.lp-feat:hover{transform:translateY(-3px);border-color:#2563eb}
+.lp-feat i{display:inline-flex;width:34px;height:34px;border-radius:9px;background:#eef2ff;color:#2563eb;align-items:center;justify-content:center;font-style:normal;font-weight:800;margin-bottom:12px}
+.lp-feat b{display:block;font-size:15px;margin-bottom:6px}
+.lp-feat p{font-size:12.5px;line-height:1.7;color:#5b6472;margin:0}
+.scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:920px;margin:0 auto}
+.scope-col{border:1px solid #e5e9f0;background:#fff;border-radius:14px;padding:20px 22px}
+.scope-col h3{margin:0 0 10px;font-size:15px;color:#1f2937}
+.scope-col ul{margin:0;padding-left:18px;color:#5b6472;font-size:13px;line-height:1.95}
+.scope-col li{margin:2px 0}
+.scope-col--partner{background:linear-gradient(180deg,#fff,#f0fdfa);border-color:#a7f3d0}
+.scope-col--partner h3{color:#0f766e}
+.scope-note{max-width:920px;margin:14px auto 0;padding:14px 18px;border:1px dashed #dbe4f0;border-radius:12px;background:#f8fbff;font-size:12.5px;line-height:1.8;color:#5b6472}
+.scope-note b{color:#1f2937}
+.scope-note code{font-family:ui-monospace,monospace;font-size:11.5px;background:#eef2ff;color:#1d4ed8;padding:1px 5px;border-radius:4px}
+@media (max-width:760px){.scope-grid{grid-template-columns:1fr}.scope-col{padding:16px 18px}}
+.lp-bound{border:1px solid #e6d7b4;background:#fff8e7;border-radius:14px;padding:20px 24px;color:#6b5010;font-size:13px;line-height:1.8}
+.lp-bound b{display:block;margin-bottom:6px}
+.lp-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:16px 38px;max-width:780px;margin:28px auto 0;padding-top:22px;border-top:1px solid #e5e9f0}
+.lp-stats div{text-align:center}
+.lp-stats b{display:block;font-size:28px;font-weight:800;letter-spacing:-.03em;color:#0f172a}
+.lp-stats span{display:block;margin-top:4px;font-size:11px;font-weight:600;color:#5f6d80}
+.lp-stats-note{margin:10px auto 0;max-width:660px;font-size:11px;line-height:1.6;color:#5f6d80;text-align:center}
+@media (max-width:760px){.lp-stats{gap:12px 22px}.lp-stats b{font-size:22px}}
+.lp-foot{border-top:1px solid #e5e9f0;padding:22px;text-align:center;color:#5f6d80;font-size:12px}
+@media (max-width:760px){.lp-hero{padding:44px 16px 32px}.lp-hero h1{font-size:30px}.lp-nav{padding:10px 14px}.lp-menu{display:none}.lp-section{padding:30px 14px}}
+</style>
+</head>
+<body class="lp">
+<a class="skip-link" href="#main">跳到内容</a>
+<header class="lp-nav">
+  <a class="lp-brand" href="./">RESEARCH AGENT <small>· 可核验的科研智能体</small></a>
+  <nav class="lp-menu" aria-label="页内导航">
+    <a href="#features">特性</a>
+    <a href="#design">系统设计</a>
+    <a href="#demos">演示与接入</a>
+    <a href="#scope">平台分工</a>
+    <a href="#boundary">边界</a>
+    <a href="./docs/">文档</a>
+  </nav>
+  <a class="lp-navcta" href="./app/">进入工作台 ↗</a>
+</header>
+<main id="main">
+  <section class="lp-hero">
+    <span class="lp-badge">静态演示镜像 · STATIC DEMO · 无真实执行</span>
+    <h1>把科研自动化，<br>做成一条<span>可核验的证据链</span>。</h1>
+    <p class="lp-lede">Research Agent 是一个证据可审计、能力可插拔、流程可组合的科研智能体运行时：文献检索、独立复现、科研写作与核验接成闭环，并在冻结模型权重下做受治理的程序级自改进。本页是产品介绍；具体的科研智能体在下方按钮进入的子页中运行。</p>
+    <div class="lp-cta">
+      <a class="lp-btn primary" href="./app/">进入科研工作台 →</a>
+      <a class="lp-btn ghost" href="./innovation/">看 90 秒创新演示</a>
+      <a class="lp-btn ghost" href="./demo/">研究运行回放</a>
+    </div>
+    <div class="lp-chips">
+      <span>span-only 证据</span><span>独立重跑复现</span><span>升级人签 · 降级自动</span><span>MCP / HTTP / CLI</span><span>host-model 无外部 key</span>
+    </div>
+    <div class="lp-stats" aria-label="当前实现规模">
+      <div><b>6</b><span>模块 SPEC</span></div>
+      <div><b>46</b><span>MCP 工具</span></div>
+      <div><b>1300+</b><span>自动测试</span></div>
+      <div><b>9</b><span>门禁</span></div>
+      <div><b>4</b><span>反馈环</span></div>
+    </div>
+    <p class="lp-stats-note">数字截至 2026-11，随版本变化；测试数取自已记录的判定，不写成宣传口径。</p>
+  </section>
+
+  <section class="lp-section" id="demos">
+    <div class="lp-sechead">
+      <p class="index">DEMOS / 进入智能体</p>
+      <h2>介绍在这里，运行在子页。</h2>
+      <p>每个按钮进入一个具体的科研智能体页面；真实执行、模型调用与人工签署只在本地 CLI / runtime。</p>
+    </div>
+    <div class="rel-grid">
+      <a class="rel-card" href="./app/"><b>Agent 工作台</b><span>可部署的对话式科研工作台：证据、自进化、签署视图。</span><em>./app/</em></a>
+      <a class="rel-card" href="./demo/"><b>研究运行控制台</b><span>9 阶段对象流 / 指令流 / 失败分支的 SIM 回放。</span><em>./demo/</em></a>
+      <a class="rel-card" href="./innovation/"><b>创新点六幕演示</b><span>把创新点变成六个可看见的状态，90 秒 walkthrough。</span><em>./innovation/</em></a>
+      <a class="rel-card" href="./qoder/"><b>接入矩阵</b><span>Qoder / Claude Code / Cursor / Cline / Codex CLI … 同一份工具表与门禁。</span><em>./qoder/</em></a>
+      <a class="rel-card" href="./rsi/"><b>自进化接缝</b><span>执行交给 Harness²，平台只留判据、台账与人签；含一次真实运行的账本。</span><em>./rsi/</em></a>
+      <a class="rel-card" href="./models/"><b>模型网关</b><span>OpenAI / Anthropic / 兼容端点（需本地 runtime）。</span><em>./models/</em></a>
+      <a class="rel-card" href="./live/"><b>本地运行时</b><span>pipeline 执行 + RSI 审计（需本地 runtime）。</span><em>./live/</em></a>
+    </div>
+  </section>
+  <section class="lp-section" id="features">
+    <div class="lp-sechead">
+      <p class="index">FEATURES / 四个判定</p>
+      <h2>不是再做一个论文生成器。</h2>
+      <p>差异在四个判定的交集：资格、完成、失效、供给。稳定的是证据与门禁，可变的是工具、流程与接入方式。</p>
+    </div>
+    <div class="lp-feats">
+      <div class="lp-feat"><i>1</i><b>资格判定 · 证据闭合</b><p>句子必须落到已持有 span 或人签实验证据；claim 只由 Evidence 创建，摘要不能当全文证据。</p></div>
+      <div class="lp-feat"><i>2</i><b>完成判定 · 可复现</b><p>RunCapsule + 独立重跑 + EA；Work 与 Judge 分离，失败也留下可审计的运行胶囊与成本。</p></div>
+      <div class="lp-feat"><i>3</i><b>失效判定 · 变更传播</b><p>spec/data/code/evidence/claim 以 SHA-256 串联；输入变了沿链标 stale，导出 fail-closed。</p></div>
+      <div class="lp-feat"><i>4</i><b>供给判定 · 受治理自改进</b><p>模型可换（含无 key 的 host-model），但证据资格不可移植；经验准入/租约/撤销，升级人签、降级自动。</p></div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="design">
+    <div class="lp-sechead">
+      <p class="index">DESIGN / 系统投影</p>
+      <h2>同一系统的四个投影。</h2>
+      <p>下面四张图与《科研智能体策略论证》原文 SVG 完全一致，是设计投影而非实现地图。读法：③ 先定授权与停止边界 → ① 看主循环的前向与反馈 → ② 看记忆准入门 → ④ 看执行与路由。</p>
+    </div>
+    <div class="flow-convention" aria-label="四张流程图的统一读图约定">
+      <span><i></i>实线 · 研究过程前向</span>
+      <span><i class="fb"></i>虚线 · 反馈环（回指更早阶段，且改变下一步动作）</span>
+      <span><i class="human"></i>红方块 · 人工门</span>
+      <span><i class="auto"></i>青方块 · 自动门（默认拒绝）</span>
+    </div>
+    <section class="section" id="strategy">
+    <div class="flow-gallery panel">
+    <h3 class="flow-title">① 过程可信主循环</h3>
+    <figure class="flow-pane" data-flow-pane="loop">
+      <svg viewBox="0 0 900 650" role="img" aria-label="过程可信主循环">
+        <title>过程可信主循环流程图</title>
+        <desc>七个阶段：文献检索、假设生成、实验设计、执行与数据分析、三层验证、评审反馈、证据绑定陈述；四个反馈：T6b 证伪/反事实、信念修订、溯源/失效传播、同质化监测；四个人工/统计门。</desc>
+        <defs>
+          <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#16181d"/></marker>
+          <marker id="ahT" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#0f766e"/></marker>
+          <marker id="ahP" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#7c3aed"/></marker>
+          <marker id="ahB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+        </defs>
+        <g>
+          <rect x="330" y="16" width="250" height="46" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="455" y="35" text-anchor="middle" font-size="14" font-weight="700">文献检索与关系推理</text>
+          <text x="455" y="52" text-anchor="middle" font-size="11" fill="#1d4ed8">T1 · 文献关系记忆</text>
+          <rect x="330" y="100" width="250" height="46" rx="10" fill="#f5f3ff" stroke="#7c3aed"/>
+          <text x="455" y="119" text-anchor="middle" font-size="14" font-weight="700">假设生成与开放探索</text>
+          <text x="455" y="136" text-anchor="middle" font-size="11" fill="#7c3aed">T2 · 多样性约束</text>
+          <rect x="330" y="184" width="250" height="46" rx="10" fill="#f6f7f9" stroke="#9aa3af"/>
+          <text x="455" y="203" text-anchor="middle" font-size="14" font-weight="700">实验设计 + 执行契约</text>
+          <text x="455" y="220" text-anchor="middle" font-size="11" fill="#5b6472">T3 · 可证伪性一等约束</text>
+          <rect x="330" y="268" width="250" height="46" rx="10" fill="#f6f7f9" stroke="#9aa3af"/>
+          <text x="455" y="287" text-anchor="middle" font-size="14" font-weight="700">执行与数据分析</text>
+          <text x="455" y="304" text-anchor="middle" font-size="11" fill="#5b6472">T4 · 过程可重建</text>
+          <rect x="330" y="352" width="250" height="46" rx="10" fill="#ecfdf5" stroke="#0f766e"/>
+          <text x="455" y="371" text-anchor="middle" font-size="14" font-weight="700">三层验证</text>
+          <text x="455" y="388" text-anchor="middle" font-size="11" fill="#0f766e">T6a · 结果/过程/证据链复现</text>
+          <rect x="330" y="436" width="250" height="46" rx="10" fill="#f6f7f9" stroke="#9aa3af"/>
+          <text x="455" y="455" text-anchor="middle" font-size="14" font-weight="700">评审与反馈</text>
+          <text x="455" y="472" text-anchor="middle" font-size="11" fill="#5b6472">T5 · 角色—评审—消费—复验</text>
+          <rect x="330" y="520" width="250" height="46" rx="10" fill="#ecfdf5" stroke="#0f766e"/>
+          <text x="455" y="539" text-anchor="middle" font-size="14" font-weight="700">证据绑定的成果陈述</text>
+          <text x="455" y="556" text-anchor="middle" font-size="11" fill="#0f766e">T7 · 陈述→证据溯源</text>
+        </g>
+        <g stroke="#16181d" stroke-width="1.6" fill="none">
+          <line x1="455" y1="62" x2="455" y2="100" marker-end="url(#ah)"/>
+          <line x1="455" y1="146" x2="455" y2="184" marker-end="url(#ah)"/>
+          <line x1="455" y1="230" x2="455" y2="268" marker-end="url(#ah)"/>
+          <line x1="455" y1="314" x2="455" y2="352" marker-end="url(#ah)"/>
+          <line x1="455" y1="398" x2="455" y2="436" marker-end="url(#ah)"/>
+          <line x1="455" y1="482" x2="455" y2="520" marker-end="url(#ah)"/>
+        </g>
+        <g>
+          <!-- 门禁 -->
+          <rect x="449" y="161" width="12" height="8" rx="2" fill="#fecaca" stroke="#b91c1c" stroke-width="1.2"/>
+          <line x1="461" y1="165" x2="585" y2="165" stroke="#b91c1c" stroke-width="1" stroke-dasharray="3 2"/>
+          <text x="592" y="168" font-size="11" fill="#b91c1c" font-weight="700">人门·假设选择</text>
+          
+          <rect x="449" y="245" width="12" height="8" rx="2" fill="#fecaca" stroke="#b91c1c" stroke-width="1.2"/>
+          <line x1="461" y1="249" x2="585" y2="249" stroke="#b91c1c" stroke-width="1" stroke-dasharray="3 2"/>
+          <text x="592" y="252" font-size="11" fill="#b91c1c" font-weight="700">人门·设计批准 / 契约</text>
+          
+          <rect x="449" y="329" width="12" height="8" rx="2" fill="#a7f3d0" stroke="#0f766e" stroke-width="1.2"/>
+          <line x1="461" y1="333" x2="585" y2="333" stroke="#0f766e" stroke-width="1" stroke-dasharray="3 2"/>
+          <text x="592" y="336" font-size="11" fill="#0f766e" font-weight="700">统计/复现门（自动）</text>
+          
+          <rect x="449" y="497" width="12" height="8" rx="2" fill="#fecaca" stroke="#b91c1c" stroke-width="1.2"/>
+          <line x1="461" y1="501" x2="585" y2="501" stroke="#b91c1c" stroke-width="1" stroke-dasharray="3 2"/>
+          <text x="592" y="504" font-size="11" fill="#b91c1c" font-weight="700">人门·签署</text>
+        </g>
+        <!-- 反馈环 -->
+        <path d="M330,375 L255,375 L255,116 L330,116" fill="none" stroke="#0f766e" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ahT)"/>
+        <text x="240" y="250" text-anchor="middle" transform="rotate(-90 240 250)" font-size="11.5" fill="#0f766e" font-weight="700">T6b · 证伪 / 反事实</text>
+        
+        <path d="M330,459 L175,459 L175,130 L330,130" fill="none" stroke="#7c3aed" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ahP)"/>
+        <text x="160" y="300" text-anchor="middle" transform="rotate(-90 160 300)" font-size="11.5" fill="#7c3aed" font-weight="700">信念修订 / 假设再激活 C</text>
+        
+        <!-- 同质化监测自环 -->
+        <path d="M580,112 L620,112 L620,132 L580,132" fill="none" stroke="#7c3aed" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ahP)"/>
+        <text x="626" y="125" font-size="11" fill="#7c3aed" font-weight="700">同质化监测 (C)</text>
+        
+        <path d="M580,543 L660,543 L660,375 L580,375" fill="none" stroke="#b45309" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ahB)"/>
+        <text x="680" y="460" text-anchor="middle" transform="rotate(-90 680 460)" font-size="11.5" fill="#b45309" font-weight="700">溯源 / 失效传播 B</text>
+        
+        <text x="450" y="605" text-anchor="middle" font-size="12" fill="#5b6472">人工门保留在高杠杆节点；所有反馈环必须改变下一步行动，而非只写反思文本（PerturbTrace / 可证伪问题二）。</text>
+        <text x="450" y="625" text-anchor="middle" font-size="12" fill="#5b6472">T6 在本文拆为 T6a 三层验证（门）与 T6b 证伪 / 反事实（反馈环）；补全模块：信念修订（C）、同质化监测、溯源 / 失效（B）。</text>
+      </svg>
+      <figcaption>实线向下 = 研究过程前向；红色方块 = 人工门，青色方块 = 自动门；虚线向上 = 反馈环（证伪/反事实、信念修订、溯源/失效）；「假设生成」阶段右侧自环 = 多样性/同质化监测。反馈均回指更早阶段，与前向流区分。</figcaption>
+    </figure>
+    <h3 class="flow-title">② 记忆协调与证据准入</h3>
+    <figure class="flow-pane" data-flow-pane="memory">
+      <svg viewBox="0 0 900 400" role="img" aria-label="记忆协调与学习证据准入">
+        <title>类型化记忆协调与学习证据准入流程图</title>
+        <desc>新经验经学习证据准入门，通过则写入记忆图谱、未过则拒绝（默认拒绝）；记忆图谱供研究各阶段消费；每条记忆绑定执行契约/溯源数据；上游变更触发失效并回指准入门复验。</desc>
+        <defs>
+          <marker id="m1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#16181d"/></marker>
+          <marker id="m2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#0f766e"/></marker>
+          <marker id="m3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+          <marker id="m4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#b91c1c"/></marker>
+        </defs>
+        <rect x="250" y="20" width="400" height="70" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+        <text x="450" y="40" text-anchor="middle" font-size="13.5" font-weight="700">类型化记忆图谱 + 协调协议</text>
+        <text x="450" y="58" text-anchor="middle" font-size="11" fill="#1d4ed8">文献关系 · 领域知识 · 假设证据 · 执行技能</text>
+        <text x="450" y="76" text-anchor="middle" font-size="10.5" fill="#5b6472">消费关系 · 复验状态</text>
+        
+        <rect x="30" y="140" width="150" height="56" rx="9" fill="#fff" stroke="#9aa3af"/>
+        <text x="105" y="172" text-anchor="middle" font-size="13" font-weight="600">新经验 / 修复</text>
+        
+        <rect x="230" y="140" width="200" height="56" rx="9" fill="#ecfdf5" stroke="#0f766e"/>
+        <text x="330" y="163" text-anchor="middle" font-size="13" font-weight="700">学习证据准入门</text>
+        <text x="330" y="181" text-anchor="middle" font-size="10.5" fill="#0f766e">迁移 / 保留 / 退化 / 成本</text>
+        
+        <rect x="730" y="140" width="150" height="56" rx="9" fill="#fff" stroke="#9aa3af"/>
+        <text x="805" y="172" text-anchor="middle" font-size="13" font-weight="600">研究各阶段消费</text>
+        
+        <rect x="500" y="140" width="200" height="56" rx="9" fill="#fffbeb" stroke="#b45309"/>
+        <text x="600" y="163" text-anchor="middle" font-size="12.5" font-weight="700">绑定执行契约</text>
+        <text x="600" y="181" text-anchor="middle" font-size="10.5" fill="#b45309">+ 溯源数据（可溯源）</text>
+        
+        <rect x="230" y="250" width="200" height="48" rx="9" fill="#fef2f2" stroke="#b91c1c"/>
+        <text x="330" y="270" text-anchor="middle" font-size="12" font-weight="700" fill="#b91c1c">✕ 拒绝 / 不写入</text>
+        <text x="330" y="286" text-anchor="middle" font-size="10" fill="#b91c1c">默认拒绝 · 降级为线索</text>
+        
+        <line x1="180" y1="168" x2="230" y2="168" stroke="#16181d" stroke-width="1.5" marker-end="url(#m1)"/>
+        <line x1="330" y1="140" x2="330" y2="90" stroke="#0f766e" stroke-width="1.7" marker-end="url(#m2)"/>
+        <text x="340" y="120" font-size="10.5" fill="#0f766e" font-weight="600">通过→写入</text>
+        
+        <line x1="330" y1="196" x2="330" y2="250" stroke="#b91c1c" stroke-width="1.5" marker-end="url(#m4)"/>
+        <text x="340" y="226" font-size="10.5" fill="#b91c1c" font-weight="600">未过→拒绝</text>
+        
+        <path d="M650,55 L805,55 L805,140" fill="none" stroke="#16181d" stroke-width="1.5" marker-end="url(#m1)"/>
+        <text x="815" y="100" font-size="10.5" fill="#5b6472">读/消费</text>
+        
+        <line x1="600" y1="90" x2="600" y2="140" stroke="#16181d" stroke-width="1.5" marker-end="url(#m1)"/>
+        <text x="610" y="118" font-size="10.5" fill="#5b6472">每条记忆绑定</text>
+        
+        <line x1="430" y1="168" x2="500" y2="168" stroke="#0f766e" stroke-width="1.7" marker-end="url(#m2)"/>
+        <text x="465" y="158" text-anchor="middle" font-size="10.5" fill="#0f766e" font-weight="600">通过即绑定</text>
+        
+        <path d="M600,196 L600,230 L330,230 L330,196" fill="none" stroke="#b45309" stroke-width="1.7" stroke-dasharray="6 4" marker-end="url(#m3)"/>
+        <text x="465" y="222" text-anchor="middle" font-size="10.5" fill="#b45309" font-weight="700">变更 → 失效 → 复验</text>
+        
+        <text x="450" y="330" text-anchor="middle" font-size="12" fill="#5b6472">准入门四向：左入新经验，右出「通过即绑定」，上出写入记忆图谱，下出拒绝（默认出口）。</text>
+        <text x="450" y="350" text-anchor="middle" font-size="12" fill="#5b6472">记忆须绑定执行契约 / 溯源数据；上游变更触发失效并回指准入门复验（虚线）。</text>
+      </svg>
+      <figcaption>中：新经验经学习证据准入门——通过则写入记忆图谱、未过则拒绝（默认拒绝）；上：记忆图谱供研究各阶段消费；右：通过即绑定执行契约/溯源数据；虚线：上游变更→失效→回指准入门复验。箭头均指向框边，反馈回指准入门而非边框。</figcaption>
+    </figure>
+    <h3 class="flow-title">③ 科研持续委托闭环</h3>
+    <figure class="flow-pane" data-flow-pane="delegate">
+      <svg viewBox="0 0 900 430" role="img" aria-label="科研持续委托闭环">
+        <title>科研持续委托闭环流程图</title>
+        <desc>顶部为目标与授权范围；右侧红框为目标撤销/失效时停止并撤销授权；六个阶段：识别触发、构建上下文、形成可执行方案、获批后执行、核验外部结果、更新并继续负责；虚线为持续负责回路。</desc>
+        <defs>
+          <marker id="d1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#16181d"/></marker>
+          <marker id="d2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#5b6472"/></marker>
+          <marker id="dStop" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#b91c1c"/></marker>
+        </defs>
+        <rect x="280" y="10" width="340" height="48" rx="10" fill="#f5f3ff" stroke="#7c3aed"/>
+        <text x="450" y="30" text-anchor="middle" font-size="13.5" font-weight="700">研究目标与授权范围</text>
+        <text x="450" y="47" text-anchor="middle" font-size="11" fill="#7c3aed">希望证明什么 · 可读取什么 · 哪些动作需人签</text>
+        
+        <rect x="650" y="10" width="150" height="48" rx="10" fill="#fef2f2" stroke="#b91c1c" stroke-dasharray="5 3"/>
+        <text x="725" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#b91c1c">目标撤销 / 失效</text>
+        <text x="725" y="47" text-anchor="middle" font-size="11" fill="#b91c1c">→ 停止并撤销授权</text>
+        <line x1="620" y1="34" x2="650" y2="34" stroke="#b91c1c" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#dStop)"/>
+        
+        <path d="M450,58 L450,80 L160,80 L160,100" fill="none" stroke="#16181d" stroke-width="1.6" marker-end="url(#d1)"/>
+        
+        <g>
+          <rect x="40" y="100" width="240" height="64" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="160" y="126" text-anchor="middle" font-size="13.5" font-weight="700">01 识别触发</text>
+          <text x="160" y="146" text-anchor="middle" font-size="11" fill="#1d4ed8">新证据/事件 · 先相关性检查</text>
+          
+          <rect x="330" y="100" width="240" height="64" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="450" y="126" text-anchor="middle" font-size="13.5" font-weight="700">02 构建上下文</text>
+          <text x="450" y="146" text-anchor="middle" font-size="11" fill="#1d4ed8">链式召回溯源数据 / 记忆</text>
+          
+          <rect x="620" y="100" width="240" height="64" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="740" y="126" text-anchor="middle" font-size="13.5" font-weight="700">03 形成可执行方案</text>
+          <text x="740" y="146" text-anchor="middle" font-size="11" fill="#1d4ed8">证据充分度/收益/风险 · 两级过滤</text>
+          
+          <rect x="620" y="240" width="240" height="64" rx="10" fill="#ecfdf5" stroke="#0f766e"/>
+          <text x="740" y="266" text-anchor="middle" font-size="13.5" font-weight="700">04 获批后执行</text>
+          <text x="740" y="286" text-anchor="middle" font-size="11" fill="#0f766e">人工门 · 异步 · 路由/执行工</text>
+          
+          <rect x="330" y="240" width="240" height="64" rx="10" fill="#ecfdf5" stroke="#0f766e"/>
+          <text x="450" y="266" text-anchor="middle" font-size="13.5" font-weight="700">05 核验外部结果</text>
+          <text x="450" y="286" text-anchor="middle" font-size="11" fill="#0f766e">三层验证 / 回执 / 独立复核</text>
+          
+          <rect x="40" y="240" width="240" height="64" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="160" y="266" text-anchor="middle" font-size="13.5" font-weight="700">06 更新并继续负责</text>
+          <text x="160" y="286" text-anchor="middle" font-size="11" fill="#1d4ed8">记忆准入 / 失效传播 / 跟进未完成</text>
+        </g>
+        
+        <g stroke="#16181d" stroke-width="1.6" fill="none">
+          <line x1="280" y1="132" x2="330" y2="132" marker-end="url(#d1)"/>
+          <line x1="570" y1="132" x2="620" y2="132" marker-end="url(#d1)"/>
+          <line x1="740" y1="164" x2="740" y2="240" marker-end="url(#d1)"/>
+          <line x1="620" y1="272" x2="570" y2="272" marker-end="url(#d1)"/>
+          <line x1="330" y1="272" x2="280" y2="272" marker-end="url(#d1)"/>
+        </g>
+        <text x="752" y="205" font-size="11" fill="#b91c1c" font-weight="600">必要时人签</text>
+        
+        <path d="M160,304 L160,350 L20,350 L20,132 L40,132" fill="none" stroke="#5b6472" stroke-width="1.7" stroke-dasharray="6 4" marker-end="url(#d2)"/>
+        <text x="90" y="338" text-anchor="middle" font-size="10.5" fill="#5b6472" font-weight="600">回指触发（目标未达成）</text>
+        
+        <text x="450" y="386" text-anchor="middle" font-size="12" fill="#5b6472">闭环验收单位：一段时间内，科研委托是否被妥善办完（签署 + 核验 + 维护），而非单轮回复/单篇论文质量。</text>
+        <text x="450" y="406" text-anchor="middle" font-size="12" fill="#5b6472">目标撤销或失效时停止并撤销授权；收到新事件先检查是否仍与目标相关。</text>
+      </svg>
+      <figcaption>承接持续委托闭环：授权范围前置 → 触发(相关性检查) → 上下文(链式召回) → 方案(两级过滤) → 获批执行(人门/异步) → 核验外部结果(回执) → 更新记忆并继续负责 → 回指触发；虚线为持续负责回路，目标撤销/失效即停（右上红框）。</figcaption>
+    </figure>
+    <h3 class="flow-title">④ 执行与路由架构</h3>
+    <figure class="flow-pane" data-flow-pane="routing">
+      <svg viewBox="0 0 900 420" role="img" aria-label="执行与路由架构">
+        <title>执行与路由架构图</title>
+        <desc>触发事件经两级过滤（快层程序→慢层语义）入路由层；路由层冷启动分派隔离执行单元池；已订阅任务线程后续事件直通执行单元池；独立外部监督控制回路监控进展/偏离；人只在门禁/验收交互；过滤层判定不行动时默认静默。</desc>
+        <defs>
+          <marker id="e1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#16181d"/></marker>
+          <marker id="e2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#1d4ed8"/></marker>
+          <marker id="e3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+        </defs>
+        <!-- 顶部一行 -->
+        <g>
+          <rect x="20" y="60" width="150" height="50" rx="9" fill="#f6f7f9" stroke="#9aa3af"/>
+          <text x="95" y="82" text-anchor="middle" font-size="12.5" font-weight="700">触发事件</text>
+          <text x="95" y="99" text-anchor="middle" font-size="10.5" fill="#5b6472">新证据/CI/评审/邮件</text>
+          
+          <rect x="200" y="60" width="130" height="50" rx="9" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="265" y="82" text-anchor="middle" font-size="12.5" font-weight="700">快层·程序过滤</text>
+          <text x="265" y="99" text-anchor="middle" font-size="10.5" fill="#1d4ed8">确定性滤噪</text>
+          
+          <rect x="360" y="60" width="130" height="50" rx="9" fill="#f5f3ff" stroke="#7c3aed"/>
+          <text x="425" y="82" text-anchor="middle" font-size="12.5" font-weight="700">慢层·语义过滤</text>
+          <text x="425" y="99" text-anchor="middle" font-size="10.5" fill="#7c3aed">大模型判候选</text>
+          
+          <rect x="520" y="55" width="160" height="60" rx="9" fill="#eef2ff" stroke="#1d4ed8" stroke-width="2"/>
+          <text x="600" y="80" text-anchor="middle" font-size="11.5" font-weight="700">协调 / 路由调度</text>
+          <text x="600" y="97" text-anchor="middle" font-size="10.5" fill="#1d4ed8">不执行 · 全局序点</text>
+          
+          <rect x="700" y="10" width="180" height="190" rx="12" fill="#fbfdff" stroke="#9aa3af" stroke-dasharray="5 4"/>
+          <text x="790" y="192" text-anchor="middle" font-size="10.5" fill="#5b6472" font-weight="600">隔离执行单元池（互不串门）</text>
+          
+          <rect x="715" y="20" width="150" height="38" rx="8" fill="#fff" stroke="#9aa3af"/>
+          <text x="790" y="36" text-anchor="middle" font-size="11.5" font-weight="600">执行单元 1</text>
+          <text x="790" y="50" text-anchor="middle" font-size="10" fill="#5b6472">隔离上下文</text>
+          
+          <rect x="715" y="72" width="150" height="38" rx="8" fill="#fff" stroke="#9aa3af"/>
+          <text x="790" y="88" text-anchor="middle" font-size="11.5" font-weight="600">执行单元 2</text>
+          <text x="790" y="102" text-anchor="middle" font-size="10" fill="#5b6472">隔离上下文</text>
+          
+          <rect x="715" y="124" width="150" height="38" rx="8" fill="#fff" stroke="#9aa3af"/>
+          <text x="790" y="140" text-anchor="middle" font-size="11.5" font-weight="600">执行单元 3</text>
+          <text x="790" y="154" text-anchor="middle" font-size="10" fill="#5b6472">异步推理</text>
+        </g>
+        
+        <!-- 顶部箭头 -->
+        <g stroke="#16181d" stroke-width="1.5" fill="none">
+          <line x1="170" y1="85" x2="200" y2="85" marker-end="url(#e1)"/>
+          <line x1="330" y1="85" x2="360" y2="85" marker-end="url(#e1)"/>
+          <line x1="490" y1="85" x2="520" y2="85" marker-end="url(#e1)"/>
+          <line x1="680" y1="85" x2="700" y2="85" marker-end="url(#e1)"/>
+        </g>
+        
+        <text x="425" y="48" text-anchor="middle" font-size="10.5" fill="#7c3aed" font-weight="600">新任务冷启动</text>
+        
+        <!-- 静默处理：统一的标签框 -->
+        <rect x="250" y="125" width="210" height="24" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 2"/>
+        <text x="355" y="141" text-anchor="middle" font-size="11" fill="#475569" font-weight="600">✕ 噪音/不相关 → 静默丢弃 (默认拒绝)</text>
+        <line x1="265" y1="110" x2="265" y2="125" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3 2"/>
+        <line x1="425" y1="110" x2="425" y2="125" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3 2"/>
+
+        <!-- 底部一行 -->
+        <g>
+          <rect x="20" y="240" width="160" height="50" rx="9" fill="#fffbeb" stroke="#b45309"/>
+          <text x="100" y="262" text-anchor="middle" font-size="12.5" font-weight="700">人</text>
+          <text x="100" y="279" text-anchor="middle" font-size="10.5" fill="#b45309">仅在门禁/验收交互</text>
+          
+          <rect x="210" y="240" width="180" height="50" rx="9" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="300" y="262" text-anchor="middle" font-size="12.5" font-weight="700">任务线程 #研究主张</text>
+          <text x="300" y="279" text-anchor="middle" font-size="10.5" fill="#1d4ed8">同一研究问题后续事件</text>
+          
+          <rect x="470" y="240" width="200" height="50" rx="9" fill="#fffbeb" stroke="#b45309"/>
+          <text x="570" y="262" text-anchor="middle" font-size="12.5" font-weight="700">独立外部监督</text>
+          <text x="570" y="279" text-anchor="middle" font-size="10.5" fill="#b45309">监控实质进展 / 目标偏离</text>
+        </g>
+        
+        <!-- 人 -> Router -->
+        <path d="M100,240 L100,160 L540,160 L540,115" fill="none" stroke="#16181d" stroke-width="1.5" marker-end="url(#e1)"/>
+        <text x="300" y="180" text-anchor="middle" font-size="11" fill="#5b6472" font-weight="600">人 · 仅门禁/验收交互（批准后路由继续）</text>
+        
+        <!-- Thread -> Worker 池 -->
+        <path d="M300,290 L300,330 L790,330 L790,200" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#e2)"/>
+        <text x="545" y="350" text-anchor="middle" font-size="11" fill="#1d4ed8" font-weight="600">已订阅任务线程直通对应执行单元（不经路由）</text>
+        
+        <!-- Watchdog -> Worker 池 -->
+        <path d="M570,240 L570,180 L700,180" fill="none" stroke="#b45309" stroke-width="1.7" stroke-dasharray="6 4" marker-end="url(#e3)"/>
+        <text x="640" y="220" text-anchor="middle" font-size="10.5" fill="#b45309" font-weight="600">外部控制回路 · 监控池</text>
+        
+        <text x="450" y="380" text-anchor="middle" font-size="12" fill="#5b6472">存算分离：智能体循环无状态云端 + 状态持久化；执行环境留用户原地（守护进程 / 本地环境）。</text>
+        <text x="450" y="400" text-anchor="middle" font-size="12" fill="#5b6472">执行单元隔离上下文 → 过程可复现 + 供给独立；路由层不执行 → 人注意力只花在门禁/验收。</text>
+      </svg>
+      <figcaption>承接 DeepSeek Super-agent：触发事件经两级过滤（快层程序→慢层语义）入路由层；路由层冷启动分派隔离执行单元池；已订阅任务线程后续事件直通执行单元池；独立外部监督控制回路监控进展/偏离；人仅在门禁/验收交互；过滤层判定不行动时统一静默丢弃（默认拒绝）；存算分离使执行环境留在用户原地。</figcaption>
+    </figure>
+    </div>
+    <div class="gate-map">
+      <h4>门禁口径（canonical）· 四张图与所有子页共用</h4>
+      <p>四个人工门：<code>G1 想法选择 = S3</code> · <code>G2 设计批准 = S4</code> · <code>S5b 结果人签 = S5c</code> · <code>G5 闭包签署 = S16</code>。升级人签、降级自动；自动门（Q0 / Q1 / G3 / G4）未过走默认拒绝，不静默放行；四个门都不能由模型代签。</p>
+      <p>图① 的「人门·假设选择 / 设计批准·契约 / 签署」分别对应 G1 / G2 / <b>S5b 结果签署</b>，青色「统计 / 复现门」是自动门。<b>G5 闭包签署在导出边界</b>（图③ 核验外部结果之后的授权收口），不在图① 的七阶段投影内 —— 不要把两者混读；图③ 的「必要时人签」落到实现就是 G2 / S5b。</p>
+      <p>四条反馈（T6b 证伪 / 反事实、信念修订 / 假设再激活、同质化监测、溯源 / 失效传播）都<b>回指更早阶段并改变下一步动作</b>，而不是只写反思文本。子页 <a href="./demo/">18 阶段全链</a>、<a href="./qoder/">接入闭环</a>、<a href="./innovation/">六幕演示</a> 与自进化循环按同一套语义绘制，门禁标签不另造口径。</p>
+    </div>
+    <p class="fineprint">门禁与读法以上方 canonical 卡片为准；demo 阶段映射 G1=S3 · G2=S4 · S5b=S5c · G5=S16，各子页投影的标签均映射到此统一口径。</p>
+    <p class="fineprint flow-source">图来源：科研智能体策略论证（1110 可读性修订版）· 第 07 节。四张图是策略投影，不是实现地图；当前实现状态以功能地图为准，本站为静态镜像、无真实执行。</p>
+    <div class="flow-links">
+      <a class="nav-cta" href="./innovation/">看六幕创新演示 ↗</a>
+      <a class="nav-cta" href="./app/">进 Agent 工作台 ↗</a>
+      <a class="nav-cta" href="./demo/#console">跑一次研究运行 ↗</a>
+      <a class="nav-cta" href="./qoder/">客户端接入 ↗</a>
+    </div>
+  </section>
+  </section>
+
+
+  <section class="lp-section" id="scope">
+    <div class="lp-sechead">
+      <p class="index">SCOPE / 平台边界</p>
+      <h2>这是平台，不是 RSI 基础设施。</h2>
+      <p>本平台负责「科研过程 + 证据 + 自改进判据」；流水线编排、版本回滚与评测调度可以下沉到独立的 RSI 基础设施。边界写清楚，两边才好对接。</p>
+    </div>
+    <div class="scope-grid">
+      <div class="scope-col">
+        <h3>本平台负责</h3>
+        <ul>
+          <li>模块契约与产物：QueryPlan / Span / EA / Claim / Closure</li>
+          <li>数据基础：文献、实验、图表、稿件、基金的 artifact 与哈希</li>
+          <li>自改进判据：准入理由、租约、撤销传播、留出增益</li>
+          <li>人签门：G1 / G2 / S5b / G5，升级人签、降级自动</li>
+        </ul>
+      </div>
+      <div class="scope-col scope-col--partner">
+        <h3>可委托 RSI 基础设施</h3>
+        <ul>
+          <li>流水线编排与重试、阶段级 checkpoint</li>
+          <li>版本 / 回滚 / 租约生命周期</li>
+          <li>细粒度反馈：知识原子级的冲突与污染检测</li>
+          <li>评测调度：小数据集、Token 预算、DeepSeek 基座</li>
+        </ul>
+      </div>
+    </div>
+    <div class="scope-note">
+      <b>接口现状：</b>MCP / HTTP / CLI 三入口共用 <code>framework_api.dispatch</code>；递归改进的执行已接到外部 <a href="./rsi/">Harness²（自进化接缝）</a>，平台只消费 <code>harness2-run-0.1</code> 产物并做准入；流水线编排 / 版本回滚 / 评测调度的其余部分仍是 roadmap。不把「已实现的控制面」说成「已完成对接」。<br/>
+      <b>分工口径：</b>自迭代的<b>执行</b>下沉到 RSI 服务；平台只保留判据（准入理由 / 租约 / 撤销传播）与数据基础，不为每个循环重造一遍基础设施。
+    </div>
+  </section>
+
+  <section class="lp-section" id="boundary">
+    <div class="lp-bound">
+      <b>边界与诚实声明</b>
+      本公开站为静态镜像：无真实 LLM、实验执行、claim 签名或 runtime job；数值来自 CACHED 快照或 SIM 演示。人工门（G1/G2/claim/closure/export）只在本地 CLI。fixture 与模拟分数不得当作真实证据；不提供代写、伪造数据/引用、规避检测或自动投稿。AI 生成内容是草稿，科学决策与署名责任由作者/PI 保留。
+    </div>
+  </section>
+</main>
+<footer class="lp-foot">Research Agent · 证据闭合的科研智能体运行时 · 静态产品演示页</footer>
+</body>
+</html>

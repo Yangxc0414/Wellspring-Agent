@@ -1,0 +1,8 @@
+{
+  "note": "Public-only prompt variants for frozen-proposer stability audit. Not hidden evaluation data.",
+  "observations": [
+    "Public BM25 baseline: recall=1.0, cost=21, coverage_gaps=0. Propose a cheaper harness with bm25 or minilm and 2-3 sources.",
+    "Public BM25 baseline: recall=1.0, cost=21, coverage_gaps=0. Paraphrase-heavy cross-paper questions may lose coverage at low source budgets. Consider frozen semantic retrieval (minilm) with 3 sources. Propose one cheaper harness.",
+    "Public BM25 baseline: recall=1.0, cost=21, coverage_gaps=0. Prefer the lowest source budget; choose bm25 with 2 sources."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "fixture": true,
+  "note": "Synthetic queue for the fixture research runner; not real research.",
+  "tasks": [
+    {
+      "task_id": "TASK-PERO-01",
+      "topic": "钙钛矿 界面 钝化 湿热稳定性",
+      "language": "zh",
+      "venue_type": "zh_core_journal",
+      "grant_scheme": "nsfc",
+      "primary_metric": "湿热稳定性",
+      "controls": ["未钝化对照"],
+      "budget": "待定"
+    },
+    {
+      "task_id": "TASK-PERO-02",
+      "topic": "perovskite passivation reproducibility",
+      "language": "en",
+      "venue_type": "en_conference",
+      "grant_scheme": "",
+      "primary_metric": "reproducibility",
+      "controls": ["single run baseline"],
+      "budget": "待定"
+    }
+  ]
+}

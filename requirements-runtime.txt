@@ -1,0 +1,7 @@
+# Local runtime only. The research pipeline also needs the project's core
+# scientific stack (numpy, pandas, scikit-learn) already used by S5.
+fastapi>=0.110
+uvicorn>=0.29
+pydantic>=2
+# Optional local PDF full-text ingestion; TXT/MD works without it.
+PyMuPDF>=1.24

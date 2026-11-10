@@ -1,0 +1,133 @@
+{
+  "schema_version": "support-calibration-0.1",
+  "description": "Curated regression cases for the sentence-level support judge. These labels are project-authored, not independent human gold; the set is used to detect drift and compare judge configurations.",
+  "cases": [
+    {
+      "id": "CAL-01",
+      "section": "Results",
+      "sentence": "Passivation improved stability under damp heat.",
+      "evidence": [
+        "Passivation improved stability under damp heat in the paired control."
+      ],
+      "expected": "supported",
+      "mode": "claim",
+      "note": "Direct paraphrase of the evidence."
+    },
+    {
+      "id": "CAL-02",
+      "section": "Results",
+      "sentence": "Passivation improved stability under damp heat and reduced cost by 30%.",
+      "evidence": [
+        "Passivation improved stability under damp heat in the paired control."
+      ],
+      "expected": "partial",
+      "mode": "claim",
+      "note": "The cost claim is not covered by the evidence."
+    },
+    {
+      "id": "CAL-03",
+      "section": "Results",
+      "sentence": "The control group outperformed passivation under damp heat.",
+      "evidence": [
+        "Passivation improved stability under damp heat; the control degraded faster."
+      ],
+      "expected": "contradicted",
+      "mode": "claim",
+      "note": "The sentence reverses the direction of the evidence."
+    },
+    {
+      "id": "CAL-04",
+      "section": "Discussion",
+      "sentence": "Passivation is the best method for all perovskite devices.",
+      "evidence": [
+        "Passivation improved stability under damp heat in one device batch."
+      ],
+      "expected": "partial",
+      "mode": "claim",
+      "note": "Direction is supported by one batch; universal superiority is not. Partial rather than insufficient after calibration review."
+    },
+    {
+      "id": "CAL-05",
+      "section": "Results",
+      "sentence": "In the paired control, passivation improved stability under damp heat.",
+      "evidence": [
+        "In the paired control, passivation improved stability under damp heat."
+      ],
+      "expected": "supported",
+      "mode": "claim",
+      "note": "Exact evidence sentence."
+    },
+    {
+      "id": "CAL-06",
+      "section": "Discussion",
+      "sentence": "Passivation always improves stability across all devices.",
+      "evidence": [
+        "Passivation improved stability under damp heat in one device batch."
+      ],
+      "expected": "partial",
+      "mode": "claim",
+      "note": "Direction is supported, universal scope is not."
+    },
+    {
+      "id": "CAL-07",
+      "section": "Results",
+      "sentence": "The passivation group reached 780 h under damp heat.",
+      "evidence": [
+        "The passivation group reached 780 h under damp heat."
+      ],
+      "expected": "supported",
+      "mode": "claim",
+      "note": "Numeric claim matches the evidence."
+    },
+    {
+      "id": "CAL-08",
+      "section": "Results",
+      "sentence": "The passivation group reached 900 h under damp heat.",
+      "evidence": [
+        "The passivation group reached 780 h under damp heat."
+      ],
+      "expected": "contradicted",
+      "mode": "claim",
+      "note": "Numeric claim conflicts with the evidence."
+    },
+    {
+      "id": "CAL-09",
+      "section": "Discussion",
+      "sentence": "Passivation is universally superior to all alternatives.",
+      "evidence": [],
+      "expected": "insufficient",
+      "mode": "claim",
+      "note": "No selected span was provided for this citation."
+    },
+    {
+      "id": "CAL-10",
+      "section": "Discussion",
+      "sentence": "We plan to test passivation on 1000 devices in the next experiment.",
+      "evidence": [],
+      "expected": "not_required",
+      "mode": "proposal",
+      "note": "Future-work sentence; citation is motivational, not evidential."
+    },
+    {
+      "id": "CAL-11",
+      "section": "Methods",
+      "sentence": "Our audit protocol has three steps: retrieve spans, label support strength, and record gaps.",
+      "evidence": [],
+      "expected": "not_required",
+      "mode": "proposal",
+      "note": "Method/protocol description, not a literature claim."
+    },
+    {
+      "id": "CAL-12",
+      "section": "Related Work",
+      "sentence": "Prior work reports both stability gains and unresolved cost trade-offs.",
+      "evidence": [
+        "Prior work reports stability gains under damp heat.",
+        "The same line of work notes unresolved cost trade-offs."
+      ],
+      "expected": "supported",
+      "mode": "claim",
+      "note": "Synthesis of two selected spans."
+    }
+  ]
+}

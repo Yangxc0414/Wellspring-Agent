@@ -1,0 +1,1927 @@
+{
+  "schema_version": "workspace-0.1",
+  "generated_at": "2026-11-10T10:54:40+00:00",
+  "count": 213,
+  "curated": 51,
+  "derived": 162,
+  "commands": [
+    {
+      "id": "study.baseline",
+      "group": "研究与对照",
+      "label": "调优强基线与研究配对比较（只读）",
+      "syntax": "python -m research_agent study baseline --study <study.json> [--seeds 1,2] [--folds 0]",
+      "description": "在搜索使用的同一划分上做交叉验证调众，再逐种子与研究成绩配对；折数受研究预算约束，预算不够两折时直接拒绝。不执行策略、不签核。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "manuscript.provenance",
+      "group": "写作与审稿",
+      "label": "数字溯源（只读）",
+      "syntax": "python -m research_agent manuscript provenance --draft <稿> --corpus <产物根>",
+      "description": "逐个小数判定来源：字节相同命中 / 舍入命中 / 正文位数超过证据；整数计数不用字符串命中认证，必须重跑。不签核、不改文件。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "workspace.preflight",
+      "group": "仓库自审",
+      "label": "治理链是否过期（只读）",
+      "syntax": "python -m research_agent workspace preflight",
+      "description": "秒级报告 SPEC 版本与 Changelog、导出注册表与 SPEC 投影、MCP 三个工具面是否一致；只查记账，不查行为，不修复、不执行。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "task.plan",
+      "group": "核心流水线",
+      "label": "规划一个科研任务",
+      "syntax": "python -m research_agent task plan --goal \"...\" --type auto",
+      "description": "按任务类型选择最小必要阶段；只读，不执行检索或运行。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "task.run",
+      "group": "核心流水线",
+      "label": "执行一个科研任务",
+      "syntax": "python -m research_agent task run --goal \"...\" --type auto --output-dir runtime_data/tasks",
+      "description": "执行文献综述/假设设计/实验验证/完整研究路由；人工门与 claim 边界不变。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "pipeline.run",
+      "group": "核心流水线",
+      "label": "运行 S1→S12 纵切",
+      "syntax": "python -m research_agent pipeline run --topic \"...\" --language zh --venue zh_core_journal",
+      "description": "离线 fixture 纵切；不会自动创建 claim。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "flow.g1",
+      "group": "核心流水线",
+      "label": "写入 G1 选择决定",
+      "syntax": "python -m research_agent flow g1 --idea-file <idea.json> --idea-id IDEA-01 --human-reason \"...\"",
+      "description": "把人工选中的候选写成 G1 decision；strict 流程进入 S4 的前置条件。",
+      "safety": "human_gate",
+      "curated": true
+    },
+    {
+      "id": "protocol.freeze_design",
+      "group": "核心流水线",
+      "label": "预注册冻结设计",
+      "syntax": "python -m research_agent protocol freeze-design --design <experiment.json> --limitation \"...\" --human-reason \"...\"",
+      "description": "在 S5 之前冻结 design；不要求 RunCapsule，strict 流程据此校验 protocol hash。",
+      "safety": "human_gate",
+      "curated": true
+    },
+    {
+      "id": "literature.run",
+      "group": "文献调研",
+      "label": "运行 S1 检索与覆盖审计",
+      "syntax": "python -m research_agent literature run --question \"...\" [--source openalex --planner glm]",
+      "description": "默认 fixture；OpenAlex/GLM 需要显式开启，摘要-only 不生成 span。",
+      "safety": "network_opt_in",
+      "curated": true
+    },
+    {
+      "id": "literature.memory",
+      "group": "文献调研",
+      "label": "查看文献覆盖记忆",
+      "syntax": "python -m research_agent literature memory show|advise",
+      "description": "只记录面向覆盖/产出与缺口，不保存摘要或 span 文本，不进入证据链。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "orchestrate.plan",
+      "group": "多智能体编排",
+      "label": "生成协作计划",
+      "syntax": "python -m research_agent orchestrate plan --topic \"...\" --source fixture",
+      "description": "只读：角色、并行 scout、typed handoff 与人工门；不执行检索。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "orchestrate.run",
+      "group": "多智能体编排",
+      "label": "运行 S1 scout fan-out + S2 fan-in",
+      "syntax": "python -m research_agent orchestrate run --topic \"...\" --source fixture",
+      "description": "本地写入 scouting/idea 产物；停在 G1 前，不创建 Claim 或准入技能。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "agent.manage",
+      "group": "多智能体编排",
+      "label": "注册自定义 advisory 子智能体",
+      "syntax": "python -m research_agent agent add --name \"...\" --role reviewer --purpose \"...\" --check coverage",
+      "description": "只允许白名单确定性 checks；输出 advisory note，不写 Claim/EA、不通过门禁。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "skill.scan",
+      "group": "科研技能",
+      "label": "扫描本地 SKILL.md",
+      "syntax": "python -m research_agent skill scan --path ~/.claude/skills",
+      "description": "解析 name/description/allowed-tools，标记 untrusted/scripts；只登记目录，不执行 scripts。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "skill.list",
+      "group": "科研技能",
+      "label": "查看技能目录与风险标记",
+      "syntax": "python -m research_agent skill list",
+      "description": "只读注册表；execution=not_available，不把 allowed-tools 当成权限。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "revision.run",
+      "group": "科研技能",
+      "label": "修订已有论文并导出投稿工作包",
+      "syntax": "python -m research_agent revision run --draft <paper.md|docx|tex> --data <table.csv> --metrics <metrics.json> --figures <figures.json> --venue software_journal --profile <profile> --output-dir runtime_data/revision",
+      "description": "保留原实验叙事与引用，重算指标、生成数据图、逐段改写并导出 MD/TeX/DOCX/PDF；无 profile 为 copy mode，不替代投稿决定。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "writing.pack",
+      "group": "科研技能",
+      "label": "把一次 run 压成写作包",
+      "syntax": "python -m research_agent writing pack --project <project> --run-id <RUN-ID> --max-sources 8",
+      "description": "只读投影 run 的来源卡、span、设计、run/claim 状态与写作契约；不签核、不编造引用或数字。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "writing.audit",
+      "group": "科研技能",
+      "label": "预审 Qoder 写好的中文手稿",
+      "syntax": "python -m research_agent writing audit --project <project> --run-id <RUN-ID> --draft <draft.md>",
+      "description": "检查引用键、结果数值、章节、占位符与 fixture；submission_ready 始终 false，不替代同行评审。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "conference.fetch",
+      "group": "科研技能",
+      "label": "抓取近 2–3 年顶会 arXiv 公开论文",
+      "syntax": "python -m research_agent conference fetch --target-dir <project>/inputs --venues NeurIPS,ICLR,ICML,ACL --years 2024,2025,2026 --allow-network",
+      "description": "按 venue/year 下载 arXiv 公开 PDF；过滤 workshop/symposium/preprint/非 agent 标题；venue 来自 comment，未独立核验。",
+      "safety": "network_opt_in",
+      "curated": true
+    },
+    {
+      "id": "literature.synthesize",
+      "group": "科研技能",
+      "label": "生成多篇文献综合矩阵",
+      "syntax": "python -m research_agent literature synthesize --project <project> --run-id <RUN-ID> --max-themes 7",
+      "description": "多篇来源 → 主题×来源矩阵；每主题至少 2 篇，记录一致点、张力和未使用来源；不创建 Claim。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "loop.status",
+      "group": "科研技能",
+      "label": "查看自动化科研主循环状态",
+      "syntax": "python -m research_agent loop status --project <project> --run-id <RUN-ID>",
+      "description": "S0–S16 阶段、Q0/G1/G2/S5b/G5 门禁、创新/手稿迭代次数与下一步的只读投影。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "experiment.approve",
+      "group": "科研技能",
+      "label": "人工批准本地实验执行",
+      "syntax": "python -m research_agent experiment approve --project <project> --experiment-id <EXP-ID> --human-reason \"<why>\"",
+      "description": "记录 data/spec/code 哈希与人工理由；不是 Claim，不自动执行。",
+      "safety": "human_gate",
+      "curated": true
+    },
+    {
+      "id": "experiment.run",
+      "group": "科研技能",
+      "label": "显式本地执行实验代码包",
+      "syntax": "python -m research_agent experiment run --project <project> --experiment-id <EXP-ID> --allow-execute",
+      "description": "只在本地 CLI；校验 approval 后运行生成的 runner，记录环境/命令/stdout/stderr/artifact SHA；不是 EA/Claim。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "experiment.ingest",
+      "group": "科研技能",
+      "label": "校验实验执行并生成 evidence",
+      "syntax": "python -m research_agent experiment ingest --project <project> --experiment-id <EXP-ID>",
+      "description": "校验 execution/receipt/metrics/artifact 哈希，写 experiment-evidence.json；不是 EA/Claim。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "experiment.claim",
+      "group": "科研技能",
+      "label": "人签本地实验 Claim",
+      "syntax": "python -m research_agent experiment claim --project <project> --experiment-id <EXP-ID> --statement \"...\" --human-reason \"...\" --assertion \"metric=accuracy,value=0.85,comparator=>=,tolerance=0.01\"",
+      "description": "只能由人执行；要求 verified evidence，绑定 evidence hash；不是 MCP 工具。",
+      "safety": "human_gate",
+      "curated": true
+    },
+    {
+      "id": "experiment.closure",
+      "group": "科研技能",
+      "label": "检查本地实验 closure",
+      "syntax": "python -m research_agent experiment closure --project <project> --experiment-id <EXP-ID> [--manuscript <draft.md>]",
+      "description": "校验 data/spec/code/approval/execution/metrics/evidence/claim 与哈希；不是 EA closure，不通过即阻断。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "experiment.sign",
+      "group": "科研技能",
+      "label": "人签本地实验 closure",
+      "syntax": "python -m research_agent experiment sign --project <project> --experiment-id <EXP-ID> --report <closure-report.json> --human-reason \"<why>\"",
+      "description": "只能由人执行；要求 closure ready；导出 manifest 标记 submission=false；不是 MCP 工具。",
+      "safety": "human_gate",
+      "curated": true
+    },
+    {
+      "id": "experiment.lineage",
+      "group": "科研技能",
+      "label": "构建或验证实验 lineage",
+      "syntax": "python -m research_agent experiment lineage --project <project> --experiment-id <EXP-ID> [--verify]",
+      "description": "spec/data/code/approval/execution/metrics/evidence/claim/closure 的哈希 DAG；verify 检测 stale。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "experiment.scaffold",
+      "group": "科研技能",
+      "label": "生成可审阅的本地实验代码包",
+      "syntax": "python -m research_agent experiment scaffold --project <project> --run-id <RUN-ID> --data inputs/data.csv --target y --features x1,x2",
+      "description": "S4 设计 + 项目内 CSV → spec/runner/requirements/README/manifest；只生成代码，不执行、不装依赖、不创建 EA/Claim。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "innovation.review",
+      "group": "科研技能",
+      "label": "创新点三评审与修订循环",
+      "syntax": "python -m research_agent innovation review --project <project> --run-id <RUN-ID> --rounds 2",
+      "description": "缺口→候选→novelty/evidence/feasibility 评审→修订→再评审；评分只是 advisory，不通过 G1、不写 Claim。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "manuscript.draft",
+      "group": "科研技能",
+      "label": "从证据包生成中文初稿",
+      "syntax": "python -m research_agent manuscript draft --project <project> --run-id <RUN-ID> --output <project>/drafts/review.md",
+      "description": "写作包+创新评审→中文综述/立场初稿→确定性审计；不伪造实验/数字；需要真实模型 key。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "manuscript.review",
+      "group": "科研技能",
+      "label": "手稿 rubric 评审与修订循环",
+      "syntax": "python -m research_agent manuscript review --project <project> --run-id <RUN-ID> --draft <project>/drafts/review.md --rounds 2",
+      "description": "评审→修订→再评审；候选修订必须通过引用/数值/章节审计且 blockers 不变差；submission_ready=false。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "figure.render",
+      "group": "科研技能",
+      "label": "渲染 AstraDraw 方法示意图",
+      "syntax": "python -m research_agent figure render --template framework-example --output-dir runtime_data/figure-demo --title \"...\"",
+      "description": "从项目 scene 或 vendored AstraDraw 模板生成 SVG/PNG/audit/manifest；模板仅视觉先验，schematic=true。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "rsi.policy",
+      "group": "受治理 RSI",
+      "label": "查看/切换自进化策略",
+      "syntax": "python -m research_agent rsi policy show|set [--enabled|--disabled] [--scope id=on|off]",
+      "description": "只切换 memory_order/query_planner/facet_budget；Claim/EA/gate 等保持 locked。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "run.execute",
+      "group": "实验与运行",
+      "label": "执行 S5 本地 run",
+      "syntax": "python -m research_agent run execute --dataset chemlab --seeds 2",
+      "description": "生成本地 RunCapsule 与 EA；不会自动签署 claim。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "run.claim",
+      "group": "人工门",
+      "label": "人工签署 claim",
+      "syntax": "python -m research_agent run claim --capsule ... --ea ... --statement \"...\" --human-reason \"...\"",
+      "description": "必须由作者/PI 显式给出理由；浏览器不提供签核端点。",
+      "safety": "human_gate",
+      "curated": true
+    },
+    {
+      "id": "maintenance.plan",
+      "group": "证据沿袭",
+      "label": "生成变更维护计划",
+      "syntax": "python -m research_agent maintenance plan --baseline ... --bundle ... --actor ... --reason ...",
+      "description": "把 stale 节点转成 rerun/rewrite/recheck；不自动执行、不签名。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "maintenance.reclose",
+      "group": "证据沿袭",
+      "label": "重跑受控 closure",
+      "syntax": "python -m research_agent maintenance reclose --plan ... --bundle ... --demo ... --claim ...",
+      "description": "仅 recheck-only 计划会重跑 closure；人签与导出仍在外层。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "waitpoint.create",
+      "group": "实验与运行",
+      "label": "创建长任务等待点",
+      "syntax": "python -m research_agent waitpoint create --label \"...\" --intent \"...\" --owner S5/demo/iris",
+      "description": "本地持久化 waitpoint；secret 只返回一次，不联网、不启动进程。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "waitpoint.signal",
+      "group": "实验与运行",
+      "label": "回传外部任务结果",
+      "syntax": "python -m research_agent waitpoint signal --id WP-... --secret ... --status ok --message \"...\"",
+      "description": "外部 job 结束后写 signal；data 是不可信数据，不是指令。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "waitpoint.inbox",
+      "group": "实验与运行",
+      "label": "读取未消费 wake",
+      "syntax": "python -m research_agent waitpoint inbox --owner S5/demo/iris",
+      "description": "只读未消费 wake；consume 才标记 delivered，重复 consume 不重复返回。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "closure.check",
+      "group": "闭合与导出",
+      "label": "检查证据闭合",
+      "syntax": "python -m research_agent closure check --demo ... --claim ...",
+      "description": "结构闭合检查；不等于同行评审或语义支持。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "closure.sign",
+      "group": "人工门",
+      "label": "签署闭合包并锁定导出",
+      "syntax": "python -m research_agent closure sign --report ... --human-reason \"...\"",
+      "description": "人工签名与导出清单；过期报告会被拒绝。",
+      "safety": "human_gate",
+      "curated": true
+    },
+    {
+      "id": "lineage.build",
+      "group": "证据沿袭",
+      "label": "构建内容寻址依赖图",
+      "syntax": "python -m research_agent lineage build --bundle ...",
+      "description": "记录 claim/slot/figure/closure/signature 的依赖。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "lineage.impact",
+      "group": "证据沿袭",
+      "label": "检查变更传播",
+      "syntax": "python -m research_agent lineage impact --baseline ... --bundle ... --fail-on-stale",
+      "description": "数据集或 Claim 变化后锁定过期导出。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "rsi.status",
+      "group": "受治理 RSI",
+      "label": "查看 RSI 账本与租约",
+      "syntax": "python -m research_agent rsi status",
+      "description": "只读；准入与撤销仍在人工流程。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "rsi.trace",
+      "group": "受治理 RSI",
+      "label": "校验 lease→run→confirmation",
+      "syntax": "python -m research_agent rsi trace --ledger ... --capsule ...",
+      "description": "只读审计，不回流准入。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "workspace.agents",
+      "group": "工作区",
+      "label": "导出模块注册表",
+      "syntax": "python -m research_agent workspace export --output-dir apps/web/public",
+      "description": "生成设置页使用的 SPEC 快照与命令目录。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "workspace.memory",
+      "group": "工作区",
+      "label": "管理本地记忆",
+      "syntax": "python -m research_agent workspace memory list|add|delete",
+      "description": "用户自管的工作记忆，不是证据、不进 Claim。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "workspace.archive",
+      "group": "工作区",
+      "label": "管理本地归档",
+      "syntax": "python -m research_agent workspace archive list|add|delete",
+      "description": "保存任务 JSON 快照；不改变证据状态。",
+      "safety": "local_write",
+      "curated": true
+    },
+    {
+      "id": "spec.show",
+      "group": "规格",
+      "label": "查看模块规格",
+      "syntax": "python -m research_agent spec show literature",
+      "description": "读取 SPEC 契约；规格是代码的源。",
+      "safety": "read_only",
+      "curated": true
+    },
+    {
+      "id": "action.automation-plan",
+      "group": "action",
+      "label": "automation plan",
+      "syntax": "python -m research_agent action automation-plan",
+      "description": "usage: research_agent action automation-plan [-h] --topic TOPIC\n                                             [--max-sources MAX_SOURCES]\n                                             [--run-dataset {,iris,breast_cancer,chemlab}]\n                                             [--run-seeds RUN_SEEDS]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "action.skill",
+      "group": "action",
+      "label": "skill",
+      "syntax": "python -m research_agent action skill",
+      "description": "usage: research_agent action skill [-h] --id\n                                   {literature-brief,hypothesis-triage,protocol-review,evidence-boundary}\n                                   [--payload PAYLOAD] [--question QUESTION]\n                                   [--max-sources MAX_SOURCES]\n                                   [--source {fixture,real}]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "agent.add",
+      "group": "agent",
+      "label": "add",
+      "syntax": "python -m research_agent agent add",
+      "description": "usage: research_agent agent add [-h] --name NAME --role\n                                {reviewer,auditor,scout,methodologist,writer-assistant}\n                                --purpose PURPOSE --check\n                                {coverage,citation,hypothesis,protocol,evidence,figure,closure}\n                                [--disabled]\n                                [--custom-agents-path CUSTOM_AGENTS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "agent.delete",
+      "group": "agent",
+      "label": "delete",
+      "syntax": "python -m research_agent agent delete",
+      "description": "usage: research_agent agent delete [-h]\n                                   [--custom-agents-path CUSTOM_AGENTS_PATH]\n                                   id",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "agent.export",
+      "group": "agent",
+      "label": "export",
+      "syntax": "python -m research_agent agent export",
+      "description": "usage: research_agent agent export [-h]\n                                   [--custom-agents-path CUSTOM_AGENTS_PATH]\n                                   [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "agent.list",
+      "group": "agent",
+      "label": "list",
+      "syntax": "python -m research_agent agent list",
+      "description": "usage: research_agent agent list [-h]\n                                 [--custom-agents-path CUSTOM_AGENTS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "agent.toggle",
+      "group": "agent",
+      "label": "toggle",
+      "syntax": "python -m research_agent agent toggle",
+      "description": "usage: research_agent agent toggle [-h] [--enabled] [--disabled]\n                                   [--custom-agents-path CUSTOM_AGENTS_PATH]\n                                   id",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "autopilot.policy.init",
+      "group": "autopilot",
+      "label": "init",
+      "syntax": "python -m research_agent autopilot policy.init",
+      "description": "usage: research_agent autopilot policy init [-h] --project PROJECT --scope\n                                            SCOPE --authorized-by\n                                            AUTHORIZED_BY --signer SIGNER\n                                            [--dataset DATASET]\n                                            [--min-seeds MIN_SEEDS]\n                                            [--max-runs MAX_RUNS]\n                                            [--expires-hours EXPIRES_HOURS]\n                                            [--endpoint {bundle,lineage}]\n                                            [--limitation LIMITATION]\n                                            [--bibliography-source BIBLIOGRAPHY_SOURCE]\n                                            [--allow-revise-idea]\n                                            [--note NOTE] [--output OUTPUT]\n                                            [--signers-path SIGNERS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "autopilot.research",
+      "group": "autopilot",
+      "label": "research",
+      "syntax": "python -m research_agent autopilot research",
+      "description": "usage: research_agent autopilot research [-h] --project PROJECT --topic TOPIC\n                                         --policy POLICY [--language {zh,en}]\n                                         [--venue VENUE]\n                                         [--max-sources MAX_SOURCES]\n                                         [--run-id RUN_ID]\n                                         [--corpus-dir CORPUS_DIR]\n                                         [--study-design-file STUDY_DESIGN_FILE]\n                                         [--signers-path SIGNERS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "autopilot.run",
+      "group": "autopilot",
+      "label": "run",
+      "syntax": "python -m research_agent autopilot run",
+      "description": "usage: research_agent autopilot run [-h] --project PROJECT --run-id RUN_ID\n                                    --policy POLICY\n                                    [--signers-path SIGNERS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "autopilot.status",
+      "group": "autopilot",
+      "label": "status",
+      "syntax": "python -m research_agent autopilot status",
+      "description": "usage: research_agent autopilot status [-h] --project PROJECT",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "benchmark.run",
+      "group": "benchmark",
+      "label": "run",
+      "syntax": "python -m research_agent benchmark run",
+      "description": "usage: research_agent benchmark run [-h] [--output-dir OUTPUT_DIR]\n                                    [--no-closure]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "bibliography.verify",
+      "group": "bibliography",
+      "label": "verify",
+      "syntax": "python -m research_agent bibliography verify",
+      "description": "usage: research_agent bibliography verify [-h] [--source SOURCE]\n                                          [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.audit",
+      "group": "closure",
+      "label": "audit",
+      "syntax": "python -m research_agent closure audit",
+      "description": "usage: research_agent closure audit [-h] --bundle BUNDLE\n                                    [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.guard-audit",
+      "group": "closure",
+      "label": "guard audit",
+      "syntax": "python -m research_agent closure guard-audit",
+      "description": "usage: research_agent closure guard-audit [-h] --project PROJECT",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.obligations.list",
+      "group": "closure",
+      "label": "list",
+      "syntax": "python -m research_agent closure obligations.list",
+      "description": "usage: research_agent closure obligations list [-h] --ledger LEDGER",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.obligations.resolve",
+      "group": "closure",
+      "label": "resolve",
+      "syntax": "python -m research_agent closure obligations.resolve",
+      "description": "usage: research_agent closure obligations resolve [-h] --ledger LEDGER --id ID\n                                                  --reason REASON --evidence\n                                                  EVIDENCE",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.obligations.waive",
+      "group": "closure",
+      "label": "waive",
+      "syntax": "python -m research_agent closure obligations.waive",
+      "description": "usage: research_agent closure obligations waive [-h] --ledger LEDGER --id ID\n                                                --reason REASON",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.profiles",
+      "group": "closure",
+      "label": "profiles",
+      "syntax": "python -m research_agent closure profiles",
+      "description": "usage: research_agent closure profiles [-h] [--project PROJECT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.publish",
+      "group": "closure",
+      "label": "publish",
+      "syntax": "python -m research_agent closure publish",
+      "description": "usage: research_agent closure publish [-h] --manifest MANIFEST\n                                      [--signature SIGNATURE]\n                                      [--signers-path SIGNERS_PATH]\n                                      [--bundle-name BUNDLE_NAME]\n                                      [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.verify-bundle",
+      "group": "closure",
+      "label": "verify bundle",
+      "syntax": "python -m research_agent closure verify-bundle",
+      "description": "usage: research_agent closure verify-bundle [-h] --bundle BUNDLE\n                                            [--signers-path SIGNERS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "design.audit",
+      "group": "design",
+      "label": "audit",
+      "syntax": "python -m research_agent design audit",
+      "description": "usage: research_agent design audit [-h] --design DESIGN [--venue VENUE]\n                                   [--strict]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "design.draft",
+      "group": "design",
+      "label": "draft",
+      "syntax": "python -m research_agent design draft",
+      "description": "usage: research_agent design draft [-h] --project PROJECT --run-id RUN_ID\n                                   [--ledger LEDGER] [--profile PROFILE]\n                                   [--force] [--strict]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "design.template",
+      "group": "design",
+      "label": "template",
+      "syntax": "python -m research_agent design template",
+      "description": "usage: research_agent design template [-h] --output OUTPUT",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "empirical.check",
+      "group": "empirical",
+      "label": "check",
+      "syntax": "python -m research_agent empirical check",
+      "description": "usage: research_agent empirical check [-h] --project PROJECT --run-id RUN_ID\n                                      --experiment-id EXPERIMENT_ID",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "empirical.paper",
+      "group": "empirical",
+      "label": "paper",
+      "syntax": "python -m research_agent empirical paper",
+      "description": "usage: research_agent empirical paper [-h] --project PROJECT --run-id RUN_ID\n                                      --experiment-id EXPERIMENT_ID --output\n                                      OUTPUT [--language {zh,en}]\n                                      [--venue {zh_core_journal,software_journal,computer_journal,en_conference}]\n                                      [--max-sources MAX_SOURCES]\n                                      [--max-spans-per-source MAX_SPANS_PER_SOURCE]\n                                      [--review-rounds REVIEW_ROUNDS]\n                                      [--repair-attempts REPAIR_ATTEMPTS]\n                                      [--method-scene METHOD_SCENE | --method-template METHOD_TEMPLATE]\n                                      [--semantic-support] [--strict-support]\n                                      [--support-votes SUPPORT_VOTES]\n                                      [--judge-profile JUDGE_PROFILE]\n                                      [--ab-check] [--ab-section AB_SECTION]\n                                      [--offline-draft] [--external-lint]\n                                      [--external-skill-root EXTERNAL_SKILL_ROOT]\n                                      [--external-consistency]\n                                      [--external-consistency-registry EXTERNAL_CONSISTENCY_REGISTRY]\n                                      [--external-consistency-auto]\n                                      [--threshold THRESHOLD]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.consistency-registry",
+      "group": "experiment",
+      "label": "consistency registry",
+      "syntax": "python -m research_agent experiment consistency-registry",
+      "description": "usage: research_agent experiment consistency-registry [-h] --project PROJECT\n                                                      --experiment-id\n                                                      EXPERIMENT_ID --output\n                                                      OUTPUT",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.figure",
+      "group": "experiment",
+      "label": "figure",
+      "syntax": "python -m research_agent experiment figure",
+      "description": "usage: research_agent experiment figure [-h] --project PROJECT --experiment-id\n                                        EXPERIMENT_ID\n                                        [--output-dir OUTPUT_DIR] [--verify]\n                                        [--manifest MANIFEST]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.local-approve",
+      "group": "experiment",
+      "label": "local approve",
+      "syntax": "python -m research_agent experiment local-approve",
+      "description": "usage: research_agent experiment local-approve [-h] --project PROJECT\n                                               --experiment-id EXPERIMENT_ID\n                                               --human-reason HUMAN_REASON",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.local-ingest",
+      "group": "experiment",
+      "label": "local ingest",
+      "syntax": "python -m research_agent experiment local-ingest",
+      "description": "usage: research_agent experiment local-ingest [-h] --project PROJECT\n                                              --experiment-id EXPERIMENT_ID",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.local-init",
+      "group": "experiment",
+      "label": "local init",
+      "syntax": "python -m research_agent experiment local-init",
+      "description": "usage: research_agent experiment local-init [-h] --project PROJECT\n                                            --experiment-id EXPERIMENT_ID\n                                            --command COMMAND [--cwd CWD]\n                                            [--env-prefix ENV_PREFIX]\n                                            [--expect EXPECT]\n                                            [--timeout TIMEOUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.local-run",
+      "group": "experiment",
+      "label": "local run",
+      "syntax": "python -m research_agent experiment local-run",
+      "description": "usage: research_agent experiment local-run [-h] --project PROJECT\n                                           --experiment-id EXPERIMENT_ID\n                                           [--allow-execute]\n                                           [--timeout TIMEOUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.preflight",
+      "group": "experiment",
+      "label": "preflight",
+      "syntax": "python -m research_agent experiment preflight",
+      "description": "usage: research_agent experiment preflight [-h] --project PROJECT\n                                           --experiment-id EXPERIMENT_ID\n                                           [--python PYTHON]\n                                           [--timeout TIMEOUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.status",
+      "group": "experiment",
+      "label": "status",
+      "syntax": "python -m research_agent experiment status",
+      "description": "usage: research_agent experiment status [-h] --project PROJECT --experiment-id\n                                        EXPERIMENT_ID",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.sweep-approve",
+      "group": "experiment",
+      "label": "sweep approve",
+      "syntax": "python -m research_agent experiment sweep-approve",
+      "description": "usage: research_agent experiment sweep-approve [-h] --project PROJECT\n                                               --experiment-id EXPERIMENT_ID\n                                               --human-reason HUMAN_REASON\n                                               [--timeout TIMEOUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.sweep-ingest",
+      "group": "experiment",
+      "label": "sweep ingest",
+      "syntax": "python -m research_agent experiment sweep-ingest",
+      "description": "usage: research_agent experiment sweep-ingest [-h] --project PROJECT\n                                              --experiment-id EXPERIMENT_ID",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.sweep-run",
+      "group": "experiment",
+      "label": "sweep run",
+      "syntax": "python -m research_agent experiment sweep-run",
+      "description": "usage: research_agent experiment sweep-run [-h] --project PROJECT\n                                           --experiment-id EXPERIMENT_ID\n                                           [--allow-execute] [--python PYTHON]\n                                           [--timeout TIMEOUT] [--dry-run]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "experiment.sweep-status",
+      "group": "experiment",
+      "label": "sweep status",
+      "syntax": "python -m research_agent experiment sweep-status",
+      "description": "usage: research_agent experiment sweep-status [-h] --project PROJECT\n                                              --experiment-id EXPERIMENT_ID",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "figure.table",
+      "group": "figure",
+      "label": "table",
+      "syntax": "python -m research_agent figure table",
+      "description": "usage: research_agent figure table [-h] --data DATA --spec SPEC --output-dir\n                                   OUTPUT_DIR",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "figure.templates",
+      "group": "figure",
+      "label": "templates",
+      "syntax": "python -m research_agent figure templates",
+      "description": "usage: research_agent figure templates [-h]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "grant.template",
+      "group": "grant",
+      "label": "template",
+      "syntax": "python -m research_agent grant template",
+      "description": "usage: research_agent grant template [-h] [--scheme {nsfc,nssfc,generic}]\n                                     --output OUTPUT",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "handoff.contract",
+      "group": "handoff",
+      "label": "contract",
+      "syntax": "python -m research_agent handoff contract",
+      "description": "usage: research_agent handoff contract [-h] [--outbox OUTBOX]\n                                       [--capabilities CAPABILITIES]\n                                       [--ledger LEDGER]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "handoff.export",
+      "group": "handoff",
+      "label": "export",
+      "syntax": "python -m research_agent handoff export",
+      "description": "usage: research_agent handoff export [-h] --outbox OUTBOX [--ledger LEDGER]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "handoff.import",
+      "group": "handoff",
+      "label": "import",
+      "syntax": "python -m research_agent handoff import",
+      "description": "usage: research_agent handoff import [-h] --outbox OUTBOX [--ledger LEDGER]\n                                     [--host-label HOST_LABEL]\n                                     [--project PROJECT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "handoff.status",
+      "group": "handoff",
+      "label": "status",
+      "syntax": "python -m research_agent handoff status",
+      "description": "usage: research_agent handoff status [-h] [--outbox OUTBOX] [--ledger LEDGER]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "host-model.bind",
+      "group": "host-model",
+      "label": "bind",
+      "syntax": "python -m research_agent host-model bind",
+      "description": "usage: research_agent host-model bind [-h] [--modules MODULES]\n                                      [--profile PROFILE] [--model MODEL]\n                                      [--store STORE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "host-model.respond",
+      "group": "host-model",
+      "label": "respond",
+      "syntax": "python -m research_agent host-model respond",
+      "description": "usage: research_agent host-model respond [-h] --turn-id TURN_ID [--text TEXT]\n                                         [--file FILE]\n                                         [--host-label HOST_LABEL]\n                                         [--project PROJECT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "host-model.status",
+      "group": "host-model",
+      "label": "status",
+      "syntax": "python -m research_agent host-model status",
+      "description": "usage: research_agent host-model status [-h] [--limit LIMIT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "host-model.turns",
+      "group": "host-model",
+      "label": "turns",
+      "syntax": "python -m research_agent host-model turns",
+      "description": "usage: research_agent host-model turns [-h] [--status STATUS]\n                                       [--module MODULE] [--limit LIMIT]\n                                       [--prompt]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "host-model.void",
+      "group": "host-model",
+      "label": "void",
+      "syntax": "python -m research_agent host-model void",
+      "description": "usage: research_agent host-model void [-h] --turn-id TURN_ID --reason REASON",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "lineage.verify",
+      "group": "lineage",
+      "label": "verify",
+      "syntax": "python -m research_agent lineage verify",
+      "description": "usage: research_agent lineage verify [-h] --manifest MANIFEST --bundle BUNDLE\n                                     [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "literature.discover",
+      "group": "literature",
+      "label": "discover",
+      "syntax": "python -m research_agent literature discover",
+      "description": "usage: research_agent literature discover [-h] [--query QUERY]\n                                          [--sources SOURCES]\n                                          [--limit-per-source LIMIT_PER_SOURCE]\n                                          [--timeout TIMEOUT]\n                                          [--output OUTPUT] [--allow-network]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "literature.fetch",
+      "group": "literature",
+      "label": "fetch",
+      "syntax": "python -m research_agent literature fetch",
+      "description": "usage: research_agent literature fetch [-h] --query QUERY --target-dir\n                                       TARGET_DIR\n                                       [--max-results {1,2,3,4,5,6,7,8,9,10}]\n                                       [--timeout TIMEOUT] [--allow-network]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "literature.memory.advise",
+      "group": "literature",
+      "label": "advise",
+      "syntax": "python -m research_agent literature memory.advise",
+      "description": "usage: research_agent literature memory advise [-h] --question QUESTION\n                                               [--max-sources MAX_SOURCES]\n                                               [--source {fixture,real,openalex}]\n                                               [--memory-path MEMORY_PATH]\n                                               [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "literature.memory.show",
+      "group": "literature",
+      "label": "show",
+      "syntax": "python -m research_agent literature memory.show",
+      "description": "usage: research_agent literature memory show [-h] [--memory-path MEMORY_PATH]\n                                             [--limit LIMIT] [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "literature.prescreen",
+      "group": "literature",
+      "label": "prescreen",
+      "syntax": "python -m research_agent literature prescreen",
+      "description": "usage: research_agent literature prescreen [-h] --input INPUT --query QUERY\n                                           [--abstracts ABSTRACTS]\n                                           [--min-hits MIN_HITS]\n                                           [--exclude-terms EXCLUDE_TERMS]\n                                           [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "mandate.status",
+      "group": "mandate",
+      "label": "status",
+      "syntax": "python -m research_agent mandate status",
+      "description": "usage: research_agent mandate status [-h] --project PROJECT\n                                     [--max-runs MAX_RUNS] [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "memory.ab.compare",
+      "group": "memory",
+      "label": "compare",
+      "syntax": "python -m research_agent memory ab.compare",
+      "description": "usage: research_agent memory ab compare [-h] --project PROJECT\n                                        [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "memory.ab.plan",
+      "group": "memory",
+      "label": "plan",
+      "syntax": "python -m research_agent memory ab.plan",
+      "description": "usage: research_agent memory ab plan [-h] --project PROJECT --run-id RUN_ID",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "memory.ab.record",
+      "group": "memory",
+      "label": "record",
+      "syntax": "python -m research_agent memory ab.record",
+      "description": "usage: research_agent memory ab record [-h] --project PROJECT --run-id RUN_ID\n                                       --arm {with,without} --ideas-file\n                                       IDEAS_FILE --literature-file\n                                       LITERATURE_FILE",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "memory.guidelines",
+      "group": "memory",
+      "label": "guidelines",
+      "syntax": "python -m research_agent memory guidelines",
+      "description": "usage: research_agent memory guidelines [-h] --project PROJECT\n                                        [--propose-file PROPOSE_FILE]\n                                        [--step STEP]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "plugin.export",
+      "group": "plugin",
+      "label": "export",
+      "syntax": "python -m research_agent plugin export",
+      "description": "usage: research_agent plugin export [-h] [--output-dir OUTPUT_DIR]\n                                    [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "plugin.verify",
+      "group": "plugin",
+      "label": "verify",
+      "syntax": "python -m research_agent plugin verify",
+      "description": "usage: research_agent plugin verify [-h] [--output-dir OUTPUT_DIR]\n                                    [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "project.init",
+      "group": "project",
+      "label": "init",
+      "syntax": "python -m research_agent project init",
+      "description": "usage: research_agent project init [-h] --dir DIR [--name NAME]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "project.status",
+      "group": "project",
+      "label": "status",
+      "syntax": "python -m research_agent project status",
+      "description": "usage: research_agent project status [-h] --dir DIR [--limit LIMIT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "protocol.freeze",
+      "group": "protocol",
+      "label": "freeze",
+      "syntax": "python -m research_agent protocol freeze",
+      "description": "usage: research_agent protocol freeze [-h] --design DESIGN --capsule CAPSULE\n                                      --limitation LIMITATION --human-reason\n                                      HUMAN_REASON [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "protocol.freeze-design",
+      "group": "protocol",
+      "label": "freeze design",
+      "syntax": "python -m research_agent protocol freeze-design",
+      "description": "usage: research_agent protocol freeze-design [-h] --design DESIGN --limitation\n                                             LIMITATION --human-reason\n                                             HUMAN_REASON\n                                             [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "research.run",
+      "group": "research",
+      "label": "run",
+      "syntax": "python -m research_agent research run",
+      "description": "usage: research_agent research run [-h] --tasks TASKS\n                                   [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "revision.ab-review",
+      "group": "revision",
+      "label": "ab review",
+      "syntax": "python -m research_agent revision ab-review",
+      "description": "usage: research_agent revision ab-review [-h] --original ORIGINAL --revised\n                                         REVISED --output-dir OUTPUT_DIR\n                                         --profile PROFILE [--store STORE]\n                                         [--section SECTION] [--rounds ROUNDS]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "revision.inspect",
+      "group": "revision",
+      "label": "inspect",
+      "syntax": "python -m research_agent revision inspect",
+      "description": "usage: research_agent revision inspect [-h] --draft DRAFT --output-dir\n                                       OUTPUT_DIR [--data DATA]\n                                       [--metrics METRICS] [--figures FIGURES]\n                                       [--venue {zh_core_journal,software_journal,computer_journal}]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "revision.plan",
+      "group": "revision",
+      "label": "plan",
+      "syntax": "python -m research_agent revision plan",
+      "description": "usage: research_agent revision plan [-h] --draft DRAFT --output-dir OUTPUT_DIR\n                                    [--data DATA] [--metrics METRICS]\n                                    [--figures FIGURES]\n                                    [--venue {zh_core_journal,software_journal,computer_journal}]\n                                    --profile PROFILE [--store STORE]\n                                    [--section SECTION] [--goal GOAL]\n                                    [--review-file REVIEW_FILE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.active.activate",
+      "group": "rsi",
+      "label": "activate",
+      "syntax": "python -m research_agent rsi active.activate",
+      "description": "usage: research_agent rsi active activate [-h] [--active-path ACTIVE_PATH]\n                                          --ledger LEDGER --lease-scope\n                                          LEASE_SCOPE --reason REASON\n                                          [--allow-simulation]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.active.deactivate",
+      "group": "rsi",
+      "label": "deactivate",
+      "syntax": "python -m research_agent rsi active.deactivate",
+      "description": "usage: research_agent rsi active deactivate [-h] [--active-path ACTIVE_PATH]\n                                            --reason REASON",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.active.show",
+      "group": "rsi",
+      "label": "show",
+      "syntax": "python -m research_agent rsi active.show",
+      "description": "usage: research_agent rsi active show [-h] [--active-path ACTIVE_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.actuals",
+      "group": "rsi",
+      "label": "actuals",
+      "syntax": "python -m research_agent rsi actuals",
+      "description": "usage: research_agent rsi actuals [-h] [--ledger LEDGER] --episode EPISODE\n                                  [--metric KEY=VALUE] [--note NOTE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.admit",
+      "group": "rsi",
+      "label": "admit",
+      "syntax": "python -m research_agent rsi admit",
+      "description": "usage: research_agent rsi admit [-h] [--ledger LEDGER] --episode EPISODE\n                                --public-ref PUBLIC_REF --hidden-ref\n                                HIDDEN_REF [--public-metric PUBLIC_METRIC]\n                                [--hidden-metric HIDDEN_METRIC]\n                                [--near-ood-ref NEAR_OOD_REF]\n                                [--near-ood-metric NEAR_OOD_METRIC]\n                                [--regression-ref REGRESSION_REF]\n                                [--regression-metric REGRESSION_METRIC]\n                                [--n N] --reason REASON --scope SCOPE\n                                [--ttl-days TTL_DAYS] [--strict]\n                                [--approved-by APPROVED_BY]\n                                [--evaluator EVALUATOR]\n                                [--task-pack TASK_PACK]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.confirm",
+      "group": "rsi",
+      "label": "confirm",
+      "syntax": "python -m research_agent rsi confirm",
+      "description": "usage: research_agent rsi confirm [-h] [--ledger LEDGER]\n                                  [--output-dir OUTPUT_DIR] [--tasks TASKS]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.fixture",
+      "group": "rsi",
+      "label": "fixture",
+      "syntax": "python -m research_agent rsi fixture",
+      "description": "usage: research_agent rsi fixture [-h] [--ledger LEDGER]\n                                  [--output-dir OUTPUT_DIR] [--tasks TASKS]\n                                  [--approve]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.agent",
+      "group": "rsi",
+      "label": "agent",
+      "syntax": "python -m research_agent rsi gen.agent",
+      "description": "usage: research_agent rsi gen agent [-h] --label LABEL [--artifact ARTIFACT]\n                                    [--episodes EPISODES]\n                                    [--status {proposed,adopted}]\n                                    [--note NOTE] [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.close",
+      "group": "rsi",
+      "label": "close",
+      "syntax": "python -m research_agent rsi gen.close",
+      "description": "usage: research_agent rsi gen close [-h] --id ID --status\n                                    {adopted,reverted,superseded}\n                                    [--commit COMMIT] [--note NOTE]\n                                    [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.compare",
+      "group": "rsi",
+      "label": "compare",
+      "syntax": "python -m research_agent rsi gen.compare",
+      "description": "usage: research_agent rsi gen compare [-h] --left LEFT --right RIGHT\n                                      [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.export",
+      "group": "rsi",
+      "label": "export",
+      "syntax": "python -m research_agent rsi gen.export",
+      "description": "usage: research_agent rsi gen export [-h] [--out OUT] [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.list",
+      "group": "rsi",
+      "label": "list",
+      "syntax": "python -m research_agent rsi gen.list",
+      "description": "usage: research_agent rsi gen list [-h] [--kind {agent,platform}]\n                                   [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.propose",
+      "group": "rsi",
+      "label": "propose",
+      "syntax": "python -m research_agent rsi gen.propose",
+      "description": "usage: research_agent rsi gen propose [-h] --label LABEL --patch PATCH\n                                      [--note NOTE] [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.snapshot",
+      "group": "rsi",
+      "label": "snapshot",
+      "syntax": "python -m research_agent rsi gen.snapshot",
+      "description": "usage: research_agent rsi gen snapshot [-h] --label LABEL [--commit COMMIT]\n                                       [--note NOTE]\n                                       [--fingerprint FINGERPRINT]\n                                       [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.gen.verify",
+      "group": "rsi",
+      "label": "verify",
+      "syntax": "python -m research_agent rsi gen.verify",
+      "description": "usage: research_agent rsi gen verify [-h] [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.harness2.probe",
+      "group": "rsi",
+      "label": "probe",
+      "syntax": "python -m research_agent rsi harness2.probe",
+      "description": "usage: research_agent rsi harness2 probe [-h] [--root ROOT] [--python PYTHON]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.harness2.record",
+      "group": "rsi",
+      "label": "record",
+      "syntax": "python -m research_agent rsi harness2.record",
+      "description": "usage: research_agent rsi harness2 record [-h] [--artifact ARTIFACT]\n                                          [--ledger LEDGER] [--scope SCOPE]\n                                          [--policy-path POLICY_PATH]\n                                          [--generation GENERATION]\n                                          [--gen-path GEN_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.harness2.run",
+      "group": "rsi",
+      "label": "run",
+      "syntax": "python -m research_agent rsi harness2.run",
+      "description": "usage: research_agent rsi harness2 run [-h] [--root ROOT] [--python PYTHON]\n                                       [--output OUTPUT] [--artifact ARTIFACT]\n                                       [--k K]\n                                       [--mode {parallel,sequential,both}]\n                                       [--adapter {demo,science}]\n                                       [--timeout TIMEOUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.harness2.status",
+      "group": "rsi",
+      "label": "status",
+      "syntax": "python -m research_agent rsi harness2.status",
+      "description": "usage: research_agent rsi harness2 status [-h] [--artifact ARTIFACT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.model-batch",
+      "group": "rsi",
+      "label": "model batch",
+      "syntax": "python -m research_agent rsi model-batch",
+      "description": "usage: research_agent rsi model-batch [-h] --model-path MODEL_PATH\n                                      --observations OBSERVATIONS\n                                      [--output-dir OUTPUT_DIR]\n                                      [--ledger-root LEDGER_ROOT] [--approve]\n                                      [--repair-attempts REPAIR_ATTEMPTS]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.observations.show",
+      "group": "rsi",
+      "label": "show",
+      "syntax": "python -m research_agent rsi observations.show",
+      "description": "usage: research_agent rsi observations show [-h]\n                                            [--observations-path OBSERVATIONS_PATH]\n                                            [--limit LIMIT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.observations.suggest",
+      "group": "rsi",
+      "label": "suggest",
+      "syntax": "python -m research_agent rsi observations.suggest",
+      "description": "usage: research_agent rsi observations suggest [-h]\n                                               [--observations-path OBSERVATIONS_PATH]\n                                               [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.policy.set",
+      "group": "rsi",
+      "label": "set",
+      "syntax": "python -m research_agent rsi policy.set",
+      "description": "usage: research_agent rsi policy set [-h] [--policy-path POLICY_PATH]\n                                     [--enabled | --disabled] [--scope SCOPE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.policy.show",
+      "group": "rsi",
+      "label": "show",
+      "syntax": "python -m research_agent rsi policy.show",
+      "description": "usage: research_agent rsi policy show [-h] [--policy-path POLICY_PATH]\n                                      [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.propose",
+      "group": "rsi",
+      "label": "propose",
+      "syntax": "python -m research_agent rsi propose",
+      "description": "usage: research_agent rsi propose [-h] [--ledger LEDGER] --kind\n                                  {skill,process,prompt,knowledge} --target\n                                  TARGET --patch PATCH --rationale RATIONALE\n                                  --predicted PREDICTED\n                                  [--predicted-metric KEY=VALUE]\n                                  [--parent PARENT] [--scope SCOPE]\n                                  [--observation OBSERVATION]\n                                  [--dry-run-ref DRY_RUN_REF]\n                                  [--policy-path POLICY_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.propose-model",
+      "group": "rsi",
+      "label": "propose model",
+      "syntax": "python -m research_agent rsi propose-model",
+      "description": "usage: research_agent rsi propose-model [-h] [--model-path MODEL_PATH]\n                                        [--profile PROFILE] [--store STORE]\n                                        --observation OBSERVATION [--out OUT]\n                                        [--policy-path POLICY_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.real-confirm",
+      "group": "rsi",
+      "label": "real confirm",
+      "syntax": "python -m research_agent rsi real-confirm",
+      "description": "usage: research_agent rsi real-confirm [-h] --ledger LEDGER\n                                       [--output-dir OUTPUT_DIR]\n                                       [--lease-scope LEASE_SCOPE]\n                                       [--tasks TASKS] [--corpus CORPUS]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.real-trial",
+      "group": "rsi",
+      "label": "real trial",
+      "syntax": "python -m research_agent rsi real-trial",
+      "description": "usage: research_agent rsi real-trial [-h] [--ledger LEDGER]\n                                     [--output-dir OUTPUT_DIR] [--tasks TASKS]\n                                     [--corpus CORPUS]\n                                     [--retriever {bm25,minilm,compare}]\n                                     [--candidate-file CANDIDATE_FILE]\n                                     [--approve]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.reject",
+      "group": "rsi",
+      "label": "reject",
+      "syntax": "python -m research_agent rsi reject",
+      "description": "usage: research_agent rsi reject [-h] [--ledger LEDGER] --episode EPISODE\n                                 --reason REASON",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.research-cycle",
+      "group": "rsi",
+      "label": "research cycle",
+      "syntax": "python -m research_agent rsi research-cycle",
+      "description": "usage: research_agent rsi research-cycle [-h] --tasks TASKS [--ledger LEDGER]\n                                         [--output-dir OUTPUT_DIR] [--approve]\n                                         [--policy-path POLICY_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.revoke",
+      "group": "rsi",
+      "label": "revoke",
+      "syntax": "python -m research_agent rsi revoke",
+      "description": "usage: research_agent rsi revoke [-h] [--ledger LEDGER] --lease LEASE --reason\n                                 REASON",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.s5-confirm",
+      "group": "rsi",
+      "label": "s5 confirm",
+      "syntax": "python -m research_agent rsi s5-confirm",
+      "description": "usage: research_agent rsi s5-confirm [-h] --ledger LEDGER\n                                     [--output-dir OUTPUT_DIR]\n                                     [--dataset {iris,breast_cancer,chemlab}]\n                                     [--lease-scope LEASE_SCOPE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.s5-trial",
+      "group": "rsi",
+      "label": "s5 trial",
+      "syntax": "python -m research_agent rsi s5-trial",
+      "description": "usage: research_agent rsi s5-trial [-h] [--ledger LEDGER]\n                                   [--output-dir OUTPUT_DIR]\n                                   [--dataset {iris,breast_cancer,chemlab}]\n                                   [--approve]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "rsi.story",
+      "group": "rsi",
+      "label": "story",
+      "syntax": "python -m research_agent rsi story",
+      "description": "usage: research_agent rsi story [-h] --ledger LEDGER [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "signer.create",
+      "group": "signer",
+      "label": "create",
+      "syntax": "python -m research_agent signer create",
+      "description": "usage: research_agent signer create [-h] --name NAME\n                                    [--signers-path SIGNERS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "signer.list",
+      "group": "signer",
+      "label": "list",
+      "syntax": "python -m research_agent signer list",
+      "description": "usage: research_agent signer list [-h] [--signers-path SIGNERS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.coverage",
+      "group": "skill",
+      "label": "coverage",
+      "syntax": "python -m research_agent skill coverage",
+      "description": "usage: research_agent skill coverage [-h] [--pack PACK]\n                                     [--pack-root PACK_ROOT] [--venue VENUE]\n                                     --file FILE\n                                     [--stage {,idea,design,writing,submission,review,reproducibility,general}]\n                                     [--profile {,design,draft,submission,revision}]\n                                     [--max-items MAX_ITEMS] [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.delete",
+      "group": "skill",
+      "label": "delete",
+      "syntax": "python -m research_agent skill delete",
+      "description": "usage: research_agent skill delete [-h] [--registry-path REGISTRY_PATH] id",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.disable",
+      "group": "skill",
+      "label": "disable",
+      "syntax": "python -m research_agent skill disable",
+      "description": "usage: research_agent skill disable [-h] [--registry-path REGISTRY_PATH] id",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.distill",
+      "group": "skill",
+      "label": "distill",
+      "syntax": "python -m research_agent skill distill",
+      "description": "usage: research_agent skill distill [-h] --skill-id SKILL_ID\n                                    [--license LICENSE]\n                                    [--source-url SOURCE_URL] --human-reason\n                                    HUMAN_REASON [--library-dir LIBRARY_DIR]\n                                    [--registry-path REGISTRY_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.enable",
+      "group": "skill",
+      "label": "enable",
+      "syntax": "python -m research_agent skill enable",
+      "description": "usage: research_agent skill enable [-h] [--registry-path REGISTRY_PATH] id",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.eval",
+      "group": "skill",
+      "label": "eval",
+      "syntax": "python -m research_agent skill eval",
+      "description": "usage: research_agent skill eval [-h] [--registry-path REGISTRY_PATH]\n                                 [--usage-path USAGE_PATH]\n                                 [--eval-root EVAL_ROOT] [--ledger LEDGER]\n                                 [--policy-path POLICY_PATH]\n                                 [--versions-path VERSIONS_PATH] --skill-id\n                                 SKILL_ID [--split {public,hidden,all}]\n                                 [--version VERSION]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.export",
+      "group": "skill",
+      "label": "export",
+      "syntax": "python -m research_agent skill export",
+      "description": "usage: research_agent skill export [-h] [--registry-path REGISTRY_PATH]\n                                   [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.invoke",
+      "group": "skill",
+      "label": "invoke",
+      "syntax": "python -m research_agent skill invoke",
+      "description": "usage: research_agent skill invoke [-h] --skill-id SKILL_ID\n                                   [--profile PROFILE] [--trusted-scripts]\n                                   [--workdir WORKDIR]\n                                   [--script-arg SCRIPT_ARG]\n                                   [--timeout TIMEOUT] [--input INPUT]\n                                   [--input-file INPUT_FILE]\n                                   [--context-file CONTEXT_FILE]\n                                   [--output OUTPUT]\n                                   [--registry-path REGISTRY_PATH]\n                                   [--usage-path USAGE_PATH] [--store STORE]\n                                   [--distill-on-success]\n                                   [--distill-license DISTILL_LICENSE]\n                                   [--distill-reason DISTILL_REASON]\n                                   [--distill-source-url DISTILL_SOURCE_URL]\n                                   [--library-dir LIBRARY_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.journal-verify",
+      "group": "skill",
+      "label": "journal verify",
+      "syntax": "python -m research_agent skill journal-verify",
+      "description": "usage: research_agent skill journal-verify [-h] --pack-root PACK_ROOT\n                                           [--profiles PROFILES]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.lint",
+      "group": "skill",
+      "label": "lint",
+      "syntax": "python -m research_agent skill lint",
+      "description": "usage: research_agent skill lint [-h] [--path PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.pack",
+      "group": "skill",
+      "label": "pack",
+      "syntax": "python -m research_agent skill pack",
+      "description": "usage: research_agent skill pack [-h] --path PATH\n                                 [--stage {,idea,design,writing,submission,review,reproducibility,general}]\n                                 [--max-items MAX_ITEMS] [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.propose",
+      "group": "skill",
+      "label": "propose",
+      "syntax": "python -m research_agent skill propose",
+      "description": "usage: research_agent skill propose [-h] [--registry-path REGISTRY_PATH]\n                                    [--usage-path USAGE_PATH]\n                                    [--eval-root EVAL_ROOT] [--ledger LEDGER]\n                                    [--policy-path POLICY_PATH]\n                                    [--versions-path VERSIONS_PATH] --skill-id\n                                    SKILL_ID --patch PATCH --rationale\n                                    RATIONALE --predicted PREDICTED\n                                    [--dry-run-ref DRY_RUN_REF]\n                                    [--observation OBSERVATION]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.route",
+      "group": "skill",
+      "label": "route",
+      "syntax": "python -m research_agent skill route",
+      "description": "usage: research_agent skill route [-h] --root ROOT --venue VENUE\n                                  [--with-checklist]\n                                  [--stage {,idea,design,writing,submission,review,reproducibility,general}]\n                                  [--max-items MAX_ITEMS]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.usage.list",
+      "group": "skill",
+      "label": "list",
+      "syntax": "python -m research_agent skill usage.list",
+      "description": "usage: research_agent skill usage list [-h] [--registry-path REGISTRY_PATH]\n                                       [--usage-path USAGE_PATH]\n                                       [--eval-root EVAL_ROOT]\n                                       [--ledger LEDGER]\n                                       [--policy-path POLICY_PATH]\n                                       [--versions-path VERSIONS_PATH]\n                                       [--skill-id SKILL_ID] [--limit LIMIT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.usage.record",
+      "group": "skill",
+      "label": "record",
+      "syntax": "python -m research_agent skill usage.record",
+      "description": "usage: research_agent skill usage record [-h] [--registry-path REGISTRY_PATH]\n                                         [--usage-path USAGE_PATH]\n                                         [--eval-root EVAL_ROOT]\n                                         [--ledger LEDGER]\n                                         [--policy-path POLICY_PATH]\n                                         [--versions-path VERSIONS_PATH]\n                                         --skill-id SKILL_ID --status\n                                         {pass,warn,fail,blocked,needs_input}\n                                         [--task-id TASK_ID] [--check CHECK]\n                                         [--artifact-ref ARTIFACT_REF]\n                                         [--note NOTE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.usage.summary",
+      "group": "skill",
+      "label": "summary",
+      "syntax": "python -m research_agent skill usage.summary",
+      "description": "usage: research_agent skill usage summary [-h] [--registry-path REGISTRY_PATH]\n                                          [--usage-path USAGE_PATH]\n                                          [--eval-root EVAL_ROOT]\n                                          [--ledger LEDGER]\n                                          [--policy-path POLICY_PATH]\n                                          [--versions-path VERSIONS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.version.activate",
+      "group": "skill",
+      "label": "activate",
+      "syntax": "python -m research_agent skill version.activate",
+      "description": "usage: research_agent skill version activate [-h]\n                                             [--registry-path REGISTRY_PATH]\n                                             [--usage-path USAGE_PATH]\n                                             [--eval-root EVAL_ROOT]\n                                             [--ledger LEDGER]\n                                             [--policy-path POLICY_PATH]\n                                             [--versions-path VERSIONS_PATH]\n                                             --skill-id SKILL_ID --version\n                                             VERSION --eval-report EVAL_REPORT\n                                             --human-reason HUMAN_REASON",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.version.list",
+      "group": "skill",
+      "label": "list",
+      "syntax": "python -m research_agent skill version.list",
+      "description": "usage: research_agent skill version list [-h] [--registry-path REGISTRY_PATH]\n                                         [--usage-path USAGE_PATH]\n                                         [--eval-root EVAL_ROOT]\n                                         [--ledger LEDGER]\n                                         [--policy-path POLICY_PATH]\n                                         [--versions-path VERSIONS_PATH]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "skill.version.rollback",
+      "group": "skill",
+      "label": "rollback",
+      "syntax": "python -m research_agent skill version.rollback",
+      "description": "usage: research_agent skill version rollback [-h]\n                                             [--registry-path REGISTRY_PATH]\n                                             [--usage-path USAGE_PATH]\n                                             [--eval-root EVAL_ROOT]\n                                             [--ledger LEDGER]\n                                             [--policy-path POLICY_PATH]\n                                             [--versions-path VERSIONS_PATH]\n                                             --skill-id SKILL_ID\n                                             --human-reason HUMAN_REASON",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "spec.list",
+      "group": "spec",
+      "label": "list",
+      "syntax": "python -m research_agent spec list",
+      "description": "usage: research_agent spec list [-h] [--json]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "spec.patch",
+      "group": "spec",
+      "label": "patch",
+      "syntax": "python -m research_agent spec patch",
+      "description": "usage: research_agent spec patch [-h] --section SECTION [--text TEXT]\n                                 [--file FILE]\n                                 module_id",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "spec.update",
+      "group": "spec",
+      "label": "update",
+      "syntax": "python -m research_agent spec update",
+      "description": "usage: research_agent spec update [-h] [--version VERSION]\n                                  [--status {draft,pilot,active,deprecated,revoked}]\n                                  [--name NAME] [--stage STAGE]\n                                  [--input INPUTS] [--output OUTPUTS]\n                                  [--tool TOOLS] [--gate GATES]\n                                  [--invariant INVARIANTS] --changelog\n                                  CHANGELOG [--replace-lists]\n                                  module_id",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.brief",
+      "group": "study",
+      "label": "brief",
+      "syntax": "python -m research_agent study brief",
+      "description": "usage: research_agent study brief [-h] --study-dir STUDY_DIR [--output OUTPUT]\n                                  [--language {zh,en}]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.claim",
+      "group": "study",
+      "label": "claim",
+      "syntax": "python -m research_agent study claim",
+      "description": "usage: research_agent study claim [-h] --study-dir STUDY_DIR --statement\n                                  STATEMENT --scope SCOPE --human-reason\n                                  HUMAN_REASON [--baseline-file BASELINE_FILE]\n                                  [--sign] [--no-guard]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.closure",
+      "group": "study",
+      "label": "closure",
+      "syntax": "python -m research_agent study closure",
+      "description": "usage: research_agent study closure [-h] --study-dir STUDY_DIR [--sign]\n                                    [--human-reason HUMAN_REASON]\n                                    [--signer SIGNER] [--build-lineage]\n                                    [--verify] [--verify-repro]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.from-idea",
+      "group": "study",
+      "label": "from idea",
+      "syntax": "python -m research_agent study from-idea",
+      "description": "usage: research_agent study from-idea [-h] --project PROJECT --run-id RUN_ID\n                                      --idea-id IDEA_ID [--seeds SEEDS]\n                                      [--budget BUDGET]\n                                      [--output-root OUTPUT_ROOT]\n                                      [--datasets DATASETS]\n                                      [--preregistration PREREGISTRATION]\n                                      [--force]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.package",
+      "group": "study",
+      "label": "package",
+      "syntax": "python -m research_agent study package",
+      "description": "usage: research_agent study package [-h] --study-dir STUDY_DIR\n                                    [--output OUTPUT] [--language {zh,en}]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.prereg.init",
+      "group": "study",
+      "label": "init",
+      "syntax": "python -m research_agent study prereg.init",
+      "description": "usage: research_agent study prereg init [-h] --dataset DATASET --seeds SEEDS\n                                        --budget BUDGET [--factors FACTORS]\n                                        [--min-delta MIN_DELTA]\n                                        [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.profiles",
+      "group": "study",
+      "label": "profiles",
+      "syntax": "python -m research_agent study profiles",
+      "description": "usage: research_agent study profiles [-h]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.replicate",
+      "group": "study",
+      "label": "replicate",
+      "syntax": "python -m research_agent study replicate",
+      "description": "usage: research_agent study replicate [-h] [--project PROJECT]\n                                      [--studies-dir STUDIES_DIR]\n                                      [--output-dir OUTPUT_DIR]\n                                      [--project-only]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.saturation",
+      "group": "study",
+      "label": "saturation",
+      "syntax": "python -m research_agent study saturation",
+      "description": "usage: research_agent study saturation [-h] --study-dir STUDY_DIR",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "study.search",
+      "group": "study",
+      "label": "search",
+      "syntax": "python -m research_agent study search",
+      "description": "usage: research_agent study search [-h] [--project PROJECT]\n                                   [--output-dir OUTPUT_DIR]\n                                   [--dataset {iris,breast_cancer,wine,digits}]\n                                   [--seeds SEEDS] [--budget BUDGET]\n                                   [--min-delta MIN_DELTA]\n                                   [--factors FACTOR=LEVEL[,LEVEL...]]\n                                   [--preregistration PREREGISTRATION]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "venue.audit",
+      "group": "venue",
+      "label": "audit",
+      "syntax": "python -m research_agent venue audit",
+      "description": "usage: research_agent venue audit [-h] --file FILE [--kind {zh_journal,grant}]\n                                  [--profile {zh_core_journal,software_journal,computer_journal}]\n                                  [--scheme {nsfc,nssfc,generic}]\n                                  [--anonymous] [--identity-removed]\n                                  [--ai-statement] [--skill-pack SKILL_PACK]\n                                  [--skill-max-items SKILL_MAX_ITEMS]\n                                  [--skill-pack-root SKILL_PACK_ROOT]\n                                  [--venue VENUE]\n                                  [--skill-stage {,idea,design,writing,submission,review,reproducibility,general}]\n                                  [--skill-profile {,design,draft,submission,revision}]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "waitpoint.consume",
+      "group": "waitpoint",
+      "label": "consume",
+      "syntax": "python -m research_agent waitpoint consume",
+      "description": "usage: research_agent waitpoint consume [-h] --owner OWNER [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "waitpoint.expire",
+      "group": "waitpoint",
+      "label": "expire",
+      "syntax": "python -m research_agent waitpoint expire",
+      "description": "usage: research_agent waitpoint expire [-h] [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "waitpoint.list",
+      "group": "waitpoint",
+      "label": "list",
+      "syntax": "python -m research_agent waitpoint list",
+      "description": "usage: research_agent waitpoint list [-h] [--owner OWNER] [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "waitpoint.status",
+      "group": "waitpoint",
+      "label": "status",
+      "syntax": "python -m research_agent waitpoint status",
+      "description": "usage: research_agent waitpoint status [-h] --id ID [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "web",
+      "group": "web",
+      "label": "web",
+      "syntax": "python -m research_agent web",
+      "description": "usage: research_agent web [-h] [--port PORT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "workspace.archive.add",
+      "group": "workspace",
+      "label": "add",
+      "syntax": "python -m research_agent workspace archive.add",
+      "description": "usage: research_agent workspace archive add [-h] --file FILE --title TITLE\n                                            --task-id TASK_ID [--note NOTE]\n                                            [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "workspace.archive.delete",
+      "group": "workspace",
+      "label": "delete",
+      "syntax": "python -m research_agent workspace archive.delete",
+      "description": "usage: research_agent workspace archive delete [-h] --id ID [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "workspace.archive.get",
+      "group": "workspace",
+      "label": "get",
+      "syntax": "python -m research_agent workspace archive.get",
+      "description": "usage: research_agent workspace archive get [-h] --id ID [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "workspace.archive.list",
+      "group": "workspace",
+      "label": "list",
+      "syntax": "python -m research_agent workspace archive.list",
+      "description": "usage: research_agent workspace archive list [-h] [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "workspace.commands",
+      "group": "workspace",
+      "label": "commands",
+      "syntax": "python -m research_agent workspace commands",
+      "description": "usage: research_agent workspace commands [-h] [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "workspace.export",
+      "group": "workspace",
+      "label": "export",
+      "syntax": "python -m research_agent workspace export",
+      "description": "usage: research_agent workspace export [-h] [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "workspace.memory.add",
+      "group": "workspace",
+      "label": "add",
+      "syntax": "python -m research_agent workspace memory.add",
+      "description": "usage: research_agent workspace memory add [-h] --text TEXT\n                                           [--kind {decision,preference,constraint,note}]\n                                           [--scope SCOPE] [--source SOURCE]\n                                           [--store STORE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "workspace.memory.delete",
+      "group": "workspace",
+      "label": "delete",
+      "syntax": "python -m research_agent workspace memory.delete",
+      "description": "usage: research_agent workspace memory delete [-h] --id ID [--store STORE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "workspace.memory.list",
+      "group": "workspace",
+      "label": "list",
+      "syntax": "python -m research_agent workspace memory.list",
+      "description": "usage: research_agent workspace memory list [-h] [--store STORE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "writing.bind",
+      "group": "writing",
+      "label": "bind",
+      "syntax": "python -m research_agent writing bind",
+      "description": "usage: research_agent writing bind [-h] --project PROJECT --run-id RUN_ID\n                                   [--language {zh,en}]\n                                   [--experiment-id EXPERIMENT_ID]\n                                   [--venue {zh_core_journal,software_journal,computer_journal,en_conference}]\n                                   --draft DRAFT --output OUTPUT",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "writing.external-claim-audit",
+      "group": "writing",
+      "label": "external claim audit",
+      "syntax": "python -m research_agent writing external-claim-audit",
+      "description": "usage: research_agent writing external-claim-audit [-h] --project PROJECT\n                                                   --run-id RUN_ID\n                                                   [--language {zh,en}]\n                                                   [--experiment-id EXPERIMENT_ID]\n                                                   [--venue {zh_core_journal,software_journal,computer_journal,en_conference}]\n                                                   [--skill-root SKILL_ROOT]\n                                                   [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "writing.external-consistency",
+      "group": "writing",
+      "label": "external consistency",
+      "syntax": "python -m research_agent writing external-consistency",
+      "description": "usage: research_agent writing external-consistency [-h] --project PROJECT\n                                                   --registry REGISTRY\n                                                   [--skill-root SKILL_ROOT]\n                                                   [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "writing.external-lint",
+      "group": "writing",
+      "label": "external lint",
+      "syntax": "python -m research_agent writing external-lint",
+      "description": "usage: research_agent writing external-lint [-h] --project PROJECT --draft\n                                            DRAFT [--skill-root SKILL_ROOT]\n                                            [--output OUTPUT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "writing.support-eval",
+      "group": "writing",
+      "label": "support eval",
+      "syntax": "python -m research_agent writing support-eval",
+      "description": "usage: research_agent writing support-eval [-h] [--cases CASES]\n                                           [--votes VOTES]\n                                           [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "writing.support-gold",
+      "group": "writing",
+      "label": "support gold",
+      "syntax": "python -m research_agent writing support-gold",
+      "description": "usage: research_agent writing support-gold [-h] --project PROJECT --run-id\n                                           RUN_ID [--language {zh,en}]\n                                           [--experiment-id EXPERIMENT_ID]\n                                           [--venue {zh_core_journal,software_journal,computer_journal,en_conference}]\n                                           [--annotator-file ANNOTATOR_FILES]\n                                           [--draft DRAFT] [--panel PANEL]\n                                           [--ledger LEDGER]\n                                           [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "writing.support-gold-template",
+      "group": "writing",
+      "label": "support gold template",
+      "syntax": "python -m research_agent writing support-gold-template",
+      "description": "usage: research_agent writing support-gold-template [-h] --project PROJECT\n                                                    --run-id RUN_ID\n                                                    [--language {zh,en}]\n                                                    [--experiment-id EXPERIMENT_ID]\n                                                    [--venue {zh_core_journal,software_journal,computer_journal,en_conference}]\n                                                    [--panel PANEL]\n                                                    [--annotator ANNOTATORS]\n                                                    [--ledger LEDGER]\n                                                    [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "writing.support-panel",
+      "group": "writing",
+      "label": "support panel",
+      "syntax": "python -m research_agent writing support-panel",
+      "description": "usage: research_agent writing support-panel [-h] --project PROJECT --run-id\n                                            RUN_ID [--language {zh,en}]\n                                            [--experiment-id EXPERIMENT_ID]\n                                            [--venue {zh_core_journal,software_journal,computer_journal,en_conference}]\n                                            --draft DRAFT\n                                            [--judge-profile JUDGE_PROFILES]\n                                            [--judge-family JUDGE_FAMILIES]\n                                            [--require-families]\n                                            [--require-providers]\n                                            [--support-votes SUPPORT_VOTES]\n                                            [--max-items MAX_ITEMS]\n                                            [--strict-support]\n                                            [--refresh-support]\n                                            [--adjudication ADJUDICATION]",
+      "safety": "catalog_only",
+      "curated": false
+    }
+  ],
+  "boundary": "descriptive catalog only; the UI does not execute shell commands; entries marked safety=catalog_only are derived from the parser and have not been classified by a human, so they carry no safety promise"
+}

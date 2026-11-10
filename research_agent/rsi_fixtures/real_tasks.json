@@ -1,0 +1,21 @@
+{
+  "fixture": false,
+  "corpus_kind": "real",
+  "benchmark": "rsi-ccby-4",
+  "license_summary": "CC-BY-4.0",
+  "note": "Questions authored against four CC-BY 4.0 arXiv papers; curated retrieval probe, not a peer-review benchmark.",
+  "tasks": [
+    {"task_id": "RPUB-1", "split": "public", "question": "Darwin Godel Machine archive open-ended self-modification coding agent", "gold_texts": ["archive of generated coding agents", "open-ended exploration"]},
+    {"task_id": "RPUB-2", "split": "public", "question": "SICA self-improving coding agent best performing agent utility function", "gold_texts": ["best performing agent from the archive", "utility function"]},
+    {"task_id": "RPUB-3", "split": "public", "question": "SIFT fast tree search judge signal parent sampling", "gold_texts": ["judge signal", "Parent nodes for the next round"]},
+    {"task_id": "RHID-1", "split": "hidden", "question": "DGM stepping stones previously discovered agents", "gold_texts": ["stepping stones for future generations", "archive of previously discovered solutions"]},
+    {"task_id": "RHID-2", "split": "hidden", "question": "SICA meta-agent archive improvement implementation", "gold_texts": ["takes the best performing agent from the archive", "identify an improvement"]},
+    {"task_id": "RHID-3", "split": "hidden", "question": "SIFT pairwise Bradley-Terry aggregation evaluation cost", "gold_texts": ["Bradley–Terry aggregation", "time and cost bottleneck"]},
+    {"task_id": "ROOD-1", "split": "near_ood", "question": "agentic context engineering evolving playbooks brevity bias context collapse", "gold_texts": ["brevity bias", "context collapse"]},
+    {"task_id": "ROOD-2", "split": "near_ood", "question": "How do self-improving systems avoid full benchmark evaluation costs?", "gold_texts": ["cheaper signals", "pairwise LLM judgments"]},
+    {"task_id": "ROOD-3", "split": "near_ood", "question": "What safety mechanisms support self-modifying coding agents?", "gold_texts": ["observability", "sandboxing"]},
+    {"task_id": "RREG-1", "split": "regression", "question": "SICA utility function benchmark performance wall-clock dollar cost", "gold_texts": ["wall-clock time", "dollar cost"]},
+    {"task_id": "RREG-2", "split": "regression", "question": "DGM safety sandboxing traceability self-modifications", "gold_texts": ["traceability of self-modifications", "sandboxing"]},
+    {"task_id": "RREG-3", "split": "regression", "question": "ACE comprehensive structured playbooks incremental updates", "gold_texts": ["structured playbooks", "incremental delta"]}
+  ]
+}

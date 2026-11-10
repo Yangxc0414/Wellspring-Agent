@@ -1,0 +1,148 @@
+{
+  "schema_version": "custom-agents-0.1",
+  "generated_at": "2026-11-10T10:54:40+00:00",
+  "count": 2,
+  "agents": [
+    {
+      "id": "CAG-20261024T154502Z-72ba99",
+      "name": "协议前置审阅",
+      "role": "methodologist",
+      "role_label": "方法学家",
+      "purpose": "在 S4 检查 baseline、主指标、对照与 seeds；当前编排 stop point 之外，明确 deferred。",
+      "enabled": true,
+      "advisory_only": true,
+      "writes": [],
+      "created_at": "2026-10-24T15:45:02+00:00",
+      "updated_at": "2026-10-24T15:45:02+00:00",
+      "checks": [
+        "protocol"
+      ],
+      "check_labels": [
+        "协议审阅"
+      ],
+      "stages": [
+        "S4"
+      ],
+      "stage": "S4",
+      "tools": [
+        "protocol.inspect"
+      ],
+      "outputs": [
+        "ProtocolAdvisory"
+      ]
+    },
+    {
+      "id": "CAG-20261024T154502Z-7b0ba5",
+      "name": "覆盖与引用审稿人",
+      "role": "reviewer",
+      "role_label": "审稿人",
+      "purpose": "检查全文覆盖与候选引用是否落在合并 span 中，提醒摘要-only 与引用断链。",
+      "enabled": true,
+      "advisory_only": true,
+      "writes": [],
+      "created_at": "2026-10-24T15:45:02+00:00",
+      "updated_at": "2026-10-24T15:45:02+00:00",
+      "checks": [
+        "coverage",
+        "citation"
+      ],
+      "check_labels": [
+        "覆盖审计",
+        "引用对齐"
+      ],
+      "stages": [
+        "S1"
+      ],
+      "stage": "S1",
+      "tools": [
+        "coverage.inspect",
+        "citation.inspect"
+      ],
+      "outputs": [
+        "CoverageAdvisory",
+        "CitationAdvisory"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "id": "coverage",
+      "label": "覆盖审计",
+      "stage": "S1",
+      "tool": "coverage.inspect",
+      "output": "CoverageAdvisory",
+      "description": "检查全文数、面向覆盖与摘要-only 来源。"
+    },
+    {
+      "id": "citation",
+      "label": "引用对齐",
+      "stage": "S1",
+      "tool": "citation.inspect",
+      "output": "CitationAdvisory",
+      "description": "检查候选帧引用的 span 是否存在于合并证据视图。"
+    },
+    {
+      "id": "hypothesis",
+      "label": "假设审阅",
+      "stage": "S2–S3",
+      "tool": "idea.inspect",
+      "output": "HypothesisAdvisory",
+      "description": "检查候选的证据支持、跨来源与 lens 多样性。"
+    },
+    {
+      "id": "protocol",
+      "label": "协议审阅",
+      "stage": "S4",
+      "tool": "protocol.inspect",
+      "output": "ProtocolAdvisory",
+      "description": "检查 baseline、指标、对照与 seeds；当前编排 stop point 之外。"
+    },
+    {
+      "id": "evidence",
+      "label": "证据边界",
+      "stage": "S5b",
+      "tool": "evidence.inspect",
+      "output": "EvidenceAdvisory",
+      "description": "检查 claim/EA 边界；当前编排不产生 Claim，因此 deferred。"
+    },
+    {
+      "id": "figure",
+      "label": "图形审阅",
+      "stage": "S6",
+      "tool": "figure.inspect",
+      "output": "FigureAdvisory",
+      "description": "检查图与 provenance；当前编排不执行 S6。"
+    },
+    {
+      "id": "closure",
+      "label": "闭包审阅",
+      "stage": "S13–S16",
+      "tool": "closure.inspect",
+      "output": "ClosureAdvisory",
+      "description": "检查 closure/export；当前编排不执行 S13–S16。"
+    }
+  ],
+  "roles": [
+    {
+      "id": "reviewer",
+      "label": "审稿人"
+    },
+    {
+      "id": "auditor",
+      "label": "审计员"
+    },
+    {
+      "id": "scout",
+      "label": "侦察员"
+    },
+    {
+      "id": "methodologist",
+      "label": "方法学家"
+    },
+    {
+      "id": "writer-assistant",
+      "label": "写作助理"
+    }
+  ],
+  "boundary": "advisory only: whitelisted deterministic checks; no Claim/EA/gate, no arbitrary code, no external tools"
+}

@@ -1,0 +1,520 @@
+{
+  "schema_version": 1,
+  "id": "PIPE-20261024T050235Z-e3a30a-figure",
+  "component": "research-agent-module-graph",
+  "style": "modern",
+  "width": 1440,
+  "height": 388,
+  "scientific_notes": [
+    "Schematic module graph; not an experimental result and not a data plot.",
+    "Node positions and colors are illustrative; they do not encode measured effects.",
+    "Evidence references: FX-001-S01-01, FX-001-S01-02, FX-001-S02-01, FX-002-S01-01"
+  ],
+  "objects": [
+    {
+      "id": "title",
+      "type": "text",
+      "role": "label",
+      "x": 54,
+      "y": 24,
+      "width": 1332,
+      "height": 44,
+      "text": "研究运行时：从证据到稿件",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 30,
+      "fill": "#172033",
+      "bold": true
+    },
+    {
+      "id": "subtitle",
+      "type": "text",
+      "role": "label",
+      "x": 54,
+      "y": 74,
+      "width": 1332,
+      "height": 30,
+      "text": "模块关系示意图；不是实验结果",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 13,
+      "fill": "#667085"
+    },
+    {
+      "id": "lit",
+      "type": "rect",
+      "role": "module",
+      "x": 54,
+      "y": 118,
+      "width": 204,
+      "height": 70,
+      "radius": 10,
+      "fill": "#EEF4FF",
+      "stroke": "#3B6FB6",
+      "strokeWidth": 2.0
+    },
+    {
+      "id": "lit-label",
+      "type": "text",
+      "role": "label",
+      "x": 68,
+      "y": 134,
+      "width": 176,
+      "height": 44,
+      "text": "文献调研\n5 spans",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 16,
+      "fill": "#1D3F6E",
+      "bold": true
+    },
+    {
+      "id": "idea",
+      "type": "rect",
+      "role": "module",
+      "x": 316,
+      "y": 118,
+      "width": 204,
+      "height": 70,
+      "radius": 10,
+      "fill": "#F3EEFF",
+      "stroke": "#7059B8",
+      "strokeWidth": 2.0
+    },
+    {
+      "id": "idea-label",
+      "type": "text",
+      "role": "label",
+      "x": 330,
+      "y": 134,
+      "width": 176,
+      "height": 44,
+      "text": "假设收敛\n3 candidates",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 16,
+      "fill": "#3F2F78",
+      "bold": true
+    },
+    {
+      "id": "design",
+      "type": "rect",
+      "role": "module",
+      "x": 578,
+      "y": 118,
+      "width": 204,
+      "height": 70,
+      "radius": 10,
+      "fill": "#EAF8F5",
+      "stroke": "#2F8A78",
+      "strokeWidth": 2.0
+    },
+    {
+      "id": "design-label",
+      "type": "text",
+      "role": "label",
+      "x": 592,
+      "y": 134,
+      "width": 176,
+      "height": 44,
+      "text": "实验设计\nready_for_g2",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 16,
+      "fill": "#1D5B50",
+      "bold": true
+    },
+    {
+      "id": "figure",
+      "type": "rect",
+      "role": "module",
+      "x": 840,
+      "y": 118,
+      "width": 204,
+      "height": 70,
+      "radius": 10,
+      "fill": "#FFF2EC",
+      "stroke": "#C56856",
+      "strokeWidth": 2.0
+    },
+    {
+      "id": "figure-label",
+      "type": "text",
+      "role": "label",
+      "x": 854,
+      "y": 134,
+      "width": 176,
+      "height": 44,
+      "text": "科研绘图\nSVG + manifest",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 16,
+      "fill": "#7E3A2C",
+      "bold": true
+    },
+    {
+      "id": "paper",
+      "type": "rect",
+      "role": "module",
+      "x": 1102,
+      "y": 118,
+      "width": 204,
+      "height": 70,
+      "radius": 10,
+      "fill": "#FFF7E8",
+      "stroke": "#B67A22",
+      "strokeWidth": 2.0
+    },
+    {
+      "id": "paper-label",
+      "type": "text",
+      "role": "label",
+      "x": 1116,
+      "y": 134,
+      "width": 176,
+      "height": 44,
+      "text": "论文契约\nslots pending",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 16,
+      "fill": "#6E4A16",
+      "bold": true
+    },
+    {
+      "id": "grant",
+      "type": "rect",
+      "role": "module",
+      "x": 1102,
+      "y": 218,
+      "width": 204,
+      "height": 70,
+      "radius": 10,
+      "fill": "#F2F4F8",
+      "stroke": "#667085",
+      "strokeWidth": 2.0
+    },
+    {
+      "id": "grant-label",
+      "type": "text",
+      "role": "label",
+      "x": 1116,
+      "y": 234,
+      "width": 176,
+      "height": 44,
+      "text": "基金申报\nNSFC",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 16,
+      "fill": "#344054",
+      "bold": true
+    },
+    {
+      "id": "edge-lit-idea-00",
+      "type": "polyline",
+      "role": "connector",
+      "points": [
+        [
+          258,
+          153.0
+        ],
+        [
+          316,
+          153.0
+        ]
+      ],
+      "stroke": "#8A96A8",
+      "strokeWidth": 1.8,
+      "dashed": false,
+      "endArrow": true
+    },
+    {
+      "id": "edge-label-lit-idea-00",
+      "type": "text",
+      "role": "label",
+      "x": 243.0,
+      "y": 127.0,
+      "width": 88,
+      "height": 20,
+      "text": "spans",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "edge-idea-design-01",
+      "type": "polyline",
+      "role": "connector",
+      "points": [
+        [
+          520,
+          153.0
+        ],
+        [
+          578,
+          153.0
+        ]
+      ],
+      "stroke": "#8A96A8",
+      "strokeWidth": 1.8,
+      "dashed": false,
+      "endArrow": true
+    },
+    {
+      "id": "edge-label-idea-design-01",
+      "type": "text",
+      "role": "label",
+      "x": 505.0,
+      "y": 127.0,
+      "width": 88,
+      "height": 20,
+      "text": "G1",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "edge-design-figure-02",
+      "type": "polyline",
+      "role": "connector",
+      "points": [
+        [
+          782,
+          153.0
+        ],
+        [
+          840,
+          153.0
+        ]
+      ],
+      "stroke": "#8A96A8",
+      "strokeWidth": 1.8,
+      "dashed": false,
+      "endArrow": true
+    },
+    {
+      "id": "edge-label-design-figure-02",
+      "type": "text",
+      "role": "label",
+      "x": 767.0,
+      "y": 127.0,
+      "width": 88,
+      "height": 20,
+      "text": "schematic",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "edge-figure-paper-03",
+      "type": "polyline",
+      "role": "connector",
+      "points": [
+        [
+          1044,
+          153.0
+        ],
+        [
+          1102,
+          153.0
+        ]
+      ],
+      "stroke": "#8A96A8",
+      "strokeWidth": 1.8,
+      "dashed": false,
+      "endArrow": true
+    },
+    {
+      "id": "edge-label-figure-paper-03",
+      "type": "text",
+      "role": "label",
+      "x": 1029.0,
+      "y": 127.0,
+      "width": 88,
+      "height": 20,
+      "text": "figure_ref",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "edge-design-grant-04",
+      "type": "polyline",
+      "role": "connector",
+      "points": [
+        [
+          782,
+          153.0
+        ],
+        [
+          1102,
+          253.0
+        ]
+      ],
+      "stroke": "#8A96A8",
+      "strokeWidth": 1.8,
+      "dashed": true,
+      "endArrow": true
+    },
+    {
+      "id": "edge-label-design-grant-04",
+      "type": "text",
+      "role": "label",
+      "x": 898.0,
+      "y": 177.0,
+      "width": 88,
+      "height": 20,
+      "text": "evidence map",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "legend-0",
+      "type": "rect",
+      "role": "legend",
+      "x": 54,
+      "y": 346,
+      "width": 12,
+      "height": 12,
+      "radius": 3,
+      "fill": "#EEF4FF",
+      "stroke": "#3B6FB6",
+      "strokeWidth": 1.2
+    },
+    {
+      "id": "legend-label-0",
+      "type": "text",
+      "role": "label",
+      "x": 72,
+      "y": 343,
+      "width": 60,
+      "height": 20,
+      "text": "文献",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "legend-1",
+      "type": "rect",
+      "role": "legend",
+      "x": 146,
+      "y": 346,
+      "width": 12,
+      "height": 12,
+      "radius": 3,
+      "fill": "#F3EEFF",
+      "stroke": "#7059B8",
+      "strokeWidth": 1.2
+    },
+    {
+      "id": "legend-label-1",
+      "type": "text",
+      "role": "label",
+      "x": 164,
+      "y": 343,
+      "width": 60,
+      "height": 20,
+      "text": "假设",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "legend-2",
+      "type": "rect",
+      "role": "legend",
+      "x": 238,
+      "y": 346,
+      "width": 12,
+      "height": 12,
+      "radius": 3,
+      "fill": "#EAF8F5",
+      "stroke": "#2F8A78",
+      "strokeWidth": 1.2
+    },
+    {
+      "id": "legend-label-2",
+      "type": "text",
+      "role": "label",
+      "x": 256,
+      "y": 343,
+      "width": 60,
+      "height": 20,
+      "text": "实验",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "legend-3",
+      "type": "rect",
+      "role": "legend",
+      "x": 330,
+      "y": 346,
+      "width": 12,
+      "height": 12,
+      "radius": 3,
+      "fill": "#FFF2EC",
+      "stroke": "#C56856",
+      "strokeWidth": 1.2
+    },
+    {
+      "id": "legend-label-3",
+      "type": "text",
+      "role": "label",
+      "x": 348,
+      "y": 343,
+      "width": 60,
+      "height": 20,
+      "text": "图表",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "legend-4",
+      "type": "rect",
+      "role": "legend",
+      "x": 422,
+      "y": 346,
+      "width": 12,
+      "height": 12,
+      "radius": 3,
+      "fill": "#FFF7E8",
+      "stroke": "#B67A22",
+      "strokeWidth": 1.2
+    },
+    {
+      "id": "legend-label-4",
+      "type": "text",
+      "role": "label",
+      "x": 440,
+      "y": 343,
+      "width": 60,
+      "height": 20,
+      "text": "稿件",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    },
+    {
+      "id": "legend-5",
+      "type": "rect",
+      "role": "legend",
+      "x": 514,
+      "y": 346,
+      "width": 12,
+      "height": 12,
+      "radius": 3,
+      "fill": "#F2F4F8",
+      "stroke": "#667085",
+      "strokeWidth": 1.2
+    },
+    {
+      "id": "legend-label-5",
+      "type": "text",
+      "role": "label",
+      "x": 532,
+      "y": 343,
+      "width": 60,
+      "height": 20,
+      "text": "基金",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 10,
+      "fill": "#667085"
+    }
+  ]
+}

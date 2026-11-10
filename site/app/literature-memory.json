@@ -1,0 +1,142 @@
+{
+  "schema_version": "literature-memory-0.1",
+  "count": 1,
+  "topics": [
+    {
+      "topic_id": "TOP-fda6c1e381cf",
+      "question": "How do self-improving coding agents use archives?",
+      "updated_at": "2026-10-24T15:46:17+00:00",
+      "modes": {
+        "real": {
+          "runs": 3,
+          "sources": 12,
+          "full_text": 12,
+          "spans": 96,
+          "queries": 18,
+          "last_run_id": "ORCH-20261024T154617Z-59a04a",
+          "last_seen": "2026-10-24T15:46:17+00:00",
+          "facets": {
+            "core": {
+              "attempts": 3,
+              "covered_runs": 3,
+              "spans": 48,
+              "queries": 3
+            },
+            "survey": {
+              "attempts": 3,
+              "covered_runs": 3,
+              "spans": 48,
+              "queries": 3
+            },
+            "method": {
+              "attempts": 3,
+              "covered_runs": 3,
+              "spans": 48,
+              "queries": 3
+            },
+            "evaluation": {
+              "attempts": 3,
+              "covered_runs": 3,
+              "spans": 48,
+              "queries": 3
+            },
+            "limitation": {
+              "attempts": 3,
+              "covered_runs": 3,
+              "spans": 48,
+              "queries": 3
+            },
+            "recent": {
+              "attempts": 3,
+              "covered_runs": 3,
+              "spans": 48,
+              "queries": 3
+            }
+          },
+          "gaps": {
+            "coverage_cap_reached": 3
+          },
+          "saturations": {
+            "partial": 3
+          }
+        }
+      },
+      "recent_runs": [
+        {
+          "run_id": "ORCH-20261024T151533Z-322387",
+          "role": "orchestrator/s1-fanout",
+          "mode": "real",
+          "at": "2026-10-24T15:15:33+00:00",
+          "facets": [
+            "core",
+            "survey",
+            "method",
+            "evaluation",
+            "limitation",
+            "recent"
+          ],
+          "sources": 4,
+          "full_text": 4,
+          "spans": 32,
+          "queries": 6,
+          "coverage_score": 0.9333,
+          "saturation": "partial",
+          "gaps": [
+            "coverage_cap_reached"
+          ],
+          "fixture_mode": false
+        },
+        {
+          "run_id": "ORCH-20261024T151639Z-357381",
+          "role": "orchestrator/s1-fanout",
+          "mode": "real",
+          "at": "2026-10-24T15:16:39+00:00",
+          "facets": [
+            "core",
+            "survey",
+            "method",
+            "evaluation",
+            "limitation",
+            "recent"
+          ],
+          "sources": 4,
+          "full_text": 4,
+          "spans": 32,
+          "queries": 6,
+          "coverage_score": 0.9333,
+          "saturation": "partial",
+          "gaps": [
+            "coverage_cap_reached"
+          ],
+          "fixture_mode": false
+        },
+        {
+          "run_id": "ORCH-20261024T154617Z-59a04a",
+          "role": "orchestrator/s1-fanout",
+          "mode": "real",
+          "at": "2026-10-24T15:46:17+00:00",
+          "facets": [
+            "core",
+            "survey",
+            "method",
+            "evaluation",
+            "limitation",
+            "recent"
+          ],
+          "sources": 4,
+          "full_text": 4,
+          "spans": 32,
+          "queries": 6,
+          "coverage_score": 0.9333,
+          "saturation": "partial",
+          "gaps": [
+            "coverage_cap_reached"
+          ],
+          "fixture_mode": false
+        }
+      ]
+    }
+  ],
+  "boundary": "process memory only; it can reorder retrieval but never creates Claim/EA/gate or evidence",
+  "generated_at": "2026-10-24T15:46:52+00:00"
+}

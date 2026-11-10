@@ -1,0 +1,79 @@
+{
+  "schema_version": "journal-skill-profiles-0.1",
+  "derived_from": "Awesome-Journal-Skills-main",
+  "boundary": "Projected deterministic writing checks from MIT-licensed skills; not the official journal template. Source/license hashes are verified by skill journal-verify.",
+  "profiles": {
+    "software_journal": {
+      "venue_id": "software_journal",
+      "label": "《软件学报》写作规范（Skill 投影）",
+      "keywords_min": 3,
+      "keywords_max": 8,
+      "requires_english_abstract": true,
+      "requires_classification": true,
+      "requires_threats": true,
+      "gb7714_min_ratio": 0.5,
+      "brief": "中文题名+英文题名；结构化摘要写目的/问题、方法、结果、结论与意义，摘要不引用文献或图表；关键词 3-8 个且中英文对应；给出中图分类号（TP 类）；引言按问题—现状不足—贡献—证据预告—局限展开；讨论威胁有效性；图表有编号题注；参考文献按 GB/T 7714 并标注 [J]/[C]/[M]/[D]/[EB/OL]。",
+      "license_path": "Journal-of-Software-Skills\\LICENSE",
+      "license_sha256": "bad075617318f23249188e9f4561c8f5fa1a3e992d1e6c95a8740750aba98540",
+      "sources": [
+        {
+          "skill": "jos-writing-style",
+          "path": "Journal-of-Software-Skills\\skills\\jos-writing-style\\SKILL.md",
+          "sha256": "db9be756e883c8d5ba0f892b39c23715a938c7f0d7b32327ffec92e5750538d1",
+          "license": "MIT",
+          "copyright": "Copyright (c) 2026 Bryce Wang"
+        },
+        {
+          "skill": "jos-related-work",
+          "path": "Journal-of-Software-Skills\\skills\\jos-related-work\\SKILL.md",
+          "sha256": "ecf8610c809a6ea3529e18a4279a4e2653895647a6127505ba646242a310bba0",
+          "license": "MIT",
+          "copyright": "Copyright (c) 2026 Bryce Wang"
+        },
+        {
+          "skill": "jos-experiments",
+          "path": "Journal-of-Software-Skills\\skills\\jos-experiments\\SKILL.md",
+          "sha256": "286e99936cf06d5e8e3ec344294b5c260761f8c857e00a1c067de06dff916c5b",
+          "license": "MIT",
+          "copyright": "Copyright (c) 2026 Bryce Wang"
+        }
+      ]
+    },
+    "computer_journal": {
+      "venue_id": "computer_journal",
+      "label": "《计算机学报》写作规范（Skill 投影）",
+      "keywords_min": 3,
+      "keywords_max": 8,
+      "requires_english_abstract": true,
+      "requires_classification": true,
+      "requires_threats": false,
+      "gb7714_min_ratio": 0.5,
+      "brief": "中文题名+英文题名；报道性摘要包含目的/方法/结果/结论；关键词 3-8 个且中英文对应；给出中图分类号（TP 类）；引言讲清问题—现状不足—本文贡献；图表题名规范并中英文对照；参考文献按 GB/T 7714 并标注 [J]/[C]/[M]/[D]/[EB/OL]。",
+      "license_path": "Chinese-Journal-of-Computers-Skills\\LICENSE",
+      "license_sha256": "bad075617318f23249188e9f4561c8f5fa1a3e992d1e6c95a8740750aba98540",
+      "sources": [
+        {
+          "skill": "cjc-writing-style",
+          "path": "Chinese-Journal-of-Computers-Skills\\skills\\cjc-writing-style\\SKILL.md",
+          "sha256": "f94e2212f34cd3af675321b090e9245437b8025299f33a8b41a759e399af1572",
+          "license": "MIT",
+          "copyright": "Copyright (c) 2026 Bryce Wang"
+        },
+        {
+          "skill": "cjc-related-work",
+          "path": "Chinese-Journal-of-Computers-Skills\\skills\\cjc-related-work\\SKILL.md",
+          "sha256": "323374f52d1148e18923641af1298379a550bd487d772cff5b77160d871756b4",
+          "license": "MIT",
+          "copyright": "Copyright (c) 2026 Bryce Wang"
+        },
+        {
+          "skill": "cjc-experiments",
+          "path": "Chinese-Journal-of-Computers-Skills\\skills\\cjc-experiments\\SKILL.md",
+          "sha256": "c5da7be9461a86ecdb8fb92269ccde494f0715a4e8e6fba9bcfcea6bf31087e9",
+          "license": "MIT",
+          "copyright": "Copyright (c) 2026 Bryce Wang"
+        }
+      ]
+    }
+  }
+}

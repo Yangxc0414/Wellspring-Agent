@@ -1,0 +1,180 @@
+{
+  "generated_at": "2026-10-23T05:17:00Z",
+  "source": "OpenAlex /works",
+  "mode": "CACHED",
+  "license": "OpenAlex metadata; respect source licenses and attribution",
+  "queries": [
+    {
+      "id": "perovskite-stability",
+      "label": "钙钛矿太阳能电池稳定性",
+      "query": "perovskite solar cell stability",
+      "from_year": 2020,
+      "total_hits": 17141,
+      "returned": 6,
+      "works": [
+        {
+          "openalex_id": "https://openalex.org/W3147596910",
+          "doi": "https://doi.org/10.1038/s41586-021-03406-5",
+          "title": "Pseudo-halide anion engineering for α-FAPbI3 perovskite solar cells",
+          "year": 2021,
+          "cited_by": 3074,
+          "venue": "Nature",
+          "authors": [
+            "Jaeki Jeong",
+            "Minjin Kim",
+            "Jongdeuk Seo"
+          ],
+          "open_access": true,
+          "abstract": ""
+        },
+        {
+          "openalex_id": "https://openalex.org/W3002058265",
+          "doi": "https://doi.org/10.1038/s41560-019-0529-5",
+          "title": "Consensus statement for stability assessment and reporting for perovskite photovoltaics based on ISOS procedures",
+          "year": 2020,
+          "cited_by": 1810,
+          "venue": "Nature Energy",
+          "authors": [
+            "Mark Khenkin",
+            "Eugene A. Katz",
+            "Antonio Abate"
+          ],
+          "open_access": true,
+          "abstract": ""
+        },
+        {
+          "openalex_id": "https://openalex.org/W3088739094",
+          "doi": "https://doi.org/10.1126/science.abb7167",
+          "title": "Stable perovskite solar cells with efficiency exceeding 24.8% and 0.3-V voltage loss",
+          "year": 2020,
+          "cited_by": 1518,
+          "venue": "Science",
+          "authors": [
+            "Mingyu Jeong",
+            "In Woo Choi",
+            "Eun Min Go"
+          ],
+          "open_access": false,
+          "abstract": ""
+        },
+        {
+          "openalex_id": "https://openalex.org/W4288425348",
+          "doi": "https://doi.org/10.1126/science.abp8873",
+          "title": "Inactive (PbI 2 ) 2 RbCl stabilizes perovskite films for efficient solar cells",
+          "year": 2022,
+          "cited_by": 1449,
+          "venue": "Science",
+          "authors": [
+            "Yang Zhao",
+            "Fei Ma",
+            "Zihan Qu"
+          ],
+          "open_access": false,
+          "abstract": ""
+        },
+        {
+          "openalex_id": "https://openalex.org/W4394728226",
+          "doi": "https://doi.org/10.1126/science.adm9474",
+          "title": "Improved charge extraction in inverted perovskite solar cells with dual-site-binding ligands",
+          "year": 2024,
+          "cited_by": 1398,
+          "venue": "Science",
+          "authors": [
+            "Hao Chen",
+            "Cheng Liu",
+            "Jian Xu"
+          ],
+          "open_access": true,
+          "abstract": ""
+        },
+        {
+          "openalex_id": "https://openalex.org/W4206188804",
+          "doi": "https://doi.org/10.1126/science.abh1885",
+          "title": "Conformal quantum dot–SnO 2 layers as electron transporters for efficient perovskite solar cells",
+          "year": 2022,
+          "cited_by": 1354,
+          "venue": "Science",
+          "authors": [
+            "Minjin Kim",
+            "Jaeki Jeong",
+            "Haizhou Lu"
+          ],
+          "open_access": true,
+          "abstract": ""
+        }
+      ]
+    },
+    {
+      "id": "solid-state-battery",
+      "label": "固态电池界面",
+      "query": "solid-state battery interface",
+      "from_year": 2020,
+      "total_hits": 7014,
+      "returned": 4,
+      "works": [
+        {
+          "openalex_id": "https://openalex.org/W4317387800",
+          "doi": "https://doi.org/10.1002/aenm.202203307",
+          "title": "Lithium Batteries and the Solid Electrolyte Interphase (SEI)—Progress and Outlook",
+          "year": 2023,
+          "cited_by": 837,
+          "venue": "Advanced Energy Materials",
+          "authors": [
+            "Henry Adenusi",
+            "Gregory Adam Chass",
+            "Stefano Passerini"
+          ],
+          "open_access": true,
+          "abstract": ""
+        },
+        {
+          "openalex_id": "https://openalex.org/W3003014070",
+          "doi": "https://doi.org/10.1002/advs.201903088",
+          "title": "Progress and Perspective of Ceramic/Polymer Composite Solid Electrolytes for Lithium Batteries",
+          "year": 2020,
+          "cited_by": 825,
+          "venue": "Advanced Science",
+          "authors": [
+            "Li Song",
+            "Shiqi Zhang",
+            "Lu Shen"
+          ],
+          "open_access": true,
+          "abstract": ""
+        },
+        {
+          "openalex_id": "https://openalex.org/W3053356149",
+          "doi": "https://doi.org/10.1002/adma.202000751",
+          "title": "Lithium/Sulfide All‐Solid‐State Batteries using Sulfide Electrolytes",
+          "year": 2020,
+          "cited_by": 811,
+          "venue": "Advanced Materials",
+          "authors": [
+            "Jinghua Wu",
+            "Sufu Liu",
+            "Fudong Han"
+          ],
+          "open_access": false,
+          "abstract": ""
+        },
+        {
+          "openalex_id": "https://openalex.org/W3105248494",
+          "doi": "https://doi.org/10.1002/aenm.202002689",
+          "title": "Solid‐State Li–Metal Batteries: Challenges and Horizons of Oxide and Sulfide Solid Electrolytes and Their Interfaces",
+          "year": 2020,
+          "cited_by": 810,
+          "venue": "Advanced Energy Materials",
+          "authors": [
+            "Kun Joong Kim",
+            "Moran Balaish",
+            "Masaki Wadaguchi"
+          ],
+          "open_access": false,
+          "abstract": ""
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "note": "manual snapshot built from OpenAlex on 2026-10-23; refresh-digest.yml will replace it on schedule"
+}

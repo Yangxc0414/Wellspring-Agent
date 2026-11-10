@@ -1,0 +1,461 @@
+{
+  "source": "closed-loop CheMLab (real local artifacts)",
+  "generatedAt": "2026-10-24T10:13:39+00:00",
+  "manifestId": "LIN-f6eeb3d1dd",
+  "bundleStatus": "complete",
+  "summary": {
+    "nodes": 17,
+    "claims": 1,
+    "slots": 5,
+    "closureChecks": 11,
+    "closureStatus": "ready",
+    "claimId": "CLM-ea8ae63df2",
+    "claimStatement": "On the local ChemLab protocol, Ridge improves R2 over a mean baseline by 0.1874 on average over seeds [17, 18, 19].",
+    "signatureId": "SIG-0cb474f152",
+    "submission": false
+  },
+  "nodes": [
+    {
+      "id": "dataset:9c644ed6b469",
+      "kind": "dataset",
+      "label": "chemlab:morgan:418train+22test",
+      "hash": "9c644ed6b469254a50ac6965bfe81d07291aa59f4523444b49be5da49243dac9",
+      "shortHash": "9c644ed6b469",
+      "dependencies": [],
+      "stage": "sources",
+      "stageLabel": "DATA & SOURCES",
+      "metadata": {}
+    },
+    {
+      "id": "code:163f718776bc",
+      "kind": "code",
+      "label": "run code",
+      "hash": "163f718776bc1e38a8e2b25f7ccd84ce03c4cff380f4f5eb4f9bbb8c6efb3525",
+      "shortHash": "163f718776bc",
+      "dependencies": [],
+      "stage": "sources",
+      "stageLabel": "DATA & SOURCES",
+      "metadata": {}
+    },
+    {
+      "id": "run:RUN-20261024T100951Z-af9680",
+      "kind": "run",
+      "label": "RUN-20261024T100951Z-af9680",
+      "hash": "47d39f98b924028255768961fe76302b88901c69dd807b7112179a8f846189bf",
+      "shortHash": "47d39f98b924",
+      "dependencies": [
+        "dataset:9c644ed6b469",
+        "code:163f718776bc"
+      ],
+      "stage": "run",
+      "stageLabel": "RUN",
+      "metadata": {
+        "status": "completed",
+        "seeds": [
+          17,
+          18,
+          19
+        ]
+      }
+    },
+    {
+      "id": "ea:EA-71b8c57e0ee5",
+      "kind": "evidence",
+      "label": "EA-71b8c57e0ee5",
+      "hash": "150f58f52024217a53e277b827f3586e6d3b137c1de067ce44d4199beb773ca3",
+      "shortHash": "150f58f52024",
+      "dependencies": [
+        "run:RUN-20261024T100951Z-af9680"
+      ],
+      "stage": "evidence",
+      "stageLabel": "EVIDENCE",
+      "metadata": {
+        "scope": "S5/demo/chemlab"
+      }
+    },
+    {
+      "id": "protocol:PROT-faf2643a88",
+      "kind": "protocol",
+      "label": "PROT-faf2643a88",
+      "hash": "9685ea1182516cf013d0c0e1f21a3855dff486fbe92c6d43a4f86d133de3049f",
+      "shortHash": "9685ea118251",
+      "dependencies": [
+        "run:RUN-20261024T100951Z-af9680"
+      ],
+      "stage": "freeze",
+      "stageLabel": "PROTOCOL",
+      "metadata": {
+        "status": "frozen"
+      }
+    },
+    {
+      "id": "bibliography:BIB-66df0d0e5c",
+      "kind": "bibliography",
+      "label": "BIB-66df0d0e5c",
+      "hash": "fb2aadc736e30762080ac4b3331519fd43dca8b51d72aede2098d9f35fde3120",
+      "shortHash": "fb2aadc736e3",
+      "dependencies": [],
+      "stage": "sources",
+      "stageLabel": "DATA & SOURCES",
+      "metadata": {
+        "status": "verified_datacite_snapshot",
+        "entry_count": 4
+      }
+    },
+    {
+      "id": "claim:CLM-ea8ae63df2",
+      "kind": "claim",
+      "label": "CLM-ea8ae63df2",
+      "hash": "15d8254eb160b7196804de3b788f8e5eab1f27c21d2b85a065db02b909f857be",
+      "shortHash": "15d8254eb160",
+      "dependencies": [
+        "ea:EA-71b8c57e0ee5"
+      ],
+      "stage": "claim",
+      "stageLabel": "CLAIM",
+      "metadata": {
+        "status": "supported",
+        "scope": "S5/demo/chemlab"
+      }
+    },
+    {
+      "id": "figure:PIPE-20261024T100950Z-921d80-result",
+      "kind": "figure",
+      "label": "PIPE-20261024T100950Z-921d80-result",
+      "hash": "cd89e93b4f8ca003b3bf730537e2cbd8c892883fa494535c0f716472a8931426",
+      "shortHash": "cd89e93b4f8c",
+      "dependencies": [
+        "ea:EA-71b8c57e0ee5",
+        "run:RUN-20261024T100951Z-af9680"
+      ],
+      "stage": "evidence",
+      "stageLabel": "EVIDENCE",
+      "metadata": {
+        "schematic": false
+      }
+    },
+    {
+      "id": "slot:method.protocol",
+      "kind": "paper_slot",
+      "label": "method.protocol",
+      "hash": "6f83a6205df39cc4c9e0259e2ff0d95bc563fb3c4cb7b90fe167f2b0df4a3cba",
+      "shortHash": "6f83a6205df3",
+      "dependencies": [
+        "protocol:PROT-faf2643a88"
+      ],
+      "stage": "slots",
+      "stageLabel": "PAPER SLOTS",
+      "metadata": {
+        "status": "bound_protocol"
+      }
+    },
+    {
+      "id": "slot:result.primary",
+      "kind": "paper_slot",
+      "label": "result.primary",
+      "hash": "f47e05f99cd014a0a1e12e68029809049abf4df508147401a248d01fae5453b1",
+      "shortHash": "f47e05f99cd0",
+      "dependencies": [
+        "claim:CLM-ea8ae63df2"
+      ],
+      "stage": "slots",
+      "stageLabel": "PAPER SLOTS",
+      "metadata": {
+        "status": "bound_claim"
+      }
+    },
+    {
+      "id": "slot:result.figure",
+      "kind": "paper_slot",
+      "label": "result.figure",
+      "hash": "d408e74d672b77d6ee7f270ff9c4b508caa3708ca35f6dacedc5aaf8b2d2bc0d",
+      "shortHash": "d408e74d672b",
+      "dependencies": [
+        "figure:PIPE-20261024T100950Z-921d80-result"
+      ],
+      "stage": "slots",
+      "stageLabel": "PAPER SLOTS",
+      "metadata": {
+        "status": "bound_figure"
+      }
+    },
+    {
+      "id": "slot:limitation",
+      "kind": "paper_slot",
+      "label": "limitation",
+      "hash": "f1c2c166967e2baa05773ca6cee9a834b655c8201e4b72e7524cbba8ba762a7e",
+      "shortHash": "f1c2c166967e",
+      "dependencies": [
+        "claim:CLM-ea8ae63df2",
+        "protocol:PROT-faf2643a88"
+      ],
+      "stage": "slots",
+      "stageLabel": "PAPER SLOTS",
+      "metadata": {
+        "status": "bound_scope"
+      }
+    },
+    {
+      "id": "slot:citation.related",
+      "kind": "paper_slot",
+      "label": "citation.related",
+      "hash": "2aa2f94afe8e204bda27a673b80bca2996978ecdecc55b731148192a4697e2ca",
+      "shortHash": "2aa2f94afe8e",
+      "dependencies": [
+        "bibliography:BIB-66df0d0e5c"
+      ],
+      "stage": "slots",
+      "stageLabel": "PAPER SLOTS",
+      "metadata": {
+        "status": "bound_bibliography"
+      }
+    },
+    {
+      "id": "paper:manuscript",
+      "kind": "paper",
+      "label": "工作稿：ChemLab reaction conversion baseline",
+      "hash": "dfe2abbf833ba8f488e722bb5989ef856a9f63f77f01d66a70a77b546ffc3f49",
+      "shortHash": "dfe2abbf833b",
+      "dependencies": [
+        "claim:CLM-ea8ae63df2",
+        "figure:PIPE-20261024T100950Z-921d80-result",
+        "protocol:PROT-faf2643a88",
+        "bibliography:BIB-66df0d0e5c",
+        "slot:method.protocol",
+        "slot:result.primary",
+        "slot:result.figure",
+        "slot:limitation",
+        "slot:citation.related"
+      ],
+      "stage": "paper",
+      "stageLabel": "MANUSCRIPT",
+      "metadata": {
+        "status": "needs_evidence"
+      }
+    },
+    {
+      "id": "closure:CLR-3ea12fd8c2",
+      "kind": "closure",
+      "label": "CLR-3ea12fd8c2",
+      "hash": "0300629a9a40ffdd84498655a4e041d23541c5a24fd2a0aea340ae7b9b3517d2",
+      "shortHash": "0300629a9a40",
+      "dependencies": [
+        "claim:CLM-ea8ae63df2",
+        "ea:EA-71b8c57e0ee5",
+        "run:RUN-20261024T100951Z-af9680",
+        "figure:PIPE-20261024T100950Z-921d80-result",
+        "protocol:PROT-faf2643a88",
+        "bibliography:BIB-66df0d0e5c",
+        "paper:manuscript",
+        "slot:method.protocol",
+        "slot:result.primary",
+        "slot:result.figure",
+        "slot:limitation",
+        "slot:citation.related"
+      ],
+      "stage": "closure",
+      "stageLabel": "CLOSURE",
+      "metadata": {
+        "status": "ready",
+        "checks": 11
+      }
+    },
+    {
+      "id": "signature:SIG-0cb474f152",
+      "kind": "signature",
+      "label": "SIG-0cb474f152",
+      "hash": "4320a2a01c64b58c0120a507750c76e5ebb0d0ffe1f0768a7576b75d805bd465",
+      "shortHash": "4320a2a01c64",
+      "dependencies": [
+        "closure:CLR-3ea12fd8c2"
+      ],
+      "stage": "signature",
+      "stageLabel": "SIGNATURE",
+      "metadata": {
+        "submission": false
+      }
+    },
+    {
+      "id": "export:manifest",
+      "kind": "export_manifest",
+      "label": "export manifest",
+      "hash": "7dd2e345935c934aade5fdf6c87e800fffcbb640a7a90dcb4d737623d639e252",
+      "shortHash": "7dd2e345935c",
+      "dependencies": [
+        "signature:SIG-0cb474f152"
+      ],
+      "stage": "signature",
+      "stageLabel": "SIGNATURE",
+      "metadata": {}
+    }
+  ],
+  "clean": {
+    "status": "clean",
+    "changed": [],
+    "staleNodeIds": [],
+    "exportAllowed": true,
+    "dispositions": [],
+    "actionCounts": {},
+    "nextSteps": []
+  },
+  "simulatedChange": {
+    "label": "数据集哈希变更（SIM）",
+    "beforeDatasetHash": "9c644ed6b469254a50ac6965bfe81d07291aa59f4523444b49be5da49243dac9",
+    "afterDatasetHash": "4a7fc003479856e6f4802578730d69b81ac03d7740506baec3ceb35fe8e2e004",
+    "changedNodeIds": [
+      "dataset:9c644ed6b469",
+      "run:RUN-20261024T100951Z-af9680"
+    ],
+    "staleNodeIds": [
+      "claim:CLM-ea8ae63df2",
+      "closure:CLR-3ea12fd8c2",
+      "dataset:9c644ed6b469",
+      "ea:EA-71b8c57e0ee5",
+      "export:manifest",
+      "figure:PIPE-20261024T100950Z-921d80-result",
+      "paper:manuscript",
+      "protocol:PROT-faf2643a88",
+      "run:RUN-20261024T100951Z-af9680",
+      "signature:SIG-0cb474f152",
+      "slot:limitation",
+      "slot:method.protocol",
+      "slot:result.figure",
+      "slot:result.primary"
+    ],
+    "staleClaims": [
+      "claim:CLM-ea8ae63df2"
+    ],
+    "staleSlots": [
+      "slot:limitation",
+      "slot:method.protocol",
+      "slot:result.figure",
+      "slot:result.primary"
+    ],
+    "staleFigures": [
+      "figure:PIPE-20261024T100950Z-921d80-result"
+    ],
+    "requiresReclosure": true,
+    "requiresResign": true,
+    "exportAllowed": false,
+    "dispositions": [
+      {
+        "node_id": "claim:CLM-ea8ae63df2",
+        "kind": "claim",
+        "label": "CLM-ea8ae63df2",
+        "action": "recheck",
+        "detail": "recheck this artifact; closure and signature must be refreshed after reruns"
+      },
+      {
+        "node_id": "closure:CLR-3ea12fd8c2",
+        "kind": "closure",
+        "label": "CLR-3ea12fd8c2",
+        "action": "recheck",
+        "detail": "recheck this artifact; closure and signature must be refreshed after reruns"
+      },
+      {
+        "node_id": "dataset:4a7fc0034798",
+        "kind": "dataset",
+        "label": "chemlab:morgan:418train+22test:v2",
+        "action": "recheck",
+        "detail": "recheck this artifact; closure and signature must be refreshed after reruns"
+      },
+      {
+        "node_id": "dataset:9c644ed6b469",
+        "kind": "dataset",
+        "label": "chemlab:morgan:418train+22test",
+        "action": "recheck",
+        "detail": "recheck this artifact; closure and signature must be refreshed after reruns"
+      },
+      {
+        "node_id": "ea:EA-71b8c57e0ee5",
+        "kind": "evidence",
+        "label": "EA-71b8c57e0ee5",
+        "action": "rerun",
+        "detail": "rerun S5 with the changed dataset/code and emit a new capsule/EA"
+      },
+      {
+        "node_id": "export:manifest",
+        "kind": "export_manifest",
+        "label": "export manifest",
+        "action": "recheck",
+        "detail": "recheck this artifact; closure and signature must be refreshed after reruns"
+      },
+      {
+        "node_id": "figure:PIPE-20261024T100950Z-921d80-result",
+        "kind": "figure",
+        "label": "PIPE-20261024T100950Z-921d80-result",
+        "action": "rewrite",
+        "detail": "regenerate or rebind this figure / manuscript slot to the new evidence"
+      },
+      {
+        "node_id": "paper:manuscript",
+        "kind": "paper",
+        "label": "工作稿：ChemLab reaction conversion baseline",
+        "action": "rewrite",
+        "detail": "regenerate or rebind this figure / manuscript slot to the new evidence"
+      },
+      {
+        "node_id": "protocol:PROT-faf2643a88",
+        "kind": "protocol",
+        "label": "PROT-faf2643a88",
+        "action": "recheck",
+        "detail": "recheck this artifact; closure and signature must be refreshed after reruns"
+      },
+      {
+        "node_id": "run:RUN-20261024T100951Z-af9680",
+        "kind": "run",
+        "label": "RUN-20261024T100951Z-af9680",
+        "action": "rerun",
+        "detail": "rerun S5 with the changed dataset/code and emit a new capsule/EA"
+      },
+      {
+        "node_id": "signature:SIG-0cb474f152",
+        "kind": "signature",
+        "label": "SIG-0cb474f152",
+        "action": "recheck",
+        "detail": "recheck this artifact; closure and signature must be refreshed after reruns"
+      },
+      {
+        "node_id": "slot:limitation",
+        "kind": "paper_slot",
+        "label": "limitation",
+        "action": "rewrite",
+        "detail": "regenerate or rebind this figure / manuscript slot to the new evidence"
+      },
+      {
+        "node_id": "slot:method.protocol",
+        "kind": "paper_slot",
+        "label": "method.protocol",
+        "action": "rewrite",
+        "detail": "regenerate or rebind this figure / manuscript slot to the new evidence"
+      },
+      {
+        "node_id": "slot:result.figure",
+        "kind": "paper_slot",
+        "label": "result.figure",
+        "action": "rewrite",
+        "detail": "regenerate or rebind this figure / manuscript slot to the new evidence"
+      },
+      {
+        "node_id": "slot:result.primary",
+        "kind": "paper_slot",
+        "label": "result.primary",
+        "action": "rewrite",
+        "detail": "regenerate or rebind this figure / manuscript slot to the new evidence"
+      }
+    ],
+    "actionCounts": {
+      "recheck": 7,
+      "rerun": 2,
+      "rewrite": 6
+    },
+    "nextSteps": [
+      "rerun S5 with the changed dataset/code; write a new capsule and EA",
+      "recheck claim/protocol/bibliography; rerun closure after the new run",
+      "regenerate/rebind the affected figure and paper slots",
+      "rerun closure checks and confirm all stale nodes are cleared",
+      "request a fresh human signature; the old signature is stale",
+      "keep export blocked until reclosure and re-signing complete"
+    ]
+  }
+}

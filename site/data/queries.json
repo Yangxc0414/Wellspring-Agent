@@ -1,0 +1,16 @@
+[
+  {
+    "id": "perovskite-stability",
+    "label": "钙钛矿太阳能电池稳定性",
+    "query": "perovskite solar cell stability",
+    "from_year": 2020,
+    "limit": 6
+  },
+  {
+    "id": "solid-state-battery",
+    "label": "固态电池界面",
+    "query": "solid-state battery interface",
+    "from_year": 2020,
+    "limit": 4
+  }
+]

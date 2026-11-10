@@ -1,0 +1,17 @@
+{
+  "name": "Research Agent",
+  "short_name": "Research Agent",
+  "description": "可核验的科研智能体：检索、复现、写作、核验与签署。",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f8fbff",
+  "theme_color": "#f8fbff",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

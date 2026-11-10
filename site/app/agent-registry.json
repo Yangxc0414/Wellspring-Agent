@@ -1,0 +1,1209 @@
+{
+  "schema_version": "workspace-0.1",
+  "source": "modules/*/SPEC.md",
+  "generated_at": "2026-11-10T05:43:44+00:00",
+  "count": 26,
+  "agents": [
+    {
+      "id": "literature",
+      "name": "文献调研",
+      "stage": "S1",
+      "version": "0.12.0",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "QueryPlan",
+        "SourceHit",
+        "Span",
+        "CoverageReceipt",
+        "LiteratureBrief",
+        "Gap",
+        "SourceManifest",
+        "DownloadedPDF",
+        "ConferenceCorpus",
+        "SynthesisMatrix"
+      ],
+      "tools": [
+        "retriever.search",
+        "parser.spans",
+        "retriever.openalex",
+        "retriever.local_pdf",
+        "retriever.arxiv_fetch",
+        "retriever.arxiv_conference",
+        "literature.fetch",
+        "literature.conference_fetch",
+        "literature.synthesis",
+        "model.glm-5.3-flash"
+      ],
+      "gates": [
+        "Q0"
+      ],
+      "invariants": [
+        "没有全文不得生成 Span",
+        "不创建 Claim",
+        "fixture 必须显式标注",
+        "摘要不能当全文证据",
+        "真实语料必须 CC-BY 且带 provenance；harness-only 不写 capability claim",
+        "local PDF/TXT/MD 必须保留页码/文档锚点；空文本或扫描件不得伪装全文",
+        "用户提供全文只作为本地证据，不自动升级为同行评审或 capability claim",
+        "OpenAlex 为只读公共 API：礼貌池 mailto、限流与重试；摘要只作 SourceHit 线索（full_text=false），OA 全文链接供人获取，不自动抓取",
+        "arXiv fetch 只在用户显式 opt-in 时联网；只下载 arXiv 公开 PDF，不绕过付费墙；记录 arXiv id/URL/SHA256/license-note；下载后仍走 local PDF 解析与 Q0",
+        "arXiv fetch 不把摘要当全文；下载失败/非 PDF/超限必须显式报错或记 skipped，不静默伪造来源",
+        "顶会 fetch 只下载 arXiv 公开 PDF；venue 来自 arXiv comment，未独立核验；过滤 workshop/symposium/preprint/findings 与非 agent 标题；不是完整 proceedings 抓取",
+        "综合矩阵每个主题至少覆盖 2 篇不同来源；未使用来源必须显式列出；不得把单篇结论写成领域共识",
+        "GLM-5.3-Flash 仅生成检索子查询：key 走环境变量，无 key/调用失败回退规则模板；输出只是查询串，不创建 Claim、不改证据边界",
+        "覆盖不足必须显式进入 gap / brief.saturation；不能用摘要-only 或重复来源伪造“足够覆盖”",
+        "LiteratureBrief 只做结构化覆盖摘要与摘录，不新增 claim，不把 excerpt 当结论"
+      ],
+      "spec": "modules/literature/SPEC.md"
+    },
+    {
+      "id": "idea",
+      "name": "假设收敛",
+      "stage": "S2–S3",
+      "version": "0.24.1",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "IdeaCard",
+        "IdeaBrief",
+        "IdeaShortlist",
+        "InnovationReview",
+        "GapMap",
+        "CriticSupplyPanel"
+      ],
+      "tools": [
+        "idea.frame",
+        "model.idea_proposer",
+        "idea.innovation_review",
+        "model.innovation_critic",
+        "model.profile_binding"
+      ],
+      "gates": [
+        "G1"
+      ],
+      "invariants": [
+        "候选不是 Claim",
+        "必须带否证条件",
+        "不能自动通过 G1",
+        "聚类只生成候选框架，不评 novelty、不自动收敛短名单",
+        "低证据支持、无跨来源候选、lens 单一必须进入 IdeaBrief.gaps / warning",
+        "模型只能基于输入 span 提候选；evidence_refs 必须解析到输入 span",
+        "模型候选仍需 G1；模型不能生成 Claim/结果/指标数值",
+        "innovation review 的 novelty/evidence/feasibility 评分只是模型辅助 critique，不是 novelty 证明；不得自动通过 G1",
+        "innovation review 只能引用写作包中存在的 REF；缺口/想法/实验计划缺字段或引用未知时必须拒绝或修复",
+        "innovation review 不运行实验、不写 Claim/EA/gate；落盘只写 run 目录",
+        "prior_art_scope 只能是 live_search/live_abstract/s1_corpus/none；live 结果只是 prior-art 线索，不是新颖性结论，也不得进入候选 evidence_refs 或当作写作包 REF",
+        "prior art 必须来自候选证据之外的来源；同 source/同 span 的 live 命中必须过滤，不得把候选自身证据伪装成 prior art；S1 回退同样排除候选来源",
+        "rule candidate 的代表 span 与 evidence_refs 先按 topic 词重叠排序，再按长度；不得只用最长 span",
+        "rule candidate 的 lens 跟随 section：limitation/discussion→boundary，evaluation/benchmark/result→measurement，method→mechanism；未知 section 才回退轮换",
+        "跨来源 contrast 必须是不同 source 且与 topic 有词重叠；不能仅因 section 是 limitation 就拉入无关对照；contrast 不是 evidence，用于 A/B 假设框架与 shortlist 排序",
+        "prior_art_report 记录每个候选的 query、scope、hits 与 error；live 搜索失败时必须回退 s1_corpus/none 并记 warning，不得静默伪造命中",
+        "任何候选都保持 novelty_status=unverified；仍需人工 G1 与独立 prior-art/新颖性判断",
+        "IdeaShortlist 只按 prior-art scope、证据数、跨来源、kill criteria 做 advisory 对比；不得给 novelty 分数、不得自动选短名单，selection 固定为 human_g1",
+        "实验计划必须绑定 executable 注册表中的 profile，且 dataset/metric 属于该 profile；不可执行的直接拒绝",
+        "innovation-review 必须输出 independence 区块；同一模型回答全部批评角色时 single_author_review=true 且 admission_eligible=false",
+        "每个批评角色必须由可解析的独立供给回答（provider+model 指纹不同），且提案模型不得兼任批评角色；只有全部条件满足才允许 admission_eligible=true",
+        "admission_eligible 只是供给层面板校验，不证明输出独立、不证明 novelty、不构成 G1/G2 通过；供给指纹来自配置，可被伪造，仍属 advisory",
+        "阶段产物的文字由请求语言决定：prompt 内的硬编码语言指令不得覆盖 language 参数，未知语言在执行前拒绝"
+      ],
+      "spec": "modules/idea/SPEC.md"
+    },
+    {
+      "id": "ccfa-audit",
+      "name": "CCF-A 实验设计披露审计",
+      "stage": "S4",
+      "version": "0.4.0",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "CCFADesignAudit",
+        "StudyDesignDraft"
+      ],
+      "tools": [
+        "design.draft",
+        "design.audit",
+        "design.template"
+      ],
+      "gates": [
+        "G2"
+      ],
+      "invariants": [
+        "只做确定性披露检查，不做同行评审、不给录用判断、不证明证据支持结论",
+        "study-design.json 与本地 run 设计（experiment.json）是两件事；run 设计不得被当成研究设计",
+        "claims 必须逐条映射到证据；beats_prior 需要调过参的基线，mechanism 需要单变量消融",
+        "数据必须声明切分/泄漏检查/许可；统计必须声明 seeds、效应量、区间、多重比较、缺失数据与功效",
+        "disclosure_complete ≠ venue_ready：没有 collected 数据、功效分析与先前工作，不得声称可投 CCF-A",
+        "不创建 Claim/EA/gate/signature/closure"
+      ],
+      "spec": "modules/ccfa-audit/SPEC.md"
+    },
+    {
+      "id": "experiment",
+      "name": "实验设计",
+      "stage": "S4",
+      "version": "0.9.0",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "DesignCard",
+        "ProtocolDraft",
+        "PreRegistrationChecklist",
+        "ProtocolCard",
+        "ProtocolBinding",
+        "ExperimentPackage",
+        "ExperimentExecution",
+        "ExperimentEvidence",
+        "ExperimentClosure",
+        "ExperimentFigure",
+        "DataAudit",
+        "ExperimentSweepEvidence",
+        "SupportPanelCheck"
+      ],
+      "tools": [
+        "design.validate",
+        "model.experiment_designer",
+        "experiment.codegen",
+        "experiment.approve",
+        "experiment.run",
+        "experiment.ingest",
+        "experiment.claim",
+        "experiment.closure",
+        "experiment.sign",
+        "experiment.lineage",
+        "experiment.figure",
+        "experiment.consistency-registry",
+        "experiment.sweep-approve",
+        "experiment.sweep-run",
+        "experiment.sweep-ingest",
+        "experiment.sweep-status",
+        "experiment.local-init",
+        "experiment.local-approve",
+        "experiment.local-run",
+        "experiment.local-ingest"
+      ],
+      "gates": [
+        "G2"
+      ],
+      "invariants": [
+        "不执行 run",
+        "不创建 Claim",
+        "主指标与停止条件需人工冻结",
+        "模型不得覆盖调用方已提供的字段",
+        "模型补全任何字段后 status 必须保持 needs_human",
+        "模型不得生成结果、指标数值、证据引用或 ProtocolCard",
+        "预注册必须先冻结 design，再执行 run；不得要求 completed capsule 才能冻结",
+        "ProtocolCard 必须绑定当前 design_sha256；run 后再单独写 ProtocolBinding",
+        "experiment codegen 只生成项目内自包含实验包；不执行、不安装依赖、不联网、不创建 EA/Claim/gate",
+        "生成包必须带 data/spec/code SHA-256 与 README 边界；target 不得出现在 features；执行必须由用户在本地显式完成",
+        "执行前必须有 approve 记录与 `--allow-execute`；MCP/HTTP 不执行训练，不自动安装依赖",
+        "local-exec（类 Codex 本地命令）仅 CLI：local-init 登记 argv/env_prefix/cwd/expected_outputs/timeout；local-approve 人签并绑定 spec 哈希；local-run 需 approve+--allow-execute、不用 shell、spec 批准后变更即拒绝",
+        "local-exec 记录 command/env_prefix/git commit/platform/stdout/stderr/产物哈希；local-ingest 校验哈希产 local-evidence（claim_eligible=false），失败/超时/缺产物保留为 incomplete；MCP/HTTP 不暴露 local-run",
+        "ingest 必须校验 execution/receipt/metrics/artifact 哈希；evidence 不是 EA/Claim",
+        "claim 只能由 CLI 人签，绑定 evidence hash；MCP 不暴露签核",
+        "结果图只能从 verified evidence 生成，schematic 必须为 false；manifest 必须绑定 spec/execution/evidence/claim 哈希，缺 matplotlib 时跳过而不是安装依赖",
+        "实证稿有结果图时必须在正文引用图 1；图号无 manifest 对应则阻断；图表不得替代 claim 或 closure",
+        "sweep 生命周期：sweep-approve 人签 → sweep-run 显式 `--allow-execute` → sweep-ingest 校验哈希 → `verified_exploratory` evidence；它不是 EA/Claim，不能作为确认结果",
+        "确认 run 可用 `--ridge-alpha` 绑定 sweep best_alpha；approve/run/ingest 必须一致，evidence 记录 alpha；确认结果仍需人签 claim",
+        "若同一 run 存在 support-panel.json，local experiment closure 的 `support_panel.ready` 只允许 ready/not_applicable；needs_human/blocked/partial 或不可读均阻断",
+        "传入手稿时 `support_panel.manuscript` 必须匹配 panel 的 draft_sha256，旧 panel 不能给新稿背书；panel 文件进入 artifact_refs 与 lineage",
+        "无 span 级 evidence 时不调用模型 designer：待人工补全占位保持不变并记录 warning"
+      ],
+      "spec": "modules/experiment/SPEC.md"
+    },
+    {
+      "id": "run",
+      "name": "S5 执行与证据",
+      "stage": "S5",
+      "version": "0.7.0",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "RunCapsule",
+        "EvidenceArtifact",
+        "ClaimRecord",
+        "ProtocolBinding"
+      ],
+      "tools": [
+        "run.execute",
+        "run.claim",
+        "experiment.approve",
+        "experiment.run",
+        "experiment.ingest",
+        "experiment.claim"
+      ],
+      "gates": [
+        "G2"
+      ],
+      "invariants": [
+        "没有冻结 protocol 不执行（strict pipeline 强制；直接调用 RunAgent 时由调用方负责）",
+        "不伪造指标；每次 run 固定 seed 并可复算",
+        "RunCapsule 与 EA 不可原地修改",
+        "不自动创建 Claim；必须有人签理由",
+        "iris/breast_cancer/chemlab 仅用于协议验证，不是论文科学证据",
+        "传入 protocol_sha256 时必须写入 RunCapsule，并与冻结协议 design_sha256 一致",
+        "ProtocolBinding 只能由 completed capsule + EA 生成，不能修改已冻结 ProtocolCard",
+        "生成实验包只能在本地 CLI 经 approve + --allow-execute 后执行；MCP/HTTP 不执行训练",
+        "执行前必须校验 approval/data/spec/code 哈希；环境只允许白名单变量，不自动安装依赖",
+        "execution receipt/experiment-evidence 不是 RunCapsule/EA/Claim；Claim 只能由 CLI 人签并绑定 evidence hash"
+      ],
+      "spec": "modules/run/SPEC.md"
+    },
+    {
+      "id": "search-study",
+      "name": "可执行改进搜索研究",
+      "stage": "S5",
+      "version": "0.71.0",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "SearchStudy",
+        "SearchEvidence",
+        "ExecutableProfile",
+        "StudyClaimDraft"
+      ],
+      "tools": [
+        "study.profiles",
+        "study.search",
+        "study.replicate"
+      ],
+      "gates": [
+        "S5b"
+      ],
+      "invariants": [
+        "结论必须带区间：区间跨零即不得作为方向性主张",
+        "三态判定只有一个来源：study_claims.comparison_verdicts 把每个比较标成 positive/negative/undecidable/unavailable；任何展示或断言都不得把跨零区间的正点估计呈现为提升",
+        "设计是数据但必须校验：未知因子/未知水平/超过 MAX_DESIGN_CELLS 直接拒绝；声明顺序的第一个水平是参照格",
+        "未变因子不得进入格名：单水平因子只记录在 design 中，已签署断言引用的 memory_*/gate_* 名称必须保持稳定",
+        "随机流按完整控制集播种：任何因子的差异都必须对应不同条件，改播种方式即改变数值，旧结论由 code.unchanged 失效",
+        "闭包的可判定判定与签署判定共用 comparison_verdicts：不允许出现\"能签不能闭\"或\"全部可判定却被要求列拒绝清单\"",
+        "产物必须自标 analogue 与 not_a_reproduction_of",
+        "evidence 形状与本地实验包一致，未人签 claim 前不得进入 allowed_result_numbers",
+        "不训练模型、不改写门禁、不创建 Claim",
+        "想法生成只能针对已声明的 executable profile 提出实验计划",
+        "只有 95% 区间不跨零的比较才能成为可签署断言；全部跨零时拒绝产出 claim 草稿",
+        "study claim 只能是 draft 并绑定 study/evidence/spec 三个不同哈希；签署仍走既有人工 claim 路径",
+        "少于 MIN_DECISION_SEEDS(=4) 个种子时不解释区间：不下界、标记 underpowered、不产出可签署断言",
+        "spec 记录 code_fingerprint：搜索代码变更后旧结论不可闭合（code.unchanged）",
+        "交互项必须有配对区间才能被引用或签署；符号由测试钉住 conventional difference-of-differences",
+        "复现按设计分组而非按目录名：budget/min_delta/度量/设计任一不同即不是复现；种子数允许不同但必须写进 warnings，因为只在某数据集训定可能只是功效差异",
+        "复现只数判定的数据集：同数据集重复写算重跑不算复现；generalizes 仅在每个数据集同向判定时为真；本层只读，不重跑、不产 claim、不把跨零区间计入同意",
+        "同一数据集同一设计只允许最高功效那份参与同意计数（否则重复同一批数据就能刷出 consistent）；被更高功效推翻的比较必须带着 decided_at.directory 归属，不能反手推翻做推翻的那一份",
+        "环境是注册表不是硬编码：可执行数据集只能来自 search_lab.DATASETS（study search / pipeline --study-dataset / study from-idea 的拒绝消息都从它生成），新增环境不得散落在 CLI 选项或错误文案里",
+        "多环境复现必须由想法驱动：--datasets 一次执行同一声明设计，每个环境写自己的包（STUDY-<idea>-<dataset>）并各自带 study-origin.json；未知或重复的环境名、以及目标目录已有研究，都在写任何文件之前拒绝",
+        "跨包功效证据进入签署判定：同一设计在同一数据集上被更高功效研究推翻的比较不得成为可签署断言（列入 not_signable 并给出 OVERTURNED 理由），全部被推翻时 build_study_claim 直接拒绝；claim 草稿的 verification.replication 记录设计指纹、已执行数据集、逐比较状态与 boundary",
+        "代码变更的可引用性由两级证据决定：code_fingerprint（整文件）仍是 code.unchanged 的唯一依据，不因任何新信号降级；study-spec.json 另存 algorithm_canary（固定对照集 iris 2×2 4 种子重跑的结果哈希），closure 可据此报告 code.canary_stable；--verify-repro 重跑本包自己的控制集并比较 study_sha256，得到 code.reproduced",
+        "复现与推翻判定默认跨同级项目：sibling_studies_dirs 以 <project>/studies 的祖父目录为扫描根，同一人的相邻项目里的同设计包一起参与阶梯；按 study_spec_sha256 去重（两份拷贝是一份证据，不得数两票）；阶梯里每一个较低功效包都与最高功效包比较，不只是最弱那一个",
+        "新增搜索因子时，其第一水平必须逐位复现既有行为，并用 study closure --verify-repro 实测证明（不是声称）；该因子的水平差异刻意共用同一条变异随机流（common random numbers），因此父本选择差异可归因于策略本身而非随机流换序",
+        "反事实审计必须分开分母：guard_audit 同时报总体开火率与\"存在可对照档口的包\"上的开火率；没有高功效孪生的包其 0 阻断不得被读成安全",
+        "不可检验的计划在算之前就被拒：`plan_testability` 用与主张守卫同一张因子词表读想法的 title/hypothesis/falsification 与 stopping_rule；若被点名的因子全部停在单一水平，拒绝执行且不写任何包文件；若至少一个被点名因子确实被变化，其余被点名的固定因子作为\"情境控制\"写进返回体 warnings",
+        "因子覆盖不等于臂覆盖：主张点名某因子时，简报必须原样转录守卫写进记录的警告，列出该因子在本包里已判定与仍未判定的臂；跨零的臂不能被同因子的另一条判定冒充成对整句话的支持",
+        "预注册在闭合链上：study-preregistration.json 属于 CHAIN_FILES，改问题/假设/分析/决策规则会让 lineage 判 stale；declared_design_sha256 只覆盖 design，不足以保护声明文本",
+        "脚手架不是预注册：`study prereg init` 只填事实（dataset/seeds/budget/resolved design/baseline 槽），四个研究判断字段与 `baseline.why` 留 `TODO(` 占位；`load_preregistration` 拒绝任何仍含占位的计划，能复制粘贴的模板不能冒充看到结果之前写下的承诺",
+        "内容哈希不含计时：study/spec/evidence 三处哈希在取哈希前剥离 elapsed_seconds 与 study_wall_seconds，产物保留这些字段仅供披露；created_at 等记录时间戳仍参与哈希，因为它们是记录的一部分而非机器负载；study_sha256 必须可由重跑同一对照复现，否则 canary 自检失效",
+        "主张主语必须由包内证据覆盖：statement 点名只有单水平的因子、或点名而无可判定断言覆盖的因子，起草直接拒绝；完全没点名则把警告写进 claim。水平来源先看声明 design，再回退 profile.factors。机器不改写人的主张，只拒绝证据不支持的主语",
+        "覆盖率必须自带链完整性分母：`package_integrity` 只回答\"包内记录的哈希能否由盘上字节在当前哈希规则下重推\"（derivable / non_derivable / incomplete），代码指纹另报 match / stale / absent 一轴；`integrity_layers` 的每个 artifact 覆盖数必须同时落在 all 与 derivable 两个分母上，不得把不可重推的早期包与可验证包混成一个\"覆盖率\"。该判定只读、不重跑、不签核，也不移动任何门禁（门禁仍由 `study closure` 决定）"
+      ],
+      "spec": "modules/search-study/SPEC.md"
+    },
+    {
+      "id": "figure",
+      "name": "科研绘图",
+      "stage": "S6",
+      "version": "0.4.1",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "FigureScene",
+        "SVG",
+        "FigureManifest",
+        "FigurePreview",
+        "RenderAudit"
+      ],
+      "tools": [
+        "astradraw.render",
+        "astradraw.render_scene",
+        "astradraw.templates",
+        "svg.audit"
+      ],
+      "gates": [
+        "G3"
+      ],
+      "invariants": [
+        "示意图与数据图分开；数据图必须绑 RunCapsule/EA",
+        "SVG 不引外部资源/脚本",
+        "必须记录 scene/svg/hash",
+        "模板只提供布局/风格先验，不携带其科学结论；标题、说明和 provenance 必须声明 schematic=true",
+        "只渲染本地 vendored AstraDraw scene；不执行上游新增脚本、不联网、不修改 vendor",
+        "AstraDraw 只产方法/框架示意图（`schematic=true`），不产实验数据结果图；数据结果图走 experiment_figures 的 verified-evidence 管线"
+      ],
+      "spec": "modules/figure/SPEC.md"
+    },
+    {
+      "id": "manuscript",
+      "name": "中文投稿工作稿与审计",
+      "stage": "S8–S12",
+      "version": "0.9.4",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "Manuscript",
+        "ManuscriptAudit",
+        "ArgumentLedger",
+        "ClaimRegistry"
+      ],
+      "tools": [
+        "manuscript.assemble",
+        "manuscript.audit",
+        "manuscript.claim_registry"
+      ],
+      "gates": [],
+      "invariants": [
+        "不创造证据、数字、Claim 或实验结果；只重排与校验已有内容",
+        "引用编号必须映射到来源元数据；无法映射时保留 `[待补文献:token]` 并阻断",
+        "参考文献使用 GB/T 7714 风格草稿；缺字段不臆造",
+        "每个候选 claim 必须记录 claim×ref×anchor 的 evidence row；span anchor 必须带 quote 与 SHA-256",
+        "语言候选检测只做词法覆盖；semantic completeness 必须标为 unknown",
+        "submission_ready 只有在 structure/reference/citation/numeric/claim/fixture 等硬检查全部通过，且 context 明确提供已签 claim 与真实 run/experiment 上下文时才为 true；否则最多为 attention，不得冒充可投稿",
+        "context 的 claim_signed/run_summary 由调用方提供；本模块只做一致性与边界检查，不自行验证签名",
+        "审计不是同行评审，不保证期刊录用"
+      ],
+      "spec": "modules/manuscript/SPEC.md"
+    },
+    {
+      "id": "paper",
+      "name": "论文写作",
+      "stage": "S8–S12",
+      "version": "0.6.0",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "PaperContract",
+        "DraftSection",
+        "SectionSlots",
+        "DraftScaffold",
+        "paper.md"
+      ],
+      "tools": [
+        "writing.profile",
+        "claim.slot",
+        "model.paper_writer"
+      ],
+      "gates": [
+        "G3",
+        "Q1"
+      ],
+      "invariants": [
+        "不创建 Claim",
+        "结果槽必须 pending_evidence 直到 EA/Claim/Figure",
+        "示意图不能绑定为结果图；数据图必须引用 manifest",
+        "模型不能写 Results，不能引入未给出的引用或数字",
+        "无 key 时确定性草稿必须仍然可读、可运行"
+      ],
+      "spec": "modules/paper/SPEC.md"
+    },
+    {
+      "id": "revision",
+      "name": "已有手稿修订与投稿包",
+      "stage": "S8–S12",
+      "version": "0.2.2",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "RevisionPlan",
+        "RevisedManuscript",
+        "RevisionAudit",
+        "SentenceLedger",
+        "DataMetricReport",
+        "FigureManifest",
+        "ManuscriptExport"
+      ],
+      "tools": [
+        "revision.ingest",
+        "revision.data_metrics",
+        "revision.figures",
+        "revision.rewrite",
+        "revision.audit",
+        "revision.export"
+      ],
+      "gates": [],
+      "invariants": [
+        "只修订已有手稿，不重新发明研究问题、实验或结论；原始叙事、实验条件、方法和限制必须保留",
+        "没有模型 profile 时只做可审计的复制/数据更新，不伪装成模型改写",
+        "模型改写必须逐段校验：引用 token 集合不变、数字集合不新增、图表编号不丢失、结果段数字不丢失；失败时保留原文并记录 blocker",
+        "改写只作用于当前段落，不接受整节/多段输出；Figure/Table 与 图/表 的中英互译视为同一引用",
+        "可选 rewrite goal 与 review comments 只作为改写指令，不得新增事实/数字/引用；模型返回双层 JSON 时必须解包",
+        "数据指标只从用户提供的表格与 metric spec 重算；未知数字不得被当作已核验数字",
+        "新图只从用户数据和 figure spec 生成；图 manifest 记录输入数据 SHA-256、spec SHA-256 和输出 SHA-256",
+        "期刊模板是结构化排版 profile，不冒充官方模板；导出包必须标注模板版本与人工复核要求",
+        "submission_ready 始终为 false；最多输出 review_ready / format_ready；投稿、签核和最终录用仍是人工决定",
+        "不创建或修改 Claim、EA、Protocol、Gate、Signature、Closure 或 export approval"
+      ],
+      "spec": "modules/revision/SPEC.md"
+    },
+    {
+      "id": "writing",
+      "name": "写作包与手稿预审",
+      "stage": "S8–S12",
+      "version": "0.8.2",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "WritingPack",
+        "ReferenceCards",
+        "EvidenceMap",
+        "WritingContract",
+        "WritingAudit",
+        "ManuscriptDraft",
+        "ManuscriptReview",
+        "SupportLedger",
+        "SupportPanel",
+        "SupportAdjudication",
+        "SupportGold",
+        "SupportGoldAnnotations",
+        "SupportGoldTemplate",
+        "ClaimPlan",
+        "SupportSectionSummary",
+        "ManuscriptSectionEdit",
+        "JournalStyleAudit",
+        "PackBinding",
+        "EmpiricalPaperLoop"
+      ],
+      "tools": [
+        "writing.pack",
+        "writing.audit",
+        "writing.external-lint",
+        "writing.external-claim-audit",
+        "writing.external-consistency",
+        "writing.draft",
+        "writing.review",
+        "writing.support-panel",
+        "writing.support-gold",
+        "writing.support-gold-template",
+        "writing.support-items",
+        "writing.support-verdicts",
+        "writing.section-edit",
+        "empirical.check",
+        "empirical.paper"
+      ],
+      "gates": [
+        "S5b",
+        "G5"
+      ],
+      "invariants": [
+        "WritingPack 是单个 run 的只读投影；不创建 Claim、EA、Gate、Signature 或 Closure",
+        "只允许引用 pack 中登记的 reference_id；不得编造标题、作者、DOI 或 URL",
+        "claim 未签核时 allowed_result_numbers 必须为空；结果段出现数值即阻断",
+        "实验包写作必须计算 `experiment-evidence.json` 的 SHA-256，并要求签名 claim 的 `evidence_sha256` 一致、evidence.status=verified、human_reason 非空；任一不满足则 claim 不得标 signed，写作包必须警告",
+        "support 审计必须在模型 judge 前做确定性数值预检：句中的小数/百分比必须出现在引用 span 或已签 claim 的 allowed numbers 中，否则该项直接 `insufficient`，method=`deterministic_evidence_precheck`；不能把“数字有引用”当成证据",
+        "实验包 EA 描述必须携带真实 evidence 路径、SHA-256、scope、claim 绑定状态；不得再返回空对象冒充 EA",
+        "已签核时结果数值只能来自 claim assertions 或 RunCapsule mean/std",
+        "来源为 fixture 时不得声称可投稿；preprint/peer_reviewed=unknown 必须显式警告",
+        "摘要-only 来源只能作为线索，不生成 span，也不能当全文证据",
+        "审计只检查引用键、结果数值、章节结构、占位符与来源边界；不做语义蕴含判断，也不替代同行评审",
+        "submission_ready 始终为 false；最多输出 ready_for_human_review",
+        "模型初稿只能使用 pack 中 REF；审计阻断时必须修复一次，仍阻断则返回 blocked，不把初稿当完成",
+        "`--offline-draft` 只用于无 key 测试：仅使用 pack refs 与 signed claim allowed numbers 生成确定性工作稿，标记 `writer_mode=deterministic_offline_test_only`；仍走同一引用/数值/结构审计与 closure 预检，不得声称模型质量或可投稿",
+        "模型修订只有在确定性审计不变差、引用/数值/长度检查通过时才接受；否则保留上一版并记录拒绝原因",
+        "MCP 只写 `<project>/runs/<RUN-ID>/writing-pack.json|md` 与 `writing-audit.json`；draft 必须位于项目内",
+        "support panel 只接受与当前 pack_id/pack_sha256 绑定的草稿；未绑定直接失败，不做“先审后补”",
+        "support panel 的每个 judge profile 是独立调用，但 profile id/family 由调用方提供，不能证明 provider/model 真正独立",
+        "`--require-families` / `require_families` 必须要求每个 judge 声明 family 且至少两个不同 family；记录 judge_families/independence，但仍是声明值，不是密码学证明",
+        "`--require-providers` / `require_providers` 必须要求每个 judge 有 provider id 且至少两个不同 provider；记录 judge_providers/judge_models/independence=distinct_providers，但 provider 配置仍不等于输出独立、语义独立或人工金标准",
+        "句级分歧必须进入 needs_human；strict 下未裁决的分歧阻断；contradicted 或未解析引用始终阻断",
+        "人工裁决必须给出 status 与 human_reason；面板不自动裁决、不把多数票冒充人工确认",
+        "pairwise kappa 只覆盖被审计子集，不是 human gold，也不是语义蕴含证明",
+        "support panel 不创建 Claim/EA/gate/signature，不改变稿件，不授权投稿",
+        "若 run 目录存在 support-panel.json，writing audit 必须返回其 status/pending_human/fingerprint；panel 未 ready 或与当前稿 draft_sha256 不一致时，审计 blocked，不能给旧 panel 背书",
+        "support ledger 必须报告 item_limit/total_cited_sentences/audited_cited_sentences/truncated；达到上限时不能静默假装全审",
+        "audit 必须检测未带引用的第三方式事实句（研究表明/已有研究/文献报告/studies show 等）；默认 warning，strict_support 下 blocker",
+        "未引用事实检测排除“本文/我们/本研究/本实验”等自指句，避免把作者自己的实验或立场误判为外部事实",
+        "该检测只是词法线索，不能判断句子真假；它不能替代支持账本、语义判断或同行评审",
+        "audit 必须报告 multi_ref_sentence_count/samples：同一句含多个 REF 时给出 warning，提示拆成单 REF 句",
+        "writer prompt 要求每句最多一个 REF；support-patch 拒绝含多个 REF 的改写句，防止把多来源支持拼成综述性断言",
+        "写作包必须生成 claim_plan：每个 claim 绑定一个 ref_id 与一个 span_id，并携带该 span 的 quote；无 span 的 REF 进入 unusable_refs",
+        "claim_plan 是写作辅助，不是 Claim/EA/证据或语义蕴含证明；writer 只能从 claim_plan 选择主张，每句对应一个 claim/REF",
+        "support judge 必须按批调用（默认每批 8 句，最多 20），避免长稿一次 payload 导致输出截断/非 JSON；每批校验后再合并",
+        "项目内部 ID（TH/CP/SUP/CLM/EXP/PROT/BIB/SPAN 等）不得被当作结果数字；结果数值检查必须先剥离这些标识符",
+        "Qoder-native 支持评审必须先返回只读 items，再由 Qoder 提供 verdict；verdict 必须覆盖所有 judgeable item（strict 默认 true），id/status/evidence_refs 必须来自当前 pack",
+        "Qoder verdict 复用只允许同一 `judge_model` 且 sentence+evidence 内容键完全一致；变更句必须重新判定；复用项在 ledger 标记 `reused=true`，并记录 `provided_count`/`reused_count`/`reuse_source`",
+        "Qoder verdict ledger 标记 `judge_model=qoder:<id>`、`verdict_source=qoder`；它是 Qoder 自评审记录，不是外部独立评审或 human gold",
+        "support verdict 写新 ledger 前，若新稿 draft hash 与旧 ledger 不同，旧 ledger 必须归档到 `<run>/support-ledger-history/support-ledger-<旧sha前16>.json`；归档只证明存在性与身份，不是正确性证明",
+        "human gold 可直接从 Qoder support-ledger 构造 panel-like wrapper（`final_status=status`），用 `--ledger` 生成空白模板或与人工多数标签比较；Qoder ledger 是单 judge 自评审，不是 panel 或 human gold",
+        "writing audit 必须读取同 run、同 draft hash 的已有 support-ledger；strict 下 blocked ledger 阻断，partial 只 warning",
+        "support ledger 必须包含 section_summary：按 section 汇总 counts 与 weak_items，并按 weak 数量降序给出 weak_sections；它只用于定位优先修订章节，不是事实判断",
+        "Qoder section edit 支持 `##` 与 `###` 标题；只替换一个匹配章节；其他章节与 pack marker 原样保留；不得新增 REF/数字，不得覆盖源稿；expected_section_sha256 不匹配即拒绝",
+        "section edit 不调用模型、不创建 Claim/EA/gate/signature；修改后必须重新走 support-items/verdicts/audit",
+        "已有草稿只能通过 bind 附加当前 pack marker，正文不得改变；已绑定/不同 pack/output=source/无可用 REF 必须拒绝；unresolved REF 返回但不得当证据；MCP `research_manuscript_bind` 与 CLI `writing bind` 共用 `bind_text_to_pack`",
+        "含 `[REF-xx]` 的句子不得被长度阈值静默丢弃；低于 8 字的 cited 句子计入 `skipped_short_cited` 并告警，不生成 support item",
+        "外部期刊 Skill 只以 MIT 许可的写作规范投影接入：software_journal/computer_journal profile 记录 skill/pack/license/copyright；不是官方模板",
+        "`writing external-lint` 只执行调用方指定的外部白名单 `scientific-writing/scripts/lint_manuscript.py`，使用当前解释器、只读、不安装依赖、不改稿；外部 issues 不是本仓库证据或签名",
+        "`empirical paper --external-lint` 把外部 lint 结果写入 final audit；外部 error/unavailable 使 loop 进入 needs_more_work，capsule S8 必须反映该 blocked 状态",
+        "`writing external-claim-audit` 只从本地 claim-registry 的 verified_anchor evidence rows 生成临时 claim CSV/source manifest，再运行外部 audit_claims.py；无 evidence 或未验证 anchor 必须被外部拒绝；临时包不改变本地 claim/closure",
+        "`writing external-consistency` 只执行调用方指定的外部白名单 `scientific-writing/scripts/check_consistency.py`，读取项目内 JSON registry（数值事实/方法/结果映射），使用当前解释器、只读、不安装依赖；外部 error 阻断，warning 为 attention；registry 与外部 issues 都不是本仓库证据、Claim 或签名",
+        "journal_style audit 检查摘要四要素、关键词、中图分类号、英文摘要、GB/T 7714 类型标记、图表题注、威胁有效性与引言弧线；结果作为 warning/journal_style，不替代同行评审",
+        "writer prompt 必须注入目标期刊规范 brief；venue 不得被来源 venue 覆盖",
+        "非 strict 下截断把 ready 降为 partial 并给出 warning；strict 下截断直接 blocked；默认上限 80，可显式提高到 200",
+        "human gold 至少需要两个独立 annotator，item id 集合必须一致，status 必须在支持状态集内；缺失/重复/非法标签直接失败",
+        "human gold 只计算双人 observed agreement 与 pairwise Cohen's kappa，以及 panel 与 gold majority 的 accuracy/confusion；kappa 是标注一致性，不是事实正确性",
+        "human gold 是参照集，不是 closure gate；gold draft_sha256 与当前稿不一致时 writing audit 只警告，不阻断",
+        "panel 与 gold 只有在双方 draft_sha256 一致时才能对照；不一致直接拒绝，不能用旧 panel 对 new gold",
+        "panel 也必须传播 judge ledger 的截断：truncated 时非 strict 至少 partial，strict 直接 blocked；不能只审前 N 句就报 ready",
+        "human gold 不创建 Claim/EA/gate/signature，不授权投稿；submission_ready 始终 false",
+        "gold 模板只包含句子/refs/evidence 与空 status/note；必须省略 panel verdict/rationale，避免把模型判断锚定给标注者",
+        "模板不是 gold；空白 status 必须被 support-gold 拒绝，直到标注者独立填写",
+        "empirical loop 必须验证 experiment.run_id 与 run 相同、evidence=verified、claim 已人签；缺一项即 blocked",
+        "empirical loop 只草拟/评审/复审 closure，不执行实验、不签 claim、不签 closure、不投稿；最终仍停在 ready_for_human_review",
+        "写作包只在 figure manifest 校验 clean 且 `kind=data_result_plot` 时携带结果图；AstraDraw 示意图不得冒充结果图；实证稿必须引用图 1，引用无 manifest 的图号或未引用已验证结果图都会阻断",
+        "写作契约的 length_target 是提示词与审计的唯一长度来源；低于目标必须报告（strict 时阻断）",
+        "可用 REF 少于 5 时多样性检查记为 not_assessable，不得静默跳过"
+      ],
+      "spec": "modules/writing/SPEC.md"
+    },
+    {
+      "id": "grant",
+      "name": "基金申报",
+      "stage": "S8–S12（基金轨）",
+      "version": "0.2.1",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "GrantPlan",
+        "ComplianceChecklist",
+        "EvidenceMap"
+      ],
+      "tools": [
+        "grant.scheme",
+        "grant.template",
+        "research_grant_template"
+      ],
+      "gates": [
+        "G4"
+      ],
+      "invariants": [
+        "不生成科学观点",
+        "不写预算数字",
+        "不自动提交",
+        "官方模板优先"
+      ],
+      "spec": "modules/grant/SPEC.md"
+    },
+    {
+      "id": "bibliography",
+      "name": "参考文献核验",
+      "stage": "S13",
+      "version": "0.1.0",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "BibliographyCard"
+      ],
+      "tools": [
+        "bibliography.verify"
+      ],
+      "gates": [
+        "G5"
+      ],
+      "invariants": [
+        "必须有 DOI/唯一标识与元数据快照哈希",
+        "只做元数据核验，不做同行评审",
+        "不伪造条目或引用"
+      ],
+      "spec": "modules/bibliography/SPEC.md"
+    },
+    {
+      "id": "closure",
+      "name": "闭合与导出",
+      "stage": "S13–S16",
+      "version": "0.18.0",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "ClosureReport",
+        "Signature",
+        "ExportManifest",
+        "EvidenceBundle",
+        "BundleVerification",
+        "PipelineStaticAudit"
+      ],
+      "tools": [
+        "closure.check",
+        "closure.sign",
+        "closure.publish",
+        "closure.profiles",
+        "closure.verify-bundle",
+        "closure.audit"
+      ],
+      "gates": [
+        "G5"
+      ],
+      "invariants": [
+        "没有 Claim/EA 不能闭合",
+        "结果槽未绑定不能导出",
+        "未签署不能导出",
+        "不自动投稿、不生成评审意见",
+        "证据 bundle 不可覆盖；先 staging、逐文件哈希、fsync，再原子 rename",
+        "bundle 只接受 submission=false 的 export manifest，并重新校验全部字节",
+        "protocol/bibliography/result-figure 的伴随文件必须存在，且 id、状态、哈希与 demo 一致",
+        "closure report 必须把全部可定位的伴随证据写入 artifact_refs，不能只签 demo/claim/EA/capsule",
+        "未决 obligation 不得因“后续报告不再列出”而自动 resolved；只能标 `unverified_disappearance`，并阻断 summary",
+        "obligation 只能通过人工显式 `resolve`（人理由 + 证据文件 SHA-256）或 `waive`（人理由）关闭；历史只追加",
+        "若存在 support-panel.json，其 status 必须为 ready 或 not_applicable；needs_human/blocked/partial 或不可读一律阻断 closure",
+        "有 signer 时必须记录 signer_id/key_id/scheme/signed_payload_sha256/HMAC；publish 必须重算并验证",
+        "本地 HMAC 只证明持有本地 signer secret，不是 PKI、法律身份或同行评审",
+        "第三套 profile search_study 与前两套词汇不互换、必须人签、submission_ready 恒 false",
+        "盘点的链完整性只报告不判定：`integrity.state = non_derivable` 既不新增 blocker 也不解除任何 blocker，门禁仍由 `study closure` 决定；覆盖率数字必须同时给出 all 与 derivable 两个分母，不得混成一个"
+      ],
+      "spec": "modules/closure/SPEC.md"
+    },
+    {
+      "id": "lineage",
+      "name": "证据沿袭与变更影响",
+      "stage": "S13–S16",
+      "version": "0.2.0",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "LineageManifest",
+        "ChangeImpact"
+      ],
+      "tools": [
+        "lineage.build",
+        "lineage.verify",
+        "lineage.impact"
+      ],
+      "gates": [
+        "G5"
+      ],
+      "invariants": [
+        "不创建 Claim/EA/Verdict，不自动重跑或重签",
+        "节点哈希来自文件或 capsule 内容哈希；不能凭空生成支持关系",
+        "上游节点变化必须沿依赖边传播为 stale",
+        "signature 失效时 export_allowed=false",
+        "S1 span 到 claim 的边在现有契约中尚不存在；不得伪造成已连通的语义链",
+        "处置分类由 stale 节点 kind 推导，不代表自动修复已经执行"
+      ],
+      "spec": "modules/lineage/SPEC.md"
+    },
+    {
+      "id": "guideline-memory",
+      "name": "记忆反馈（Guideline Memory）",
+      "stage": "META",
+      "version": "0.3.1",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "GuidelineStore",
+        "GuidelineBlock"
+      ],
+      "tools": [
+        "memory.guidelines"
+      ],
+      "gates": [],
+      "invariants": [
+        "纯确定性记账：产线只允许出现在宿主模型轮次里，本模块不调用模型、不训练、不参数化",
+        "每条记忆必须引用项目内真实存在的产物路径，引用缺失或越界一律拒绝入库",
+        "记忆是提示侧建议，不是能力：不得创建或修改 Claim、断言、门禁判定或导出数字",
+        "同一课只计一次印证：token-Jaccard ≥ 0.5 视为重复，seen+1 而不是新增近似重复",
+        "无人再印证的记忆会过期（STALE_STEPS），而不是永久留在提示里",
+        "单步最多落地 3 条，总表上限 24 条，渲染块受字符预算约束",
+        "记忆效果必须由 run 内对照判定：memory_ab 两臂只允许差一个 guideline 块，比较用运行时已在执行的确定性检查（引用落地到 ≥2 个不同来源、否证句非空、experiment_plan 通过 validate_plan）；配对数 <4 时只报 underpowered，不给方向",
+        "A/B 的度量必须有动态范围：已在输出路径上强制执行的门（引用落地、否证非空、计划过 validate_plan）对存活想法必然接近满分，不能用来分辨两臂；分辨力来自有变化空间的检查（来源广度、停止规则是否写明种子/配对/预算、风险是否点名）"
+      ],
+      "spec": "modules/guideline-memory/SPEC.md"
+    },
+    {
+      "id": "host-model",
+      "name": "宿主模型交接",
+      "stage": "META",
+      "version": "0.7.0",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "ModelTurn",
+        "ModelTurnReceipt"
+      ],
+      "tools": [
+        "host_model.pending",
+        "host_model.respond"
+      ],
+      "gates": [
+        "无（本模块不创建人工门；它只是把生成步骤交给宿主 Agent）"
+      ],
+      "invariants": [
+        "宿主提交只算能力输出，不算证据；下游审计与门禁必须原样执行",
+        "turn 与请求文本 SHA-256 绑定，提交时重算不一致即拒绝",
+        "一次性消费：responded 的 turn 不可重复改写",
+        "过期 turn 不可提交",
+        "host_label 是\"自报且未验证\"，不得作为模型独立性或质量的证明",
+        "请求哈希重放只在同一 profile 内生效：同一提示词发给两个批评供给时必须各问一次，不得把一份回答复用给两者",
+        "端口必须携带可核对的供给指纹（provider_id / provider_kind / model_name）与已消费 turn_id 列表，供面板把分数归因到实际回答者",
+        "面板可以证明\"同一宿主回答了全部批评角色\"，从而拒绝承认独立；它不能证明不同宿主的答案彼此独立",
+        "本模块不提供 sign/approve/freeze/claim/publish"
+      ],
+      "spec": "modules/host-model/SPEC.md"
+    },
+    {
+      "id": "integration",
+      "name": "通用 MCP 与项目目录",
+      "stage": "META",
+      "version": "0.48.0",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "ProjectManifest",
+        "RunDirectory",
+        "TaskExecution",
+        "MCPToolResult",
+        "ExternalSkillAdvisory",
+        "SkillDistillCandidate",
+        "ManuscriptRevision",
+        "WritingPack",
+        "WritingAudit",
+        "SupportPanel",
+        "SupportAdjudication",
+        "ConferenceCorpus",
+        "SynthesisMatrix",
+        "InnovationReview",
+        "ManuscriptDraft",
+        "ManuscriptReview",
+        "ExperimentPackage",
+        "ModelProfileCatalog",
+        "AgentCapabilityManifest",
+        "LoopCapsule"
+      ],
+      "tools": [
+        "research_project_init",
+        "research_bootstrap",
+        "research_plan",
+        "research_run",
+        "research_status",
+        "research_model_profiles",
+        "research_model_turns",
+        "research_model_respond",
+        "research_list_artifacts",
+        "research_read_artifact",
+        "research_next_actions",
+        "research_skill_list",
+        "research_skill_instructions",
+        "research_skill_invoke",
+        "research_skill_distill",
+        "research_manuscript_revise",
+        "research_figure_templates",
+        "research_figure_render",
+        "research_literature_fetch",
+        "research_literature_synthesis",
+        "research_conference_fetch",
+        "research_writing_pack",
+        "research_manuscript_audit",
+        "research_venue_audit",
+        "research_grant_template",
+        "research_innovation_review",
+        "research_manuscript_draft",
+        "research_manuscript_review",
+        "research_experiment_codegen",
+        "research_experiment_status",
+        "research_empirical_status",
+        "research_closure_status",
+        "research_evolution_status",
+        "research_lineage_status",
+        "research_support_panel",
+        "research_support_items",
+        "research_support_verdicts",
+        "research_manuscript_section_edit",
+        "research_manuscript_bind",
+        "research_manuscript_ab_review",
+        "research_model_void",
+        "research_host_contract",
+        "research_skill_packs",
+        "research_mandate_status",
+        "research_number_provenance",
+        "research_study_baseline"
+      ],
+      "gates": [
+        "Q0",
+        "G1",
+        "G2",
+        "S5b",
+        "G5"
+      ],
+      "invariants": [
+        "MCP 只暴露计划/执行/读取/下一步，不暴露 sign、approve、freeze、publish 或 export 工具",
+        "所有项目写入必须位于 --root 或 RESEARCH_AGENT_MCP_ROOT 内；拒绝 ..、绝对越界路径与 symlink 逃逸",
+        "每次运行写入 <project>/runs/<RUN-ID>/，并带 run-context.json 记录客户端与请求摘要",
+        "每次 pipeline/task 运行写入只读 `loop-capsule.json`：S1→S2–S3→S4→S5→S6→S8–S12→S13→META 节点、blockers 与 bounded next_actions；缺失节点不得写成 pass，capsule 不创建证据/claim/gate/signature/closure",
+        "loop-capsule 由 run 产物派生；若同 run 存在 `experiments/<id>`，S5/S13 必须反映该实验包的 claim/closure/signature 阶段；S8–S12 必须读取 `manuscript-audit.json`/`writing-audit.json`，无写作审计时标 `WRITING_NOT_STARTED`；runtime 完成后可补 observation_id/active_policy_id，但不得改写其他节点的状态来源",
+        "loop-capsule 的 G5/S13 必须读取 `closure-signature/signature.json`：closure report ready 但未签名只能标 `CLOSURE_UNSIGNED` 与 S13=ready，不得写成 pass/done；签名后才把 G5 置 pass、S13 置 done、claim_status 置 signed，并在 reason 里区分 delegated 与 human",
+        "build fingerprint 必须固定为进程启动时导入的代码；每次请求重读磁盘会让长期运行的 stdio server 报出“当前文件”的哈希，掩盖它仍在执行旧模块",
+        "stdout 只输出 JSON-RPC/NDJSON；库与调试日志走 stderr，不能污染协议",
+        "production 模式缺 model binding/key 时必须失败，不得静默回退规则模板",
+        "fixture 仅用于流程验证；摘要-only 不生成 span，不产生 claim",
+        "MCP 的 external Skill 只以 instruction-only advisory 调用；不执行 scripts/tools/network；输出不进入 Claim/EA/gate",
+        "research_bootstrap 只初始化/计划/列目录；`run_now=true` 时才调用本地 TaskAgent `research_run`，仍不执行外部 Skill 脚本、不签核",
+        "research_skill_instructions 只返回 enabled Skill 的文本，不返回本地路径、不执行脚本；Qoder 自执行时仍不得把 Skill 指令当证据或门禁",
+        "MCP 蒸馏只产出 project notes 下的 disabled 候选；不自动启用；MCP 不提供 trusted script 执行",
+        "trusted script 全权限只在本地 CLI 显式 opt-in，且不是 sandbox",
+        "MCP revision 只写 `<project>/revisions/`；无 profile 时 copy mode；不改写成功不得声称改写",
+        "MCP figure render 只渲染项目 scene 或本地 vendored 模板；不执行 vendor 脚本、不联网、不修改原 AstraDraw 文件夹",
+        "figure 模板只提供视觉先验；manifest 必须标 schematic=true，不能把模板中的机制/数字当本文结论",
+        "revision 的 submission_ready 始终 false；DOCX/TeX 是工作模板，不是官方期刊模板",
+        "writing pack 是 run 的只读投影；未签核 claim 不得发布结果数值；不允许编造引用",
+        "主 run 的事件流是权威状态：`research_agent/run_events.py` 以 append-only 哈希链记录 `seq/at/kind/phase/payload/prev_hash/entry_hash`，`demo.json` 与 `job.json` 只是派生投影，不得就地改写门禁结论；`verify_events()` 只报告链断裂，绝不静默修复",
+        "阶段边界只有在**全部**门禁为 `pass`/`skipped` 时才由 `commit_boundary()` 写 `boundary_committed`；任一门禁 `blocked`/`needs_human`/`failed` 写 `gate_rejected` 且边界不提交。`replay_boundaries()` 只读重放，不自动续跑、不自动跨人工门",
+        "G3/G5 的 `status` 与 `reason` 只能由 `pipeline.evaluate_g3_g5()` 这一个纯函数决定；`pipeline.run()` 与 `write_pipeline_artifacts()` 都必须调用它，禁止在产物后处理里就地 mutate 门禁 dict",
+        "全量判定记录（`scripts/record_test_verdict.py`）必须把运行器 `FAILED (errors=N, failures=M)` 里的两个数解析进结构化 `errors`/`failures` 字段；`summary_line` 保留运行器原文，二者不得互相矛盾",
+        "允许一条**不跨人工门**的自动回路：S1 覆盖判定（`saturation` / `coverage_score` / `gaps` / `evidence_breadth`）可驱动下一轮 `max_sources`，由 `research_cycle.decide_next_cycle()` 纯函数决策、`run_literature_cycle()` 执行；每轮的观测与决策写进 append-only 事件链，预算有界（`max_cycles` / `budget_cap`），饱和或预算耗尽必须停下，耗尽时显式写「需人补语料」而不是假装已收敛",
+        "该回路**只改变检索预算**：不改 Q0/G1/G2/G3/G5 判定、不写 Claim/EA/gate/signature、不置真 `submission_ready`、不自动续跑整个 pipeline、不新增语料（不编造文献）。`PipelineRequest.adaptive_retrieval` 默认 False，关闭时行为与上一版逐字一致",
+        "writing audit 的 submission_ready 始终 false；fixture 来源、未知引用、未签核结果数值必须阻断",
+        "MCP 只把 writing-pack.json/md 与 writing-audit.json 写入对应 run；draft 必须位于项目内",
+        "模型 key 只来自用户/系统环境变量；Windows 启动器仅按名称从 HKCU\\Environment 回读，不写项目、不写 MCP 配置、不记录值",
+        "conference fetch 仅下载 arXiv 公开 PDF；venue 来自 arXiv comment，未独立核验；不是完整 proceedings 抓取",
+        "innovation review 必须通过 REF 存在性/字段/可证伪性校验；模型输出不得创建 Claim/EA/gate",
+        "manuscript review 只在确定性审计不变差时接受修订；不改写未知引用；submission_ready 始终 false",
+        "writing pack 的 experiment_id 只读取 verified experiment-evidence 与人签 claim；evidence 不是 EA",
+        "MCP 不提供 experiment run/approve/claim；生成实验包的执行与签核只能在本地 CLI",
+        "MCP、HTTP JSON、Python SDK 共用同一套工具名/JSON Schema/边界；适配器不得各自复制业务逻辑",
+        "research_status 只读盘点 canonical_run/local_experiment closure 产物；不重跑、不签核、不改变 closure 状态",
+        "runtime `/api/autopilot-status` 只读且剥离绝对路径；不提供任何触发 autopilot 的端点",
+        "research_closure_status 一次只读一个 profile；canonical_run 与 local_experiment 的 closure 词汇不互换；只返回下一条人工命令",
+        "research_evolution_status 只读一个 RSI 台账的生命周期读数（episodes/decided/rejection_rate/gate_verdict/gate_stops/timeline）；零拒绝判为 gate_uninformative 而非成功；不 propose、不 admit、不 reject、不 revoke、不 activate",
+        "research_lineage_status 只重算项目内节点的 SHA-256 并判 fresh/stale；不重建 workspace、不读取项目外文件、不把 fresh 当作实验或 closure 有效",
+        "research_support_panel 只接受与 pack_id/pack_sha256 绑定的稿件；judge profile 由调用方提供，不能证明 provider/model 独立；分歧必须 pending_human 或 strict 阻断",
+        "research_support_panel 的 kappa 只覆盖被审计子集，不是 human gold；人工裁决必须带 status 与 human_reason；不创建 Claim/EA/gate/signature",
+        "research_support_items/verdicts 是 Qoder 自评审通道：items 只读、verdicts 只记录 Qoder 提供的判断；不调用外部模型、不冒充独立评审",
+        "verdicts 必须覆盖所有 judgeable item（strict 默认 true），id/status/evidence_refs 必须来自当前 pack；缺项直接拒绝",
+        "section edit 只替换一个匹配章节，其他章节与 marker 原样保留；不得新增 REF 或数字，不得覆盖源稿；expected_section_sha256 不匹配即拒绝",
+        "research_model_profiles 只返回 profile/provider/model/是否有 key；不得返回 API key、masked key、base URL 或本地路径；不发起网络调用",
+        "diverse_judge_pairs 只是可用性建议，不证明两个 profile 的 provider 真正独立或模型质量",
+        "HTTP adapter 默认只允许 loopback；非 loopback 必须配置 `RESEARCH_AGENT_API_TOKEN`，不得裸奔",
+        "capabilities 只暴露工具 schema、start-research/review-draft/review-idea prompt、边界/人类门，不暴露 secrets、绝对本地路径或内部 prompt"
+      ],
+      "spec": "modules/integration/SPEC.md"
+    },
+    {
+      "id": "mandate",
+      "name": "持续委托投影",
+      "stage": "META",
+      "version": "0.1.3",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "MandateStatus"
+      ],
+      "tools": [
+        "mandate.status"
+      ],
+      "gates": [],
+      "invariants": [
+        "只读投影：不创建 Claim/EA/Verdict，不签名、不批准、不执行、不写项目状态",
+        "触发来自已有 loop-capsule 的 blockers/next_actions，不重新计算门禁",
+        "缺失 artifact 不是 pass；过期或撤销的委托必须停止",
+        "委托授权只能由人写入；agent 不得创建、放宽或续期",
+        "状态只能是 empty/active/partial/needs_human/stopped"
+      ],
+      "spec": "modules/mandate/SPEC.md"
+    },
+    {
+      "id": "rsi",
+      "name": "受治理的递归改进",
+      "stage": "META",
+      "version": "0.9.0",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "StepLedger",
+        "AdmissionRecord",
+        "Lease",
+        "RSIReport",
+        "ConfirmationRecord",
+        "RSIStory",
+        "EvolutionPolicyState",
+        "EvolutionObservation",
+        "ActivePolicyState"
+      ],
+      "tools": [
+        "rsi.ledger",
+        "rsi.policy",
+        "rsi.trace",
+        "rsi.observations",
+        "rsi.active"
+      ],
+      "gates": [
+        "H0",
+        "H1"
+      ],
+      "invariants": [
+        "候选不能修改 claim/evidence/gate/rubric/export/signature",
+        "没有 dry-run 不能准入",
+        "没有 public+hidden 不能准入",
+        "没有人签不能 active",
+        "撤销必须保留并传播",
+        "过期 lease 不得生效；不同预算的 active lease 冲突必须拒绝执行",
+        "预测与实际写入 ledger；数值预测只用于过程校准，不得当作能力证据；coverage gap 不能作为降低预算的理由",
+        "候选按 public 排序，最多两个 finalist 依次 gate；hidden 不参与排序或提案",
+        "harness-only 或 simulated 证据不得写入 capability claim",
+        "lease scope 必须与执行器 scope 匹配；跨 benchmark 不得自动生效",
+        "同一 benchmark 的 target+patch 不得重复 propose；拒绝项无新证据不得重试",
+        "候选集必须预注册；hidden 不用于扩展候选或选择 retriever",
+        "active real harness lease 必须由 pipeline run --use-lease 消费；无 lease 或冲突时 fail closed",
+        "runtime job 完成时必须写入 observation（非 fixture/非证据）；观测只用于候选建议，不得进入 Claim/EA/Closure",
+        "observation suggestion 只读且 advisory；activation 必须走 CLI 人理由，MCP/runtime 不提供激活或签核入口",
+        "active literature budget 必须由下一次 runtime job 消费并在事件流记录；S5 seed lease 必须覆盖 runtime 的 run_seeds，否则视为未闭环",
+        "strict admission 必须同时具备 public/hidden/near_ood/regression、非 simulation 证据、evaluator、artifact_sha256 与 task_pack_sha256；缺一项不得准入",
+        "已 evaluate 的证据不得在 admit 时被替换；准入必须记录 approved_by 与 evidence_digest",
+        "capability_claims 只能来自 active lease；revoked/expired 必须自动收回",
+        "每次 propose/evaluate/admit/reject/revoke/confirmation 必须追加哈希链事件；事件链断裂时审计失败",
+        "模型提案是不可信输入；schema 归一化不得绕过 scope/gate，且必须保留提案 id/rationale",
+        "proposal batch 审计必须保留逐条拒绝原因，不能只报接受率",
+        "schema-repair 只允许回灌格式/策略错误并重试；不得跳过 gate，不得把修复次数当能力增益",
+        "real sealed confirmation 只复核、不回流准入；回归由人处理",
+        "sealed confirmation 必须使用未参与选择/准入的 held-out task pack",
+        "S5 evaluator 只改 run seed budget；iris/breast_cancer/chemlab 指标不是论文证据",
+        "ChemLab seed-budget confirmation 必须使用与 admission 测试集不重叠的 42 条派生 held-out 反应；不得复用固定 22 化合物测试集冒充复核",
+        "active S5 seed lease 必须由 run execute --use-lease 消费；无 lease 时 fail closed",
+        "S5 sealed confirmation 必须使用 held-out protocol instances；used_for_admission=false",
+        "S5 选择是 dataset-specific；不得当作通用 harness 结论",
+        "rsi trace 必须 fail closed：lease 未生效、capsule seeds/dataset 不匹配、存在 capability claim 或 confirmation 回流准入时不得报 traceable",
+        "confirmation 记录只作审计，不得回流准入或生成 capability claim；regressed 必须保留并交人处理；重复同一 artifact 不得重复记账",
+        "confirmation/trace 必须 fail closed：status/passed 不一致、scope 不匹配、delta 非有限数值、confirmation 与 ledger hash 不一致时不得通过",
+        "自进化策略只控制新候选与记忆调序：master off 时不得新增 propose/自动研究循环候选；不得追溯撤销已有 lease/confirmation",
+        "策略只允许切换 literature.memory_order / literature.query_planner / orchestrator.facet_budget；claim/evidence/gate/rubric/held-out/closure/signature/export 不在可切换集合内",
+        "确认不可动作于升级，但 regressed 确认必须可动作于降级：自动撤销该候选的 active 租约；升级仍需人工签署",
+        "每个 episode 记录 platform_fingerprint（平台代码指纹）与 candidate.version（自进化候选版本），供自进化版本管理与平台自我迭代的关联/回滚；平台只记账与提供接缝，不实现自进化算法"
+      ],
+      "spec": "modules/rsi/SPEC.md"
+    },
+    {
+      "id": "skills",
+      "name": "科研技能目录",
+      "stage": "META",
+      "version": "0.15.0",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "SkillManifest",
+        "SkillRegistrySnapshot",
+        "SkillRiskReport",
+        "SkillUsageRecord",
+        "SkillEvalReport",
+        "SkillCandidate",
+        "SkillVersionSnapshot",
+        "ExternalSkillAdvisory",
+        "SkillDistillCandidate",
+        "SkillPack"
+      ],
+      "tools": [
+        "skills.scan",
+        "skills.validate",
+        "skills.list",
+        "skills.usage",
+        "skills.eval",
+        "skills.propose",
+        "skills.versions",
+        "skills.invoke",
+        "skills.trusted_invoke",
+        "skills.distill",
+        "skills.pack"
+      ],
+      "gates": [],
+      "invariants": [
+        "目录层只做扫描/校验，不执行 scripts；只有 CLI 显式 `--trusted-scripts` 才可运行本地脚本，MCP/runtime 不执行",
+        "external skill invocation 必须 enabled；instruction-only 需要显式 model profile，trusted script 需要显式 opt-in",
+        "trusted script 以用户本机 OS 权限运行，不是 sandbox；不经过网络代理、凭据隔离或文件隔离",
+        "trusted script 的 stdin 只含 skill_id/input/context/workdir；可选 `--script-arg` 直接作为 argv 透传（不经 shell）；stdout/stderr 有上限，超时强制终止；结果不是证据",
+        "外部 Skill 输出（含脚本 stdout）是不可信 advisory/工具输出，必须记录 usage；不能作为证据或能力增益",
+        "蒸馏只接受 enabled 的外部 Skill，必须有 license 与 human_reason；输出 disabled candidate，不自动启用、不自动版本激活",
+        "蒸馏复制 SKILL.md、scripts/references/assets 与顶层资源（排除隐藏文件与依赖缓存）并记录逐文件 SHA-256/provenance；不证明质量、不改变 license、不进入 Claim/EA/gate",
+        "runtime 只执行 4 个 built-in 只读检查，不执行 imported/custom skill",
+        "导入技能是不可信 instructions；默认停用，人工检查后再启用",
+        "allowed-tools 只是声明，不是权限授予；执行能力始终是 not_available",
+        "name 与 description 必填；缺少任一字段的文件跳过并报告原因",
+        "单文件大小、Skill 数量与 instructions 长度有上限；不把超大文件静默截断后当完整技能",
+        "技能目录/说明不进入 SourceHit、Span、Claim、EA、gate、closure 或 signature",
+        "浏览器导入与 runtime/CLI 目录是两条入口；浏览器不能直接读取绝对主目录路径",
+        "usage/eval 只是调用与回归证据，不是能力增益",
+        "imported/custom skill 不可执行，不能伪造行为评测",
+        "skill 改进候选只能 pending_human，不能自动改写或自动启用",
+        "版本激活只能切换到预注册的 built-in handler，且必须 public+hidden eval pass + 人签理由",
+        "版本回滚只能回到已有版本；imported/custom skill 不可激活或回滚"
+      ],
+      "spec": "modules/skills/SPEC.md"
+    },
+    {
+      "id": "autopilot",
+      "name": "策略自动驾驶",
+      "stage": "S2–S16",
+      "version": "0.2.3",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "G1Decision",
+        "ProtocolCard",
+        "BibliographyCard",
+        "ClaimRecord",
+        "ClosureSignature",
+        "ExportManifest",
+        "EvidenceBundle",
+        "LineageManifest",
+        "AutopilotReport",
+        "AutopilotLedger"
+      ],
+      "tools": [
+        "autopilot.policy.init",
+        "autopilot.run",
+        "autopilot.research",
+        "autopilot.status"
+      ],
+      "gates": [
+        "G1",
+        "G2",
+        "S5b",
+        "G5"
+      ],
+      "invariants": [
+        "策略只能由人创建；自动流程不得创建、修改或放宽策略",
+        "策略哈希与授权人写进每一步的 reason；签名标记 delegated，不冒充人签",
+        "越过 scope / 数据集 / 最低种子数 / 有效期 / max_runs 一律停止，不得降级继续",
+        "断言必须是胶囊里最差种子的下限（comparator >=, tolerance 0）；草稿弱于下限即拒绝",
+        "已存在 claim 的 run 不再签署；bundle 目标已存在时不覆盖",
+        "只在 CLI 暴露；MCP/HTTP/runtime 不提供 autopilot 工具",
+        "submission_ready 恒为 false；不投稿、不生成评审意见"
+      ],
+      "spec": "modules/autopilot/SPEC.md"
+    },
+    {
+      "id": "judge",
+      "name": "证据支持审稿",
+      "stage": "S5b–S13",
+      "version": "0.1.2",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "SupportAuditReport"
+      ],
+      "tools": [
+        "judge.support",
+        "model.support_judge"
+      ],
+      "gates": [],
+      "invariants": [
+        "只产 advisory 支持判定，不创建/修改 Claim、EA、paper slot、gate、signature 或 export",
+        "状态只能是 supported / partial / contradicted / insufficient",
+        "模型只能基于给定句子与证据片段判断，不能新增引用或证据",
+        "无模型时只能输出明确标注的 lexical heuristic，不能伪装成语义判断",
+        "production 的 strict 审计要求 judge 模型绑定；test 模式允许 heuristic 回退",
+        "句子出现显式 [span] / [source] 时只使用该引用；section refs 只能作为无显式引用时的 fallback",
+        "production strict 下 contradicted verdict 必须阻断 job；partial/insufficient 只作 advisory",
+        "judge 与 paper/idea/experiment/literature 共用同一 profile 时，runtime readiness 必须显式提示独立性受限；只警告，不阻断"
+      ],
+      "spec": "modules/judge/SPEC.md"
+    },
+    {
+      "id": "orchestrator",
+      "name": "多智能体编排",
+      "stage": "S1–S3",
+      "version": "0.2.3",
+      "status": "pilot",
+      "owner": "research-agent",
+      "outputs": [
+        "CollaborationPlan",
+        "ScoutTask",
+        "ScoutReport",
+        "MergedEvidenceView",
+        "IdeaCard",
+        "CustomAgent",
+        "AdvisoryNote",
+        "SkillCandidate",
+        "EvolutionPolicy"
+      ],
+      "tools": [
+        "literature.facet_subset",
+        "literature.memory.advise",
+        "idea.cluster",
+        "rsi.propose"
+      ],
+      "gates": [
+        "Q0",
+        "G1"
+      ],
+      "invariants": [
+        "只并行相互独立的检索面向；人工门之间保持串行",
+        "每个 scout 只能读自己获得授权的 facet_subset，不能重写问题或越过预算",
+        "fan-in 只合并 SourceHit/Span/Coverage/Brief，按 source_id/span_id 去重",
+        "不创建 Claim/EA，不代替人工通过 G1/G2/S5b/G5",
+        "文献记忆只记录覆盖/产出/缺口等过程量，不保存摘要、span 文本或 claim 文本",
+        "记忆只能调整下一轮面向顺序与预算；不能把记忆内容当证据",
+        "由记忆派生的 SkillCandidate 永远 pending_human；必须走 dry-run、public/hidden/regression 与人工准入",
+        "自定义子智能体只能是 advisory：只能选择白名单 checks，不写 Claim/EA、不通过门禁、不执行任意代码",
+        "自进化策略关闭时忽略记忆调序并抑制新的候选；已有 lease/confirmation 不被追溯撤销",
+        "自进化策略只允许切换 literature.memory_order / literature.query_planner / orchestrator.facet_budget；Claim/EA/gate/rubric/held-out/closure/signature/export 不可切换",
+        "fixture 输出必须透传 fixture_mode；不得把模拟覆盖写成真实结果"
+      ],
+      "spec": "modules/orchestrator/SPEC.md"
+    },
+    {
+      "id": "task-agent",
+      "name": "任务路由与执行",
+      "stage": "S0–S12",
+      "version": "0.7.0",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "TaskPlan",
+        "TaskExecution",
+        "TaskReport",
+        "LoopCapsule"
+      ],
+      "tools": [
+        "literature.run",
+        "idea.frame",
+        "experiment.design",
+        "pipeline.run"
+      ],
+      "gates": [
+        "Q0",
+        "G1",
+        "G2",
+        "S5b",
+        "G3"
+      ],
+      "invariants": [
+        "只路由到已有模块，不创造新的证据对象",
+        "不创建 Claim/EA，不替人签署或通过门禁",
+        "任务类型不明确时必须请求补充，不能静默跑全套流程",
+        "文献综述只跑 S1；实验验证必须有 run_dataset 或可复用的 run_dir",
+        "报告必须区分完成、需证据、需人工和失败",
+        "执行异常必须写结构化 FailureRecord（`failure.json`）：含 error_type/retryable/suggested_action；它只用于诊断，不改变 claim、门禁或签名",
+        "fixture 与摘要-only 必须显式标注",
+        "每次 task 完成/失败都写只读 loop-capsule.json；缺失节点不是通过，capsule 不创建证据/claim/gate/signature/closure",
+        "next_actions 只指向可执行命令，不代替人执行、不代替人签核",
+        "包查找必须认多环境命名：想法执行后的包可能是 STUDY-<idea>-<dataset>（--datasets all），ledger 只能按前缀识别并以想法声明的环境为优先，不得把已执行的想法报成从未执行"
+      ],
+      "spec": "modules/task-agent/SPEC.md"
+    },
+    {
+      "id": "venue-audit",
+      "name": "中文期刊与基金申请检查",
+      "stage": "S8–S12（写作/基金轨）",
+      "version": "0.3.0",
+      "status": "draft",
+      "owner": "research-agent",
+      "outputs": [
+        "VenueAudit"
+      ],
+      "tools": [
+        "research_venue_audit",
+        "venue.audit"
+      ],
+      "gates": [],
+      "invariants": [
+        "只做结构与合规检查，不生成科学观点、不写预算数字、不签名、不提交",
+        "中文期刊检查基于工作 profile，不是官方模板；官方模板与当年征集通知优先",
+        "基金检查只验收模块骨架与合规确认，不替代申请人的判断",
+        "状态只能是 ready_for_human / needs_revision / blocked，submission_ready 恒为 false"
+      ],
+      "spec": "modules/venue-audit/SPEC.md"
+    }
+  ],
+  "boundary": "read-only spec projection; it does not execute agents or change their status"
+}

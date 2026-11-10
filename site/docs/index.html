@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>文档 · Research Agent</title>
+<meta name="description" content="Research Agent 公开站随包发布的设计文档索引；原始 Markdown，静态镜像，无真实执行。" />
+<link rel="canonical" href="https://yangxc0414.github.io/research-agent/docs/" />
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+<style>
+:root{--bg:#f8fbff;--ink:#0f172a;--muted:#5b6472;--line:#e4e9f2;--blue:#2563eb;--teal:#0f766e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.7 "Inter","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+a{color:inherit;text-decoration:none}
+.top{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;justify-content:space-between;padding:12px 22px;background:rgba(255,255,255,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.brand{font-weight:800;letter-spacing:.07em;font-size:14px;color:var(--teal)}
+.brand small{color:#5f6d80;font-weight:600;letter-spacing:.02em}
+.home{color:var(--blue);font-weight:700;font-size:12.5px}
+.nav{display:flex;flex-wrap:wrap;gap:6px}
+.nav a{border:1px solid #dbe4f0;background:#f4f8fd;color:#23406e;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px}
+.nav a:hover{border-color:var(--blue);color:var(--blue)}
+main{max-width:980px;margin:0 auto;padding:44px 22px 56px}
+.eyebrow{font:700 11px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;color:var(--blue);text-transform:uppercase;margin:0 0 10px}
+h1{font-size:34px;letter-spacing:-.03em;margin:0 0 12px}
+.lede{max-width:760px;color:var(--muted);font-size:14px;margin:0 0 10px}
+.notice{border:1px solid #e6d7b4;background:#fff8e7;color:#6b5010;border-radius:12px;padding:12px 16px;font-size:12.5px;line-height:1.7;margin:20px 0 30px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:16px 18px;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.card b{font-size:14px}
+.card span{font-size:12px;line-height:1.65;color:var(--muted)}
+.card em{font-style:normal;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:var(--blue)}
+.convention{max-width:980px;margin:26px auto 0;padding:16px 20px;border:1px solid var(--line);background:#fff;border-radius:12px;font-size:12.5px;line-height:1.8;color:var(--muted)}
+.convention b{color:var(--ink)}
+.convention code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;background:#eef2ff;color:var(--blue);padding:1px 5px;border-radius:4px}
+.foot{padding:16px;text-align:center;color:#5f6d80;font:500 12px/1.6 "Inter","PingFang SC","Microsoft YaHei",system-ui,sans-serif;border-top:1px solid var(--line);background:#fff}
+@media(max-width:640px){main{padding:28px 14px 40px}h1{font-size:26px}.nav{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div><a class="brand" href="../">RESEARCH AGENT <small>· DOCS</small></a></div>
+  <nav class="nav" aria-label="站点导航">
+    <a href="../">主页</a><a href="../app/">工作台</a><a href="../demo/">运行回放</a><a href="../innovation/">创新演示</a><a href="../qoder/">接入</a>
+  </nav>
+  <a class="home" href="../">← 返回主页</a>
+</header>
+<main>
+  <p class="eyebrow">DOCUMENTATION / 随站发布的原文</p>
+  <h1>文档索引</h1>
+  <p class="lede">下面是随 GitHub Pages 一同发布的原始设计文档。它们是 Markdown 原文，浏览器直接打开即可阅读；构建时由 <code>scripts/build-site.mjs</code> 从仓库根目录复制，不要在 <code>site/docs/</code> 里直接编辑。</p>
+  <div class="notice"><b>边界：</b>本站是静态镜像，无真实 LLM、实验执行、claim 签名或 runtime job；数值来自 CACHED 快照或 SIM 演示。19–26 等内部调研与实现设计文档不随 Pages 发布，只在仓库内作为推进依据。</div>
+  <div class="grid">
+    <a class="card" href="README.md"><em>README.md</em><b>站点说明与接入</b><span>站点结构、本地预览、部署到 Pages、数据与模式（LIVE PUBLIC / CACHED / SIM / STATIC）、安全边界。</span></a>
+    <a class="card" href="16-科研Skill生态调研.md"><em>16-科研Skill生态调研.md</em><b>Skill 生态与动态流程编排</b><span>科研 Skill 生态调研与按契约编排的设计依据。</span></a>
+    <a class="card" href="17-上层微服务架构.md"><em>17-上层微服务架构.md</em><b>上层微服务架构</b><span>基于 Skill 契约的服务分层、端口与模块边界。</span></a>
+    <a class="card" href="18-GitHub Pages部署与多智能体Skill设计.md"><em>18-…-GitHub Pages部署…md</em><b>Pages 部署与多智能体 Skill</b><span>静态站点部署路径与多智能体 Skill 设计。</span></a>
+  </div>
+</main>
+<div class="convention">
+  <b>读图约定（与主页及所有子页共用）：</b>实线 = 研究过程前向；虚线 = 反馈环，一律回指更早阶段且必须改变下一步动作；红 = 人工门，青 = 自动门（默认拒绝）。<br/>
+  canonical 门禁：<code>G1 想法选择 = S3</code> · <code>G2 设计批准 = S4</code> · <code>S5b 结果人签 = S5c</code> · <code>G5 闭包签署 = S16</code>；升级人签、降级自动，四个门不可由模型代签。
+</div>
+<footer class="foot">Research Agent · 各子页是同一系统的投影：实线 = 前向 · 虚线 = 反馈（回指更早阶段且改变下一步动作） · 红 = 人工门 · 青 = 自动门（默认拒绝）<br/>canonical 门禁：G1 想法=S3 / G2 设计=S4 / S5b 结果人签=S5c / G5 闭包=S16；真实执行 / 模型 / 签署只在本地 CLI / runtime</footer>
+</body>
+</html>

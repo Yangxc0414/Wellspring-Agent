@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>自进化接缝 · Research Agent</title>
+<meta name="description" content="科研智能体的自进化不是平台自己再写一遍递归改进：执行交给 Harness²，平台只保留数据基础、准入判据、台账与人签。本页显示一次真实运行的账本、组件面、采纳改动与门禁清单。" />
+<link rel="canonical" href="https://yangxc0414.github.io/research-agent/rsi/" />
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="../assets/base.css" />
+<link rel="stylesheet" href="../assets/theme.css" />
+<link rel="stylesheet" href="../assets/subpage.css" />
+<style>
+  :root{
+    --ink:#0b1220; --body:#3d4756; --muted:#5f6d80; --line:#e3e9f2;
+    --indigo:#2563eb; --teal:#0d7a6f; --amber:#b45309; --rose:#be123c; --violet:#6d28d9;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  body{background:#f7faff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+  .eyebrow{font:700 10px/1 var(--mono);letter-spacing:.16em;color:var(--indigo);text-transform:uppercase}
+  .rsi-hero h1{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;font-size:clamp(30px,3.6vw,44px);line-height:1.16;letter-spacing:-.03em;margin:14px 0 0;font-weight:750}
+  .rsi-hero h1 em{font-style:normal;color:var(--indigo)}
+  .lede{font-size:15.5px;line-height:1.85;color:var(--body);max-width:760px;margin:16px 0 0}
+  .lede code{font-family:var(--mono);font-size:13px;background:#eef3fb;border:1px solid #dde6f4;border-radius:5px;padding:1px 5px}
+
+  .rsi-hero{padding:56px 0 34px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#ffffff,#f7faff)}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:36px;align-items:end}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{border:1px solid var(--line);border-radius:12px;background:#fff;padding:13px 14px;box-shadow:0 12px 30px -28px rgba(15,23,42,.5)}
+  .tile span{display:block;font:700 9px/1 var(--mono);letter-spacing:.12em;color:var(--muted)}
+  .tile b{display:block;margin-top:8px;font-size:26px;line-height:1;letter-spacing:-.03em}
+  .tile em{display:block;margin-top:6px;font-style:normal;font-size:11px;color:var(--muted)}
+  .tile.ok b{color:var(--teal)} .tile.warn b{color:var(--amber)}
+
+  section.block{padding:44px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}
+  .sec-head h2{font-size:22px;letter-spacing:-.02em;margin:8px 0 0}
+  .sec-head p{margin:0;max-width:520px;font-size:12.5px;line-height:1.7;color:var(--muted);text-align:right}
+
+  .seam{width:100%;height:auto;border:1px solid var(--line);border-radius:16px;background:#fff}
+
+  .run-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .run-cell{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 14px}
+  .run-cell span{font:700 9px/1 var(--mono);letter-spacing:.1em;color:var(--muted)}
+  .run-cell b{display:block;margin-top:7px;font-size:15px}
+  .run-cell em{display:block;margin-top:4px;font-style:normal;font-size:11px;color:var(--muted)}
+
+  .budget{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px 18px}
+  .budget-top{display:flex;flex-wrap:wrap;gap:16px;align-items:baseline;justify-content:space-between}
+  .budget-top b{font-size:22px;letter-spacing:-.02em}
+  .budget-top small{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .bars{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+  .bar-row span{display:block;font:700 9px/1 var(--mono);letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+  .bar{height:8px;border-radius:999px;background:#edf2fa;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa)}
+  .bar.seq i{background:linear-gradient(90deg,#0d7a6f,#34d399)}
+
+  table.tasks{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}
+  table.tasks th{text-align:left;font:700 9px/1 var(--mono);letter-spacing:.1em;color:var(--muted);padding:8px 10px;background:#f4f7fb;border-bottom:1px solid var(--line)}
+  table.tasks td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tasks tr:last-child td{border-bottom:0}
+  .r-pill{display:inline-block;border-radius:999px;padding:2px 8px;font:700 9px/1.5 var(--mono);letter-spacing:.05em}
+  .r-pill.ok{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+  .r-pill.warn{background:#fff7e8;color:var(--amber);border:1px solid #fde68a}
+  .r-pill.miss{background:#fff1f2;color:var(--rose);border:1px solid #fecdd3}
+
+  .surface{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .comp{border:1px solid var(--line);border-radius:10px;background:#fff;padding:11px 12px;display:flex;flex-direction:column;gap:4px}
+  .comp span{font:700 9px/1 var(--mono);letter-spacing:.08em;color:var(--muted)}
+  .comp b{font-size:12.5px;letter-spacing:-.01em}
+  .comp i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--indigo)}
+  .comp.off{background:#fbfcfe;border-style:dashed;opacity:.72}
+
+  .diff{border:1px solid #1e293b;border-radius:12px;overflow:hidden;background:#0b1220}
+  .diff-head{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #1e293b;color:#cbd5e1;font:700 10px/1.4 var(--mono);letter-spacing:.06em}
+  .diff-head em{font-style:normal;color:#94a3b8;font-weight:500;letter-spacing:0}
+  .diff pre{margin:0;padding:14px;overflow:auto;max-height:320px;font:12px/1.7 var(--mono);color:#dbeafe}
+  .diff .add{color:#6ee7b7} .diff .del{color:#fca5a5} .diff .meta{color:#94a3b8}
+
+  .gov{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:14px}
+  .panel{border:1px solid var(--line);border-radius:12px;background:#fff;padding:16px 18px}
+  .panel h3{margin:0 0 4px;font-size:14px}
+  .panel p.sub{margin:0 0 12px;font-size:11.5px;line-height:1.65;color:var(--muted)}
+  .check{display:flex;gap:9px;padding:7px 0;border-bottom:1px dashed #e8eef7;font-size:12px}
+  .check:last-child{border-bottom:0}
+  .check i{flex:0 0 16px;height:16px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:800;color:#fff;background:var(--teal)}
+  .check.miss i{background:var(--rose)}
+  .check b{font-weight:650}
+  .check em{display:block;font-style:normal;color:var(--muted);font-size:10.5px;margin-top:1px;word-break:break-word}
+  .seam-flow{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+  .seam-flow li{position:relative;border:1px solid var(--line);border-radius:9px;padding:9px 11px 9px 34px;font-size:11.5px;line-height:1.55}
+  .seam-flow li b{display:block;font-size:12px}
+  .seam-flow li span{color:var(--muted);font-size:10.5px}
+  .seam-flow li::before{content:attr(data-n);position:absolute;left:9px;top:9px;width:17px;height:17px;border-radius:50%;background:#eef3fb;color:var(--indigo);font:800 9px/17px var(--mono);text-align:center}
+  .seam-flow li.human{border-color:#fecdd3;background:#fff7f8}
+  .seam-flow li.human::before{background:#fee2e2;color:var(--rose)}
+  .seam-flow li.auto{border-color:#a7f3d0;background:#f4fdf9}
+  .seam-flow li.auto::before{background:#d1fae5;color:#047857}
+
+  .bound{border:1px solid #fde68a;background:#fffdf5;border-radius:12px;padding:15px 18px;font-size:12.5px;line-height:1.8;color:#6b5010}
+  .bound b{display:block;margin-bottom:5px;color:#7c2d12}
+  .src{margin:12px 0 0;font-size:11px;line-height:1.7;color:var(--muted)}
+  .src code{font-family:var(--mono);font-size:10.5px;background:#eef3fb;border:1px solid #dde6f4;border-radius:4px;padding:0 4px}
+
+
+  .gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .gen-track{border:1px solid var(--line);border-radius:12px;background:#fff;padding:14px 16px}
+  .gen-track-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .gen-track-head b{font:700 10px/1 var(--mono);letter-spacing:.12em;color:var(--indigo)}
+  .gen-track-head span{font-size:10.5px;color:var(--muted)}
+  .gen-track p{margin:6px 0 12px;font-size:11px;line-height:1.65;color:var(--muted)}
+  .gen-node{position:relative;margin-left:7px;padding:9px 0 9px 20px;border-left:2px solid #e3e9f2}
+  .gen-node:last-child{border-left-color:transparent}
+  .gen-node::before{content:"";position:absolute;left:-6px;top:13px;width:10px;height:10px;border-radius:50%;background:#2563eb;border:2px solid #fff;box-shadow:0 0 0 1px #c7d7f5}
+  .gen-track.is-agent .gen-node::before{background:#0d7a6f;box-shadow:0 0 0 1px #a7f3d0}
+  .gen-node b{display:block;font-size:12.5px;letter-spacing:-.01em}
+  .gen-node code{display:block;margin-top:3px;font:10.5px/1.5 var(--mono);color:var(--muted);overflow-wrap:anywhere}
+  .gen-node em{display:block;margin-top:3px;font-style:normal;font-size:10.5px;color:var(--muted)}
+  .gen-node .r-pill{margin-left:6px}
+  .gen-warn{margin-top:12px;border:1px solid #fecdd3;background:#fff7f8;border-radius:10px;padding:11px 14px}
+  .gen-warn b{display:block;font-size:11.5px;color:#9f1239;margin-bottom:4px}
+  .gen-warn li{font-size:11px;line-height:1.65;color:#7f1d1d;margin-left:16px}
+  .table-scroll{overflow-x:auto}
+  .table-scroll table{min-width:640px}
+  .r-empty{border:1px dashed #cbd5e1;border-radius:12px;background:#fff;padding:18px;font-size:12.5px;line-height:1.75;color:var(--muted)}
+  @media(max-width:980px){
+    .hero-grid{grid-template-columns:1fr}
+    .run-grid{grid-template-columns:1fr 1fr}
+    .surface{grid-template-columns:repeat(2,1fr)}
+    .gov{grid-template-columns:1fr}
+    .gen-grid{grid-template-columns:1fr}
+  }
+  @media(max-width:560px){
+    .wrap{padding:0 16px}
+    .table-scroll{margin-right:-16px;padding-right:16px}
+    .run-grid{grid-template-columns:1fr}
+    .bars{grid-template-columns:1fr}
+    .sec-head{flex-direction:column;align-items:flex-start}
+    .sec-head p{text-align:left}
+  }
+</style>
+</head>
+<body>
+<div class="sp-top"><a class="sp-home" href="../">← 返回主页</a><span class="sp-chip">自进化接缝 · 真实运行产物</span><nav class="sp-sib"><a href="../demo/">运行</a><a href="../innovation/">创新</a><a href="../app/">工作台</a><a href="../qoder/">接入</a></nav></div>
+
+<header class="rsi-hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">SELF-EVOLUTION / SEAM</p>
+        <h1>递归改进的执行交给 Harness²，<br/>平台只留下<em>判据、台账与人签</em>。</h1>
+        <p class="lede">本页不是又一套自进化循环。平台把候选任务包交给 Harness² 的 Propose–Probe–Compose，收回的是一份<code>harness2-run-0.1</code> 产物：预算恒等式、被采纳的组件改动、经验条目与留出检查。平台只做三件事——提供数据基础、把产物映射成受治理的候选、在门下等人签字。</p>
+      </div>
+      <div class="tiles" id="hero-tiles">
+        <div class="tile"><span>RECURSION BUDGET</span><b>—</b><em>R = 4k · P = 3k</em></div>
+        <div class="tile"><span>ADOPTED EDITS</span><b>—</b><em>按组件去重</em></div>
+        <div class="tile"><span>HELD-OUT</span><b>—</b><em>提案者没见过</em></div>
+        <div class="tile"><span>CONFORMANCE</span><b>—</b><em>契约 / 预算 / 边界</em></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="block" id="seam">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">00 / SEAM</p><h2>谁做什么，一次说清</h2></div>
+        <p>实线 = 前向交付；虚线 = 回指。任何"改进"都要以候选身份重新过门，不能从执行侧直接改写平台。</p>
+      </div>
+      <svg class="seam" viewBox="0 0 1080 286" role="img" aria-label="平台与 Harness² 的分工：平台提供任务包与数据基础，Harness² 执行递归改进并返回产物，平台把产物映射为候选，经治理门与人签后以租约回到下一轮">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#94a3b8"/></marker>
+          <marker id="arV" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#6d28d9"/></marker>
+        </defs>
+        <rect x="24" y="30" width="300" height="150" rx="14" fill="#f5f9ff" stroke="#dbe6f7"/>
+        <text x="44" y="56" font-size="10" font-weight="800" letter-spacing=".14em" fill="#2563eb">PLATFORM · 本仓库</text>
+        <text x="44" y="82" font-size="13" font-weight="700" fill="#0b1220">数据基础 + 判据 + 台账</text>
+        <text x="44" y="104" font-size="11" fill="#5f6d80">· task pack：任务 / 评分 / 留出集</text>
+        <text x="44" y="123" font-size="11" fill="#5f6d80">· Candidate / EvalEvidence / StepLedger</text>
+        <text x="44" y="142" font-size="11" fill="#5f6d80">· EvolutionPolicy · scope · 撤销传播</text>
+        <text x="44" y="164" font-size="10.5" fill="#b45309">人签：dry-run · public · hidden · 具名放行</text>
+
+        <rect x="392" y="30" width="296" height="150" rx="14" fill="#f8f7ff" stroke="#e2dcfb"/>
+        <text x="412" y="56" font-size="10" font-weight="800" letter-spacing=".14em" fill="#6d28d9">HARNESS² · 外部引擎</text>
+        <text x="412" y="82" font-size="13" font-weight="700" fill="#0b1220">Propose · Probe · Compose</text>
+        <text x="412" y="104" font-size="11" fill="#5f6d80">· c1..c8 可编辑组件面</text>
+        <text x="412" y="123" font-size="11" fill="#5f6d80">· 平行 / 顺序两种递归</text>
+        <text x="412" y="142" font-size="11" fill="#5f6d80">· R=4k rollouts · P=3k sessions</text>
+        <text x="412" y="164" font-size="10.5" fill="#6d28d9">模型权重不动；只改 harness</text>
+
+        <rect x="756" y="30" width="300" height="150" rx="14" fill="#f4fdf9" stroke="#c7f0e2"/>
+        <text x="776" y="56" font-size="10" font-weight="800" letter-spacing=".14em" fill="#0d7a6f">ARTIFACT · 契约</text>
+        <text x="776" y="82" font-size="13" font-weight="700" fill="#0b1220">harness2-run-0.1</text>
+        <text x="776" y="104" font-size="11" fill="#5f6d80">· 预算恒等式与任务状态</text>
+        <text x="776" y="123" font-size="11" fill="#5f6d80">· 采纳树 + 统一 diff</text>
+        <text x="776" y="142" font-size="11" fill="#5f6d80">· 经验条目（必须带观测）</text>
+        <text x="776" y="164" font-size="10.5" fill="#0d7a6f">校验失败即拒绝入库</text>
+
+        <path d="M326 105 L386 105" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#ar)"/>
+        <text x="330" y="96" font-size="9.5" fill="#5f6d80">task pack</text>
+        <path d="M690 105 L750 105" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#ar)"/>
+        <text x="694" y="96" font-size="9.5" fill="#5f6d80">一次运行</text>
+
+        <path d="M1040 182 L1040 212 L60 212 L60 186" fill="none" stroke="#6d28d9" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#arV)"/>
+        <text x="560" y="236" font-size="10.5" fill="#6d28d9" text-anchor="middle">产物回指：采纳的组件 → Candidate（pending）→ 治理门 → 人签 → 租约</text>
+        <text x="560" y="256" font-size="9.5" fill="#5f6d80" text-anchor="middle">没过门的候选留在 pending_human，不生效；租约回到下一轮任务被消费</text>
+      </svg>
+      <p class="src">这张图标的是职责边界，不是实现地图：左侧全部已在本仓库实现（<code>modules/rsi</code>），中间是外部依赖（<code>harness2-main</code>），右侧是两边唯一允许交换的格式。</p>
+    </div>
+  </section>
+
+  <section class="block" id="run">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">01 / RUN</p><h2>这一次实际跑了什么</h2></div>
+        <p>数字全部来自 <code>runtime_data/harness2/latest.json</code>，页面不写死任何结果。没有产物时下方直接显示为空，不补默认值。</p>
+      </div>
+      <div id="run-body"><div class="r-empty">正在读取产物…</div></div>
+    </div>
+  </section>
+
+
+  <section class="block" id="generations">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">02 / GENERATIONS</p><h2>对自进化本身做版本管理</h2></div>
+        <p>两条轨道分开记账：<b>agent</b> 记被采纳的 harness 树与它依据的证据；<b>platform</b> 记平台代码指纹与提交。一条 harness 世代只有在记录它跑在哪版平台代码上之后，平台变更才能点名“哪些改进需要复验”。</p>
+      </div>
+      <div class="gen-grid">
+        <div class="gen-track" id="gen-platform">
+          <div class="gen-track-head"><b>PLATFORM · 平台代码</b><span id="gen-pf">指纹 —</span></div>
+          <p>版本 = <code>research_agent/**/*.py</code> 的内容哈希 + 提交。只覆盖 Python 源码，所以只改 SPEC 不移动指纹。</p>
+          <div id="gen-platform-nodes"><div class="r-empty">正在读取世代…</div></div>
+        </div>
+        <div class="gen-track is-agent" id="gen-agent">
+          <div class="gen-track-head"><b>AGENT · harness 树</b><span id="gen-af">世代 —</span></div>
+          <p>版本 = 采纳树的 SHA-256 + episode / claim-eligible 标记。树变了才算新世代，改名不算。</p>
+          <div id="gen-agent-nodes"><div class="r-empty">正在读取世代…</div></div>
+        </div>
+      </div>
+      <div id="gen-warn"></div>
+      <p class="src">这里记录的是“哪版代码 + 哪版 harness 产出了哪份证据”，不是“越跑越强”。回退与复验是人的动作，台账只负责让它可追溯。</p>
+    </div>
+  </section>
+
+  <section class="block" id="surface">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">03 / EDITABLE SURFACE</p><h2>能被改的只有这八类</h2></div>
+        <p>模型权重、claim、evidence、gate、rubric、closure、signature、export 都不在可编辑面里；组件路径命中这些词直接拒绝。</p>
+      </div>
+      <div class="surface" id="surface-body"><div class="r-empty">正在读取组件面…</div></div>
+      <p class="src">计数来自运行起点的基础 harness：空槽位以 0 显示，表示这一类本轮没有被编辑，不代表平台不支持。</p>
+    </div>
+  </section>
+
+  <section class="block" id="adopted">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">04 / ADOPTED</p><h2>被采纳的改动长什么样</h2></div>
+        <p>同一个组件常常在多个任务、两种递归模式里被重复采纳；平台按 (路径, diff) 去重成一条候选，观察点写进理由，而不是刷成多条 episode。</p>
+      </div>
+      <div id="adopted-body"><div class="r-empty">正在读取采纳记录…</div></div>
+    </div>
+  </section>
+
+  <section class="block" id="governance">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">05 / GOVERNANCE</p><h2>产物怎么变成一条待签记录</h2></div>
+        <p>右侧清单是本次运行的机器自检；左侧是它在平台里必须走完的路。任何一步缺失，episode 停在 <code>pending_human</code>。</p>
+      </div>
+      <div class="gov">
+        <div class="panel">
+          <h3>从产物到租约</h3>
+          <p class="sub">候选只写台账，不写代码；真正生效要等下一次运行消费租约。</p>
+          <ol class="seam-flow">
+            <li class="auto" data-n="1"><b>归一化</b><span>schema / 预算恒等式 / 任务状态 / 经验证据，任一不满足即拒绝入库</span></li>
+            <li data-n="2"><b>映射候选</b><span>按组件去重 → Candidate(kind, target, patch)；不可变面命中则 blocked</span></li>
+            <li class="human" data-n="3"><b>dry-run + public</b><span>改进分片的回执；没有它不算测过</span></li>
+            <li class="human" data-n="4"><b>hidden / 留出集</b><span>提案者没见过的任务；缺这一项就不能声称泛化</span></li>
+            <li class="human" data-n="5"><b>具名人签 + scope</b><span>人只在门禁与验收交互，签的是准入理由，不是代码</span></li>
+            <li class="auto" data-n="6"><b>租约与撤销</b><span>到期失效；上游变更会传播失效并回指复验</span></li>
+          </ol>
+          <p class="src" style="margin-top:14px">对应命令：<code>python -m research_agent.cli rsi harness2 run</code> → <code>... record</code> → <code>... admit</code>（admit 需要 public/hidden 回执、dry-run、具名人）。页面只读产物，不提供任何签核按钮。</p>
+        </div>
+        <div class="panel">
+          <h3>本次运行的自检</h3>
+          <p class="sub">全部为真才允许写 episode；有一条失败，CLI 的 <code>run</code> 就以非零退出。</p>
+          <div id="check-body"><div class="r-empty">正在读取清单…</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="interface">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">06 / INTERFACE CHECK</p><h2>接口算不算「正常」，按这五条判</h2></div>
+        <p>每条都有可复现的入口与可判定的输出；只看页面截图不算验收。命令在仓库根目录执行。</p>
+      </div>
+      <div class="table-scroll">
+      <table class="tasks">
+        <thead><tr><th style="width:30%">入口</th><th style="width:38%">通过判据</th><th>失败时说明什么</th></tr></thead>
+        <tbody>
+          <tr><td><code>rsi harness2 probe</code></td><td><code>available: true</code>，并给出 checkout、3.12 解释器、桥路径与补丁</td><td>找不到 checkout / 没有 3.12 / 桥缺失，三者分别报出</td></tr>
+          <tr><td><code>rsi harness2 run --k 2 --mode both</code></td><td><code>R == expected_R</code>、<code>P == expected_P</code>、<code>checklist_ok: true</code>；否则非零退出</td><td>预算恒等式不成立或阶段回退，说明这次递归不算完成</td></tr>
+          <tr><td><code>rsi harness2 record</code></td><td>每个去重后的采纳组件写一条 <code>pending_human</code>；<code>leases: []</code></td><td>conformance 未全过时直接拒绝写入，不产生半批台账</td></tr>
+          <tr><td><code>GET /api/rsi/harness2</code></td><td>200 + <code>harness2-story-0.1</code>；<code>?record=true</code> 只返回 <code>would_record</code></td><td>404 说明本机没有产物，不是接口坏</td></tr>
+          <tr><td><code>rsi story --ledger …</code></td><td><code>simulation_episodes ≥ 1</code>，并带「重建的是被演练的回路，不是被改进的回路」警告</td><td>缺这条警告，说明模拟证据被当成了真实增益</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="src">本轮实测：probe 通过（3.12.10，来源 <code>py -3.12</code>）；run 3/3 任务、R=48/48、P=36/36、10/10 自检；record 写入 1 条 pending、0 租约；HTTP 200；story 警告存在。</p>
+    </div>
+  </section>
+
+  <section class="block" id="boundary" style="border-bottom:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">07 / BOUNDARY</p><h2>这条证据能证明什么</h2></div>
+        <p>把"接口通了"和"能力涨了"分开写，是这个项目唯一不能让步的地方。</p>
+      </div>
+      <div class="bound">
+        <b>确定性执行 = 接口证据，不是能力证据。</b>
+        本轮的执行器与提案者都是确定性脚本（<code>deterministic-science-fixture</code>），所以产物强制标 <code>simulation=true</code>、<code>claim_eligible=false</code>，台账里也不会出现 capability claim。它证明的是：任务包能被 Harness² 消费、预算恒等式成立、采纳树能被映射成受治理的候选、留出检查能跑通。它<strong>不</strong>证明科研能力提升。
+      </div>
+      <p class="src">下一步（未实现，写在这里而不是写成已支持）：把确定性执行器换成 DeepSeek 基座上的真实 agent 执行器，接一个真实科研任务包（论文投稿反馈处理 / Skill 提炼），再跑同样的 k 与留出集；那时才允许讨论增益，且仍需 hidden + 人签。</p>
+      <p class="src">数据出处：<code>runtime_data/harness2/latest.json</code>（运行产物）· <code>runtime_data/harness2/story.json</code>（本页读取的投影）· <code>research_agent/rsi_harness2.py</code>（映射与校验）· <code>scripts/harness2_run.py</code>（3.12 运行桥）· <code>harness2-main/</code>（上游，Apache-2.0）。</p>
+    </div>
+  </section>
+</main>
+
+<footer class="sp-foot">Research Agent · 自进化接缝 · 执行在 Harness²，判据与台账在平台 · 门禁口径 G1 想法=S3 / G2 设计=S4 / S5b 结果人签=S5c / G5 闭包=S16；本页所有数字来自一次确定性运行的产物，不构成能力声明</footer>
+
+<script>
+(function () {
+  var LABELS = [
+    ["c1 system prompt", "系统提示"],
+    ["c2 guardrails", "护栏"],
+    ["c3 memory", "长期记忆"],
+    ["c4 tool guidance", "工具说明"],
+    ["c5 subagents", "子代理"],
+    ["c6 skills", "Skills"],
+    ["c7 scripts", "脚本"],
+    ["c8 plugins", "插件"]
+  ];
+
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+
+  function el(id) { return document.getElementById(id); }
+
+  function paintTiles(story) {
+    var budget = story.budget || {};
+    var identity = budget.R === budget.expected_R && budget.P === budget.expected_P;
+    var adopted = (story.adopted || []).length;
+    var held = story.held_out || {};
+    var tiles = [
+      ["RECURSION BUDGET", budget.R + " / " + budget.expected_R, "P " + budget.P + " / " + budget.expected_P, identity ? "ok" : "warn"],
+      ["ADOPTED EDITS", String(adopted), "去重后的组件", adopted ? "ok" : "warn"],
+      ["HELD-OUT", held.n ? held.passed + " / " + held.n : "—", held.n ? "base " + (held.base_passed || 0) + " / " + held.n : "无留出集", held.n && held.passed === held.n ? "ok" : "warn"],
+      ["CONFORMANCE", story.checklist_ok ? "PASS" : "FAIL", (story.checklist || []).length + " 项自检", story.checklist_ok ? "ok" : "warn"]
+    ];
+    el("hero-tiles").innerHTML = tiles.map(function (t) {
+      return '<div class="tile ' + t[3] + '"><span>' + esc(t[0]) + "</span><b>" + esc(t[1]) + "</b><em>" + esc(t[2]) + "</em></div>";
+    }).join("");
+  }
+
+  function paintRun(story) {
+    var run = story.run || {};
+    var budget = story.budget || {};
+    var tasks = story.tasks || [];
+    var held = story.held_out || {};
+    var identity = budget.R === budget.expected_R && budget.P === budget.expected_P;
+    var cells = [
+      ["ADAPTER", run.adapter || "—", run.executor || ""],
+      ["k / MODE", "k=" + (run.k || 0), (run.modes || []).join(" + ") || "—"],
+      ["WALL", (run.wall_s || 0) + " s", "platform " + String(story.platform_fingerprint || "—").slice(0, 8) + "…"],
+      ["TASKS", tasks.filter(function (t) { return t.status === "ok"; }).length + " / " + tasks.length, "留出 " + (held.n ? held.passed + "/" + held.n : "—")]
+    ];
+    var rows = tasks.map(function (t) {
+      return "<tr><td><b>" + esc(t.task_id) + "</b></td><td>" + esc(t.domain || "") + '</td><td><span class="r-pill ' + (t.status === "ok" ? "ok" : "warn") + '">' + esc(t.status) + "</span></td></tr>";
+    }).join("");
+    el("run-body").innerHTML =
+      '<div class="run-grid">' + cells.map(function (c) {
+        return '<div class="run-cell"><span>' + esc(c[0]) + "</span><b>" + esc(c[1]) + "</b><em>" + esc(c[2]) + "</em></div>";
+      }).join("") + "</div>" +
+      '<div class="budget"><div class="budget-top"><b>预算恒等式 ' + (identity ? "成立" : "不成立") + "</b>" +
+      "<small>R=" + budget.R + " / 期望 " + budget.expected_R + " · P=" + budget.P + " / 期望 " + budget.expected_P + " · USD " + (budget.usd || 0) + "</small></div>" +
+      '<div class="bars"><div class="bar-row"><span>ROLLOUTS · R = 4k</span><div class="bar"><i style="width:' + (budget.expected_R ? Math.min(100, Math.round(100 * budget.R / budget.expected_R)) : 0) + '%"></i></div></div>' +
+      '<div class="bar-row"><span>SESSIONS · P = 3k</span><div class="bar seq"><i style="width:' + (budget.expected_P ? Math.min(100, Math.round(100 * budget.P / budget.expected_P)) : 0) + '%"></i></div></div></div>' +
+      '<table class="tasks"><thead><tr><th>TASK</th><th>DOMAIN</th><th>STATUS</th></tr></thead><tbody>' + rows + "</tbody></table></div>";
+  }
+
+  function paintSurface(story) {
+    var counts = (story.surface || {}).components || {};
+    el("surface-body").innerHTML = LABELS.map(function (pair) {
+      var count = counts[pair[0]];
+      var known = typeof count === "number";
+      return '<div class="comp' + (known && count === 0 ? " off" : "") + '"><span>' + esc(pair[0].split(" ")[0].toUpperCase()) + "</span><b>" + esc(pair[1]) + "</b><i>" + (known ? count + " file" + (count === 1 ? "" : "s") : "—") + "</i></div>";
+    }).join("");
+  }
+
+  function paintAdopted(story) {
+    var adopted = story.adopted || [];
+    if (!adopted.length) {
+      el("adopted-body").innerHTML = '<div class="r-empty">本次运行没有被采纳的组件改动。没有改动也是一种结果：它说明探针没有给出可复用的对比，页面不会替它编一个。</div>';
+      return;
+    }
+    var first = adopted[0];
+    var change = (first.changes || [])[0] || {};
+    var lines = String(change.diff || "").split("\n").slice(0, 26).map(function (line) {
+      var cls = line.indexOf("+++") === 0 || line.indexOf("---") === 0 || line.indexOf("@@") === 0 ? "meta" : (line.charAt(0) === "+" ? "add" : (line.charAt(0) === "-" ? "del" : ""));
+      return '<span class="' + cls + '">' + esc(line) + "</span>";
+    }).join("\n");
+    var seen = adopted.length;
+    el("adopted-body").innerHTML =
+      '<div class="diff"><div class="diff-head"><span>' + esc(change.path || "") + "</span><em>sessions " + seen + " 次采纳 · 去重后 1 条候选 · tree " + esc(String(first.adopted_sha256 || "").slice(0, 12)) + "…</em></div><pre>" + lines + "</pre></div>" +
+      '<p class="src">这条改动来自 <code>scripts/coverage.py</code>：基础 harness 用 span id 的全局集合判断支撑，于是引用了别人的 span 的 claim 也算"有证据"。改进后的脚本按 (claim_id, span_id) 连接并校验偏移。注意这只是夹具任务，不是科研结论。</p>';
+  }
+
+  function paintChecks(story) {
+    var checks = story.checklist || [];
+    if (!checks.length) {
+      el("check-body").innerHTML = '<div class="r-empty">没有自检结果。</div>';
+      return;
+    }
+    el("check-body").innerHTML = checks.map(function (c) {
+      return '<div class="check' + (c.ok ? "" : " miss") + '"><i>' + (c.ok ? "✓" : "×") + "</i><div><b>" + esc(c.label) + "</b><em>" + esc(c.detail) + "</em></div></div>";
+    }).join("");
+  }
+
+  function fail(message) {
+    ["run-body", "surface-body", "adopted-body", "check-body"].forEach(function (id) {
+      el(id).innerHTML = '<div class="r-empty">' + esc(message) + "</div>";
+    });
+  }
+
+
+  function paintGenerations(data) {
+    if (!data || data.schema !== "evolution-story-0.1") return;
+    var current = data.current || {};
+    el("gen-pf").textContent = "指纹 " + (current.fingerprint || "—") + " · " + (current.source_files || 0) + " 文件";
+    var agentLatest = (data.agent || [])[data.agent.length - 1];
+    el("gen-af").textContent = "世代 " + (agentLatest ? agentLatest.generation_id : "—");
+
+    function nodes(items, isAgent) {
+      if (!items || !items.length) return '<div class="r-empty">还没有记录。先跑 <code>rsi gen snapshot</code> 或 <code>rsi harness2 record --generation</code>。</div>';
+      return items.slice().reverse().map(function (g) {
+        var pill = g.status === "adopted" ? "ok" : (g.status === "reverted" ? "miss" : "warn");
+        var meta = isAgent
+          ? "tree " + String(g.agent_tree_sha || "").slice(0, 12) + "… · " + (g.episode_ids || []).length + " episode · platform " + (g.platform_fingerprint || "—")
+          : (g.commit ? "commit " + String(g.commit).slice(0, 7) : "no commit") + " · " + (g.platform_fingerprint || "—");
+        return '<div class="gen-node"><b>' + esc(g.label) + '<span class="r-pill ' + pill + '">' + esc(g.status) + '</span></b>' +
+          "<code>" + esc(g.generation_id) + " · " + esc(meta) + "</code>" +
+          (g.note ? "<em>" + esc(g.note) + "</em>" : "") + "</div>";
+      }).join("");
+    }
+    el("gen-platform-nodes").innerHTML = nodes(data.platform, false);
+    el("gen-agent-nodes").innerHTML = nodes(data.agent, true);
+
+    var warnings = data.warnings || [];
+    el("gen-warn").innerHTML = warnings.length
+      ? '<div class="gen-warn"><b>需要人处理 ' + warnings.length + ' 项</b><ul>' + warnings.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul></div>"
+      : "";
+    var badges = document.querySelectorAll("#generations .gen-track");
+    if (badges.length === 2) {
+      badges[0].dataset.ok = String(!!data.ok);
+    }
+  }
+
+  function loadGenerations() {
+    fetch("../data/evolution.json", { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(paintGenerations)
+      .catch(function (error) {
+        el("gen-platform-nodes").innerHTML = '<div class="r-empty">没有世代台账（' + esc(error.message) + '）。</div>';
+        el("gen-agent-nodes").innerHTML = '<div class="r-empty">先跑 <code>rsi gen snapshot</code>。</div>';
+      });
+  }
+
+  loadGenerations();
+
+  fetch("../data/harness2.json", { cache: "no-store" })
+    .then(function (response) {
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.json();
+    })
+    .then(function (story) {
+      if (!story || story.schema !== "harness2-story-0.1") throw new Error("产物 schema 不匹配");
+      paintTiles(story); paintRun(story); paintSurface(story); paintAdopted(story); paintChecks(story);
+    })
+    .catch(function (error) {
+      fail("没有可读的运行产物（" + error.message + "）。页面不会用默认数字填空；请先在本地跑 `python -m research_agent.cli rsi harness2 run`。");
+    });
+})();
+</script>
+</body>
+</html>

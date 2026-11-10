@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Research Agent · Module Workbench</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M8 11l8-4 8 4v10l-8 4-8-4z' fill='none' stroke='white' stroke-width='1.8'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css?v=3" />
+</head>
+<body>
+<a class="skip" href="#workspace">跳到工作区</a>
+<div class="app" id="app">
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Research Agent 工作台">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 7.5 12 11l7-3.5M12 11v9" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="brand-copy"><b>Research Agent</b><small>MODULE WORKBENCH</small></span>
+    </a>
+
+    <div class="run-context" aria-live="polite">
+      <span class="mono">TASK · <span id="run-id">—</span></span>
+      <b id="run-topic">载入 fixture…</b>
+    </div>
+
+    <div class="top-actions">
+      <div class="mode-switch" role="group" aria-label="轨道">
+        <button type="button" class="mode is-on" data-mode="paper" aria-pressed="true">论文轨</button>
+        <button type="button" class="mode" data-mode="grant" aria-pressed="false">基金轨</button>
+      </div>
+      <button type="button" class="icon-btn theme-btn" id="theme-btn" aria-label="切换浅色/深色主题"><span class="theme-ico" id="theme-ico">🌙</span></button>
+      <button type="button" class="icon-btn" id="gateway-btn" aria-label="模型网关：接入 OpenAI / Anthropic / 兼容 API"><span class="theme-ico">🧠</span><span class="icon-btn-label">模型</span></button>
+      <button type="button" class="icon-btn" id="palette-btn" aria-label="打开命令面板（Command K）"><span class="mono">⌘K</span><span class="icon-btn-label">搜索</span></button>
+      <button type="button" class="primary-btn" id="replay-btn"><span class="live-dot" aria-hidden="true"></span>回放运行</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="rail" aria-label="任务与研究流水线">
+      <div id="task-section">
+        <div class="rail-head"><span class="eyebrow">TASKS · 任务</span><span class="rail-state" id="task-count">—</span></div>
+        <nav class="task-list" id="task-list" aria-label="任务列表"></nav>
+      </div>
+      <div class="rail-divider">
+        <div class="rail-divider-head"><span class="eyebrow">PIPELINE · 当前任务流程</span><span class="rail-state" id="rail-state">—</span></div>
+        <b id="rail-task-name">—</b>
+      </div>
+      <nav class="stage-list" id="stage-list" aria-label="阶段列表"></nav>
+      <div class="rail-foot">
+        <div class="fixture-note"><span class="dot amber"></span><b>FIXTURE / NO API</b><span>数据只用于演示，不是实验结果。</span></div>
+        <div class="spec-note">SPEC-DRIVEN · <span id="spec-count">0</span> MODULES</div>
+      </div>
+    </aside>
+
+    <main class="main" id="workspace">
+      <section class="main-head">
+        <div class="head-copy">
+          <span class="eyebrow" id="head-eyebrow">RUN SURFACE / MODULE GRAPH</span>
+          <h1 id="topic">从证据到可签署草稿</h1>
+          <p id="subtitle">文献 → 假设 → 设计 → 图 → 论文；基金作为并行轨道。所有结果槽保持待证据。</p>
+        </div>
+        <div class="head-badges">
+          <span class="badge" id="status-badge">needs_human</span>
+          <span class="badge quiet" id="mode-badge">SIM</span>
+          <span class="badge quiet" id="gate-summary">—</span>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="canvas">
+          <div class="canvas-bar">
+            <div class="tabs" role="tablist" aria-label="工作区视图">
+              <button type="button" class="tab is-on" role="tab" aria-selected="true" data-tab="overview">总览</button>
+              <button type="button" class="tab" role="tab" aria-selected="false" data-tab="evidence">证据</button>
+              <button type="button" class="tab" role="tab" aria-selected="false" data-tab="paper">稿件 / 基金</button>
+              <button type="button" class="tab" role="tab" aria-selected="false" data-tab="trace">运行记录</button>
+              <button type="button" class="tab" role="tab" aria-selected="false" data-tab="evolution">自进化</button>
+              <button type="button" class="tab" role="tab" aria-selected="false" data-tab="innovation">创新逻辑</button>
+            </div>
+            <span class="canvas-note mono" id="canvas-note">select a stage · j / k · 1–6</span>
+          </div>
+
+          <div class="tab-panel is-on" id="panel-overview" role="tabpanel">
+            <div class="pipeline-card">
+              <div class="card-head"><span class="eyebrow">MODULE GRAPH</span><span class="mono" id="graph-note">SPEC → ARTIFACT</span></div>
+              <div class="pipeline-strip" id="pipeline-strip"></div>
+              <div class="scroll-hint">← 横向滑动查看全部模块 →</div>
+            </div>
+            <div class="arm-ledger" id="arm-ledger" hidden></div>
+            <div class="model-bar" id="model-bar" hidden></div>
+            <div class="stat-grid" id="stat-grid"></div>
+            <div class="figure-card">
+              <div class="card-head">
+                <div><span class="eyebrow">SVG FIGURE</span><b class="card-title" id="figure-title">模块关系图</b></div>
+                <span class="badge quiet">SCHEMATIC</span>
+              </div>
+              <div class="figure-frame"><img id="figure-img" alt="研究流水线模块关系示意图" /></div>
+              <div class="figure-hint">← 左右滑动查看完整图 →</div>
+              <div class="figure-foot"><span id="figure-caption">由 AstraDraw scene → SVG 生成；不是实验数据图。</span><span class="mono" id="figure-hash">—</span></div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="panel-evidence" role="tabpanel" hidden>
+            <div class="section-grid" id="evidence-grid"></div>
+          </div>
+
+          <div class="tab-panel" id="panel-paper" role="tabpanel" hidden>
+            <div class="section-grid" id="paper-grid"></div>
+          </div>
+
+          <div class="tab-panel" id="panel-trace" role="tabpanel" hidden>
+            <div class="trace-grid" id="trace-grid"></div>
+          </div>
+
+          <div class="tab-panel" id="panel-evolution" role="tabpanel" hidden>
+            <div class="evo-loop-card">
+              <div class="card-head">
+                <div><span class="eyebrow">RSI / GOVERNED LOOP</span><b class="card-title">自进化回路 · 准入在人在门</b></div>
+                <span class="badge quiet" id="evo-source-badge">STATIC SNAPSHOT</span>
+              </div>
+              <div class="loop-stepper" id="loop-stepper"></div>
+              <div class="loop-legend" id="loop-legend"></div>
+              <div class="scroll-hint">← 横向滑动查看完整回路 →</div>
+            </div>
+            <div class="stat-grid evo-kpi" id="evo-kpi"></div>
+            <div class="evo-grid" id="evo-grid"></div>
+          </div>
+
+          <div class="tab-panel" id="panel-innovation" role="tabpanel" hidden>
+            <div class="evo-loop-card">
+              <div class="card-head">
+                <div><span class="eyebrow">INNOVATION LEDGER · 主张必须绑证据</span><b class="card-title">创新逻辑对账 · 三大支柱 × 八条主张</b></div>
+                <span class="badge quiet" id="innov-verify-badge">—</span>
+              </div>
+              <div class="innov-flow" id="innov-flow"></div>
+              <p class="model-note" id="innov-note">机器可读镜像 data/innovations.json；scripts/verify-innovation-claims.py 对仓库落地点逐条校验；工作台只读。这本身遵守我们自己的纪律：主张必须绑证据。</p>
+            </div>
+            <div class="evo-grid" id="innov-grid"></div>
+          </div>
+        </div>
+
+        <aside class="inspector" id="inspector" aria-live="polite">
+          <div class="inspector-head"><span class="eyebrow">INSPECTOR</span><span class="mono" id="inspector-module">—</span></div>
+          <div id="inspector-body"></div>
+        </aside>
+      </section>
+
+      <div class="console" id="console">
+        <span class="console-prompt" aria-hidden="true">❯</span>
+        <input class="console-input" id="console-input" type="text" autocomplete="off" spellcheck="false"
+          placeholder="输入指令：/task 2 · /module run · /view evolution · /theme · /help（↑↓ 历史 · Tab 补全）"
+          aria-label="指令输入框" />
+        <span class="console-echo mono" id="console-echo">READY · 本地静态指令，不触发任何 API</span>
+        <button type="button" class="console-help" id="console-help" aria-label="查看指令帮助">/help</button>
+      </div>
+
+      <footer class="statusbar">
+        <span><span class="status-dot"></span> LOCAL / FIXTURE</span>
+        <span class="mono" id="status-versions">specs —</span>
+        <span class="mono" id="status-msg">READY</span>
+        <span class="mono">/ 指令行 · ⌘K 面板</span>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<div class="gateway-dialog" id="gateway-dialog" hidden>
+  <div class="palette-backdrop" data-close-gateway></div>
+  <div class="gateway-box" role="dialog" aria-modal="true" aria-label="模型网关">
+    <div class="gateway-head">
+      <div>
+        <span class="eyebrow">MODEL GATEWAY · OpenAI / Anthropic / 兼容端点</span>
+        <b class="gateway-title">模型网关</b>
+      </div>
+      <span class="badge quiet" id="gateway-live-badge">STATIC · 离线快照</span>
+    </div>
+    <div class="gateway-probe">
+      <span class="mono">runtime</span>
+      <input id="gateway-runtime-url" type="text" value="http://127.0.0.1:8787" aria-label="本地 runtime 地址" />
+      <button type="button" class="console-help" id="gateway-probe-btn">探测实时状态</button>
+      <span class="mono" id="gateway-probe-note">未连接 · 使用 data/gateway.json 快照</span>
+    </div>
+    <div class="gateway-body" id="gateway-body"></div>
+    <div class="gateway-foot">
+      <span>密钥只进环境变量或本地 runtime 内存；浏览器永远看不到 key 值，前端只保存选择。</span>
+      <span class="mono">MODEL GATEWAY</span>
+    </div>
+  </div>
+</div>
+
+<div class="palette" id="palette" hidden>
+  <div class="palette-backdrop" data-close-palette></div>
+  <div class="palette-box" role="dialog" aria-modal="true" aria-label="命令面板">
+    <div class="palette-input"><span class="mono">/</span><input id="palette-input" type="text" placeholder="搜索模块或动作…" autocomplete="off" /></div>
+    <div class="palette-list" id="palette-list"></div>
+    <div class="palette-foot"><span>↑↓ 选择 · Enter 打开 · Esc 关闭</span><span class="mono">COMMAND</span></div>
+  </div>
+</div>
+
+<script src="app.js?v=3"></script>
+</body>
+</html>

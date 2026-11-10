@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "research-agent": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "<ABSOLUTE_PATH_TO_REPO>/scripts/research_mcp_server.py",
+        "--root",
+        "<ABSOLUTE_PATH_TO_REPO>"
+      ],
+      "env": {
+        "PYTHONPATH": "<ABSOLUTE_PATH_TO_REPO>",
+        "RESEARCH_AGENT_MCP_ROOT": "<ABSOLUTE_PATH_TO_REPO>",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  }
+}

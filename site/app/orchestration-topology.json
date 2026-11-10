@@ -1,0 +1,622 @@
+{
+  "schema_version": "orchestration-0.1",
+  "action": "collaboration-plan",
+  "generated_at": "2026-11-10T05:43:44+00:00",
+  "topic": "",
+  "source": "fixture",
+  "topology": "fan-out → fan-in → sequential → human gate (+ advisory lane)",
+  "roles": [
+    {
+      "id": "orchestrator",
+      "name": "研究编排器",
+      "stage": "META",
+      "module": "orchestrator",
+      "mode": "control",
+      "inputs": [
+        "question",
+        "budget",
+        "memory_advice",
+        "evolution_policy"
+      ],
+      "outputs": [
+        "ScoutTask[]",
+        "StopDecision",
+        "AdvisoryNote[]"
+      ],
+      "gates": [],
+      "executes": true,
+      "forbidden": [
+        "Claim",
+        "EA",
+        "gate",
+        "signature",
+        "admission"
+      ]
+    },
+    {
+      "id": "scout-1",
+      "name": "文献侦察 · 核心问题/综述",
+      "stage": "S1",
+      "module": "literature",
+      "mode": "fan-out",
+      "parallel_group": "s1-scouts",
+      "facets": [
+        "core",
+        "survey"
+      ],
+      "inputs": [
+        "ScoutTask"
+      ],
+      "outputs": [
+        "SourceHit[]",
+        "Span[]",
+        "CoverageReceipt",
+        "LiteratureBrief"
+      ],
+      "gates": [
+        "Q0"
+      ],
+      "budget": 2,
+      "executes": true
+    },
+    {
+      "id": "scout-2",
+      "name": "文献侦察 · 方法/评测/基准",
+      "stage": "S1",
+      "module": "literature",
+      "mode": "fan-out",
+      "parallel_group": "s1-scouts",
+      "facets": [
+        "method",
+        "evaluation"
+      ],
+      "inputs": [
+        "ScoutTask"
+      ],
+      "outputs": [
+        "SourceHit[]",
+        "Span[]",
+        "CoverageReceipt",
+        "LiteratureBrief"
+      ],
+      "gates": [
+        "Q0"
+      ],
+      "budget": 2,
+      "executes": true
+    },
+    {
+      "id": "scout-3",
+      "name": "文献侦察 · 局限/失败/近期进展",
+      "stage": "S1",
+      "module": "literature",
+      "mode": "fan-out",
+      "parallel_group": "s1-scouts",
+      "facets": [
+        "limitation",
+        "recent"
+      ],
+      "inputs": [
+        "ScoutTask"
+      ],
+      "outputs": [
+        "SourceHit[]",
+        "Span[]",
+        "CoverageReceipt",
+        "LiteratureBrief"
+      ],
+      "gates": [
+        "Q0"
+      ],
+      "budget": 2,
+      "executes": true
+    },
+    {
+      "id": "CAG-20261024T154502Z-72ba99",
+      "name": "协议前置审阅",
+      "stage": "S4",
+      "module": "custom-advisory",
+      "mode": "custom-advisory",
+      "checks": [
+        "protocol"
+      ],
+      "check_labels": [
+        "协议审阅"
+      ],
+      "tools": [
+        "protocol.inspect"
+      ],
+      "outputs": [
+        "ProtocolAdvisory"
+      ],
+      "inputs": [
+        "MergedEvidenceView",
+        "IdeaCard[]"
+      ],
+      "gates": [],
+      "executes": false,
+      "deferred_checks": [
+        "protocol"
+      ],
+      "advisory_only": true,
+      "writes": [],
+      "gate_owner": "human"
+    },
+    {
+      "id": "CAG-20261024T154502Z-7b0ba5",
+      "name": "覆盖与引用审稿人",
+      "stage": "S1",
+      "module": "custom-advisory",
+      "mode": "custom-advisory",
+      "checks": [
+        "coverage",
+        "citation"
+      ],
+      "check_labels": [
+        "覆盖审计",
+        "引用对齐"
+      ],
+      "tools": [
+        "coverage.inspect",
+        "citation.inspect"
+      ],
+      "outputs": [
+        "CoverageAdvisory",
+        "CitationAdvisory"
+      ],
+      "inputs": [
+        "MergedEvidenceView",
+        "IdeaCard[]"
+      ],
+      "gates": [],
+      "executes": true,
+      "deferred_checks": [],
+      "advisory_only": true,
+      "writes": [],
+      "gate_owner": "human"
+    },
+    {
+      "id": "coverage-auditor",
+      "name": "覆盖审计",
+      "stage": "S1",
+      "module": "literature",
+      "mode": "fan-in",
+      "inputs": [
+        "ScoutReport[]"
+      ],
+      "outputs": [
+        "MergedEvidenceView",
+        "CoverageSummary"
+      ],
+      "gates": [
+        "Q0"
+      ],
+      "executes": true
+    },
+    {
+      "id": "idea-facilitator",
+      "name": "假设收敛",
+      "stage": "S2–S3",
+      "module": "idea",
+      "mode": "sequential",
+      "inputs": [
+        "MergedEvidenceView"
+      ],
+      "outputs": [
+        "IdeaCard",
+        "IdeaBrief"
+      ],
+      "gates": [
+        "G1"
+      ],
+      "executes": true,
+      "gate_owner": "human"
+    },
+    {
+      "id": "protocol-designer",
+      "name": "设计冻结",
+      "stage": "S4",
+      "module": "experiment",
+      "mode": "gated",
+      "inputs": [
+        "IdeaCard"
+      ],
+      "outputs": [
+        "DesignCard",
+        "ProtocolDraft"
+      ],
+      "gates": [
+        "G2"
+      ],
+      "executes": false,
+      "gate_owner": "human"
+    },
+    {
+      "id": "runner",
+      "name": "复现执行",
+      "stage": "S5a",
+      "module": "run",
+      "mode": "gated",
+      "inputs": [
+        "DesignCard"
+      ],
+      "outputs": [
+        "RunCapsule"
+      ],
+      "gates": [
+        "X0–X7"
+      ],
+      "executes": false
+    },
+    {
+      "id": "evidence-curator",
+      "name": "证据判定",
+      "stage": "S5b",
+      "module": "run",
+      "mode": "gated",
+      "inputs": [
+        "RunCapsule"
+      ],
+      "outputs": [
+        "EvidenceArtifact",
+        "ClaimRecord"
+      ],
+      "gates": [
+        "S5"
+      ],
+      "executes": false,
+      "gate_owner": "human"
+    },
+    {
+      "id": "figure-builder",
+      "name": "结果图",
+      "stage": "S6",
+      "module": "figure",
+      "mode": "gated",
+      "inputs": [
+        "ClaimRecord"
+      ],
+      "outputs": [
+        "FigureManifest"
+      ],
+      "gates": [],
+      "executes": false
+    },
+    {
+      "id": "writer",
+      "name": "写作槽位",
+      "stage": "S8–S12",
+      "module": "paper",
+      "mode": "gated",
+      "inputs": [
+        "ClaimRecord",
+        "FigureManifest"
+      ],
+      "outputs": [
+        "PaperContract",
+        "SectionSlots"
+      ],
+      "gates": [],
+      "executes": false
+    },
+    {
+      "id": "closure-auditor",
+      "name": "闭包检查",
+      "stage": "S13–S16",
+      "module": "closure",
+      "mode": "gated",
+      "inputs": [
+        "ClaimRecord",
+        "SignatureRequest"
+      ],
+      "outputs": [
+        "ClosureReport",
+        "ExportManifest"
+      ],
+      "gates": [
+        "G5"
+      ],
+      "executes": false,
+      "gate_owner": "human"
+    },
+    {
+      "id": "rsi-governor",
+      "name": "自进化治理",
+      "stage": "META",
+      "module": "rsi",
+      "mode": "independent",
+      "inputs": [
+        "ProcessObservation",
+        "SkillCandidate"
+      ],
+      "outputs": [
+        "EvalEvidence",
+        "LeaseDecision"
+      ],
+      "gates": [],
+      "executes": false,
+      "note": "allowed to evaluate and propose; admission/revoke stays on the human-governed RSI path"
+    }
+  ],
+  "lanes": {
+    "parallel": {
+      "name": "S1 scout fan-out",
+      "roles": [
+        "scout-1",
+        "scout-2",
+        "scout-3"
+      ],
+      "max_workers": 3,
+      "write_scope": "read-only retrieval; each scout returns its own facet report"
+    },
+    "fan_in": {
+      "name": "coverage merge",
+      "role": "coverage-auditor",
+      "depends_on": [
+        "scout-1",
+        "scout-2",
+        "scout-3"
+      ],
+      "merge_keys": [
+        "source_id",
+        "span_id"
+      ]
+    },
+    "sequential": [
+      "idea-facilitator",
+      "G1"
+    ],
+    "independent": [
+      "rsi-governor"
+    ],
+    "custom_advisory": {
+      "name": "custom advisory checks",
+      "roles": [
+        "CAG-20261024T154502Z-72ba99",
+        "CAG-20261024T154502Z-7b0ba5"
+      ],
+      "applies_at": "S1–S3",
+      "write_scope": "advisory notes only; no Claim/EA/gate"
+    }
+  },
+  "handoffs": [
+    {
+      "from": "orchestrator",
+      "to": "scout-*",
+      "contract": "ScoutTask",
+      "mode": "fan-out",
+      "fields": [
+        "question",
+        "facet_subset",
+        "budget",
+        "source_scope"
+      ]
+    },
+    {
+      "from": "scout-*",
+      "to": "coverage-auditor",
+      "contract": "ScoutReport",
+      "mode": "fan-in",
+      "fields": [
+        "hits",
+        "spans",
+        "coverage",
+        "brief"
+      ],
+      "merge": "dedupe source_id/span_id; no scout may write a Claim"
+    },
+    {
+      "from": "coverage-auditor",
+      "to": "idea-facilitator",
+      "contract": "MergedEvidenceView",
+      "mode": "sequential",
+      "fields": [
+        "hits",
+        "spans",
+        "facet_coverage",
+        "gaps"
+      ]
+    },
+    {
+      "from": "idea-facilitator",
+      "to": "human",
+      "contract": "IdeaCard[]",
+      "mode": "gate",
+      "gate": "G1",
+      "fields": [
+        "candidates",
+        "brief",
+        "gaps"
+      ]
+    },
+    {
+      "from": "human",
+      "to": "protocol-designer",
+      "contract": "G1Decision",
+      "mode": "gate",
+      "gate": "G2",
+      "fields": [
+        "metric",
+        "baseline",
+        "seeds",
+        "controls"
+      ]
+    },
+    {
+      "from": "evidence-curator",
+      "to": "figure-builder",
+      "contract": "ClaimRecord",
+      "mode": "gate",
+      "gate": "S5b",
+      "fields": [
+        "ea",
+        "claim",
+        "scope"
+      ]
+    },
+    {
+      "from": "closure-auditor",
+      "to": "human",
+      "contract": "ClosureReport",
+      "mode": "gate",
+      "gate": "G5",
+      "fields": [
+        "report",
+        "signature",
+        "export_manifest"
+      ]
+    },
+    {
+      "from": "rsi-governor",
+      "to": "human",
+      "contract": "SkillCandidate",
+      "mode": "independent",
+      "fields": [
+        "patch",
+        "dry_run",
+        "public_eval",
+        "hidden_eval",
+        "regression"
+      ],
+      "note": "orchestrator never admits; human admission is a separate gate"
+    },
+    {
+      "from": "coverage-auditor/idea-facilitator",
+      "to": "custom-advisory",
+      "contract": "AdvisoryNote[]",
+      "mode": "custom-advisory",
+      "fields": [
+        "checks",
+        "status",
+        "summary",
+        "details"
+      ],
+      "note": "read-only deterministic checks; protocol/evidence/figure/closure stay deferred at this stop point"
+    }
+  ],
+  "human_gates": [
+    {
+      "id": "G1",
+      "after": "S2–S3",
+      "reason": "候选假设收敛与新颖性仍需人工判断"
+    },
+    {
+      "id": "G2",
+      "after": "S4",
+      "reason": "主指标、对照与 seeds 需要人工冻结"
+    },
+    {
+      "id": "S5b",
+      "after": "S5a",
+      "reason": "Claim 只能由作者/PI 签署"
+    },
+    {
+      "id": "G5",
+      "after": "S13–S16",
+      "reason": "闭包与导出需要人工放行"
+    }
+  ],
+  "budget": {
+    "total_sources": 6,
+    "groups": [
+      {
+        "role_id": "scout-1",
+        "facets": [
+          "core",
+          "survey"
+        ],
+        "sources": 2
+      },
+      {
+        "role_id": "scout-2",
+        "facets": [
+          "method",
+          "evaluation"
+        ],
+        "sources": 2
+      },
+      {
+        "role_id": "scout-3",
+        "facets": [
+          "limitation",
+          "recent"
+        ],
+        "sources": 2
+      }
+    ]
+  },
+  "stop_at": "S2–S3 candidate frames",
+  "blocked_at": "G1",
+  "does_not_execute": [
+    "G1/G2/S5b/G5 decisions",
+    "S4 design freeze",
+    "S5 run and Claim",
+    "closure/signature/export",
+    "RSI admission or revocation"
+  ],
+  "evolution_policy": {
+    "enabled": true,
+    "scopes": {
+      "literature.memory_order": true,
+      "literature.query_planner": true,
+      "orchestrator.facet_budget": true,
+      "literature.retrieval.budget": true,
+      "experiment.run.seeds": true
+    },
+    "locked": [
+      {
+        "id": "claim.statement",
+        "label": "Claim 陈述",
+        "reason": "必须由作者/PI 签署"
+      },
+      {
+        "id": "evidence.artifact",
+        "label": "EvidenceArtifact",
+        "reason": "只能由运行与人签产生"
+      },
+      {
+        "id": "gate.decision",
+        "label": "门禁判定",
+        "reason": "G1/G2/S5b/G5 只能人工放行"
+      },
+      {
+        "id": "rubric",
+        "label": "评价规则",
+        "reason": "规则冻结，候选不得改写"
+      },
+      {
+        "id": "heldout",
+        "label": "Held-out 集合",
+        "reason": "不得用于提案或调参"
+      },
+      {
+        "id": "closure",
+        "label": "闭包报告",
+        "reason": "只能由闭包检查产生"
+      },
+      {
+        "id": "signature",
+        "label": "签名",
+        "reason": "浏览器与编排器都不提供签核"
+      },
+      {
+        "id": "export",
+        "label": "导出清单",
+        "reason": "未闭包/已过期时锁定"
+      }
+    ],
+    "boundary": "local visibility gate for automatic process/skill candidates; never unlocks Claim/EA/gate/rubric/held-out/closure/signature/export"
+  },
+  "memory": {
+    "mode": "fixture",
+    "observed_runs": 0,
+    "cold_start": true,
+    "rationale": [],
+    "skill_candidate": null,
+    "applied": true,
+    "boundary": "memory reorders facets/budget only; it never supplies evidence"
+  },
+  "boundary": "Topology only: the UI never runs scouts, claims, gates or admissions.",
+  "template": true,
+  "note": "静态角色与 handoff 模板；具体 facet 预算由任务运行时按记忆重算"
+}

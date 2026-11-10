@@ -1,0 +1,7 @@
+# Codex registers MCP servers in ~/.codex/config.toml
+[mcp_servers.research-agent]
+command = "python"
+args = ["<RESEARCH_AGENT_ROOT>/scripts/research_mcp_server.py", "--root", "<RESEARCH_AGENT_ROOT>"]
+
+[mcp_servers.research-agent.env]
+PYTHONPATH = "<RESEARCH_AGENT_ROOT>"

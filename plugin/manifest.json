@@ -1,0 +1,112 @@
+{
+  "schema_version": "research-agent-plugin-0.1",
+  "name": "research-agent",
+  "root": "<RESEARCH_AGENT_ROOT>",
+  "entrypoints": {
+    "mcp_stdio": {
+      "command": "python",
+      "args": [
+        "<RESEARCH_AGENT_ROOT>/scripts/research_mcp_server.py",
+        "--root",
+        "<RESEARCH_AGENT_ROOT>"
+      ],
+      "env": {
+        "PYTHONPATH": "<RESEARCH_AGENT_ROOT>"
+      }
+    },
+    "http_runtime": {
+      "command": "python",
+      "args": [
+        "-m",
+        "research_agent.runtime"
+      ]
+    },
+    "cli": "python -m research_agent",
+    "file_drop": {
+      "contract": "python -m research_agent handoff contract --capabilities <claims>",
+      "export": "python -m research_agent handoff export --outbox <dir>",
+      "import": "python -m research_agent handoff import --outbox <dir>"
+    }
+  },
+  "tools": 46,
+  "tool_names": [
+    "research_project_init",
+    "research_bootstrap",
+    "research_plan",
+    "research_run",
+    "research_status",
+    "research_model_profiles",
+    "research_model_turns",
+    "research_model_respond",
+    "research_model_void",
+    "research_list_artifacts",
+    "research_read_artifact",
+    "research_next_actions",
+    "research_skill_list",
+    "research_skill_instructions",
+    "research_skill_invoke",
+    "research_skill_distill",
+    "research_manuscript_revise",
+    "research_figure_templates",
+    "research_figure_render",
+    "research_literature_fetch",
+    "research_literature_synthesis",
+    "research_conference_fetch",
+    "research_writing_pack",
+    "research_manuscript_audit",
+    "research_innovation_review",
+    "research_manuscript_draft",
+    "research_manuscript_review",
+    "research_experiment_codegen",
+    "research_experiment_status",
+    "research_empirical_status",
+    "research_closure_status",
+    "research_evolution_status",
+    "research_lineage_status",
+    "research_support_panel",
+    "research_support_items",
+    "research_support_verdicts",
+    "research_manuscript_section_edit",
+    "research_manuscript_bind",
+    "research_manuscript_ab_review",
+    "research_host_contract",
+    "research_venue_audit",
+    "research_grant_template",
+    "research_skill_packs",
+    "research_mandate_status",
+    "research_number_provenance",
+    "research_study_baseline"
+  ],
+  "cli_commands": 213,
+  "prompts": [
+    "start-research",
+    "review-draft",
+    "review-idea"
+  ],
+  "turn_ttl_minutes": 180,
+  "human_only": [
+    "claim signature",
+    "gate decision (G1/G2/S5b/G3/G5)",
+    "protocol freeze",
+    "closure signature",
+    "bundle publish",
+    "export approval"
+  ],
+  "human_only_statement": "G1 decision, G2 protocol freeze, claim signature, closure signature, bundle publish and export approval are human-only; this server has no tool for them",
+  "model_supply": {
+    "host_supplied_no_api_key": {
+      "where": "a platform host whose agent has its own model (Qoder and similar)",
+      "how": "generation stages return a pending ModelTurn; the host answers it with research_model_respond (or handoff export/import) and re-runs the step",
+      "api_key_required": false,
+      "detect": "handoff contract --capabilities can_call_tools,can_serve_model"
+    },
+    "client_configured_key": {
+      "where": "a plain CLI client with no agent to answer turns",
+      "how": "bind a keyed profile once, then every stage calls it directly",
+      "api_key_required": true,
+      "detect": "handoff contract without can_serve_model"
+    },
+    "if_neither": "the run stops with blocked=model_stages_suspend_without_a_host_model instead of silently producing a weaker draft"
+  },
+  "boundary": "the plugin is a transport and a description of entrypoints only: it contains no research logic and no gate authority; claim signatures, gate decisions, protocol freeze, closure signatures, publishing and export approval stay CLI operations, run by a human or by a human-authored autopilot policy that the plugin may invoke but never create or widen"
+}

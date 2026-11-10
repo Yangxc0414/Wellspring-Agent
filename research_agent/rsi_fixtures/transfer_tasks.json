@@ -1,0 +1,15 @@
+{
+  "fixture": false,
+  "corpus_kind": "real",
+  "sealed_after_admission": true,
+  "benchmark": "rsi-transfer-ccby-3",
+  "note": "Held-out transfer questions for three papers not used in harness design; never used for selection or admission.",
+  "tasks": [
+    {"task_id": "TRANS-1", "split": "hidden", "question": "Agent Laboratory autonomous pipeline human feedback research idea", "gold_texts": ["autonomous pipeline", "human feedback"]},
+    {"task_id": "TRANS-2", "split": "hidden", "question": "Agent Laboratory Co-pilot mode human involvement", "gold_texts": ["Co-pilot mode", "human involvement"]},
+    {"task_id": "TRANS-3", "split": "hidden", "question": "AI Scientist fully automated process peer review ideation", "gold_texts": ["fully automated process", "peer review"]},
+    {"task_id": "TRANS-4", "split": "hidden", "question": "AI Scientist open-ended loop previous discoveries low cost", "gold_texts": ["open-ended loop", "$15/paper"]},
+    {"task_id": "TRANS-5", "split": "hidden", "question": "SEAL self-edits reinforcement learning weight updates", "gold_texts": ["self-edits", "reinforcement learning"]},
+    {"task_id": "TRANS-6", "split": "hidden", "question": "SEAL knowledge incorporation continued pretraining", "gold_texts": ["knowledge incorporation", "continued pretraining"]}
+  ]
+}

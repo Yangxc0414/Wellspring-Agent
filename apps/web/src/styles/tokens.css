@@ -1,0 +1,42 @@
+:root {
+  color-scheme: light;
+  --bg: #f8fbff;
+  --bg-tint: #eef6ff;
+  --surface: #ffffff;
+  --surface-2: #f3f8ff;
+  --surface-3: #eaf3ff;
+  --text: #0e1b2e;
+  --muted: #53657d;
+  --faint: #8b9bb0;
+  --line: rgba(23, 58, 102, 0.09);
+  --line-strong: rgba(23, 58, 102, 0.17);
+  --accent: #2563eb;
+  --accent-2: #38bdf8;
+  --accent-deep: #1d4ed8;
+  --accent-dim: rgba(37, 99, 235, 0.075);
+  --accent-dim-strong: rgba(37, 99, 235, 0.13);
+  --teal: #0f8a9e;
+  --teal-dim: rgba(15, 138, 158, 0.08);
+  --amber: #9a6b1e;
+  --amber-dim: #fdf7e9;
+  --coral: #d92d55;
+  --coral-dim: rgba(217, 45, 85, 0.07);
+  --violet: #6d28d9;
+  /* settings.css / lineage.css reference this in 228 calc() expressions, but it was
+     never declared, so all of those font sizes silently fell back to inheritance. */
+  --settings-font-scale: 1.15;
+  --gradient: linear-gradient(128deg, #2563eb 0%, #38bdf8 62%, #7dd3fc 100%);
+  --serif: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif;
+  --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", "SFMono-Regular", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --shadow-pop: 0 22px 65px rgba(15, 35, 70, 0.15);
+  --shadow-soft: 0 8px 26px rgba(37, 99, 235, 0.08);
+  --topbar: 48px;
+  --sidebar: 280px;
+  --context: 352px;
+  /* Layout breakpoints (keep in sync with src/domain/breakpoints.ts):
+     1150 / 960 / 760 / 620. JS uses 1150 for the context-panel drawer. */
+}

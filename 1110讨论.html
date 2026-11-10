@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1110 讨论 · 科研智能体下一步：过程可信与判定消费的策略论证</title>
+<style>
+  :root{
+    --bg:#ffffff; --ink:#16181d; --sub:#5b6472; --line:#e4e7ec; --soft:#f6f7f9;
+    --accent:#1d4ed8; --accent-soft:#eef2ff; --teal:#0f766e; --teal-soft:#ecfdf5;
+    --amber:#b45309; --amber-soft:#fffbeb; --red:#b91c1c; --red-soft:#fef2f2;
+    --j1:#1d4ed8; --j2:#0f766e; --j3:#b45309; --j4:#7c3aed;
+    --serif:"Songti SC","SimSun","Noto Serif SC",Georgia,serif;
+    --sans:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:6px;height:54px;flex-wrap:wrap}
+  nav .brand{font-weight:700;font-size:14px;letter-spacing:.02em;margin-right:10px;white-space:nowrap}
+  nav a.nl{font-size:13px;color:var(--sub);padding:6px 10px;border-radius:7px;white-space:nowrap}
+  nav a.nl:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+  nav a.nl.active{color:var(--accent);background:var(--accent-soft);font-weight:600}
+  header{padding:74px 0 46px;border-bottom:1px solid var(--line)}
+  .kicker{font-size:13px;letter-spacing:.18em;color:var(--accent);font-weight:700;text-transform:uppercase}
+  h1{font-family:var(--serif);font-size:42px;line-height:1.28;margin:16px 0 10px;font-weight:700;letter-spacing:.01em}
+  .lede{font-size:19px;color:var(--sub);max-width:840px;margin:0 0 26px}
+  .meta{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;color:var(--sub);margin-bottom:26px}
+  .meta b{color:var(--ink);font-weight:600}
+  .thesis{border-left:4px solid var(--accent);background:var(--accent-soft);
+    padding:20px 24px;border-radius:0 12px 12px 0;font-size:17px;max-width:920px}
+  .thesis b{color:var(--accent)}
+  .chips{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;background:#fff}
+  .chip b{color:var(--accent)}
+  section{padding:56px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-no{font-family:var(--mono);font-size:14px;color:var(--accent);font-weight:700}
+  h2{font-family:var(--serif);font-size:29px;margin:0;font-weight:700;letter-spacing:.01em}
+  .sec-sub{color:var(--sub);font-size:15px;margin:0 0 30px;max-width:880px}
+  h3{font-size:18px;margin:34px 0 12px;font-weight:700}
+  p{margin:0 0 14px}
+  .muted{color:var(--sub)}
+  .small{font-size:13.5px}
+  .grid{display:grid;gap:18px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .card{border:1px solid var(--line);border-radius:14px;padding:22px 22px;background:#fff}
+  .card.soft{background:var(--soft)}
+  .card .tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+  .card h4{margin:8px 0 10px;font-size:17px}
+  .card p{font-size:14.5px;margin:0 0 10px;color:#2a2f38}
+  .card p:last-child{margin-bottom:0}
+  .card .ev{font-size:13px;color:var(--sub);border-top:1px dashed var(--line);padding-top:10px;margin-top:12px}
+  .card .ev b{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 8px;table-layout:fixed}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+  th{font-size:12.5px;color:var(--sub);font-weight:700;letter-spacing:.03em;background:var(--soft)}
+  td b{font-weight:600}
+  tr:last-child td{border-bottom:none}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .note{border-radius:12px;padding:16px 20px;font-size:14.5px;margin:18px 0}
+  .note.blue{background:var(--accent-soft);border:1px solid #dbe3ff}
+  .note.teal{background:var(--teal-soft);border:1px solid #c7f0e2}
+  .note.amber{background:var(--amber-soft);border:1px solid #f3e2b8}
+  .note.red{background:var(--red-soft);border:1px solid #f4c9c9}
+  .note b{font-weight:700}
+  .note .h{font-weight:700;display:block;margin-bottom:4px}
+  figure{margin:26px 0;border:1px solid var(--line);border-radius:14px;padding:20px;background:#fff}
+  figcaption{font-size:13px;color:var(--sub);margin-top:12px;text-align:center}
+  svg{display:block;width:100%;height:auto}
+  svg text{font-family:var(--sans)}
+  .bars{margin:10px 0}
+  .bar-row{display:grid;grid-template-columns:210px 1fr 64px;align-items:center;gap:12px;margin:9px 0}
+  .bar-row .bl{font-size:13.5px}
+  .bar-track{background:var(--soft);border-radius:6px;height:22px;overflow:hidden;border:1px solid var(--line)}
+  .bar-fill{height:100%;background:linear-gradient(90deg,#93c5fd,#1d4ed8);border-radius:6px 0 0 6px}
+  .bar-row .bv{font-family:var(--mono);font-size:13.5px;text-align:right;font-weight:600}
+  .dir{border:1px solid var(--line);border-radius:16px;padding:0;overflow:hidden;margin:20px 0}
+  .dir .dh{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px}
+  .dir .dh .dn{font-family:var(--mono);font-weight:700;font-size:15px;color:#fff;background:var(--accent);border-radius:8px;padding:4px 12px}
+  .dir .dh h4{margin:0;font-size:19px}
+  .dir .dh .risk{margin-left:auto;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+  .risk.low{background:var(--teal-soft);color:var(--teal)}
+  .risk.mid{background:var(--amber-soft);color:var(--amber)}
+  .risk.high{background:var(--red-soft);color:var(--red)}
+  .dir .db{padding:20px 24px}
+  .dir .rq{font-size:15.5px;font-weight:600;margin:0 0 16px;color:var(--ink)}
+  .kv{display:grid;grid-template-columns:96px 1fr;gap:8px 14px;font-size:14px}
+  .kv .k{color:var(--sub);font-weight:600}
+  .kv .v{color:#2a2f38}
+  .kv .v b{color:var(--ink)}
+  .dir.rec{border:2px solid var(--accent)}
+  .dir.rec .dh{background:var(--accent-soft)}
+  .chain{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:18px 0}
+  .chain .step{flex:1;min-width:170px;border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .chain .step .st{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.05em}
+  .chain .step h5{margin:6px 0 6px;font-size:15px}
+  .chain .step p{font-size:13px;color:var(--sub);margin:0}
+  .chain .arr{display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--accent);padding:0 8px;font-weight:700}
+  .q{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:18px 22px;margin:14px 0;background:#fff}
+  .q .qn{font-family:var(--mono);color:var(--accent);font-weight:700;font-size:13px}
+  .q h4{margin:4px 0 8px;font-size:16.5px}
+  .q p{font-size:14px;color:var(--sub);margin:0}
+  .q .opts{margin-top:10px;font-size:13.5px}
+  .q .opts span{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:7px;padding:3px 10px;margin:3px 6px 3px 0}
+  .refs{font-size:13.5px}
+  .refs .rg{margin:18px 0}
+  .refs .rg h4{font-size:14px;margin:0 0 8px;color:var(--ink)}
+  .refs ol{margin:0;padding-left:22px}
+  .refs li{margin:6px 0;color:#2a2f38}
+  .refs li .src{color:var(--sub)}
+  footer{padding:40px 0 70px;color:var(--sub);font-size:13px}
+  @media (max-width:820px){
+    .g3,.g2,.g4{grid-template-columns:1fr}
+    h1{font-size:32px}
+    .bar-row{grid-template-columns:130px 1fr 52px}
+    .chain{flex-direction:column}
+    .chain .arr{transform:rotate(90deg);padding:6px 0}
+    nav .wrap{height:auto;padding:8px 28px}
+  }
+  @media print{
+    nav{display:none}
+    section{break-inside:avoid-page;border-bottom:1px solid #ccc}
+    body{font-size:12px}
+    a{color:var(--ink)}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <span class="brand">1110 · 组会讨论</span>
+    <a class="nl" href="#s1">本质判断</a>
+    <a class="nl" href="#s2">拟采用策略</a>
+    <a class="nl" href="#s3">外部证据</a>
+    <a class="nl" href="#s4">证据→策略</a>
+    <a class="nl" href="#s5">方向与可证伪问题</a>
+    <a class="nl" href="#s6">Skill生态·行动</a>
+    <a class="nl" href="#s7">主线与流程图</a>
+    <a class="nl" href="#s8">讨论问题</a>
+    <a class="nl" href="#s9">参考文献</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">Research Agent · Strategy Review · 承接上次讨论</div>
+    <h1>科研智能体的下一步<br>过程可信与判定消费的策略论证</h1>
+    <p class="lede">上次讨论已把研究重心从「能不能做」推向「做了之后是否可信、可积累、可解释」，并给出五判断、两主线、三优先方向与四个可证伪评测问题。
+      本次<b>不汇报代码进展</b>，而是回答：承接这些判断，我们下一步<b>希望采用什么策略</b>、把哪个机制作为研究切口、用什么可证伪实验验证它。</p>
+    <div class="meta">
+      <span><b>场合</b> 组会汇报 · 交流讨论</span>
+      <span><b>日期</b> 2026-11-10</span>
+      <span><b>承接</b> 上次讨论纪要（五判断 / 两主线 / A·B·C / 四问）</span>
+      <span><b>口径</b> 只谈策略与可核实文献，不谈代码实现</span>
+    </div>
+    <div class="thesis">
+      <b>一句话策略主张：</b>不追端到端「自动写论文」的红海，而是采用<b>「过程可信底座 + 判定消费」</b>策略——
+      以<b>三层可验证 + 证据溯源</b>为内核（主线一），把<b>「反馈/判定真正改变下一步行动」</b>与<b>「学习证据准入 / 技能适用域」</b>作为研究切口（方向 A/B/C），
+      用<b>机制级可证伪评测</b>验证，而非堆功能或发明度量。新颖性落在外部集体空白处，不在度量或生成能力本身。
+      验收单位升级为<b>「一段时间内科研委托是否被妥善办完」</b>（签署+核验+维护），工程底座借<b>「控制面/执行面分离 + 事件驱动」</b>（Router/Worker、两级过滤、Thread 直通、异步 ReAct、Watchdog）。
+    </div>
+    <div class="chips">
+      <span class="chip"><b>策略①</b> 过程可信底座（三层可验证 + provenance）</span>
+      <span class="chip"><b>策略②</b> 反馈→行动（判定消费）</span>
+      <span class="chip"><b>策略③</b> 学习证据准入（适用域 / 负迁移）</span>
+      <span class="chip"><b>策略④</b> 多样性保持 + 反事实证伪</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 01 本质判断 ============ -->
+<section id="s1">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">01</span><h2>本质判断：承接上次讨论的重心转移</h2></div>
+    <p class="sec-sub">上次讨论的五判断与两认知，照出三个本质矛盾。它们决定了我们不该在「生成更多 / 更快」上竞争，而该在「可信 / 可积累 / 可解释」上建立切口。</p>
+
+    <div class="grid g3">
+      <div class="card">
+        <span class="tag">本质矛盾 ①</span>
+        <h4>生成 ≠ 证据</h4>
+        <p>对应判断 2（产出像论文 → 过程经得起复现）。可验证性分三层：结果复现 / 过程复现 / 证据链复现；其中<b>证据链复现（陈述→数据→代码→执行→分析）基本空白</b>。独立审计发现 AI Scientist <a href="https://arxiv.org/abs/2502.14297">42% 实验失败仍成文</a>；Co-Scientist 扩展审计显示<b>无验证机制</b>时端到端论文严重结果幻觉 ~90%（加可靠性模块降至 ~4%，<a href="https://arxiv.org/abs/2608.26701">30 专家/450 评审</a>）。</p>
+        <p class="ev"><b>策略指向：</b>做证据链复现层 + 记忆条目绑定执行契约 / provenance，而非更强生成。</p>
+      </div>
+      <div class="card">
+        <span class="tag">本质矛盾 ②</span>
+        <h4>判定 / 反思 ≠ 行动</h4>
+        <p>对应可证伪问题二与 PerturbTrace：真实反馈并不稳定优于随机 / 无反馈；SAGE 的多假设反思本身已不新。<b>判定消费</b>指把门禁/验证/失效的判定结果用作下一步行动的输入，而非只读报告；关键不是「生成解释」，而是<b>反馈是否按证据质量改变下一步正确行动</b>。</p>
+        <p class="ev"><b>策略指向：</b>把「判定消费为行为」作为切口，用真实/打乱/过时/含噪/矛盾反馈做机制级对照。</p>
+      </div>
+      <div class="card">
+        <span class="tag">本质矛盾 ③</span>
+        <h4>单次成功 ≠ 可积累增益</h4>
+        <p>对应判断 1（程序自主 → 过程自主）与问题一/三：一次修复成功不代表学会；反复按同一指标选最优会高估科学进步（Goodhart）。记忆准入要看<b>学习证据</b>：跨任务迁移 / 知识保留 / 退化检测 / 演化成本。</p>
+        <p class="ev"><b>策略指向：</b>学习证据四维准入 + 负迁移控制；度量借外部成熟信封，不发明度量。</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="note amber" style="margin:0">
+        <span class="h">前置认知 A · 个体新颖 ≠ 群体多样</span>
+        37,802 条 AI 构思研究（上次纪要，待核）+ <a href="https://arxiv.org/abs/2409.04109">Si et al.</a> 互证：想法「个体新颖、群体趋同」，多为局部方法重组。Evidence-Informed Beliefs 已在做多样性优化 → 新工作必须聚焦<b>长时程探索中的具体失效条件</b>，而非泛泛「增加多样性」。
+      </div>
+      <div class="note amber" style="margin:0">
+        <span class="h">前置认知 B · 评测能测结果，不一定解释能力升降</span>
+        MLR-Bench / ScienceClaw-Eval 已支持阶段级与演化级评测 → <b>不能再笼统把「缺评测」当选题</b>。必须针对具体机制提出<b>可证伪评测问题</b>（见 §05 四问）。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 拟采用策略 ============ -->
+<section id="s2">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">02</span><h2>我们目前希望采用的策略（而非已做了什么）</h2></div>
+    <p class="sec-sub">以下四条是拟采用的研究策略，对应上次两主线与三方向。它们是「打算怎么研究」，不是「已经实现了什么」；每条都带一个可证伪的验证入口。</p>
+
+    <div class="grid g2">
+      <div class="card soft">
+        <span class="tag">策略① · 主线一 / 方向 B</span>
+        <h4>过程可信底座：三层可验证 + 证据溯源</h4>
+        <p>以<b>证据链复现</b>为核心：论文每个实验性结论可追溯到数据 / 代码版本 / 执行记录 / 分析过程；结果变化时能识别哪些图表、统计、陈述失去支持。记忆条目绑定执行契约与 provenance，配<b>类型化记忆图谱 + 协调协议</b>（四类记忆：文献关系 / 领域知识 / 假设证据 / 执行技能）。</p>
+        <p class="ev"><b>验证入口：</b>held-out 改上游 code/data/protocol，测失效推导是否正确（对照只防篡改不传播失效的系统）。</p>
+      </div>
+      <div class="card soft">
+        <span class="tag">策略② · 判定消费 / 问题二</span>
+        <h4>反馈 → 行动：让判定改变下一步决策</h4>
+        <p>研究「实验反馈在什么条件下真正改变正确行动」，而非只写反思文本。对同一任务提供<b>真实 / 打乱 / 过时 / 含噪 / 互相矛盾</b>反馈，比较下一步行动是否按证据质量合理变化。互操作协议记录「角色—评审—消费—复验」关系（判断 4）。</p>
+        <p class="ev"><b>验证入口：</b>反馈敏感性与反馈真实信息价值是否一致；显式识别反馈质量能否改善行动选择。</p>
+      </div>
+      <div class="card soft">
+        <span class="tag">策略③ · 方向 A / 问题三</span>
+        <h4>学习证据准入：技能适用域与负迁移控制</h4>
+        <p>不研究「生成更多技能」，而研究<b>已验证技能何时可安全用于新任务</b>：直接复用 / 先行测试 / 拒绝复用。准入不看单次复验，看四维学习证据（迁移 / 保留 / 退化 / 成本）。对照 <a href="https://arxiv.org/abs/2610.08691">ScienceClaw</a> 三重验证、AutoSci 持久记忆，找其筛选机制处理不了的情境变化。</p>
+        <p class="ev"><b>验证入口：</b>全部存储 / 全不存储 / 重放后存储 / 独立任务验证后存储 四策略对照跨任务收益。</p>
+      </div>
+      <div class="card soft">
+        <span class="tag">策略④ · 主线二 / 方向 C</span>
+        <h4>多样性保持 + 反事实证伪 / 信念修订</h4>
+        <p>监测群体同质化、带多样性约束的探索奖励；补因果干预 / 反事实证伪（T6 空白最大）；证据冲突时决定<b>修订信念 / 保留不确定 / 再激活被否决假设</b>。需构造能区分「合理修订」与「无效反复探索」的评测环境。</p>
+        <p class="ev"><b>验证入口：</b>跟踪多轮方向分布 / 新颖度 / 重复率 / 可验证收益，对照有 / 无探索约束。</p>
+      </div>
+    </div>
+
+    <div class="note blue">
+      <span class="h">策略取舍（有所不为）</span>
+      <b>不追</b>端到端生成红海——质量证据差（42% 失败 / ~90% 幻觉）且赛道拥挤，正面竞争无差异化；<b>不发明</b>度量——ARS/CCFA/MLR-Bench 已把度量做成机器契约，再发明不被认新颖，故借信封对准空白；<b>不搬</b>全量 skill 目录——AJS 证明静态格式≠运行时证据，搬目录不增可信；<b>不引入</b>无约束 autonomous execution——ARS 明确拒绝、安全/隐私开放问题未解；
+      人工门留在<b>高杠杆节点</b>（假设选择 / 设计批准 / 签署），自动化只跑门间段。新颖性锁定在外部集体空白：证据链复现、失效传播、判定消费、学习证据准入。
+    </div>
+
+    <div class="note teal">
+      <span class="h">与上次三方向的对应</span>
+      <b>方向 A（技能适用域）</b>→ 策略③；<b>方向 B（实验→陈述证据溯源）</b>→ 策略①；<b>方向 C（信念修订 / 假设再激活）</b>→ 策略④（主体）；策略②为其提供「修订是否真的改变行动」的判据。
+      倾向以 <b>B 为内核守住、A 为第一个切口</b>（上次优先推荐）、C 为后续前沿；策略②贯穿作为「反馈是否改变行动」的诊断实验。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 外部证据 ============ -->
+<section id="s3">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">03</span><h2>外部证据地图：空白与已收敛处</h2></div>
+    <p class="sec-sub">把上次 Taxonomy 与本轮调研摆在一起：哪些已被做掉（不该再当新颖性）、哪些仍是集体空白（我们的落点）。定量数字优先经原文/摘要核实；引自上次纪要者（如 37,802、PerturbTrace）单独标注、仅作定性对照。</p>
+
+    <div class="grid g3">
+      <div class="card soft">
+        <span class="tag">已收敛 · 不该再当新颖性</span>
+        <h4>生成 / 度量 / 泛泛多样性</h4>
+        <p><b>端到端生成</b>：AI Scientist v1/v2（Nature 2026 / workshop 接收后撤稿）；独立审计 42% 实验失败、占位符。</p>
+        <p><b>度量信封</b>：ARS 预注册先哈希 / write-once / lower_bound；CCFA 配对 bootstrap / sign test / 顺序反转；MLR-Bench / ScienceClaw-Eval 阶段级与演化级评测。</p>
+        <p><b>多样性 / 反思</b>：37,802 构思收窄研究、Evidence-Informed Beliefs、SAGE 多假设归因。</p>
+        <p class="ev"><b>启示：</b>这些是「该借 / 该对照」，不是「该发明」。</p>
+      </div>
+      <div class="card soft">
+        <span class="tag">集体空白 · 我们的落点</span>
+        <h4>证据链 / 失效 / 准入 / 证伪</h4>
+        <p><b>证据链复现</b>：陈述→数据→代码→执行→分析 的溯源账本基本空白（判断 2）。</p>
+        <p><b>失效传播</b>：所调研的开源/论文系统中未见 upstream-change→downstream-stale 推导（ECC 哈希链只防篡改）。</p>
+        <p><b>学习证据准入</b>：ScienceClaw 已有三重验证；其能否覆盖情境变化/负迁移是<b>我们要验证的切口</b>（非已证空白）；类型化记忆协调空白（判断 5）。</p>
+        <p><b>证伪 / 反事实</b>：T6 空白最大，无「以可证伪性为一等约束」的 agent（判断 3）。</p>
+        <p class="ev"><b>启示：</b>新颖性锁定这里，配机制级可证伪评测。</p>
+      </div>
+      <div class="card soft">
+        <span class="tag">结构需求 · 人工门</span>
+        <h4>最成功的系统都保留人</h4>
+        <p><b>Co-Scientist</b>（Nature 2026）：验证全部由人类湿实验完成；可靠性模块把严重结果幻觉 ~90%→~4%（30 专家 / 450 评审）。</p>
+        <p><b>Virtual Lab / Robin</b>（Nature）：AI 设计 + 人湿实验。</p>
+        <p><b>AutoResearchClaw / ECC</b>：HITL 六档干预 / 「门间自动段」，人门留在环外。</p>
+        <p class="ev"><b>启示：</b>人工门是结构需求；策略②的「判定消费」不等于去掉人门。</p>
+      </div>
+    </div>
+
+    <h3>能力基准：成功率低且口径互不换算（过程级评测缺失）</h3>
+    <div class="bars">
+      <div class="bar-row"><span class="bl">PaperBench（复现 ICML 论文）</span><div class="bar-track"><div class="bar-fill" style="width:21%"></div></div><span class="bv">21.0%</span></div>
+      <div class="bar-row"><span class="bl">CORE-Bench（计算复现·最难档）</span><div class="bar-track"><div class="bar-fill" style="width:21%"></div></div><span class="bv">21%</span></div>
+      <div class="bar-row"><span class="bl">DiscoveryBench（数据驱动发现）</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="bv">25%</span></div>
+      <div class="bar-row"><span class="bl">ScienceAgentBench（数据分析）</span><div class="bar-track"><div class="bar-fill" style="width:32.4%"></div></div><span class="bv">32.4%</span></div>
+      <div class="bar-row"><span class="bl">MLAgentBench（ML 实验）</span><div class="bar-track"><div class="bar-fill" style="width:37.5%"></div></div><span class="bv">37.5%</span></div>
+    </div>
+    <p class="small muted">RE-Bench：2 小时 agent 约人类 4 倍、32 小时人类反超约 2 倍 → 短时迭代强、长程研究弱。基准各测一角、互不换算 → 缺<b>过程级 / 证据链级</b>统一评估，正是策略①的评测空间。</p>
+  </div>
+</section>
+
+<!-- ============ 04 证据→策略 ============ -->
+<section id="s4">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">04</span><h2>证据 → 策略：把空白对到拟采用的切口</h2></div>
+    <p class="sec-sub">每个本质矛盾 = 外部证明它重要 + 外部已收敛处（该借）+ 集体空白（该做）+ 可证伪验证入口。这是策略调整的 solid 依据。</p>
+
+    <div class="chain">
+      <div class="step"><div class="st">外部证明重要</div><h5>可信是瓶颈</h5><p>证据绑定 90%→4%；42% 失败仍成文；复现鸿沟 ~21%；想法新颖但群体趋同。</p></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="st">外部已收敛</div><h5>该借不该发明</h5><p>度量信封 / 哈希身份 / 门间自动化 / 阶段级评测 / 多样性优化 已有成熟工作。</p></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="st">集体空白</div><h5>该做的切口</h5><p>证据链复现 / 失效传播 / 判定消费 / 学习证据准入 / 反事实证伪 / 记忆协调。</p></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="st">策略</div><h5>机制级可证伪</h5><p>四策略各带一个能失败的对照实验（§05），而非堆功能。</p></div>
+    </div>
+
+    <table>
+      <thead><tr><th style="width:18%">本质矛盾</th><th style="width:34%">外部支撑 / 已收敛处</th><th>拟采用策略 + 验证入口</th></tr></thead>
+      <tbody>
+        <tr><td><b>① 生成≠证据</b></td><td>Co-Scientist 90%→4%；PaperQA2 超人类；判断 2 三层可验证；ECC/ARS 哈希只防篡改。</td><td><b>策略①</b>：证据链复现 + provenance + 失效传播。验证：held-out 改上游测 stale 推导。</td></tr>
+        <tr><td><b>② 判定≠行动</b></td><td>PerturbTrace：真实反馈并不稳定优于随机/无反馈；SAGE 反思已不新；RE-Bench 长程弱。</td><td><b>策略②</b>：反馈→行动。验证：五类反馈对照行动合理变化。</td></tr>
+        <tr><td><b>③ 成功≠增益</b></td><td>ScienceClaw 三重验证 / AutoSci 记忆已覆盖；度量外部成熟；Goodhart / 37,802 收窄。</td><td><b>策略③+④</b>：学习证据准入 + 负迁移 + 多样性/证伪。验证：四存储策略对照 / 探索约束对照。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 05 方向与可证伪问题 ============ -->
+<section id="s5">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">05</span><h2>三个优先方向 + 四个可证伪评测问题</h2></div>
+    <p class="sec-sub">承接上次讨论：方向 A/B/C 是战略选项，四问是把它们落成「能失败」的实验。优先顺序与上次一致：A 优先、B 守内核、C 后续；问题二作第一个诊断实验、问题一优先预实验。</p>
+
+    <div class="dir rec">
+      <div class="dh"><span class="dn">方向 A</span><h4>技能迁移的适用域判定（优先推荐）</h4><span class="risk mid">切口 · 负迁移控制</span></div>
+      <div class="db">
+        <p class="rq">一个历史任务上验证过的技能，在什么条件下可安全用于新任务？何时直接复用 / 先行测试 / 拒绝复用？</p>
+        <div class="kv">
+          <span class="k">对照已覆盖</span><span class="v">ScienceClaw 重放 + 独立任务验证；AutoSci 持久记忆。泛泛「该不该写 Memory」已不新。</span>
+          <span class="k">新切口</span><span class="v">学习证据四维准入（迁移/保留/退化/成本）+ 其筛选机制处理不了的情境变化 / 错误迁移案例。</span>
+          <span class="k">最小实验</span><span class="v">成功经验集在原任务/相似/分布变化任务上测；四存储策略对照。</span>
+        </div>
+      </div>
+    </div>
+    <div class="dir">
+      <div class="dh"><span class="dn">方向 B</span><h4>实验运行 → 论文陈述的证据溯源（守内核）</h4><span class="risk low">内核 · 证据链</span></div>
+      <div class="db">
+        <p class="rq">每个实验性结论能否追溯到数据 / 代码版本 / 执行记录 / 分析过程？结果变化时识别哪些图表 / 统计 / 陈述失去支持。</p>
+        <div class="kv">
+          <span class="k">对照已覆盖</span><span class="v">PaperBench 结果复现、REPRO-Bench；但证据链复现层空白。</span>
+          <span class="k">新切口</span><span class="v">不是加事实核查 agent，而是<b>失效传播</b>：upstream-change→downstream-stale。</span>
+          <span class="k">最小实验</span><span class="v">held-out 改上游，测哪些结论/图表被正确判失效、哪些需重签、导出是否被锁。</span>
+        </div>
+      </div>
+    </div>
+    <div class="dir">
+      <div class="dh"><span class="dn">方向 C</span><h4>证据冲突下的信念修订与假设再激活（后续前沿）</h4><span class="risk high">前沿 · 需评测环境</span></div>
+      <div class="db">
+        <p class="rq">新证据与历史结论冲突时，如何决定修订信念 / 保留不确定 / 再激活被否决假设？</p>
+        <div class="kv">
+          <span class="k">对照已覆盖</span><span class="v">AutoDiscovery 贝叶斯惊奇度；Evidence-Informed Beliefs 动态信念。</span>
+          <span class="k">新切口</span><span class="v">构造能区分「合理修订」与「无效反复探索」的评测环境（FalsifyBench 子集）。</span>
+          <span class="k">风险</span><span class="v">更前沿但评测环境构造成本高，适合作后续工作。</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>四个可证伪评测问题（机制级，非笼统「缺评测」）</h3>
+    <table>
+      <thead><tr><th style="width:6%">问</th><th style="width:30%">研究问题 / 可证伪假设</th><th style="width:34%">最小实验</th><th>优先级 / 风险</th></tr></thead>
+      <tbody>
+        <tr><td class="num">Q1</td><td>连续优化后指标收益是否与独立科学证据脱钩？假设：反复筛选使报告指标改善而独立验证停滞。</td><td>多 agent 固定预算反复改进同批任务，记录优化指标 vs 独立种子/独立条件结果，看差距随轮次扩大。</td><td>优先预实验；需证明是长期反复选择的系统偏差，非普通测试集已知问题。</td></tr>
+        <tr><td class="num">Q2</td><td>什么情况下实验反馈真正改变正确行动？假设：反馈敏感性与真实信息价值不一致。</td><td>同一任务给真实/打乱/过时/含噪/矛盾反馈，比较下一步行动合理变化与最终结果。</td><td><b>第一个诊断实验</b>；易启动但与近期工作重叠高。</td></tr>
+        <tr><td class="num">Q3</td><td>怎样判断一次成功修改值得沉淀为长期经验？假设：原任务成功不足以预测跨任务收益。</td><td>四存储策略（全存/全不存/重放后/独立验证后）对照跨任务收益。</td><td>与主线一致；作后续或 Q1 机制扩展。</td></tr>
+        <tr><td class="num">Q4</td><td>自主循环是否越来越擅长局部改进却难跳出既有路线？假设：探索空间逐步收窄。</td><td>跟踪多轮方向分布/新颖度/重复率/可验证收益，对照有/无探索约束。</td><td>重要但<b>不作第一篇主切口</b>。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 06 Skill 生态与行动 ============ -->
+<section id="s6">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">06</span><h2>Skill 生态对照：该借 / 该守 / 该新增 + 行动清单</h2></div>
+    <p class="sec-sub">精读「Research Skill 调研」10 仓库对照上次反思。结论：外部在「度量信封 / 哈希身份 / 门间自动化」高度收敛（该借），在「真实执行→人签消费→失效传播→受治理 RSI」集体空白（该作为内核坚持、并率先用最小实例验证）。</p>
+
+    <table>
+      <thead><tr><th style="width:18%">仓库</th><th style="width:28%">优化什么</th><th style="width:30%">证据 / 验证纪律</th><th>对照策略</th></tr></thead>
+      <tbody>
+        <tr><td><b>ECC</b></td><td>311 skill + 跨宿主投影 + eval-harness</td><td>append-only 哈希链胶囊 + SE0–SE4 效果分级 + fail-closed</td><td>哈希只防篡改不传播失效 → 策略①增量</td></tr>
+        <tr><td><b>deer-flow</b></td><td>LangGraph super-agent</td><td>schema 契约 + assurance 阶梯 + waiver(hash+expires+reason)</td><td>最接近 lease 的机器契约 → 该借 schema</td></tr>
+        <tr><td><b>academic-research-skills</b></td><td>human-in-loop copilot</td><td>预注册先哈希 + write-once + lower_bound + ≥2 判官；拒绝执行</td><td>度量信封该借；拒绝执行=我们内核空白处</td></tr>
+        <tr><td><b>CCFA-Skills</b></td><td>17 CCF-A 故事线技能</td><td>真实消融：配对 bootstrap + sign test + 顺序反转</td><td>统计纪律该借；质量分仍自评</td></tr>
+        <tr><td><b>Awesome-Journal-Skills</b></td><td>744 venue 写作规范</td><td>纯静态 Markdown，行为评测被拆除</td><td>格式即数据该借；无运行时=反例</td></tr>
+        <tr><td><b>scientific-agent-skills</b></td><td>177 技能 + 518 脚本</td><td>代码强制 claim/evidence 审计 + AST 契约 linter</td><td>句级审计该借；无执行闭合/人签</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note amber">
+      <span class="h">口径修正：度量学不是独家空白，而是外部最成熟处</span>
+      ARS / CCFA 已把度量做成机器可校验契约。因此<b>不框成「发明度量」</b>，而「借外部成熟度量信封，对准外部空白的失效传播 / 供给独立性 / 学习证据准入」。新颖性在空白处，不在度量本身。
+    </div>
+
+    <h3>下一步行动清单（有序 · 每步带能失败的验收）</h3>
+    <table>
+      <thead><tr><th style="width:7%">步</th><th style="width:15%">类别</th><th style="width:38%">动作（策略/研究，非代码汇报）</th><th style="width:26%">能失败的验收</th><th>依据</th></tr></thead>
+      <tbody>
+        <tr><td class="num">N1</td><td>守内核·校准</td><td>以一次最小可辩护的证据闭合实例（设计→执行→签署→失效复核）作为策略校准点，确认内核口径自洽</td><td>实例能真实签署且变更输入后导出被锁；否则内核口径需重述</td><td>方向 B / 判断 2</td></tr>
+        <tr><td class="num">N2</td><td>借工程纪律</td><td>采用 waiver / assurance 式机器契约（hash+expires+reason+效果分级）作为学习证据准入信封</td><td>缺 expires/reason 即 fail-closed</td><td>ECC / deer-flow</td></tr>
+        <tr><td class="num">N3</td><td>借工程纪律</td><td>接 ARS 度量信封 + CCFA 统计双判 + MLR-Bench/ScienceClaw-Eval 口径到评测输出</td><td>超时/缺失按下界报告，不报乐观点估计</td><td>度量外部最成熟</td></tr>
+        <tr><td class="num">N4</td><td>新增研究·可发表</td><td>失效传播 held-out 探针（方向 B）：改上游测 stale 推导，对照只防篡改系统</td><td>探针抓不住对照系统漏报 → 无增量</td><td>失效传播全空白</td></tr>
+        <tr><td class="num">N5</td><td>新增研究·诊断</td><td>反馈→行动五类反馈对照（Q2）作为第一个诊断实验；学习证据四存储策略对照（Q3/A）</td><td>反馈敏感性与信息价值一致 → 切口不成立</td><td>PerturbTrace / ScienceClaw</td></tr>
+        <tr><td class="num">N6</td><td>守内核·口径</td><td>对外锁定内核=三层可验证+证据链+人门；不引入无约束 autonomous execution、不搬全量 skill 目录</td><td>口径与可核实证据一致</td><td>ARS POSITIONING / 上次讨论</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted">顺序理由：N1 校准内核口径先于新机制；N2/N3 借现成契约最小成本；N4/N5 才是可发表研究增量；N6 贯穿口径纪律。</p>
+  </div>
+</section>
+
+<!-- ============ 07 主线与流程图 ============ -->
+<section id="s7">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">07</span><h2>推荐主线 + 策略视图流程图（补全缺失模块）</h2></div>
+    <p class="sec-sub">主线 = 「过程可信底座 + 判定消费」。下面<b>四张视图</b>（过程模块 / 记忆准入 / 委托验收 / 执行路由）是策略视图而非实现地图。反思上一版漏画者：证伪/反事实、信念修订、多样性监测、记忆协调/准入/provenance（图1/2）；本轮再借 DeepSeek Super-agent 与 Personal Agent 两篇文章补：委托验收单位、授权/停止条件、Router/Worker 分离、两级过滤/Thread 直通/链式召回、异步 ReAct/Watchdog（图3/4 + 原则表）。</p>
+
+    <div class="note teal">
+      <span class="h">推荐主线</span>
+      <b>守住</b>过程可信内核（策略①/方向 B）；<b>第一个切口</b>=学习证据准入/技能适用域（策略③/方向 A，上次优先推荐）；<b>诊断实验</b>=反馈→行动（策略②/Q2）；<b>后续前沿</b>=信念修订/反事实证伪（策略④/方向 C）。
+      度量与门间自动化<b>借</b>外部成熟契约；人工门留高杠杆节点。有序动作见 §06 N1–N6。
+    </div>
+
+    <div class="note blue">
+      <span class="h">四视图关系（避免误读为四套系统）</span>
+      图1 = <b>过程模块</b>（研究做什么、有哪些反馈环）；图2 = <b>记忆与准入</b>（凭什么积累、何时拒绝写入）；图3 = <b>委托验收</b>（对谁负责、何时停止、验收单位）；图4 = <b>执行路由</b>（怎么并发、谁执行、谁监督）。
+      四者是<b>同一系统的四个投影</b>：图1 的每个阶段由图4 的隔离 Worker 执行、经图2 的记忆准入积累、并被图3 的委托闭环验收。阅读顺序建议 3→1→2→4（先验收口径，再过程，再积累，再执行）。
+    </div>
+
+    <h3>流程图 1 · 过程可信主循环（补：证伪 / 信念修订 / 多样性 / provenance）</h3>
+    <figure>
+      <svg viewBox="0 0 900 640" role="img" aria-label="过程可信主循环">
+        <defs>
+          <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#16181d"/></marker>
+          <marker id="ahT" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#0f766e"/></marker>
+          <marker id="ahP" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#7c3aed"/></marker>
+          <marker id="ahB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+        </defs>
+        <!-- main spine -->
+        <g>
+          <rect x="330" y="16" width="250" height="46" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="455" y="35" text-anchor="middle" font-size="14" font-weight="700">文献检索与关系推理</text>
+          <text x="455" y="52" text-anchor="middle" font-size="11" fill="#1d4ed8">T1 · 文献关系记忆</text>
+          <rect x="330" y="100" width="250" height="46" rx="10" fill="#f5f3ff" stroke="#7c3aed"/>
+          <text x="455" y="119" text-anchor="middle" font-size="14" font-weight="700">假设生成与开放探索</text>
+          <text x="455" y="136" text-anchor="middle" font-size="11" fill="#7c3aed">T2 · 多样性约束</text>
+          <rect x="330" y="184" width="250" height="46" rx="10" fill="#f6f7f9" stroke="#9aa3af"/>
+          <text x="455" y="203" text-anchor="middle" font-size="14" font-weight="700">实验设计 + 执行契约</text>
+          <text x="455" y="220" text-anchor="middle" font-size="11" fill="#5b6472">T3 · 可证伪性一等约束</text>
+          <rect x="330" y="268" width="250" height="46" rx="10" fill="#f6f7f9" stroke="#9aa3af"/>
+          <text x="455" y="287" text-anchor="middle" font-size="14" font-weight="700">执行与数据分析</text>
+          <text x="455" y="304" text-anchor="middle" font-size="11" fill="#5b6472">T4 · 过程可重建</text>
+          <rect x="330" y="352" width="250" height="46" rx="10" fill="#ecfdf5" stroke="#0f766e"/>
+          <text x="455" y="371" text-anchor="middle" font-size="14" font-weight="700">三层验证</text>
+          <text x="455" y="388" text-anchor="middle" font-size="11" fill="#0f766e">T6 · 结果/过程/证据链</text>
+          <rect x="330" y="436" width="250" height="46" rx="10" fill="#f6f7f9" stroke="#9aa3af"/>
+          <text x="455" y="455" text-anchor="middle" font-size="14" font-weight="700">评审与反馈</text>
+          <text x="455" y="472" text-anchor="middle" font-size="11" fill="#5b6472">T5 · 角色—评审—消费—复验</text>
+          <rect x="330" y="520" width="250" height="46" rx="10" fill="#ecfdf5" stroke="#0f766e"/>
+          <text x="455" y="539" text-anchor="middle" font-size="14" font-weight="700">证据绑定的成果陈述</text>
+          <text x="455" y="556" text-anchor="middle" font-size="11" fill="#0f766e">T7 · 陈述→证据溯源</text>
+        </g>
+        <g stroke="#16181d" stroke-width="1.6" fill="none">
+          <line x1="455" y1="62" x2="455" y2="98" marker-end="url(#ah)"/>
+          <line x1="455" y1="146" x2="455" y2="182" marker-end="url(#ah)"/>
+          <line x1="455" y1="230" x2="455" y2="266" marker-end="url(#ah)"/>
+          <line x1="455" y1="314" x2="455" y2="350" marker-end="url(#ah)"/>
+          <line x1="455" y1="398" x2="455" y2="434" marker-end="url(#ah)"/>
+          <line x1="455" y1="482" x2="455" y2="518" marker-end="url(#ah)"/>
+        </g>
+        <g font-size="11" fill="#b91c1c" font-weight="600">
+          <text x="465" y="168">人工门·假设选择</text>
+          <text x="465" y="252">人工门·设计批准/执行契约</text>
+          <text x="465" y="336">统计/复现门</text>
+          <text x="465" y="504">人工门·签署</text>
+        </g>
+        <!-- left feedback: falsification (B5->B2) -->
+        <path d="M330,375 L222,375 L222,112 L328,112" fill="none" stroke="#0f766e" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ahT)"/>
+        <text x="210" y="250" text-anchor="middle" transform="rotate(-90 210 250)" font-size="11.5" fill="#0f766e" font-weight="700">证伪/反事实环 T6</text>
+        <!-- left feedback: belief revision (B6->B2) -->
+        <path d="M330,459 L162,459 L162,134 L328,134" fill="none" stroke="#7c3aed" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ahP)"/>
+        <text x="150" y="300" text-anchor="middle" transform="rotate(-90 150 300)" font-size="11.5" fill="#7c3aed" font-weight="700">信念修订/假设再激活 C</text>
+        <!-- right self-loop: diversity on B2 -->
+        <path d="M580,112 L600,112 L600,134 L582,134" fill="none" stroke="#7c3aed" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ahP)"/>
+        <text x="612" y="123" text-anchor="middle" transform="rotate(-90 612 123)" font-size="11" fill="#7c3aed" font-weight="700">同质化监测</text>
+        <!-- right feedback: provenance/staleness (B7->B5) -->
+        <path d="M580,543 L660,543 L660,375 L582,375" fill="none" stroke="#b45309" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ahB)"/>
+        <text x="672" y="460" text-anchor="middle" transform="rotate(-90 672 460)" font-size="11.5" fill="#b45309" font-weight="700">provenance/失效传播 B</text>
+        <text x="450" y="600" text-anchor="middle" font-size="12" fill="#5b6472">人工门留在高杠杆节点；所有反馈环必须改变下一步行动，而非只写反思文本（PerturbTrace / 可证伪问题二）。</text>
+        <text x="450" y="618" text-anchor="middle" font-size="12" fill="#5b6472">补全模块：证伪/反事实（T6）、信念修订（C）、同质化监测、provenance/失效（B）——上一版流程图漏画者。</text>
+      </svg>
+      <figcaption>实线向下 = 研究过程前向；红色 = 人工门 / 验证门；虚线向上 = 反馈环（证伪/反事实、信念修订、provenance/失效）；B2 右侧自环 = 多样性/同质化监测。反馈均回指更早阶段，与前向流区分。记忆/准入见图2、委托验收见图3、执行路由见图4。</figcaption>
+    </figure>
+
+    <h3>流程图 2 · 类型化记忆协调 + 学习证据准入（补：记忆 / 准入 / provenance 层）</h3>
+    <figure>
+      <svg viewBox="0 0 900 400" role="img" aria-label="记忆协调与学习证据准入">
+        <defs>
+          <marker id="m1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#16181d"/></marker>
+          <marker id="m2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#0f766e"/></marker>
+          <marker id="m3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+          <marker id="m4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#b91c1c"/></marker>
+        </defs>
+        <!-- store: typed memory graph + coordination protocol -->
+        <rect x="250" y="20" width="400" height="70" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+        <text x="450" y="40" text-anchor="middle" font-size="13.5" font-weight="700">类型化记忆图谱 + 协调协议</text>
+        <text x="450" y="58" text-anchor="middle" font-size="11" fill="#1d4ed8">文献关系 · 领域知识 · 假设证据 · 执行技能</text>
+        <text x="450" y="76" text-anchor="middle" font-size="10.5" fill="#5b6472">消费关系 · 复验状态</text>
+        <!-- gate row -->
+        <rect x="30" y="140" width="150" height="56" rx="9" fill="#fff" stroke="#9aa3af"/>
+        <text x="105" y="172" text-anchor="middle" font-size="13" font-weight="600">新经验 / 修复</text>
+        <rect x="230" y="140" width="200" height="56" rx="9" fill="#ecfdf5" stroke="#0f766e"/>
+        <text x="330" y="163" text-anchor="middle" font-size="13" font-weight="700">学习证据准入门</text>
+        <text x="330" y="181" text-anchor="middle" font-size="10.5" fill="#0f766e">迁移 / 保留 / 退化 / 成本</text>
+        <rect x="700" y="140" width="170" height="56" rx="9" fill="#fff" stroke="#9aa3af"/>
+        <text x="785" y="172" text-anchor="middle" font-size="13" font-weight="600">研究各阶段消费</text>
+        <!-- reject + provenance -->
+        <rect x="230" y="250" width="200" height="48" rx="9" fill="#fef2f2" stroke="#b91c1c"/>
+        <text x="330" y="270" text-anchor="middle" font-size="12" font-weight="700" fill="#b91c1c">✕ 拒绝 / 不写入</text>
+        <text x="330" y="286" text-anchor="middle" font-size="10" fill="#b91c1c">fail-closed · 降级为线索</text>
+        <rect x="500" y="250" width="200" height="48" rx="9" fill="#fffbeb" stroke="#b45309"/>
+        <text x="600" y="270" text-anchor="middle" font-size="12" font-weight="700">绑定执行契约</text>
+        <text x="600" y="286" text-anchor="middle" font-size="10" fill="#b45309">+ provenance（可溯源）</text>
+        <!-- edges -->
+        <line x1="180" y1="168" x2="228" y2="168" stroke="#16181d" stroke-width="1.5" marker-end="url(#m1)"/>
+        <line x1="330" y1="140" x2="330" y2="92" stroke="#0f766e" stroke-width="1.7" marker-end="url(#m2)"/>
+        <text x="340" y="120" font-size="10.5" fill="#0f766e" font-weight="600">通过→写入</text>
+        <line x1="330" y1="196" x2="330" y2="248" stroke="#b91c1c" stroke-width="1.5" marker-end="url(#m4)"/>
+        <text x="340" y="226" font-size="10.5" fill="#b91c1c" font-weight="600">未过→拒绝</text>
+        <path d="M650,55 L785,55 L785,138" fill="none" stroke="#16181d" stroke-width="1.5" marker-end="url(#m1)"/>
+        <text x="795" y="100" font-size="10.5" fill="#5b6472">读/消费</text>
+        <line x1="550" y1="90" x2="550" y2="248" stroke="#16181d" stroke-width="1.5" marker-end="url(#m1)"/>
+        <text x="560" y="170" font-size="10.5" fill="#5b6472">每条绑定</text>
+        <path d="M500,274 L470,274 L470,168 L432,168" fill="none" stroke="#b45309" stroke-width="1.7" stroke-dasharray="6 4" marker-end="url(#m3)"/>
+        <text x="486" y="220" text-anchor="middle" transform="rotate(-90 486 220)" font-size="10.5" fill="#b45309" font-weight="700">变更→stale→复验</text>
+        <text x="450" y="340" text-anchor="middle" font-size="12" fill="#5b6472">准入门四向：左入新经验、右入复验反馈、上出写入、下出拒绝；拒绝是默认出口，写入须过四维学习证据。</text>
+        <text x="450" y="360" text-anchor="middle" font-size="12" fill="#5b6472">上游变更→stale→回指准入门复验（虚线），而非顶到边框；记忆须绑定执行契约/provenance（上次判断 1/2/5）。</text>
+      </svg>
+      <figcaption>中：新经验经学习证据准入门——通过则写入记忆图谱、未过则拒绝（fail-closed）；上：记忆图谱供研究各阶段消费；下：每条记忆绑定执行契约/provenance；虚线：上游变更→stale→回指准入门复验。箭头均指向框边，反馈回指 gate 而非边框。</figcaption>
+    </figure>
+
+    <h3>设计思路：借两篇文章的八条系统原则（修正上一版设计）</h3>
+    <p class="small muted">参照 DeepSeek《Super-agent 设计探索》与《Personal Agent 深度剖析》(Meta Muse)。上一版流程图只画了「过程模块 + 记忆」，缺「委托验收 / 控制面执行面分离 / 事件路由 / 异步与外部监督」四个维度；下表把缺的设计原则补上，并落到策略。</p>
+    <table>
+      <thead><tr><th style="width:22%">借来的原则</th><th style="width:14%">出处</th><th style="width:20%">对应策略</th><th>它修正什么</th></tr></thead>
+      <tbody>
+        <tr><td><b>验收单位=长期委托办完</b></td><td>PA · 图1</td><td>策略① 证据闭合</td><td>从「单轮/单篇质量」改为「一段时间内科研委托是否签署+核验+维护」；补目标撤销/失效即停、新事件先相关性检查。</td></tr>
+        <tr><td><b>控制面/执行面分离</b> Router/Worker</td><td>DeepSeek §2</td><td>策略② + 供给独立</td><td>Router 只协调/交互/记忆、不执行；Worker 隔离上下文 → 过程可复现 + 跨 worker 独立评审；缓解人注意力瓶颈。</td></tr>
+        <tr><td><b>两级过滤 Fast/Slow</b></td><td>DeepSeek §3.1</td><td>门禁</td><td>确定性程序门先滤噪（span-only/统计/design-audit），语义/人工只判候选 → 把拒绝做成廉价前置。</td></tr>
+        <tr><td><b>Thread + 订阅直通</b></td><td>DeepSeek §3.2</td><td>策略② 判定消费</td><td>以 claim/研究问题为 Thread；同 thread 新证据直通负责环节，不重跑全流水线；先相关性检查。</td></tr>
+        <tr><td><b>Inline&amp;Spill + 链式召回</b></td><td>DeepSeek §3.3</td><td>策略① provenance</td><td>证据对象内联下一跳 ID，按需沿证据链展开上下文，避免全量塞入窗口。</td></tr>
+        <tr><td><b>异步 ReAct + waitpoints</b></td><td>DeepSeek §4.1</td><td>长程实验 / HITL</td><td>start() 立即返回、后台执行、完成投递；人可随时介入/接管 → 补 RE-Bench 长程弱项。</td></tr>
+        <tr><td><b>存算分离 / 脑手分离</b></td><td>DeepSeek §5</td><td>本地执行边界</td><td>Loop 无状态 + 状态持久化；执行环境留用户原地（daemon/BYOM）→ 契合「实验由用户环境执行」。</td></tr>
+        <tr><td><b>独立 Watchdog 控制回路</b></td><td>DeepSeek §6</td><td>退化检测 / RSI 撤销</td><td>外部回路监控实质进展与目标偏离（非仅进程存活）→ 对应学习证据「退化检测」与 regressed 自动撤销。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note blue">
+      <span class="h">术语速览（便于口头表述）</span>
+      <p class="small" style="margin:0 0 6px"><b>判定消费</b>：把门禁/验证/失效的判定结果用作下一步行动的输入，而非只读报告。</p>
+      <p class="small" style="margin:0 0 6px"><b>三层可验证</b>：结果复现 / 过程复现 / 证据链复现（陈述→数据→代码→执行→分析）。</p>
+      <p class="small" style="margin:0 0 6px"><b>学习证据准入</b>：记忆/技能写入前看跨任务迁移、知识保留、退化检测、演化成本四维，而非单次复验。</p>
+      <p class="small" style="margin:0 0 6px"><b>provenance / 证据链</b>：每条结论与记忆条目绑定来源与执行契约，上游变更可推导下游失效。</p>
+      <p class="small" style="margin:0 0 6px"><b>fail-closed</b>：缺证据/缺授权时默认拒绝，而非默认放行。</p>
+      <p class="small" style="margin:0 0 6px"><b>Router / Worker</b>：控制面（协调/交互/记忆、不执行）与执行面（隔离上下文、并发）分离。</p>
+      <p class="small" style="margin:0 0 6px"><b>Thread</b>：同一研究问题/claim 的事件流；已订阅的后续事件直通负责 Worker，不重跑全流水线。</p>
+      <p class="small" style="margin:0 0 6px"><b>供给独立</b>：生成与评审来自不同供给方（跨模型/跨 worker），避免「自己生成自己批准」。</p>
+      <p class="small" style="margin:0"><b>Goodhart</b>：按同一指标反复选最优，会使报告指标与真实科学进步脱钩。</p>
+    </div>
+
+    <h3>流程图 3 · 科研持续委托闭环（补：验收单位 / 授权范围 / 停止条件）</h3>
+    <figure>
+      <svg viewBox="0 0 900 430" role="img" aria-label="科研持续委托闭环">
+        <defs>
+          <marker id="d1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#16181d"/></marker>
+          <marker id="d2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#5b6472"/></marker>
+        </defs>
+        <rect x="280" y="10" width="340" height="48" rx="10" fill="#f5f3ff" stroke="#7c3aed"/>
+        <text x="450" y="30" text-anchor="middle" font-size="13.5" font-weight="700">研究目标与授权范围</text>
+        <text x="450" y="47" text-anchor="middle" font-size="11" fill="#7c3aed">希望证明什么 · 可读取什么 · 哪些动作需人签</text>
+        <path d="M450,58 L450,80 L160,80 L160,98" fill="none" stroke="#16181d" stroke-width="1.6" marker-end="url(#d1)"/>
+        <g>
+          <rect x="40" y="100" width="240" height="64" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="160" y="126" text-anchor="middle" font-size="13.5" font-weight="700">01 识别触发</text>
+          <text x="160" y="146" text-anchor="middle" font-size="11" fill="#1d4ed8">新证据/事件 · 先相关性检查</text>
+          <rect x="330" y="100" width="240" height="64" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="450" y="126" text-anchor="middle" font-size="13.5" font-weight="700">02 构建上下文</text>
+          <text x="450" y="146" text-anchor="middle" font-size="11" fill="#1d4ed8">链式召回 provenance / 记忆</text>
+          <rect x="620" y="100" width="240" height="64" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="740" y="126" text-anchor="middle" font-size="13.5" font-weight="700">03 形成可执行方案</text>
+          <text x="740" y="146" text-anchor="middle" font-size="11" fill="#1d4ed8">证据充分度/收益/风险 · 两级过滤</text>
+          <rect x="620" y="240" width="240" height="64" rx="10" fill="#ecfdf5" stroke="#0f766e"/>
+          <text x="740" y="266" text-anchor="middle" font-size="13.5" font-weight="700">04 获批后执行</text>
+          <text x="740" y="286" text-anchor="middle" font-size="11" fill="#0f766e">人工门 · 异步 · Router/Worker</text>
+          <rect x="330" y="240" width="240" height="64" rx="10" fill="#ecfdf5" stroke="#0f766e"/>
+          <text x="450" y="266" text-anchor="middle" font-size="13.5" font-weight="700">05 核验外部结果</text>
+          <text x="450" y="286" text-anchor="middle" font-size="11" fill="#0f766e">三层验证 / 回执 / 独立复核</text>
+          <rect x="40" y="240" width="240" height="64" rx="10" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="160" y="266" text-anchor="middle" font-size="13.5" font-weight="700">06 更新并继续负责</text>
+          <text x="160" y="286" text-anchor="middle" font-size="11" fill="#1d4ed8">记忆准入 / 失效传播 / 跟进未完成</text>
+        </g>
+        <g stroke="#16181d" stroke-width="1.6" fill="none">
+          <line x1="280" y1="132" x2="328" y2="132" marker-end="url(#d1)"/>
+          <line x1="570" y1="132" x2="618" y2="132" marker-end="url(#d1)"/>
+          <line x1="740" y1="164" x2="740" y2="238" marker-end="url(#d1)"/>
+          <line x1="620" y1="272" x2="572" y2="272" marker-end="url(#d1)"/>
+          <line x1="330" y1="272" x2="282" y2="272" marker-end="url(#d1)"/>
+        </g>
+        <text x="752" y="205" font-size="11" fill="#b91c1c" font-weight="600">必要时人签</text>
+        <path d="M160,304 L160,350 L20,350 L20,132 L38,132" fill="none" stroke="#5b6472" stroke-width="1.7" stroke-dasharray="6 4" marker-end="url(#d2)"/>
+        <text x="450" y="386" text-anchor="middle" font-size="12" fill="#5b6472">闭环验收单位：一段时间内，科研委托是否被妥善办完（签署 + 核验 + 维护），而非单轮回复/单篇论文质量。</text>
+        <text x="450" y="406" text-anchor="middle" font-size="12" fill="#5b6472">目标撤销或失效时停止；收到新事件先检查是否仍与目标相关（PA 图1 的停止条件，上一版漏画）。</text>
+      </svg>
+      <figcaption>承接 PA「持续委托闭环」：授权范围前置 → 触发(相关性检查) → 上下文(链式召回) → 方案(两级过滤) → 获批执行(人门/异步) → 核验外部结果(回执) → 更新记忆并继续负责 → 回指触发；虚线为持续负责回路，目标撤销/失效即停。</figcaption>
+    </figure>
+
+    <h3>流程图 4 · 执行与路由架构（补：Router/Worker / 两级过滤 / Thread 直通 / Watchdog）</h3>
+    <figure>
+      <svg viewBox="0 0 900 420" role="img" aria-label="执行与路由架构">
+        <defs>
+          <marker id="e1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#16181d"/></marker>
+          <marker id="e2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#1d4ed8"/></marker>
+          <marker id="e3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+        </defs>
+        <g>
+          <rect x="20" y="60" width="150" height="50" rx="9" fill="#f6f7f9" stroke="#9aa3af"/>
+          <text x="95" y="82" text-anchor="middle" font-size="12.5" font-weight="700">Trigger 事件</text>
+          <text x="95" y="99" text-anchor="middle" font-size="10.5" fill="#5b6472">新证据/CI/评审/邮件</text>
+          <rect x="200" y="60" width="130" height="50" rx="9" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="265" y="82" text-anchor="middle" font-size="12.5" font-weight="700">Fast 程序层</text>
+          <text x="265" y="99" text-anchor="middle" font-size="10.5" fill="#1d4ed8">确定性滤噪</text>
+          <rect x="360" y="60" width="130" height="50" rx="9" fill="#f5f3ff" stroke="#7c3aed"/>
+          <text x="425" y="82" text-anchor="middle" font-size="12.5" font-weight="700">Slow 语义层</text>
+          <text x="425" y="99" text-anchor="middle" font-size="10.5" fill="#7c3aed">LLM 判候选</text>
+          <rect x="520" y="60" width="160" height="50" rx="9" fill="#eef2ff" stroke="#1d4ed8" stroke-width="2"/>
+          <text x="600" y="82" text-anchor="middle" font-size="12.5" font-weight="700">Router 层</text>
+          <text x="600" y="99" text-anchor="middle" font-size="10.5" fill="#1d4ed8">全局序点/协调/记忆 · 不执行</text>
+          <rect x="720" y="20" width="160" height="40" rx="9" fill="#fff" stroke="#9aa3af"/>
+          <text x="800" y="37" text-anchor="middle" font-size="12" font-weight="600">Worker 1</text>
+          <text x="800" y="52" text-anchor="middle" font-size="10" fill="#5b6472">隔离上下文</text>
+          <rect x="720" y="80" width="160" height="40" rx="9" fill="#fff" stroke="#9aa3af"/>
+          <text x="800" y="97" text-anchor="middle" font-size="12" font-weight="600">Worker 2</text>
+          <text x="800" y="112" text-anchor="middle" font-size="10" fill="#5b6472">隔离上下文</text>
+          <rect x="720" y="140" width="160" height="40" rx="9" fill="#fff" stroke="#9aa3af"/>
+          <text x="800" y="157" text-anchor="middle" font-size="12" font-weight="600">Worker 3</text>
+          <text x="800" y="172" text-anchor="middle" font-size="10" fill="#5b6472">异步 ReAct</text>
+        </g>
+        <g stroke="#16181d" stroke-width="1.5" fill="none">
+          <line x1="170" y1="85" x2="198" y2="85" marker-end="url(#e1)"/>
+          <line x1="330" y1="85" x2="358" y2="85" marker-end="url(#e1)"/>
+          <line x1="490" y1="85" x2="518" y2="85" marker-end="url(#e1)"/>
+          <path d="M680,85 L700,85" marker-end="url(#e1)"/>
+          <line x1="700" y1="40" x2="700" y2="160"/>
+          <line x1="700" y1="40" x2="718" y2="40" marker-end="url(#e1)"/>
+          <line x1="700" y1="100" x2="718" y2="100" marker-end="url(#e1)"/>
+          <line x1="700" y1="160" x2="718" y2="160" marker-end="url(#e1)"/>
+        </g>
+        <text x="345" y="132" text-anchor="middle" font-size="10.5" fill="#5b6472">滤除噪音 / 判定不行动 → 保持静默（默认拒绝）</text>
+        <text x="700" y="195" text-anchor="middle" font-size="10.5" fill="#5b6472">新任务冷启动 Slow</text>
+        <g>
+          <rect x="20" y="240" width="150" height="50" rx="9" fill="#fffbeb" stroke="#b45309"/>
+          <text x="95" y="262" text-anchor="middle" font-size="12.5" font-weight="700">人</text>
+          <text x="95" y="279" text-anchor="middle" font-size="10.5" fill="#b45309">只在门禁/验收交互</text>
+          <rect x="200" y="240" width="180" height="50" rx="9" fill="#eef2ff" stroke="#1d4ed8"/>
+          <text x="290" y="262" text-anchor="middle" font-size="12.5" font-weight="700">Thread #claim</text>
+          <text x="290" y="279" text-anchor="middle" font-size="10.5" fill="#1d4ed8">同一研究问题后续事件</text>
+          <rect x="480" y="240" width="200" height="50" rx="9" fill="#fffbeb" stroke="#b45309"/>
+          <text x="580" y="262" text-anchor="middle" font-size="12.5" font-weight="700">独立 Watchdog</text>
+          <text x="580" y="279" text-anchor="middle" font-size="10.5" fill="#b45309">监控实质进展/目标偏离</text>
+        </g>
+        <path d="M540,110 L540,160 L95,160 L95,238" fill="none" stroke="#16181d" stroke-width="1.5" marker-end="url(#e1)"/>
+        <text x="300" y="155" text-anchor="middle" font-size="10.5" fill="#5b6472">人 · 门禁/验收</text>
+        <path d="M290,290 L290,320 L800,320 L800,182" fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#e2)"/>
+        <text x="545" y="335" text-anchor="middle" font-size="11" fill="#1d4ed8" font-weight="600">已订阅 Thread 直通 Fast Path（不经过 Router）</text>
+        <path d="M580,240 L580,112" fill="none" stroke="#b45309" stroke-width="1.7" stroke-dasharray="6 4" marker-end="url(#e3)"/>
+        <text x="592" y="205" font-size="10.5" fill="#b45309" font-weight="600">外部控制回路</text>
+        <path d="M680,265 L760,265 L760,182" fill="none" stroke="#b45309" stroke-width="1.7" stroke-dasharray="6 4" marker-end="url(#e3)"/>
+        <text x="712" y="255" text-anchor="middle" font-size="10" fill="#b45309">监控 Worker</text>
+        <text x="450" y="380" text-anchor="middle" font-size="12" fill="#5b6472">存算分离：Agent Loop 无状态云端 + 状态持久化；执行环境留用户原地（daemon/BYOM）。</text>
+        <text x="450" y="400" text-anchor="middle" font-size="12" fill="#5b6472">Worker 隔离上下文 → 过程可复现 + 供给独立；Router 不执行 → 人注意力只花在门禁/验收。</text>
+      </svg>
+      <figcaption>承接 DeepSeek Super-agent：Trigger 经两级过滤（Fast 程序→Slow 语义）入 Router；Router 冷启动分派隔离 Worker；已订阅 Thread 后续事件直通 Worker（Fast Path）；独立 Watchdog 外部控制回路监控进展/偏离；人只在门禁/验收交互；存算分离使执行环境留在用户原地。</figcaption>
+    </figure>
+
+    <h3>研究里程碑（每步带能失败的验收，非代码交付）</h3>
+    <table>
+      <thead><tr><th style="width:10%">阶段</th><th>研究动作</th><th style="width:42%">能失败的验收</th></tr></thead>
+      <tbody>
+        <tr><td class="num">M0</td><td>内核口径校准：最小证据闭合实例 + 失效复核（N1）</td><td>实例不能签署或变更不锁导出 → 内核口径重述</td></tr>
+        <tr><td class="num">M1</td><td>第一个诊断实验：反馈→行动五类反馈对照（Q2/N5）</td><td>反馈敏感性与信息价值一致 → 切口不成立</td></tr>
+        <tr><td class="num">M2</td><td>方向 A 预实验：四存储策略跨任务对照（Q3）+ 方向 B 失效探针（N4）</td><td>原任务成功能预测跨任务收益 / 探针无漏报差异 → 无增量</td></tr>
+        <tr><td class="num">M3</td><td>问题一预实验：反复筛选 vs 独立验证差距（Q1）；借度量信封报告</td><td>差距不随轮次扩大 → 现象不成立，换切口</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 08 讨论问题 ============ -->
+<section id="s8">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">08</span><h2>留给导师的决策点</h2></div>
+    <p class="sec-sub">承接上次讨论，本次请导师裁决策略取舍与切口顺序。这些是需要人写下的输入。</p>
+    <div class="q">
+      <span class="qn">D1 · 策略主线</span>
+      <h4>是否确认「过程可信底座 + 判定消费」为总策略，且不追端到端生成红海？</h4>
+      <p>倾向：守 B 内核、A 为第一切口、②作诊断实验、C 后续。请确认取舍。</p>
+      <div class="opts"><span>A. 确认</span><span>B. 以 C 为第一切口</span><span>C. 先做问题二诊断再定</span></div>
+    </div>
+    <div class="q">
+      <span class="qn">D2 · 第一个实验</span>
+      <h4>第一个启动的实验选§05问题二（反馈→行动，易启动）还是问题一（反复筛选脱钩，优先预实验）？</h4>
+      <p>上次判断：问题二适合作第一个诊断实验；问题一较值得优先预实验。两者资源需求不同。</p>
+      <div class="opts"><span>A. 问题二先</span><span>B. 问题一先</span><span>C. 并行</span></div>
+    </div>
+    <div class="q">
+      <span class="qn">D3 · 学术产出定位</span>
+      <h4>第一篇写「证据链复现/失效传播」系统+评测，还是「学习证据准入/负迁移」机制论文？</h4>
+      <p>前者空白明确但需评测环境；后者与 ScienceClaw 重叠需找其处理不了的情境。请定主切口。</p>
+      <div class="opts"><span>A. 证据链/失效</span><span>B. 准入/负迁移</span><span>C. 系统为壳机制为核</span></div>
+    </div>
+    <div class="q">
+      <span class="qn">D4 · 评测口径</span>
+      <h4>机制级评测对照 MLR-Bench / ScienceClaw-Eval 够不够，还是需自建 held-out 探针？</h4>
+      <p>倾向：借外部成熟度量信封 + 自建失效/反馈 held-out 探针（外部空白处）。请定最低证据门槛。</p>
+      <div class="opts"><span>A. 借外部够</span><span>B. 需自建探针</span><span>C. 两者结合</span></div>
+    </div>
+    <div class="q">
+      <span class="qn">D5 · 工程底座</span>
+      <h4>是否采用「控制面/执行面分离 + 委托验收单位」作为工程底座（Router/Worker、两级过滤、Thread 直通、异步、Watchdog）？</h4>
+      <p>借 DeepSeek Super-agent / PA 的系统原则支撑策略①②；但需评估其安全/隐私开放问题（提示注入、凭据不接触）与长程记忆瓶颈是否在我们的 scope 内。</p>
+      <div class="opts"><span>A. 采用为底座</span><span>B. 只借原则不搬架构</span><span>C. 先做单委托闭环再扩</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 09 参考文献 ============ -->
+<section id="s9">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">09</span><h2>参考文献与证据来源</h2></div>
+    <p class="sec-sub">带链接者经原文/摘要核实；标『上次纪要』者引自上次讨论 Taxonomy，仅作定性对照、出处待核，不作为已核实定量证据。无法核实的数字不写。</p>
+    <div class="refs">
+      <div class="rg">
+        <h4>上次讨论核心对照（过程自主 / 记忆 / 自进化）</h4>
+        <ol>
+          <li>ScienceClaw: Benchmarking Continual Self-Evolution of AI Agents（2026）<span class="src">· 重放+独立任务+科学约束三重验证</span> — arXiv:2610.08691</li>
+          <li>AutoSci（北大 DAIR, 2026）<span class="src">· SciMem/SciFlow/SciDAG/SciEvolve</span> — arXiv:2605.31468</li>
+          <li>PerturbTrace<span class="src">· 真实反馈并不稳定优于随机/无反馈</span> — 上次纪要</li>
+          <li>SAGE: One Reflection Is Not Enough<span class="src">· 多假设失败归因</span> — 上次纪要</li>
+          <li>Evidence-Informed LLM Beliefs for Continual Scientific Discovery（2026） — arXiv:2606.29182</li>
+          <li>AI Research Agents Narrow Scientific Exploration（2026）<span class="src">· 37,802 构思收窄</span> — 上次纪要</li>
+          <li>Si et al. Can LLMs Generate Novel Research Ideas?（ICLR 2025） — <a href="https://arxiv.org/abs/2409.04109">arxiv.org/abs/2409.04109</a></li>
+          <li>MLR-Bench（NeurIPS 2025 D&B） — arXiv:2505.19955；ScienceClaw-Eval — 上次纪要</li>
+        </ol>
+      </div>
+      <div class="rg">
+        <h4>端到端生成与质量审计</h4>
+        <ol>
+          <li>The AI Scientist（Nature 2026） — <a href="https://arxiv.org/abs/2408.06292">arxiv.org/abs/2408.06292</a></li>
+          <li>The AI Scientist-v2（2025） — <a href="https://arxiv.org/abs/2504.08066">arxiv.org/abs/2504.08066</a></li>
+          <li>Beel 等. Evaluating Sakana's AI Scientist（2025）<span class="src">· 42% 失败/占位符</span> — <a href="https://arxiv.org/abs/2502.14297">arxiv.org/abs/2502.14297</a></li>
+          <li>Agent Laboratory（2025） — <a href="https://arxiv.org/abs/2501.04227">arxiv.org/abs/2501.04227</a>；AgentRxiv — <a href="https://arxiv.org/abs/2503.18102">arxiv.org/abs/2503.18102</a></li>
+        </ol>
+      </div>
+      <div class="rg">
+        <h4>人机协作与证据闭合（核心背书）</h4>
+        <ol>
+          <li>Google AI Co-Scientist（Nature 2026） — <a href="https://arxiv.org/abs/2502.18864">arxiv.org/abs/2502.18864</a></li>
+          <li>Accelerating Scientific Research with Gemini in the Real-World（2026）<span class="src">· 30 专家/450 评审，~90%→~4%</span> — <a href="https://arxiv.org/abs/2608.26701">arxiv.org/abs/2608.26701</a></li>
+          <li>Virtual Lab（Nature 2025） — <a href="https://doi.org/10.1038/s41586-025-09442-9">doi.org/10.1038/s41586-025-09442-9</a>；Robin — <a href="https://arxiv.org/abs/2505.13400">arxiv.org/abs/2505.13400</a></li>
+          <li>PaperQA2（2024） — <a href="https://arxiv.org/abs/2409.13740">arxiv.org/abs/2409.13740</a>；A-Lab（Nature 2023/2026 更正） — <a href="https://www.nature.com/articles/s41586-023-06734-w">nature.com</a></li>
+        </ol>
+      </div>
+      <div class="rg">
+        <h4>能力基准与复现</h4>
+        <ol>
+          <li>PaperBench（ICML 2025）<span class="src">· 21.0%</span> — <a href="https://arxiv.org/abs/2504.01848">arxiv.org/abs/2504.01848</a>；REPRO-Bench — 上次纪要</li>
+          <li>RE-Bench（METR） — <a href="https://arxiv.org/abs/2411.15114">arxiv.org/abs/2411.15114</a>；ScienceAgentBench — <a href="https://arxiv.org/abs/2410.05080">arxiv.org/abs/2410.05080</a></li>
+          <li>CORE-Bench — <a href="https://arxiv.org/abs/2409.11363">arxiv.org/abs/2409.11363</a>；MLAgentBench — <a href="https://arxiv.org/abs/2310.03302">arxiv.org/abs/2310.03302</a>；DiscoveryBench — <a href="https://arxiv.org/abs/2407.01725">arxiv.org/abs/2407.01725</a></li>
+        </ol>
+      </div>
+      <div class="rg">
+        <h4>自进化 / RSI / 开源闭环</h4>
+        <ol>
+          <li>Darwin Gödel Machine — <a href="https://arxiv.org/abs/2505.22954">arxiv.org/abs/2505.22954</a>；AlphaEvolve — <a href="https://deepmind.google/discover/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/">deepmind.google</a></li>
+          <li>ADAS — <a href="https://arxiv.org/abs/2408.08435">arxiv.org/abs/2408.08435</a>；AFlow — <a href="https://arxiv.org/abs/2410.10762">arxiv.org/abs/2410.10762</a>；自进化综述 — <a href="https://arxiv.org/abs/2507.21046">arxiv.org/abs/2507.21046</a></li>
+          <li>karpathy/autoresearch<span class="src">· 固定/探索/控制三层</span>；AutoResearchClaw<span class="src">· HITL+MetaClaw+反伪造</span>；ARIS<span class="src">· 跨模型对抗评审</span> — 上次纪要 GitHub 列表</li>
+        </ol>
+      </div>
+      <div class="rg">
+        <h4>系统设计参照（本轮两篇文章）</h4>
+        <ol>
+          <li>DeepSeek Harness《Super-agent 设计探索：迈向更自主的 Agent 系统》（2026-11）<span class="src">· 双层架构/事件驱动/异步ReAct/存算分离/Watchdog；原型 dsh-superagent-prototype</span></li>
+          <li>《Personal Agent 深度剖析》（Meta Muse 贯穿案例, 2026-10）<span class="src">· 持续委托闭环/授权范围/验收单位=长期事务办完/停止条件</span></li>
+        </ol>
+      </div>
+      <div class="rg">
+        <h4>Skill 生态（本地调研 · Downloads/Research Skill调研）</h4>
+        <ol>
+          <li>ECC — capsule-envelope.schema.json（哈希链+SE0–SE4）；orch-review.workflow.js（门间自动段）</li>
+          <li>deer-flow — waiver_manifest.v1.schema.json；review_report.v1（assurance 阶梯）</li>
+          <li>academic-research-skills — MEASUREMENT_CONTRACT.md；POSITIONING.md（拒绝执行）</li>
+          <li>CCFA-Skills — 实验结果.md + evaluation/*.csv；Awesome-Journal-Skills — run_checks.py；scientific-agent-skills — audit_claims.py</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><b>口径声明</b> · 本文为策略论证，不汇报代码实现；外部数字经原文/摘要核实；未闭合与不宣称主动披露。承接上次讨论纪要（五判断/两主线/A·B·C/四问）。</p>
+    <p>1110 组会讨论材料 · 白底可打印 · 生成于 2026-11-08</p>
+  </div>
+</footer>
+
+<script>
+  const links=[...document.querySelectorAll('nav a.nl')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const obs=new IntersectionObserver((es)=>{
+    es.forEach(e=>{if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove('active'));
+      const a=links.find(l=>l.getAttribute('href')==='#'+e.target.id);
+      if(a)a.classList.add('active');
+    }});
+  },{rootMargin:'-45% 0px -50% 0px'});
+  secs.forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

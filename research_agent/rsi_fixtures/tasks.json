@@ -1,0 +1,14 @@
+{
+  "fixture": true,
+  "note": "Synthetic S1 retrieval tasks for the TF-RSI control-loop test. Not a scientific benchmark.",
+  "tasks": [
+    {"task_id": "PUB-1", "split": "public", "question": "钙钛矿 界面 钝化 湿热稳定性", "gold_texts": ["780 h", "85°C/85%RH"]},
+    {"task_id": "PUB-2", "split": "public", "question": "perovskite passivation reproducibility", "gold_texts": ["记录完整性", "三次重复"]},
+    {"task_id": "HID-1", "split": "hidden", "question": "钙钛矿 复现 协议", "gold_texts": ["温度、湿度", "停止条件"]},
+    {"task_id": "HID-2", "split": "hidden", "question": "perovskite humidity stability", "gold_texts": ["420 h", "780 h"]},
+    {"task_id": "OOD-1", "split": "near_ood", "question": "interface degradation stability", "gold_texts": ["85°C/85%RH"]},
+    {"task_id": "OOD-2", "split": "near_ood", "question": "protocol completeness", "gold_texts": ["记录完整性"]},
+    {"task_id": "REG-1", "split": "regression", "question": "钙钛矿 钝化 稳定性", "gold_texts": ["780 h"]},
+    {"task_id": "REG-2", "split": "regression", "question": "perovskite passivation protocol", "gold_texts": ["记录完整性"]}
+  ]
+}

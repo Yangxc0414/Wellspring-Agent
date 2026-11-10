@@ -1,0 +1,297 @@
+{
+  "schema": "harness2-story-0.1",
+  "generated_at": "2026-11-10T11:25:09Z",
+  "available": true,
+  "problems": [],
+  "platform_fingerprint": "7594c67a27762064",
+  "run": {
+    "adapter": "science",
+    "executor": "deterministic-science-fixture",
+    "platform": "nt",
+    "k": 2,
+    "modes": [
+      "agg",
+      "seq"
+    ],
+    "wall_s": 11.289,
+    "started_at": "2026-11-10T11:24:57Z",
+    "finished_at": "2026-11-10T11:25:09Z"
+  },
+  "budget": {
+    "R": 48,
+    "expected_R": 48,
+    "P": 36,
+    "expected_P": 36,
+    "usd": 0.0
+  },
+  "tasks": [
+    {
+      "task_id": "claims-1",
+      "domain": "claim-audit",
+      "status": "ok"
+    },
+    {
+      "task_id": "claims-2",
+      "domain": "claim-audit",
+      "status": "ok"
+    },
+    {
+      "task_id": "claims-3",
+      "domain": "claim-audit",
+      "status": "ok"
+    }
+  ],
+  "surface": {
+    "components": {
+      "c1 system prompt": 1,
+      "c2 guardrails": 1,
+      "c3 memory": 1,
+      "c4 tool guidance": 1,
+      "c5 subagents": 0,
+      "c6 skills": 0,
+      "c7 scripts": 1,
+      "c8 plugins": 0
+    }
+  },
+  "adopted": [
+    {
+      "task_id": "claims-1",
+      "mode": "agg",
+      "label": "agg2",
+      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
+      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
+      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "changes": [
+        {
+          "path": "scripts/coverage.py",
+          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+        }
+      ]
+    },
+    {
+      "task_id": "claims-1",
+      "mode": "seq",
+      "label": "c2",
+      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
+      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
+      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "changes": [
+        {
+          "path": "scripts/coverage.py",
+          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+        }
+      ]
+    },
+    {
+      "task_id": "claims-2",
+      "mode": "agg",
+      "label": "agg1",
+      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
+      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
+      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "changes": [
+        {
+          "path": "scripts/coverage.py",
+          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+        }
+      ]
+    },
+    {
+      "task_id": "claims-2",
+      "mode": "seq",
+      "label": "c2",
+      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
+      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
+      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "changes": [
+        {
+          "path": "scripts/coverage.py",
+          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+        }
+      ]
+    },
+    {
+      "task_id": "claims-3",
+      "mode": "agg",
+      "label": "agg1",
+      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
+      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
+      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "changes": [
+        {
+          "path": "scripts/coverage.py",
+          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+        }
+      ]
+    },
+    {
+      "task_id": "claims-3",
+      "mode": "seq",
+      "label": "c2",
+      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
+      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
+      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "changes": [
+        {
+          "path": "scripts/coverage.py",
+          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+        }
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "task_id": "claims-1",
+      "mode": "agg",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "evidence": "scripts/coverage.py contrast on claims-1",
+      "confidence": "high for the observed join contrast"
+    },
+    {
+      "task_id": "claims-1",
+      "mode": "seq",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "evidence": "scripts/coverage.py contrast on claims-1",
+      "confidence": "high for the observed join contrast"
+    },
+    {
+      "task_id": "claims-2",
+      "mode": "agg",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "evidence": "scripts/coverage.py contrast on claims-2",
+      "confidence": "high for the observed join contrast"
+    },
+    {
+      "task_id": "claims-2",
+      "mode": "seq",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "evidence": "scripts/coverage.py contrast on claims-2",
+      "confidence": "high for the observed join contrast"
+    },
+    {
+      "task_id": "claims-3",
+      "mode": "agg",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "evidence": "scripts/coverage.py contrast on claims-3",
+      "confidence": "high for the observed join contrast"
+    },
+    {
+      "task_id": "claims-3",
+      "mode": "seq",
+      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "evidence": "scripts/coverage.py contrast on claims-3",
+      "confidence": "high for the observed join contrast"
+    }
+  ],
+  "held_out": {
+    "n": 1,
+    "passed": 1,
+    "base_passed": 0,
+    "delta": 1
+  },
+  "classification": {
+    "simulation": true,
+    "claim_eligible": false,
+    "why": "deterministic executor and scripted proposer: this measures the seam, not a scientific capability gain"
+  },
+  "checklist": [
+    {
+      "id": "contract",
+      "label": "产物符合 harness2-run-0.1 契约",
+      "ok": true,
+      "detail": "shape ok"
+    },
+    {
+      "id": "budget",
+      "label": "预算恒等式 R=4k、P=3k 成立",
+      "ok": true,
+      "detail": "R=48/48 · P=36/36"
+    },
+    {
+      "id": "exit",
+      "label": "桥进程正常退出",
+      "ok": true,
+      "detail": "exit=0"
+    },
+    {
+      "id": "tasks",
+      "label": "全部任务完成",
+      "ok": true,
+      "detail": "3/3 ok"
+    },
+    {
+      "id": "fallback",
+      "label": "没有阶段回退到旧 harness",
+      "ok": true,
+      "detail": "no fallback"
+    },
+    {
+      "id": "adopted",
+      "label": "至少有一个被采纳的组件改动",
+      "ok": true,
+      "detail": "6 adopted"
+    },
+    {
+      "id": "lessons",
+      "label": "经验条目都带观测证据",
+      "ok": true,
+      "detail": "6/6 with evidence"
+    },
+    {
+      "id": "classification",
+      "label": "确定性执行被标为 simulation，且不可申领能力",
+      "ok": true,
+      "detail": "simulation=True · claim_eligible=False"
+    },
+    {
+      "id": "shims",
+      "label": "便携性补丁已显式声明",
+      "ok": true,
+      "detail": "fcntl.flock, tree.read_tree"
+    },
+    {
+      "id": "human_gate",
+      "label": "产物不含任何签名/准入动作",
+      "ok": true,
+      "detail": "admission stays in the platform CLI"
+    }
+  ],
+  "checklist_ok": true,
+  "probe": {
+    "available": true,
+    "reason": "ready",
+    "root_name": "harness2-main",
+    "package": {
+      "version": "0.1.0",
+      "requires_python": ">=3.12,<3.14"
+    },
+    "interpreter_version": "3.12.10",
+    "interpreter_source": "py -3.12",
+    "bridge_name": "harness2_run.py",
+    "bridge_exists": true,
+    "adapters": [
+      "demo",
+      "science"
+    ],
+    "platform_python": "3.8.7",
+    "shims": [
+      {
+        "name": "fcntl.flock",
+        "why": "Harness² uses advisory file locks; Windows has no fcntl.",
+        "when": "os.name == 'nt'"
+      },
+      {
+        "name": "tree.read_tree",
+        "why": "Upstream assumes POSIX path separators when matching the editable surface.",
+        "when": "os.name == 'nt'"
+      }
+    ]
+  },
+  "artifact_name": "latest.json"
+}

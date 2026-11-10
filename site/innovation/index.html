@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Research Agent · 创新点演示</title>
+<meta name="description" content="Research Agent 创新点演示：SPEC 驱动模块、证据 span、AstraDraw SVG provenance、论文/基金待证据槽位；纯静态、无 API、fixture。" />
+<link rel="canonical" href="https://yangxc0414.github.io/research-agent/innovation/" />
+<meta name="theme-color" content="#0b1220" />
+<meta property="og:title" content="Research Agent · 让每个结论有出处" />
+<meta property="og:description" content="六模块 SPEC / artifact / gate 的可复核科研运行时；静态六幕演示。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M8 11l8-4 8 4v10l-8 4-8-4z' fill='none' stroke='white' stroke-width='1.8'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="../assets/subpage.css" />
+</head>
+<body>
+<div class="sp-top"><a class="sp-home" href="../">← 返回主页</a><span class="sp-chip">静态演示 · SIM / fixture · 人工门只在本地 CLI</span><nav class="sp-sib"><a href="../demo/">运行</a><a href="../innovation/">创新</a><a href="../app/">工作台</a><a href="../qoder/">接入</a><a href="../rsi/">自进化</a></nav></div>
+
+<a class="skip" href="#demo">跳到演示舞台</a>
+<div class="page">
+  <header class="topbar">
+    <a class="brand" href="../" aria-label="返回 Research Agent 主页">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 7.5 12 11l7-3.5M12 11v9" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="brand-copy"><b>Research Agent</b><small>INNOVATION DEMO</small></span>
+    </a>
+    <div class="top-meta">
+      <span class="pill">STATIC</span><span class="pill">NO API</span><span class="pill amber">SIM</span>
+    </div>
+    <div class="top-actions">
+      <a class="quiet-link" href="../app/">工作台 ↗</a>
+      <a class="quiet-link" href="../demo/">控制台演示 ↗</a>
+      <button type="button" class="present-btn" id="present-btn">演示模式</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="top">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">EVIDENCE-CLOSED RESEARCH RUNTIME / 毕设创新点演示</p>
+          <h1>不是把论文写长，<br/><span>而是让每个结论有出处。</span></h1>
+          <p class="lede">六个演示模块共享同一套 <b>SPEC / artifact / gate</b>：文献留下 span，实验设计只产草稿，图表留下 provenance，论文结果槽在 EA 到达前保持 pending。不是“全自动写完”，而是把科研过程做成可复核、可阻断、可维护的运行时。最新 64 种子预注册扩样把创新点收敛为<b>度量有效性</b>：raw 交互 4/4，AUC 交互 0/4，且三个环境的 AUC 上界低于 raw 效应量级——不把 event-count 产物写成效率或机制发现。</p>
+          <div class="hero-actions">
+            <button type="button" class="primary-btn" id="start-btn">开始 90 秒演示 <span aria-hidden="true">→</span></button>
+            <a class="ghost-btn" href="#proof">看技术证据</a>
+          </div>
+          <div class="hero-facts" aria-label="实现事实">
+            <span><b id="fact-specs">6</b> 模块 SPEC</span>
+            <span><b id="fact-tests">—</b> 自动测试</span>
+            <span><b>0</b> API 调用</span>
+            <span><b>6</b> 幕演示</span>
+            <span><b>MCP</b> Qoder 接入</span>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+          <div class="board-glow"></div>
+          <div class="board">
+            <svg class="board-lines" viewBox="0 0 520 430" fill="none">
+              <path d="M74 92 C160 92 170 190 245 190" />
+              <path d="M74 300 C160 300 170 215 245 215" />
+              <path d="M300 190 C370 190 380 118 442 118" />
+              <path d="M300 215 C370 215 380 300 442 300" />
+              <path class="dash" d="M300 202 C380 202 390 360 442 360" />
+              <path d="M245 60 C245 90 245 120 245 150" />
+            </svg>
+            <span class="orbit-node n1"><i></i>文献</span>
+            <span class="orbit-node n2"><i></i>假设</span>
+            <span class="orbit-node n3"><i></i>设计</span>
+            <span class="orbit-node n4"><i></i>图</span>
+            <span class="orbit-node n5"><i></i>论文</span>
+            <span class="orbit-node n6"><i></i>基金</span>
+            <div class="board-core">
+              <span class="mono">CORE / INVARIANT</span>
+              <b>证据闭合</b>
+              <small>claim 只由 Evidence 创建<br/>export 只由 Closure 执行</small>
+            </div>
+            <div class="board-tag tag-a">SPEC VERSIONED</div>
+            <div class="board-tag tag-b">SVG AUDITED</div>
+          </div>
+          <div class="hero-caption"><span class="live-dot"></span>FIXTURE · 实线 = 前向 · 虚线 = 反馈回指（与主页主循环同一语义）</div>
+        </div>
+      </div>
+      <div class="scroll-cue"><span></span>往下看六个场景</div>
+    </section>
+
+    <section class="panorama" id="panorama">
+      <div class="pano-wrap">
+        <div class="pano-head">
+          <div><p class="eyebrow">RUNTIME AT A GLANCE / 证据闭合全景</p><h2>一条链，八个状态，七道门。</h2></div>
+          <p>从问题卡到导出包，每一步都留下 artifact 与哈希；门禁不过就停，不静默放行。下面的状态来自一次 fixture run，不是推测。</p>
+        </div>
+        <div class="pano-track" role="list">
+          <article class="pano-node is-done" role="listitem"><span class="pano-idx">01</span><b>问题卡</b><small>TaskSpec</small><i class="pano-gate auto">G0</i></article>
+          <span class="pano-edge" aria-hidden="true"></span>
+          <article class="pano-node is-done" role="listitem"><span class="pano-idx">02</span><b>检索 · span</b><small>QueryPlan → Span</small><i class="pano-gate auto">Q0</i></article>
+          <span class="pano-edge" aria-hidden="true"></span>
+          <article class="pano-node is-done" role="listitem"><span class="pano-idx">03</span><b>假设</b><small>3 candidates</small><i class="pano-gate human">G1</i></article>
+          <span class="pano-edge" aria-hidden="true"></span>
+          <article class="pano-node is-done" role="listitem"><span class="pano-idx">04</span><b>设计</b><small>protocol · TaskSpec</small><i class="pano-gate human">G2</i></article>
+          <span class="pano-edge" aria-hidden="true"></span>
+          <article class="pano-node is-done" role="listitem"><span class="pano-idx">05</span><b>确证</b><small>verdict + EA</small></article>
+          <span class="pano-edge" aria-hidden="true"></span>
+          <article class="pano-node is-current" role="listitem"><span class="pano-idx">06</span><b>结果人签</b><small>claim draft</small><i class="pano-gate human">S5b</i></article>
+          <span class="pano-edge is-block" aria-hidden="true"></span>
+          <article class="pano-node is-blocked" role="listitem"><span class="pano-idx">07</span><b>稿件槽</b><small>5 slots · 4 pending</small><i class="pano-gate auto">G3</i></article>
+          <span class="pano-edge is-block" aria-hidden="true"></span>
+          <article class="pano-node is-blocked" role="listitem"><span class="pano-idx">08</span><b>导出</b><small>EB 包</small><i class="pano-gate human">G5</i></article>
+        </div>
+        <p class="pano-feedback"><span aria-hidden="true">↩</span>溯源 / 失效传播：导出前检查上游变更 → 回确证复验。虚线一律回指更早阶段，而且必须改变下一步动作。</p>
+        <div class="pano-status" id="pano-status">读取 fixture run…</div>
+      </div>
+    </section>
+
+    <section class="stage-section" id="demo">
+      <div class="section-intro">
+        <div>
+          <p class="eyebrow">THE 90-SECOND WALKTHROUGH</p>
+          <h2>把“创新点”变成六个可看见的状态。</h2>
+        </div>
+        <p>不是流程图。每一幕都对应仓库里真实存在的 SPEC、artifact 或 audit；数字来自 fixture，不冒充实验结果。反馈环与主页主循环一致：T6b 证伪/反事实、信念修订/假设再激活、溯源/失效传播、同质化监测——反馈必须改变下一步行动，而非只写反思文本。</p>
+      </div>
+
+      <div class="stage-frame" id="stage">
+        <div class="stage-top">
+          <div class="stage-heading">
+            <span class="eyebrow">INNOVATION STAGE / <span id="stage-act-label">01 / 06</span></span>
+            <b id="stage-title">先写契约，再写代码。</b>
+          </div>
+          <div class="stage-controls" aria-label="演示控制">
+            <button type="button" class="ctrl" id="prev-btn" aria-label="上一幕">←</button>
+            <button type="button" class="ctrl play" id="play-btn" aria-pressed="false">播放</button>
+            <button type="button" class="ctrl" id="next-btn" aria-label="下一幕">→</button>
+            <button type="button" class="ctrl present-inline" id="present-inline">全屏</button>
+          </div>
+        </div>
+
+        <div class="stage-body">
+          <nav class="act-rail" id="act-rail" aria-label="演示幕次"></nav>
+          <div class="act-canvas" id="act-canvas" aria-live="polite"></div>
+          <aside class="act-note" id="act-note"></aside>
+        </div>
+
+        <div class="stage-bottom">
+          <div class="stage-progress" aria-hidden="true"><i id="progress-fill"></i></div>
+          <div class="stage-hint"><span class="mono">← → 切换 · Space 播放 · Esc 退出演示</span><span class="mono" id="stage-source">FIXTURE</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="roadmap" id="roadmap">
+      <div class="roadmap-head">
+        <div><p class="eyebrow">ROADMAP / 从纵切到平台</p><h2>今天能演示的，和下一轮要补的。</h2></div>
+        <p>不把 roadmap 说成已完成。三段分开写：现在跑通的、下一轮要接的、目标态由谁负责。</p>
+      </div>
+      <div class="roadmap-grid">
+        <article class="roadmap-col is-now"><span class="mono">TODAY · 已跑通</span><h3>六模块 + 证据闭合</h3><ul><li>SPEC / artifact / gate 同构</li><li>span-only，摘要不进证据</li><li>结果槽 pending，G5 fail-closed</li><li>模块 / 事件链 / CLI / 前端快照的自动测试</li><li><a href="../rsi/">Harness² 自进化接缝</a>：R=4k/P=3k 账本、c1..c8、留出 1/1</li></ul><em>fixture 纵切 · 确定性夹具 · 0 API</em></article>
+        <article class="roadmap-col is-next"><span class="mono">NEXT · 待接</span><h3>真实检索 + EA 账本</h3><ul><li>OpenAlex 全文与句级 span</li><li>RunCapsule / EA / claim 人签</li><li>DeepSeek 基座 + 小数据集验证</li><li>论文投稿反馈与 Skill 提炼场景</li><li>把确定性执行器换成真实 agent 执行器（接缝已通，换执行不改判据）</li></ul><em>本轮 roadmap · 未实测</em></article>
+        <article class="roadmap-col is-target"><span class="mono">TARGET · 分工</span><h3>平台 + RSI 基础设施</h3><ul><li>平台：数据基础与自改进判据</li><li>基础设施：编排 / 回滚 / 细粒度反馈</li><li>评测：Token 预算与留出集</li><li>人签门始终留在平台</li></ul><em>与 RSI 基础设施对接</em></article>
+      </div>
+    </section>
+
+    <section class="proof" id="proof">
+      <div class="proof-head">
+        <p class="eyebrow">WHY THIS IS DIFFERENT / 可检验的工程差异</p>
+        <h2>不是“又一个写作 Agent”，<br/>而是把证据约束做成底座。</h2>
+        <p>下面每一条都能在代码、SPEC 或测试里找到对应物；没有效果数字，也不宣称通用能力。</p>
+      </div>
+      <div class="proof-grid">
+        <article class="proof-card"><span class="mono">01 / SPEC</span><h3>模块先有契约</h3><p>每个演示模块各有一份 SPEC.md；CLI 只做最小更新，改一个模块不必理解全部代码。</p><div class="proof-foot"><span id="proof-spec-foot">6 SPEC · 版本化</span> <span>→</span></div></article>
+        <article class="proof-card"><span class="mono">02 / ARTIFACT</span><h3>证据不是聊天记录</h3><p>模块交换 QueryPlan、Span、DesignCard、PaperContract；摘要-only 永远不能变成 span。</p><div class="proof-foot">span / coverage / gap <span>→</span></div></article>
+        <article class="proof-card"><span class="mono">03 / SVG</span><h3>图也有 provenance</h3><p>AstraDraw scene → SVG；审计 XML、ID、文本、外部引用与 aria；结果图和示意图分开。</p><div class="proof-foot">scene hash / svg hash <span>→</span></div></article>
+        <article class="proof-card"><span class="mono">04 / BOUNDARY</span><h3>结果槽保持 pending</h3><p>论文和基金只产骨架；没有 EA/Closure，G5 导出一直 blocked。这不是“不能做”，是“不乱做”。</p><div class="proof-foot">5 slots pending <span>→</span></div></article>
+      </div>
+      <div class="comparison">
+        <div class="comparison-head"><span class="mono">POSITION / 工程口径</span><b>与常见科研 Agent 的差异</b></div>
+        <div class="comparison-row"><b>DeepScientist</b><span>强在本地工作区/skills/UI</span><em>我们补 SPEC→artifact/gate 的可读约束</em></div>
+        <div class="comparison-row"><b>AI-Scientist-v3</b><span>强在 Docker/run/rubric 单轮</span><em>我们补 run 之后的证据、claim、稿件槽链</em></div>
+        <div class="comparison-row"><b>ARIS / AutoResearchClaw</b><span>强在评审与技能演化</span><em>我们把审计放进模块契约与工作台</em></div>
+        <div class="comparison-row"><b>AstraDraw</b><span>强在参考图→scene→SVG/PPTX</span><em>我们加 SVG 审计与证据边界</em></div>
+      </div>
+      <p class="proof-note">边界：当前是 fixture + CC-BY 论文正文 probe 的纵切；没有真实检索 API、用户研究或论文效果。H1–H4 仍是待验证假设。受治理 RSI 控制面（StepLedger / pending / lease / MetaTracker）已实现；S1 compare 选中 MiniLM+budget3 并回灌 pipeline；S5 iris 选 seeds3、breast_cancer 选 seeds2，均被 run 消费并通过新协议 sealed 复核；pipeline 用 S5 lease 跑真实 run，产出 EA + claim draft，人签 claim 后才把 paper.result.primary 标为 bound_claim；ChemLab 真实反应数据做受控 baseline（Ridge R²0.193 vs mean −0.048），人签 claim + 数据图后绑定；protocol 冻结 + 数据图 + 4 条 DataCite 元数据后 closure 11/11 ready，人签 export manifest（submission=false）（协议验证，非新发现）。本地 Qwen2.5-0.5B 的 3-prompt 审计 1/3 eligible。**仍无可靠开放式 proposer、peer-review benchmark、真实研究实验，不宣称 RSI**；详见仓库内 <b>24- 工程反思</b> 与 <b>25- 受治理的 RSI</b>。</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>RESEARCH AGENT · INNOVATION DEMO</span>
+    <nav class="footer-nav" aria-label="站点子页面">
+      <a href="../">主页</a><a href="../demo/">控制台演示</a><a href="../app/">工作台</a><a href="../docs/">文档</a>
+    </nav>
+    <span class="mono">STATIC / FIXTURE / NO API / SIM</span>
+  </footer>
+</div>
+
+<div class="present-hint" id="present-hint">演示模式 · Esc 退出</div>
+<script src="app.js"></script>
+<footer class="sp-foot">Research Agent · 各子页是同一系统的投影：实线 = 前向 · 虚线 = 反馈（回指更早阶段且改变下一步动作） · 红 = 人工门 · 青 = 自动门（默认拒绝）<br/>canonical 门禁：G1 想法=S3 / G2 设计=S4 / S5b 结果人签=S5c / G5 闭包=S16；真实执行 / 模型 / 签署只在本地 CLI / runtime</footer>
+</body>
+</html>

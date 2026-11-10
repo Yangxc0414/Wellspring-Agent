@@ -1,0 +1,77 @@
+{
+  "fixture": false,
+  "verification_source": "datacite_api_snapshot",
+  "verified_at": "2026-10-24T04:16:54Z",
+  "api_base": "https://api.datacite.org/dois/",
+  "note": "Frozen DataCite metadata verification; metadata-only and not peer review.",
+  "entries": [
+    {
+      "arxiv_id": "2505.22954",
+      "doi": "10.48550/arxiv.2505.22954",
+      "title": "Darwin Godel Machine: Open-Ended Evolution of Self-Improving Agents",
+      "authors": [
+        "Zhang, Jenny",
+        "Hu, Shengran",
+        "Lu, Cong",
+        "Lange, Robert",
+        "Clune, Jeff"
+      ],
+      "year": 2025,
+      "url": "https://doi.org/10.48550/arxiv.2505.22954",
+      "license": "Creative Commons Attribution 4.0 International",
+      "response_sha256": "c55a094cae3c0ed2ca63a54435687e670232e50ddd4c60b332007cfbb6efa503"
+    },
+    {
+      "arxiv_id": "2504.15228",
+      "doi": "10.48550/arxiv.2504.15228",
+      "title": "A Self-Improving Coding Agent",
+      "authors": [
+        "Robeyns, Maxime",
+        "Szummer, Martin",
+        "Aitchison, Laurence"
+      ],
+      "year": 2025,
+      "url": "https://doi.org/10.48550/arxiv.2504.15228",
+      "license": "Creative Commons Attribution 4.0 International",
+      "response_sha256": "8714964465953aeffaedad16eca5100d5ab094c32a95afdba540805033db8502"
+    },
+    {
+      "arxiv_id": "2609.19526",
+      "doi": "10.48550/arxiv.2609.19526",
+      "title": "Self Improvement via Fast Tree-search",
+      "authors": [
+        "Fu, Xinghong",
+        "Kulanthaivelu, Aravinth",
+        "Yamada, Yutaro"
+      ],
+      "year": 2026,
+      "url": "https://doi.org/10.48550/arxiv.2609.19526",
+      "license": "Creative Commons Attribution 4.0 International",
+      "response_sha256": "4d0f3f81278e7a697a1a287e54ab168b085bfd83a3040d4e61d315915d56b5e6"
+    },
+    {
+      "arxiv_id": "2510.04618",
+      "doi": "10.48550/arxiv.2510.04618",
+      "title": "Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models",
+      "authors": [
+        "Zhang, Qizheng",
+        "Hu, Changran",
+        "Upasani, Shubhangi",
+        "Ma, Boyuan",
+        "Hong, Fenglu",
+        "Kamanuru, Vamsidhar",
+        "Rainton, Jay",
+        "Wu, Chen",
+        "Ji, Mengmeng",
+        "Li, Hanchen",
+        "Thakker, Urmish",
+        "Zou, James",
+        "Olukotun, Kunle"
+      ],
+      "year": 2025,
+      "url": "https://doi.org/10.48550/arxiv.2510.04618",
+      "license": "Creative Commons Attribution 4.0 International",
+      "response_sha256": "a3c5aada28109a73b9b657e4e09b20fe05eb309655b467edfba1ab5b31af3a00"
+    }
+  ]
+}

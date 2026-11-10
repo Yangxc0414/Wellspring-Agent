@@ -1,0 +1,45 @@
+{
+  "figure_id": "PIPE-20261024T050235Z-e3a30a-figure",
+  "title": "研究运行时：从证据到稿件",
+  "schematic": true,
+  "kind": "module_graph",
+  "style": "modern",
+  "scene_sha256": "1494e857783c9c8a130e4a9d8d1450094685e3f0e4133f4a95a6ab90d0577d0a",
+  "svg_sha256": "992702528d58f902c7297539e420b69f254660592fea1c57ad4951de3f4e69cf",
+  "evidence_refs": [
+    "FX-001-S01-01",
+    "FX-001-S01-02",
+    "FX-001-S02-01",
+    "FX-002-S01-01"
+  ],
+  "provenance": {
+    "generator": "research_agent.figure",
+    "spec_version": "0.1.2",
+    "astradraw_source": "research_agent/vendor/astradraw",
+    "style": "modern",
+    "evidence_refs": [
+      "FX-001-S01-01",
+      "FX-001-S01-02",
+      "FX-001-S02-01",
+      "FX-002-S01-01"
+    ],
+    "schematic": true
+  },
+  "audit": {
+    "ok": true,
+    "errors": [],
+    "warnings": [],
+    "checks": {
+      "root": true,
+      "size": true,
+      "ids_unique": true,
+      "text_count": 19,
+      "image_count": 0,
+      "role_img": true,
+      "labelled": true,
+      "has_title": true,
+      "has_desc": true,
+      "aria_targets": true
+    }
+  }
+}

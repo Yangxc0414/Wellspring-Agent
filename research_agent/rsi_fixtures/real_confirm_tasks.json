@@ -1,0 +1,13 @@
+{
+  "fixture": false,
+  "corpus_kind": "real",
+  "sealed_after_admission": true,
+  "benchmark": "rsi-ccby-4-confirm",
+  "note": "Post-lease sealed confirmation on new questions; never used for candidate selection or admission.",
+  "tasks": [
+    {"task_id": "CONF-REAL-1", "split": "hidden", "question": "Darwin Godel Machine interestingly different stepping stones lineage", "gold_texts": ["interestingly different stepping stones", "lineage of self-modifications"]},
+    {"task_id": "CONF-REAL-2", "split": "hidden", "question": "SICA asynchronous LLM-based overseer oversight mechanisms", "gold_texts": ["asynchronous LLM-based overseer", "oversight mechanisms"]},
+    {"task_id": "CONF-REAL-3", "split": "hidden", "question": "SIFT visit-count exploration term pairwise wins", "gold_texts": ["visit-count exploration term", "pairwise wins"]},
+    {"task_id": "CONF-REAL-4", "split": "hidden", "question": "ACE grow-and-refine Reflector", "gold_texts": ["grow-and-refine", "Reflector"]}
+  ]
+}

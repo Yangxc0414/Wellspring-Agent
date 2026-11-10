@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Research Agent · Model Gateway</title>
+  <meta name="description" content="Research Agent 本地模型网关：OpenAI、Anthropic 与 OpenAI 兼容端点；密钥只进 runtime 内存或环境变量。" />
+  <link rel="canonical" href="https://yangxc0414.github.io/research-agent/models/" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/base.css" />
+  <link rel="stylesheet" href="../assets/theme.css" />
+  <link rel="stylesheet" href="../assets/custom.css" />
+  <link rel="stylesheet" href="./models.css" />
+<link rel="stylesheet" href="../assets/subpage.css" />
+<style>
+.mg-matrix .mg-panel-head{align-items:flex-start}
+.matrix-wrap{overflow-x:auto;margin-top:10px}
+.matrix{width:100%;border-collapse:collapse;font-size:11.5px;min-width:520px}
+.matrix th,.matrix td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line,#e4e9f2);vertical-align:top}
+.matrix th{font:700 10px var(--mono,ui-monospace);letter-spacing:.1em;color:#5f6d80;background:#f4f7fb}
+.matrix td b{display:block;font-weight:700;color:#0b1220}
+.matrix td small{display:block;margin-top:2px;font-size:9.5px;font-weight:500;color:#5f6d80}
+.matrix tbody tr:last-child td{border-bottom:0}
+.matrix-foot{margin:10px 0 0;font-size:11px;line-height:1.6;color:#5f6d80}
+.matrix-foot b{color:#0f766e}
+@media(max-width:760px){.matrix{min-width:480px;font-size:11px}}
+@media(max-width:560px){
+  .matrix{min-width:0}
+  .matrix thead{display:none}
+  .matrix,.matrix tbody{display:block}
+  .matrix tr{display:grid;grid-template-columns:1fr 1fr;gap:3px 10px;padding:10px 0;border-bottom:1px solid var(--line,#e4e9f2)}
+  .matrix tr:last-child{border-bottom:0}
+  .matrix td{border:0;padding:0}
+  .matrix td:first-child{grid-column:1/-1;margin-bottom:4px}
+  .matrix td[data-label]::before{content:attr(data-label) " · ";color:#5f6d80}
+}
+</style>
+</head>
+<body class="models-page">
+<div class="sp-top"><a class="sp-home" href="../">← 返回主页</a><span class="sp-chip">配置说明 · 需本地 runtime</span><nav class="sp-sib"><a href="../demo/">运行</a><a href="../innovation/">创新</a><a href="../app/">工作台</a><a href="../qoder/">接入</a><a href="../rsi/">自进化</a></nav></div>
+
+  <a class="skip-link" href="#model-main">跳到内容</a>
+  <header class="mg-top">
+    <a class="mg-brand" href="../app/">← WORKSPACE</a>
+    <a class="mg-kicker" href="../#strategy" style="color:var(--accent);text-decoration:none;">主页 / 策略视图 ↗</a>
+    <span class="mg-kicker">MODEL GATEWAY <i>/</i> ADVANCED SUBPAGE · OPENAI · ANTHROPIC · COMPATIBLE</span>
+    <div class="mg-connect">
+      <label class="mg-api"><span>API</span><input id="api-base" type="url" value="http://127.0.0.1:8787" spellcheck="false" autocomplete="off" /></label>
+      <button class="btn btn-ghost" id="connect-btn" type="button">连接</button>
+      <span class="mg-chip" id="conn-chip" data-state="checking"><i></i>CHECKING</span>
+    </div>
+  </header>
+
+  <main class="mg-shell" id="model-main">
+    <section class="mg-hero">
+      <div>
+        <span class="mg-kicker">30 / MODEL ACCESS · SUBPAGE</span>
+        <h1>模型接入</h1>
+        <p class="mg-lede">把模型接进来，但不把密钥交出去。OpenAI、Anthropic 与任意 OpenAI 兼容端点：密钥只从环境变量或本地 runtime 内存读取，不写仓库、不回传浏览器、不记录 prompt。</p>
+      </div>
+      <div class="mg-security">
+        <div><span>KEY SOURCE</span><b>ENV / SESSION</b><em>不落盘</em></div>
+        <div><span>TRANSPORT</span><b>HTTPS / LOCAL</b><em>拒绝公网明文</em></div>
+        <div><span>LOGGING</span><b>METADATA ONLY</b><em>不存 prompt</em></div>
+      </div>
+    </section>
+
+    <div class="mg-banner" id="banner" hidden></div>
+
+    <div class="mg-grid">
+      <section class="mg-panel mg-matrix">
+        <div class="mg-panel-head">
+          <div><span class="mg-kicker">00 / CAPABILITY MATRIX</span><h2>哪种端点支持哪些字段</h2></div>
+          <p class="mg-note">绑定只改配置，不改变模块行为。字段不被端点支持时会被忽略或截断，所以先看表再填。</p>
+        </div>
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead><tr><th>Provider</th><th>思考模式</th><th>思考预算</th><th>extra_body</th><th>usage</th></tr></thead>
+            <tbody>
+              <tr><td><b>OpenAI</b><small>Chat / Responses</small></td><td data-label="思考模式">reasoning effort</td><td data-label="预算">—</td><td data-label="extra_body">—</td><td data-label="usage">tokens</td></tr>
+              <tr><td><b>Anthropic</b><small>预算 &lt; max_tokens</small></td><td data-label="思考模式">thinking</td><td data-label="预算">budget_tokens</td><td data-label="extra_body">—</td><td data-label="usage">input / output</td></tr>
+              <tr><td><b>Azure OpenAI</b><small>需 api-version</small></td><td data-label="思考模式">reasoning effort</td><td data-label="预算">—</td><td data-label="extra_body">—</td><td data-label="usage">tokens</td></tr>
+              <tr><td><b>OpenAI-compatible</b><small>DeepSeek / Qwen / vLLM</small></td><td data-label="思考模式">视服务商</td><td data-label="预算">视服务商</td><td data-label="extra_body">原样透传</td><td data-label="usage">可能缺失</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="matrix-foot">当前只有 <b>rsi</b> 是 WIRED（真实消费者）；其他模块标 CONFIG ONLY。接入 API 不等于 pipeline 已使用模型，也不绕过 claim / EA / gate。</p>
+      </section>
+
+      <section class="mg-panel mg-providers">
+        <div class="mg-panel-head">
+          <div><span class="mg-kicker">01 / PROVIDERS</span><h2>接入端点</h2></div>
+          <span class="mg-count" id="provider-count">—</span>
+          <button class="btn btn-quiet" id="new-provider" type="button">新建</button>
+        </div>
+        <div class="provider-list" id="provider-list"><p class="mg-empty">连接 runtime 后显示 provider。</p></div>
+
+        <form class="mg-form" id="provider-form">
+          <div class="mg-form-head"><b>Provider 配置</b><span class="mg-hint" id="provider-hint">API key 留空则保持现状</span></div>
+          <div class="field-row">
+            <label class="field"><span>Provider ID</span><input id="p-id" maxlength="40" placeholder="openai" required /></label>
+            <label class="field"><span>类型</span>
+              <select id="p-kind">
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="openai_compatible">OpenAI 兼容</option>
+                <option value="azure_openai">Azure OpenAI</option>
+              </select>
+            </label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>显示名</span><input id="p-label" placeholder="OpenAI" /></label>
+            <label class="field"><span>Base URL</span><input id="p-base" placeholder="https://api.openai.com/v1" /></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>API key 环境变量</span><input id="p-env" placeholder="OPENAI_API_KEY" /></label>
+            <label class="field"><span>api-version（Azure）</span><input id="p-version" placeholder="2024-10-21" /></label>
+          </div>
+          <label class="mg-check"><input id="p-private" type="checkbox" /> 允许私有网络 / 本地网关（如 Ollama、vLLM）</label>
+          <label class="field"><span>模型列表（每行一个；可手动输入）</span><textarea id="p-models" rows="3" placeholder="gpt-5&#10;gpt-5-mini"></textarea></label>
+          <label class="field"><span>API key（只写入本次 runtime 内存）</span><input id="p-key" type="password" placeholder="留空：使用环境变量或保持 session key" autocomplete="off" /></label>
+          <div class="mg-actions">
+            <button class="btn" type="submit">保存 Provider</button>
+            <button class="btn btn-quiet" id="refresh-models" type="button">刷新模型</button>
+            <button class="btn btn-quiet" id="clear-key" type="button">清除 session key</button>
+          </div>
+          <p class="mg-note" id="provider-note">密钥不会出现在返回 JSON、artifact 或日志中。环境变量优先由 runtime 进程读取。</p>
+        </form>
+      </section>
+
+      <section class="mg-panel mg-profiles">
+        <div class="mg-panel-head">
+          <div><span class="mg-kicker">02 / MODEL PROFILES</span><h2>模型档案</h2></div>
+          <span class="mg-count" id="profile-count">—</span>
+        </div>
+        <div class="profile-list" id="profile-list"><p class="mg-empty">暂无模型档案。</p></div>
+
+        <form class="mg-form" id="profile-form">
+          <div class="mg-form-head"><b>新建 / 编辑档案</b><span class="mg-hint">Provider + model + thinking</span></div>
+          <div class="field-row">
+            <label class="field"><span>Profile ID</span><input id="f-id" maxlength="40" placeholder="rsi-proposer" required /></label>
+            <label class="field"><span>Provider</span><select id="f-provider"></select></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>模型 ID</span><input id="f-model" list="model-options" placeholder="gpt-5" required /><datalist id="model-options"></datalist></label>
+            <label class="field"><span>显示名</span><input id="f-label" placeholder="RSI proposer" /></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>上下文窗口 tokens（来自模型配置）</span><input id="f-context" type="number" min="8192" max="2000000" step="1" value="128000" /></label>
+            <label class="field"><span>最大输出 tokens（模型上限）</span><input id="f-output" type="number" min="16" max="1000000" step="1" value="16384" /></label>
+          </div>
+          <label class="mg-check"><input id="f-thinking-supported" type="checkbox" checked /> 模型声明支持思考（不支持时请关闭）</label>
+          <div class="field-row">
+            <label class="field"><span>思考模式</span>
+              <select id="f-thinking">
+                <option value="off">off · 不启用</option>
+                <option value="effort">effort · 推理强度</option>
+                <option value="budget">budget · token 预算</option>
+              </select>
+            </label>
+            <label class="field"><span>推理强度</span>
+              <select id="f-effort">
+                <option value="minimal">minimal</option>
+                <option value="low">low</option>
+                <option value="medium" selected>medium</option>
+                <option value="high">high</option>
+              </select>
+            </label>
+          </div>
+          <label class="field" id="budget-field"><span>思考预算 tokens（Anthropic / 兼容端点）</span><input id="f-budget" type="number" min="1024" max="32000" step="1024" placeholder="4096" /></label>
+          <div class="field-row">
+            <label class="field"><span>Max tokens</span><input id="f-max" type="number" min="16" max="128000" value="2048" /></label>
+            <label class="field"><span>Temperature</span><input id="f-temperature" type="number" min="0" max="2" step="0.1" value="0.2" /></label>
+          </div>
+          <div class="field-row">
+            <label class="field"><span>Top p（可留空）</span><input id="f-topp" type="number" min="0" max="1" step="0.05" /></label>
+            <label class="mg-check compact"><input id="f-json" type="checkbox" /> 请求 JSON 模式（OpenAI 系）</label>
+          </div>
+          <label class="field"><span>extra_body（JSON；兼容端点专用）</span><textarea id="f-extra" rows="3" placeholder='{"enable_thinking": true}'></textarea></label>
+          <div class="mg-actions"><button class="btn" type="submit">保存档案</button><button class="btn btn-quiet" id="reset-profile" type="button">重置</button></div>
+          <p class="mg-note" id="thinking-note">OpenAI 使用 reasoning_effort；Anthropic 使用 thinking.budget_tokens；兼容端点请用 extra_body 显式声明。</p>
+        </form>
+      </section>
+
+      <section class="mg-panel mg-probe">
+        <div class="mg-panel-head">
+          <div><span class="mg-kicker">03 / PROBE</span><h2>发一条真实请求</h2></div>
+          <span class="mg-count" id="probe-status">IDLE</span>
+        </div>
+        <p class="mg-note">探测会产生 API 费用。响应只在本页显示；runtime 只记录 provider/model/usage/latency，不记录 prompt 正文。</p>
+        <form class="mg-form" id="probe-form">
+          <label class="field"><span>Profile</span><select id="probe-profile"></select></label>
+          <label class="field"><span>System（可选）</span><textarea id="probe-system" rows="2" placeholder="你是科研证据助手。"></textarea></label>
+          <label class="field"><span>Prompt</span><textarea id="probe-prompt" rows="4" placeholder="用三句话说明你会如何核验一条 claim。"></textarea></label>
+          <div class="field-row">
+            <label class="field"><span>本次 max tokens（可选）</span><input id="probe-max" type="number" min="16" max="4096" placeholder="512" /></label>
+            <div class="mg-actions"><button class="btn" type="submit">发送探测 →</button></div>
+          </div>
+        </form>
+        <div class="probe-meta" id="probe-meta" hidden></div>
+        <pre class="probe-output" id="probe-output" hidden></pre>
+      </section>
+
+      <section class="mg-panel mg-bindings">
+        <div class="mg-panel-head">
+          <div><span class="mg-kicker">04 / BINDINGS</span><h2>模块绑定</h2></div>
+          <span class="mg-count" id="binding-count">—</span>
+        </div>
+        <p class="mg-note">绑定只改配置，不会自动改变模块行为。标 <b>WIRED</b> 的模块已有真实消费者；其余为下一阶段适配目标，不会绕过 claim/EA/gate。</p>
+        <div class="binding-list" id="binding-list"></div>
+      </section>
+    </div>
+
+    <section class="mg-panel mg-calls">
+      <div class="mg-panel-head">
+        <div><span class="mg-kicker">05 / CALL LOG</span><h2>调用审计</h2></div>
+        <button class="btn btn-quiet" id="refresh-calls" type="button">刷新</button>
+      </div>
+      <p class="mg-note">只保留最近 100 次元数据；不包含 prompt、response 或 API key。</p>
+      <div class="call-table" id="call-table"><p class="mg-empty">还没有调用。</p></div>
+    </section>
+
+    <footer class="mg-footer">
+      <span>LOCAL RUNTIME ONLY · KEYS NEVER PERSISTED</span>
+      <span>OpenAI · Anthropic · OpenAI-compatible</span>
+      <a href="../live/">打开运行控制台 ↗</a>
+    </footer>
+  </main>
+
+  <script src="./models.js"></script>
+<footer class="sp-foot">Research Agent · 各子页是同一系统的投影：实线 = 前向 · 虚线 = 反馈（回指更早阶段且改变下一步动作） · 红 = 人工门 · 青 = 自动门（默认拒绝）<br/>canonical 门禁：G1 想法=S3 / G2 设计=S4 / S5b 结果人签=S5c / G5 闭包=S16；真实执行 / 模型 / 签署只在本地 CLI / runtime</footer>
+</body>
+</html>

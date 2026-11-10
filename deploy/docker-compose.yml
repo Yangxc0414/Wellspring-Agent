@@ -1,0 +1,13 @@
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      # Local FastAPI runtime. Replace with a service name in a shared compose network.
+      API_UPSTREAM: ${API_UPSTREAM:-http://host.docker.internal:8787}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

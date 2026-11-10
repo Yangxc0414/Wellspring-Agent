@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "wellspring-agent": {
+      "type": "stdio",
+      "command": "<PYTHON_38_EXECUTABLE>",
+      "args": [
+        "<WELLSPRING_AGENT_ROOT>/scripts/research_mcp_server.py",
+        "--root",
+        "<WELLSPRING_AGENT_ROOT>"
+      ],
+      "env": {
+        "PYTHONPATH": "<WELLSPRING_AGENT_ROOT>",
+        "RESEARCH_AGENT_MCP_ROOT": "<WELLSPRING_AGENT_ROOT>",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  }
+}

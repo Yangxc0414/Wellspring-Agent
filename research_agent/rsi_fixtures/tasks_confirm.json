@@ -1,0 +1,19 @@
+{
+  "fixture": true,
+  "sealed": true,
+  "note": "Post-lease confirmation only. Never used for candidate selection or admission; synthetic, not a scientific benchmark.",
+  "tasks": [
+    {
+      "task_id": "CONF-1",
+      "split": "hidden",
+      "question": "passivation interface durability under damp heat",
+      "gold_texts": ["85°C/85%RH", "界面钝化组"]
+    },
+    {
+      "task_id": "CONF-2",
+      "split": "hidden",
+      "question": "reproducibility protocol reporting completeness",
+      "gold_texts": ["记录完整性", "停止条件"]
+    }
+  ]
+}

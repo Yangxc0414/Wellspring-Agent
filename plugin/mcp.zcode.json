@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "research-agent": {
+      "command": "python",
+      "args": [
+        "<RESEARCH_AGENT_ROOT>/scripts/research_mcp_server.py",
+        "--root",
+        "<RESEARCH_AGENT_ROOT>"
+      ],
+      "env": {
+        "PYTHONPATH": "<RESEARCH_AGENT_ROOT>"
+      },
+      "type": "stdio"
+    }
+  }
+}

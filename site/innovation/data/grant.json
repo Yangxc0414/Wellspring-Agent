@@ -1,0 +1,28 @@
+{
+  "title": "申报草稿：钙钛矿 界面 钝化 稳定性",
+  "scheme": "nsfc",
+  "modules": [
+    "立项依据",
+    "研究内容",
+    "研究基础",
+    "创新点",
+    "预算说明"
+  ],
+  "compliance": [
+    "三模块/页限以当年官方模板为准",
+    "AI 辅助声明",
+    "科学观点由申请人提供"
+  ],
+  "evidence_refs": [
+    "FX-001-S01-01",
+    "FX-001-S01-02",
+    "FX-001-S02-01",
+    "FX-002-S01-01"
+  ],
+  "status": "draft_needs_human",
+  "warnings": [
+    "scheme=国家自然科学基金（NSFC）; scaffold only: no scientific claims, no budget numbers, no submission",
+    "AI assists retrieval/structure/polish; scientific ideas and responsibility stay with the applicant",
+    "official template / page limit must be checked against the current call"
+  ]
+}

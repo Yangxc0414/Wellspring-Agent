@@ -1,0 +1,13 @@
+# Codex CLI MCP configuration example.
+# Replace <ABSOLUTE_ROOT> with this repository's absolute path.
+# Never put API keys here; provider keys stay in the user environment.
+
+[mcp_servers.research-agent]
+command = "python"
+args = [
+  "<ABSOLUTE_ROOT>/scripts/research_mcp_server.py",
+  "--root", "<ABSOLUTE_ROOT>",
+]
+env = { PYTHONPATH = "<ABSOLUTE_ROOT>", RESEARCH_AGENT_MCP_ROOT = "<ABSOLUTE_ROOT>", PYTHONIOENCODING = "utf-8" }
+startup_timeout_sec = 60
+tool_timeout_sec = 180

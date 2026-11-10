@@ -1,0 +1,220 @@
+{
+  "schema": "evolution-story-0.1",
+  "current": {
+    "fingerprint": "7594c67a27762064",
+    "source_files": 217,
+    "platform_generation": "GEN-1b18df2684",
+    "agent_generation": "GEN-067df5aa55"
+  },
+  "platform": [
+    {
+      "generation_id": "GEN-15d2879485",
+      "kind": "platform",
+      "label": "P1 · 接缝上线（f692c16）",
+      "status": "superseded",
+      "created_at": "2026-11-10T10:52:18+00:00",
+      "parent_id": "",
+      "platform_fingerprint": "8640c59332cc379a",
+      "agent_tree_sha": "",
+      "candidate_ids": [],
+      "episode_ids": [],
+      "artifact_sha256": "",
+      "commit": "f692c16",
+      "note": "Harness² 接缝刚上线时的平台基线；指纹按当时的 research_agent/**/*.py 重算 | superseded by P2 · 新增世代台账",
+      "evidence": {},
+      "closed_at": "2026-11-10T10:52:19+00:00"
+    },
+    {
+      "generation_id": "GEN-ee2fa2e859",
+      "kind": "platform",
+      "label": "P2 · 新增世代台账",
+      "status": "superseded",
+      "created_at": "2026-11-10T10:52:19+00:00",
+      "parent_id": "GEN-15d2879485",
+      "platform_fingerprint": "5a3468317b2bf3df",
+      "agent_tree_sha": "",
+      "candidate_ids": [],
+      "episode_ids": [],
+      "artifact_sha256": "",
+      "commit": "",
+      "note": "加入 agent/platform 双轨世代台账、rsi gen、/api/rsi/generations | superseded by P3 · 世代记录脱敏 + 复验规则",
+      "evidence": {},
+      "closed_at": "2026-11-10T10:52:20+00:00"
+    },
+    {
+      "generation_id": "GEN-109d054891",
+      "kind": "platform",
+      "label": "P3 · 世代记录脱敏 + 复验规则",
+      "status": "superseded",
+      "created_at": "2026-11-10T10:52:20+00:00",
+      "parent_id": "GEN-ee2fa2e859",
+      "platform_fingerprint": "d9d851a50bd7ba58",
+      "agent_tree_sha": "",
+      "candidate_ids": [],
+      "episode_ids": [],
+      "artifact_sha256": "",
+      "commit": "",
+      "note": "世代引用改仓库相对路径、导出剥离 artifact_ref；同树换平台自动 supersede 旧记录 | superseded by P4 · 插件清单补 WorkBuddy + setup_mcp 九家",
+      "evidence": {},
+      "closed_at": "2026-11-10T11:24:48+00:00"
+    },
+    {
+      "generation_id": "GEN-1b18df2684",
+      "kind": "platform",
+      "label": "P4 · 插件清单补 WorkBuddy + setup_mcp 九家",
+      "status": "adopted",
+      "created_at": "2026-11-10T11:24:48+00:00",
+      "parent_id": "GEN-109d054891",
+      "platform_fingerprint": "7594c67a27762064",
+      "agent_tree_sha": "",
+      "candidate_ids": [],
+      "episode_ids": [],
+      "artifact_sha256": "",
+      "commit": "",
+      "note": "plugin export 生成 mcp.workbuddy.json；setup_mcp --host 支持 qoder/zcode/codex/workbuddy/claude-code/cursor/cline/continue/zed，只打印不写全局配置",
+      "evidence": {},
+      "closed_at": ""
+    }
+  ],
+  "agent": [
+    {
+      "generation_id": "GEN-578db9c209",
+      "kind": "agent",
+      "label": "G0 · claims 夹具（在 P2 上跑）",
+      "status": "superseded",
+      "created_at": "2026-11-10T10:52:27+00:00",
+      "parent_id": "",
+      "platform_fingerprint": "5a3468317b2bf3df",
+      "agent_tree_sha": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
+      "candidate_ids": [],
+      "episode_ids": [],
+      "artifact_sha256": "39689de6f29870fddb92bd29a929e521075559238c06b1175cf2ff94fcf22379",
+      "commit": "",
+      "note": "留出 1/1，基线 0/1；确定性执行 | re-validated on platform d9d851a50bd7ba58",
+      "evidence": {
+        "budget_identity": true,
+        "tasks": [
+          {
+            "task_id": "claims-1",
+            "status": "ok"
+          },
+          {
+            "task_id": "claims-2",
+            "status": "ok"
+          },
+          {
+            "task_id": "claims-3",
+            "status": "ok"
+          }
+        ],
+        "held_out": {
+          "n": 1,
+          "passed": 1,
+          "base_passed": 0,
+          "delta": 1
+        },
+        "simulation": true,
+        "claim_eligible": false,
+        "metrics": {
+          "adapter": "science"
+        }
+      },
+      "closed_at": "2026-11-10T10:52:48+00:00"
+    },
+    {
+      "generation_id": "GEN-14373e0ee8",
+      "kind": "agent",
+      "label": "G1 · claims 夹具（在 P3 上复验）",
+      "status": "superseded",
+      "created_at": "2026-11-10T10:52:48+00:00",
+      "parent_id": "GEN-578db9c209",
+      "platform_fingerprint": "d9d851a50bd7ba58",
+      "agent_tree_sha": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
+      "candidate_ids": [],
+      "episode_ids": [
+        "EP-e5d069a9fe"
+      ],
+      "artifact_sha256": "",
+      "commit": "",
+      "note": "recorded from rsi harness2 record | re-validated on platform 7594c67a27762064",
+      "evidence": {
+        "budget_identity": true,
+        "tasks": [
+          {
+            "task_id": "claims-1",
+            "status": "ok"
+          },
+          {
+            "task_id": "claims-2",
+            "status": "ok"
+          },
+          {
+            "task_id": "claims-3",
+            "status": "ok"
+          }
+        ],
+        "held_out": {
+          "n": 1,
+          "passed": 1,
+          "base_passed": 0,
+          "delta": 1
+        },
+        "simulation": true,
+        "claim_eligible": false,
+        "metrics": {
+          "adapter": "science"
+        }
+      },
+      "closed_at": "2026-11-10T11:25:12+00:00"
+    },
+    {
+      "generation_id": "GEN-067df5aa55",
+      "kind": "agent",
+      "label": "G2 · claims 夹具（在 P4 上复验）",
+      "status": "adopted",
+      "created_at": "2026-11-10T11:25:12+00:00",
+      "parent_id": "GEN-14373e0ee8",
+      "platform_fingerprint": "7594c67a27762064",
+      "agent_tree_sha": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
+      "candidate_ids": [],
+      "episode_ids": [
+        "EP-3de47f375b"
+      ],
+      "artifact_sha256": "",
+      "commit": "",
+      "note": "recorded from rsi harness2 record",
+      "evidence": {
+        "budget_identity": true,
+        "tasks": [
+          {
+            "task_id": "claims-1",
+            "status": "ok"
+          },
+          {
+            "task_id": "claims-2",
+            "status": "ok"
+          },
+          {
+            "task_id": "claims-3",
+            "status": "ok"
+          }
+        ],
+        "held_out": {
+          "n": 1,
+          "passed": 1,
+          "base_passed": 0,
+          "delta": 1
+        },
+        "simulation": true,
+        "claim_eligible": false,
+        "metrics": {
+          "adapter": "science"
+        }
+      },
+      "closed_at": ""
+    }
+  ],
+  "warnings": [],
+  "ok": true,
+  "boundary": "a generation records which code and which harness produced which evidence; it never applies a patch, never signs and never revokes a lease by itself. The platform fingerprint covers research_agent/**/*.py only, so a SPEC-only change does not move it."
+}

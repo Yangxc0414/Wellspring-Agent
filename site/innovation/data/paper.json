@@ -1,0 +1,70 @@
+{
+  "title": "工作稿：钙钛矿 界面 钝化 稳定性",
+  "profile": {
+    "language": "zh",
+    "venue_type": "zh_core_journal",
+    "citation_style": "GB/T 7714-2015",
+    "sections": [
+      "摘要",
+      "引言",
+      "相关工作",
+      "方法",
+      "实验设计",
+      "结果",
+      "讨论",
+      "结论"
+    ]
+  },
+  "sections": [
+    "摘要",
+    "引言",
+    "相关工作",
+    "方法",
+    "实验设计",
+    "结果",
+    "讨论",
+    "结论"
+  ],
+  "slots": [
+    {
+      "slot_id": "method.protocol",
+      "section": "方法",
+      "required_evidence": "G2 Protocol / DesignCard / TaskSpec",
+      "status": "pending_evidence"
+    },
+    {
+      "slot_id": "result.primary",
+      "section": "结果",
+      "required_evidence": "EA + supported Claim + MetricRecord",
+      "status": "pending_evidence"
+    },
+    {
+      "slot_id": "result.figure",
+      "section": "结果",
+      "required_evidence": "FigureManifest + Figure data / run data",
+      "status": "bound_figure"
+    },
+    {
+      "slot_id": "limitation",
+      "section": "讨论",
+      "required_evidence": "EvidenceCard scope / validity threats",
+      "status": "pending_evidence"
+    },
+    {
+      "slot_id": "citation.related",
+      "section": "相关工作",
+      "required_evidence": "verified bibliography (DOI/Crossref)",
+      "status": "pending_evidence"
+    }
+  ],
+  "claims": [],
+  "status": "needs_evidence",
+  "warnings": [
+    "scaffold only: no result claims, no numbers, no abstract prose",
+    "WritingProfile=zh_core_journal; citation_style=GB/T 7714-2015",
+    "schematic figure is not a result figure; do not bind it to result.figure without data",
+    "all result slots are pending_evidence; export/Closure remains blocked",
+    "result.figure references data-backed FigureManifest; writer does not re-verify data",
+    "figure_refs are schematic; not bound to result.figure"
+  ]
+}

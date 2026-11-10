@@ -1,0 +1,152 @@
+# -*- coding: utf-8 -*-
+"""package_wellspring.py -- rebuild the Wellspring-Agent distribution folder from this repo.
+
+Engineering rules:
+- Manifest-driven: the previous MANIFEST.txt defines exactly which files a rebuild
+  may delete; files you added by hand (LICENSE, notes, ...) are never touched.
+- Excludes: third-party snapshots (research_agent/vendor/astradraw -- already
+  gitignored upstream, no redistribution grant), runtime data
+  (research_agent/web/data), node_modules / dist / test-results, caches.
+- Secret gate: every candidate file is scanned for credential patterns before a
+  single byte is written; a hit aborts the whole run.
+- Deterministic: same repo state -> same MANIFEST.
+
+Usage:  python scripts/package_wellspring.py
+"""
+import io
+import os
+import re
+import shutil
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+TARGET = REPO / "Wellspring-Agent"
+MANIFEST = TARGET / "MANIFEST.txt"
+
+# (source dir relative to repo, target dir relative to package, excluded dir/file names)
+TREES = [
+    ("research_agent", "research_agent", {"__pycache__", "data", "vendor"}),
+    ("modules", "modules", {"__pycache__"}),
+    ("tests", "tests", {"__pycache__"}),
+    ("scripts", "scripts", {"__pycache__"}),
+    ("integrations", "integrations", set()),
+    ("site", "site", set()),
+    ("apps/web", "apps/web", {"node_modules", "dist", "test-results", "playwright-report"}),
+    (".github", ".github", set()),
+]
+FILES = [
+    "README.md", "ARCHITECTURE.md", "QUICKSTART.md", "AGENTS.md",
+    "CONTRIBUTING.md", "LICENSING.md", "SECURITY.md", "THIRD_PARTY_NOTICES.md",
+    "pyproject.toml", "requirements-dev.txt", "requirements-runtime.txt",
+    ".gitignore", ".dockerignore", ".mcp.json.example",
+]
+SECRET_PATTERNS = [
+    re.compile(rb"wk-[A-Za-z0-9]{16,}"),
+    re.compile(rb"sk-[A-Za-z0-9]{16,}"),
+    re.compile(rb"ghp_[A-Za-z0-9]{20,}"),
+    re.compile(rb"AKIA[0-9A-Z]{16}"),
+]
+SCAN_SKIP_SUFFIX = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".woff", ".woff2",
+                    ".ttf", ".zip", ".pdf", ".mp4", ".webm", ".svg"}
+
+
+def collect():
+    """Return the copy plan: list of (src_path, dst_relpath)."""
+    plan = []
+    for src_rel, dst_rel, excludes in TREES:
+        src_root = REPO / src_rel
+        if not src_root.is_dir():
+            print("WARN missing tree: %s" % src_rel)
+            continue
+        for root, dirs, files in os.walk(src_root):
+            rel_root = os.path.relpath(root, src_root)
+            dirs[:] = [d for d in dirs if d not in excludes]
+            for name in sorted(files):
+                if name.endswith(".pyc") or name in excludes:
+                    continue
+                rel = os.path.normpath(os.path.join(rel_root, name)) if rel_root != "." else name
+                if any(part in excludes for part in Path(rel).parts):
+                    continue
+                plan.append((src_root / rel, (Path(dst_rel) / rel).as_posix()))
+    for rel in FILES:
+        src = REPO / rel
+        if src.is_file():
+            plan.append((src, rel))
+        else:
+            print("WARN missing file: %s" % rel)
+    return plan
+
+
+def scan_secrets(plan):
+    hits = []
+    for src, rel in plan:
+        if src.suffix.lower() in SCAN_SKIP_SUFFIX:
+            continue
+        try:
+            if src.stat().st_size > 2 * 1024 * 1024:
+                continue
+            blob = src.read_bytes()
+        except OSError:
+            continue
+        for pat in SECRET_PATTERNS:
+            m = pat.search(blob)
+            if m:
+                hits.append((rel, m.group(0)[:6] + b"..."))
+    return hits
+
+
+def previous_manifest_files():
+    """Files a previous run copied -- the only files this run may delete."""
+    old = []
+    if MANIFEST.is_file():
+        for line in io.open(MANIFEST, "r", encoding="utf-8").read().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "\t" in line:
+                old.append(line.split("\t", 1)[1])
+    return old
+
+
+def main():
+    plan = collect()
+    hits = scan_secrets(plan)
+    if hits:
+        print("ABORT: credential pattern found; nothing was written.")
+        for rel, head in hits:
+            print("  %s -> %s" % (rel, head.decode("ascii", "replace")))
+        sys.exit(1)
+
+    TARGET.mkdir(parents=True, exist_ok=True)
+    # delete only what the previous manifest owns
+    removed = 0
+    for rel in previous_manifest_files():
+        dst = TARGET / rel
+        if dst.is_file():
+            dst.unlink()
+            removed += 1
+    # prune now-empty dirs left behind (except the package root)
+    for root, dirs, files in os.walk(TARGET, topdown=False):
+        if root == str(TARGET):
+            continue
+        if not dirs and not files:
+            os.rmdir(root)
+
+    total_bytes = 0
+    lines = ["# Wellspring-Agent manifest -- regenerated by scripts/package_wellspring.py",
+             "# format: <src-relative-to-repo>\t<package-relative-path>"]
+    for src, rel in sorted(plan, key=lambda item: item[1]):
+        dst = TARGET / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        total_bytes += src.stat().st_size
+        lines.append("%s\t%s" % (os.path.relpath(src, REPO).replace("\\", "/"), rel))
+    lines.append("# files: %d | bytes: %d" % (len(plan), total_bytes))
+    with io.open(MANIFEST, "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(lines) + "\n")
+
+    print("OK Wellspring-Agent: %d files, %.1f MB (stale removed: %d)" % (len(plan), total_bytes / 1048576.0, removed))
+    print("   target: %s" % TARGET)
+
+
+if __name__ == "__main__":
+    main()

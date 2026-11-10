@@ -1,0 +1,454 @@
+{
+  "schema_version": "orchestration-0.1",
+  "run_id": "ORCH-20261024T154617Z-59a04a",
+  "topic": "How do self-improving coding agents use archives?",
+  "source": "real",
+  "fixture_mode": false,
+  "scouts": [
+    {
+      "role_id": "scout-1",
+      "name": "文献侦察 · 核心问题/综述",
+      "facets": [
+        "core",
+        "survey"
+      ],
+      "budget": 4,
+      "status": "ok",
+      "sources": 4,
+      "full_text": 4,
+      "spans": 32,
+      "queries": 2,
+      "saturation": "partial",
+      "coverage_score": 0.917,
+      "gap_codes": [
+        "coverage_cap_reached"
+      ]
+    },
+    {
+      "role_id": "scout-2",
+      "name": "文献侦察 · 方法/评测/基准",
+      "facets": [
+        "method",
+        "evaluation"
+      ],
+      "budget": 4,
+      "status": "ok",
+      "sources": 4,
+      "full_text": 4,
+      "spans": 32,
+      "queries": 2,
+      "saturation": "partial",
+      "coverage_score": 0.917,
+      "gap_codes": [
+        "coverage_cap_reached"
+      ]
+    },
+    {
+      "role_id": "scout-3",
+      "name": "文献侦察 · 局限/失败/近期进展",
+      "facets": [
+        "limitation",
+        "recent"
+      ],
+      "budget": 4,
+      "status": "ok",
+      "sources": 4,
+      "full_text": 4,
+      "spans": 32,
+      "queries": 2,
+      "saturation": "partial",
+      "coverage_score": 0.917,
+      "gap_codes": [
+        "coverage_cap_reached"
+      ]
+    }
+  ],
+  "merged": {
+    "sources": 4,
+    "full_text": 4,
+    "spans_count": 32,
+    "queries": 6,
+    "covered_facets": 6,
+    "planned_facets": 6,
+    "coverage_score": 0.9333,
+    "saturation": "partial",
+    "facet_coverage": [
+      {
+        "facet": "core",
+        "label": "核心问题",
+        "queries": 1,
+        "sources": 2,
+        "span_count": 16,
+        "covered": true
+      },
+      {
+        "facet": "survey",
+        "label": "综述",
+        "queries": 1,
+        "sources": 2,
+        "span_count": 16,
+        "covered": true
+      },
+      {
+        "facet": "method",
+        "label": "方法",
+        "queries": 1,
+        "sources": 2,
+        "span_count": 16,
+        "covered": true
+      },
+      {
+        "facet": "evaluation",
+        "label": "评测/基准",
+        "queries": 1,
+        "sources": 2,
+        "span_count": 16,
+        "covered": true
+      },
+      {
+        "facet": "limitation",
+        "label": "局限/失败",
+        "queries": 1,
+        "sources": 2,
+        "span_count": 16,
+        "covered": true
+      },
+      {
+        "facet": "recent",
+        "label": "近期进展",
+        "queries": 1,
+        "sources": 2,
+        "span_count": 16,
+        "covered": true
+      }
+    ],
+    "gaps": [
+      {
+        "code": "coverage_cap_reached",
+        "message": "at least one scout exhausted its budget before its facets were covered"
+      }
+    ],
+    "scout_gaps": {
+      "scout-1": [
+        "coverage_cap_reached"
+      ],
+      "scout-2": [
+        "coverage_cap_reached"
+      ],
+      "scout-3": [
+        "coverage_cap_reached"
+      ]
+    }
+  },
+  "idea": {
+    "run_id": "ORCH-20261024T154617Z-59a04a-IDEA",
+    "status": "candidates_need_human",
+    "candidates": [
+      {
+        "idea_id": "IDEA-01",
+        "title": "【机制】候选 01：围绕「Scientific progress is cumulative and open-ended, with eac…」",
+        "hypothesis": "若改变「Scientific progress is cumulative and open-ended, with eac…」所描述的机制或关键条件，则在固定协议、同 baseline、同预算下，主指标应出现可测变化；机制与指标需人工补全。",
+        "falsification": "预注册协议下主指标无改善或反向，或效应不超出预注册最小效应。",
+        "evidence_refs": [
+          "ARXIV-2505.22954v3-S01-01",
+          "ARXIV-2505.22954v3-S01-02",
+          "ARXIV-2505.22954v3-S01-03",
+          "ARXIV-2505.22954v3-S01-04"
+        ],
+        "status": "candidate",
+        "lens": "mechanism",
+        "evidence_count": 4,
+        "source_count": 1,
+        "novelty_status": "unverified",
+        "testability": "needs_metric"
+      },
+      {
+        "idea_id": "IDEA-02",
+        "title": "【边界】候选 02：围绕「LLM s have recently made impressive advancements across a …」",
+        "hypothesis": "若「LLM s have recently made impressive advancements across a …」所暗示的效应只在特定数据/条件边界内成立，则跨条件复现时应出现可测退化；边界与最小效应需人工补全。",
+        "falsification": "预注册协议下主指标无改善或反向，或效应不超出预注册最小效应。",
+        "evidence_refs": [
+          "ARXIV-2504.15228v1-S01-01",
+          "ARXIV-2504.15228v1-S01-02",
+          "ARXIV-2504.15228v1-S01-03",
+          "ARXIV-2504.15228v1-S01-04"
+        ],
+        "status": "candidate",
+        "lens": "boundary",
+        "evidence_count": 4,
+        "source_count": 1,
+        "novelty_status": "unverified",
+        "testability": "needs_metric"
+      },
+      {
+        "idea_id": "IDEA-03",
+        "title": "【测量】候选 03：围绕「Large Language Models (LLMs) have enabled the rapid develo…」",
+        "hypothesis": "若把「Large Language Models (LLMs) have enabled the rapid develo…」改造成可重复的对照/测量，则在同一评价协议下主指标应可区分；测量口径与 seeds 需人工补全。",
+        "falsification": "预注册协议下主指标无改善或反向，或效应不超出预注册最小效应。",
+        "evidence_refs": [
+          "ARXIV-2609.19526-S01-01",
+          "ARXIV-2609.19526-S01-02",
+          "ARXIV-2609.19526-S01-03",
+          "ARXIV-2609.19526-S01-05"
+        ],
+        "status": "candidate",
+        "lens": "measurement",
+        "evidence_count": 4,
+        "source_count": 1,
+        "novelty_status": "unverified",
+        "testability": "needs_metric"
+      }
+    ],
+    "brief": {
+      "candidate_count": 3,
+      "source_count": 4,
+      "multi_ref_candidates": 3,
+      "multi_source_candidates": 0,
+      "lenses": {
+        "mechanism": 1,
+        "boundary": 1,
+        "measurement": 1
+      },
+      "gaps": [
+        "no_multi_source_candidate",
+        "novelty_unverified"
+      ],
+      "summary": "从 32 个 span / 4 个来源聚成 3 个候选；3 个引用 ≥2 条证据、0 个跨来源；候选轴：boundary / measurement / mechanism；G1 仍需人工收敛，novelty 未核验。"
+    },
+    "warnings": [
+      "candidate frames only; no novelty ranking, no Claim, no automatic G1",
+      "mechanism and metric must be filled by a human before design freeze",
+      "spec status=pilot; development-only",
+      "idea_brief: 从 32 个 span / 4 个来源聚成 3 个候选；3 个引用 ≥2 条证据、0 个跨来源；候选轴：boundary / measurement / mechanism；G1 仍需人工收敛，novelty 未核验。",
+      "idea_coverage_gap: no_multi_source_candidate"
+    ]
+  },
+  "custom_agents": [
+    {
+      "id": "CAG-20261024T154502Z-72ba99",
+      "name": "协议前置审阅",
+      "role": "methodologist",
+      "role_label": "方法学家",
+      "stage": "S4",
+      "checks": [
+        "protocol"
+      ],
+      "check_labels": [
+        "协议审阅"
+      ],
+      "tools": [
+        "protocol.inspect"
+      ],
+      "outputs": [
+        "ProtocolAdvisory"
+      ],
+      "enabled": true,
+      "advisory_only": true,
+      "writes": []
+    },
+    {
+      "id": "CAG-20261024T154502Z-7b0ba5",
+      "name": "覆盖与引用审稿人",
+      "role": "reviewer",
+      "role_label": "审稿人",
+      "stage": "S1",
+      "checks": [
+        "coverage",
+        "citation"
+      ],
+      "check_labels": [
+        "覆盖审计",
+        "引用对齐"
+      ],
+      "tools": [
+        "coverage.inspect",
+        "citation.inspect"
+      ],
+      "outputs": [
+        "CoverageAdvisory",
+        "CitationAdvisory"
+      ],
+      "enabled": true,
+      "advisory_only": true,
+      "writes": []
+    }
+  ],
+  "advisory_notes": [
+    {
+      "id": "ADV-CAG-20261024T154502Z-72ba99-protocol",
+      "agent_id": "CAG-20261024T154502Z-72ba99",
+      "agent_name": "协议前置审阅",
+      "check": "protocol",
+      "check_label": "协议审阅",
+      "boundary": "advisory note only; no Claim/EA/gate",
+      "status": "deferred",
+      "summary": "S4 check 在当前 S1–S3 stop point 之外",
+      "details": [
+        "not_executed=true",
+        "stage=S4"
+      ]
+    },
+    {
+      "id": "ADV-CAG-20261024T154502Z-7b0ba5-coverage",
+      "agent_id": "CAG-20261024T154502Z-7b0ba5",
+      "agent_name": "覆盖与引用审稿人",
+      "check": "coverage",
+      "check_label": "覆盖审计",
+      "boundary": "advisory note only; no Claim/EA/gate",
+      "status": "pass",
+      "summary": "全文 4/3 · 面向 6/6 · 摘要-only 0",
+      "details": [
+        "full_text_target=3",
+        "facet_ratio=1.00",
+        "abstract_only=0"
+      ]
+    },
+    {
+      "id": "ADV-CAG-20261024T154502Z-7b0ba5-citation",
+      "agent_id": "CAG-20261024T154502Z-7b0ba5",
+      "agent_name": "覆盖与引用审稿人",
+      "check": "citation",
+      "check_label": "引用对齐",
+      "boundary": "advisory note only; no Claim/EA/gate",
+      "status": "pass",
+      "summary": "12 个候选引用全部落在合并 span 中",
+      "details": [
+        "candidates=3",
+        "missing_refs=0"
+      ]
+    }
+  ],
+  "policy": {
+    "enabled": true,
+    "scopes": {
+      "literature.memory_order": true,
+      "literature.query_planner": true,
+      "orchestrator.facet_budget": true
+    },
+    "locked": [
+      {
+        "id": "claim.statement",
+        "label": "Claim 陈述",
+        "reason": "必须由作者/PI 签署"
+      },
+      {
+        "id": "evidence.artifact",
+        "label": "EvidenceArtifact",
+        "reason": "只能由运行与人签产生"
+      },
+      {
+        "id": "gate.decision",
+        "label": "门禁判定",
+        "reason": "G1/G2/S5b/G5 只能人工放行"
+      },
+      {
+        "id": "rubric",
+        "label": "评价规则",
+        "reason": "规则冻结，候选不得改写"
+      },
+      {
+        "id": "heldout",
+        "label": "Held-out 集合",
+        "reason": "不得用于提案或调参"
+      },
+      {
+        "id": "closure",
+        "label": "闭包报告",
+        "reason": "只能由闭包检查产生"
+      },
+      {
+        "id": "signature",
+        "label": "签名",
+        "reason": "浏览器与编排器都不提供签核"
+      },
+      {
+        "id": "export",
+        "label": "导出清单",
+        "reason": "未闭包/已过期时锁定"
+      }
+    ],
+    "memory_applied": true,
+    "suppressed_candidate": null,
+    "boundary": "local visibility gate for automatic process/skill candidates; never unlocks Claim/EA/gate/rubric/held-out/closure/signature/export"
+  },
+  "memory": {
+    "recorded": {
+      "run_id": "ORCH-20261024T154617Z-59a04a",
+      "role": "orchestrator/s1-fanout",
+      "mode": "real",
+      "at": "2026-10-24T15:46:17+00:00",
+      "facets": [
+        "core",
+        "survey",
+        "method",
+        "evaluation",
+        "limitation",
+        "recent"
+      ],
+      "sources": 4,
+      "full_text": 4,
+      "spans": 32,
+      "queries": 6,
+      "coverage_score": 0.9333,
+      "saturation": "partial",
+      "gaps": [
+        "coverage_cap_reached"
+      ],
+      "fixture_mode": false
+    },
+    "next_focus": [
+      {
+        "facet": "core",
+        "priority": 0.44,
+        "reason": "已覆盖，按 span/query 产出给余量（16.00）"
+      },
+      {
+        "facet": "survey",
+        "priority": 0.44,
+        "reason": "已覆盖，按 span/query 产出给余量（16.00）"
+      }
+    ],
+    "applied": true,
+    "boundary": "process memory only; it reorders the next scout plan and never becomes evidence"
+  },
+  "skill_candidate": {
+    "candidate_id": "LCAND-930831ba0f",
+    "kind": "process",
+    "target": "orchestrator.facet_budget",
+    "facet": null,
+    "constraint": "source_budget",
+    "patch": "when coverage_cap_reached repeats, reserve one extra source for the lowest-yield facet before adding queries; request a larger max_sources if the cap is still binding",
+    "rationale": "coverage_cap_reached 在 real 模式的 3 次 S1 运行中重复出现；约束在来源预算，不是查询模板。",
+    "predicted_effect": "下一次 public dry-run 在不改变 full-text-only 规则下达到目标来源数",
+    "status": "pending_human",
+    "scope": "S1/real/TOP-fda6c1e381cf",
+    "governance": {
+      "auto_admitted": false,
+      "required": [
+        "dry_run",
+        "public_eval",
+        "hidden_eval",
+        "regression",
+        "human_admission"
+      ],
+      "immutable": [
+        "Claim",
+        "EA",
+        "gate",
+        "rubric",
+        "export",
+        "signature"
+      ],
+      "note": "budget/full-text process proposal only; no evidence boundary changes"
+    }
+  },
+  "warnings": [
+    "S1 outputs spans, not claims; spans must pass Q0/Claim Curator before use",
+    "spec status=pilot; this run is development-only",
+    "coverage=partial; 4 sources / 4 full texts / 32 spans; see brief.gaps",
+    "orchestrator stops before G1; idea frames are candidates, not an admitted hypothesis",
+    "self-evolution stays in the skill/memory lane; no skill is admitted by this run",
+    "2 custom advisory agent(s) ran read-only checks; notes are not evidence or gate decisions"
+  ],
+  "boundary": "Web summary only: no source text, span text or abstract; idea frames remain candidates and no Claim/EA/gate/admission is created."
+}

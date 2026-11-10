@@ -1,0 +1,63 @@
+{
+  "fixture": true,
+  "note": "Synthetic data for offline tests only. Not real papers; do not cite as evidence.",
+  "papers": [
+    {
+      "source_id": "FX-001",
+      "title": "Fixture Paper A: Interface passivation and humidity stability",
+      "year": 2025,
+      "venue": "Fixture Venue (synthetic)",
+      "doi": null,
+      "abstract": "A synthetic record describing interface passivation and damp-heat stability. Only for pipeline tests.",
+      "keywords": ["perovskite", "passivation", "humidity", "stability", "钙钛矿", "钝化", "湿热稳定性"],
+      "full_text": true,
+      "license": "fixture-only",
+      "fixture": true,
+      "sections": [
+        {
+          "name": "Results",
+          "text": "在 85°C/85%RH 的 fixture 条件下，对照组的稳定性为 420 h，界面钝化组为 780 h。该数值仅用于测试流程，不是真实实验结果。"
+        },
+        {
+          "name": "Limitations",
+          "text": "Fixture 数据只验证检索、定位和覆盖回执，不支持任何材料科学结论。"
+        }
+      ]
+    },
+    {
+      "source_id": "FX-002",
+      "title": "Fixture Paper B: Reproducibility of passivation protocols",
+      "year": 2024,
+      "venue": "Fixture Workshop (synthetic)",
+      "doi": null,
+      "abstract": "A synthetic record about protocol reproducibility and reporting completeness.",
+      "keywords": ["reproducibility", "protocol", "passivation", "perovskite", "复现", "协议", "钝化"],
+      "full_text": true,
+      "license": "fixture-only",
+      "fixture": true,
+      "sections": [
+        {
+          "name": "Method",
+          "text": "Fixture 协议要求记录温度、湿度、样本量和停止条件；缺少任一项时，结果只能标为未判定。"
+        },
+        {
+          "name": "Results",
+          "text": "在 fixture 的三次重复中，只有两次满足预注册的记录完整性检查，因此不宣称稳定性提升。"
+        }
+      ]
+    },
+    {
+      "source_id": "FX-003",
+      "title": "Fixture Paper C: A review without full text",
+      "year": 2023,
+      "venue": "Fixture Review (synthetic)",
+      "doi": null,
+      "abstract": "A synthetic abstract-only record used to verify that abstracts never become spans or evidence.",
+      "keywords": ["review", "perovskite", "综述", "钙钛矿"],
+      "full_text": false,
+      "license": "fixture-only",
+      "fixture": true,
+      "sections": []
+    }
+  ]
+}

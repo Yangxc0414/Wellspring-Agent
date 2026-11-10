@@ -1,0 +1,47 @@
+<svg role="img" aria-labelledby="fig-title fig-desc" xmlns="http://www.w3.org/2000/svg" width="1440" height="388" viewBox="0 0 1440 388">
+<title id="fig-title">研究运行时：从证据到稿件</title>
+<desc id="fig-desc">模块关系示意图；不是实验结果（示意图，不是实验结果）</desc>
+<metadata id="fig-provenance">{&quot;astradraw_source&quot;: &quot;research_agent/vendor/astradraw&quot;, &quot;evidence_refs&quot;: [&quot;FX-001-S01-01&quot;, &quot;FX-001-S01-02&quot;, &quot;FX-001-S02-01&quot;, &quot;FX-002-S01-01&quot;], &quot;generator&quot;: &quot;research_agent.figure&quot;, &quot;schematic&quot;: true, &quot;spec_version&quot;: &quot;0.1.2&quot;, &quot;style&quot;: &quot;modern&quot;}</metadata>
+<rect width="100%" height="100%" fill="white"/>
+<text id="title" data-role="label" x="54" y="46.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="30" font-weight="700" font-style="normal" fill="#172033">研究运行时：从证据到稿件</text>
+<text id="subtitle" data-role="label" x="54" y="89.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="13" font-weight="400" font-style="normal" fill="#667085">模块关系示意图；不是实验结果</text>
+<rect id="lit" data-role="module" x="54" y="118" width="204" height="70" rx="10" fill="#EEF4FF" stroke="#3B6FB6" stroke-width="2.0"/>
+<text id="lit-label" data-role="label" x="68" y="146.72" dominant-baseline="central" font-family="Microsoft YaHei" font-size="16" font-weight="700" font-style="normal" fill="#1D3F6E"><tspan x="68" y="146.72">文献调研</tspan><tspan x="68" dy="18.56">5 spans</tspan></text>
+<rect id="idea" data-role="module" x="316" y="118" width="204" height="70" rx="10" fill="#F3EEFF" stroke="#7059B8" stroke-width="2.0"/>
+<text id="idea-label" data-role="label" x="330" y="146.72" dominant-baseline="central" font-family="Microsoft YaHei" font-size="16" font-weight="700" font-style="normal" fill="#3F2F78"><tspan x="330" y="146.72">假设收敛</tspan><tspan x="330" dy="18.56">3 candidates</tspan></text>
+<rect id="design" data-role="module" x="578" y="118" width="204" height="70" rx="10" fill="#EAF8F5" stroke="#2F8A78" stroke-width="2.0"/>
+<text id="design-label" data-role="label" x="592" y="146.72" dominant-baseline="central" font-family="Microsoft YaHei" font-size="16" font-weight="700" font-style="normal" fill="#1D5B50"><tspan x="592" y="146.72">实验设计</tspan><tspan x="592" dy="18.56">ready_for_g2</tspan></text>
+<rect id="figure" data-role="module" x="840" y="118" width="204" height="70" rx="10" fill="#FFF2EC" stroke="#C56856" stroke-width="2.0"/>
+<text id="figure-label" data-role="label" x="854" y="146.72" dominant-baseline="central" font-family="Microsoft YaHei" font-size="16" font-weight="700" font-style="normal" fill="#7E3A2C"><tspan x="854" y="146.72">科研绘图</tspan><tspan x="854" dy="18.56">SVG + manifest</tspan></text>
+<rect id="paper" data-role="module" x="1102" y="118" width="204" height="70" rx="10" fill="#FFF7E8" stroke="#B67A22" stroke-width="2.0"/>
+<text id="paper-label" data-role="label" x="1116" y="146.72" dominant-baseline="central" font-family="Microsoft YaHei" font-size="16" font-weight="700" font-style="normal" fill="#6E4A16"><tspan x="1116" y="146.72">论文契约</tspan><tspan x="1116" dy="18.56">slots pending</tspan></text>
+<rect id="grant" data-role="module" x="1102" y="218" width="204" height="70" rx="10" fill="#F2F4F8" stroke="#667085" stroke-width="2.0"/>
+<text id="grant-label" data-role="label" x="1116" y="246.72" dominant-baseline="central" font-family="Microsoft YaHei" font-size="16" font-weight="700" font-style="normal" fill="#344054"><tspan x="1116" y="246.72">基金申报</tspan><tspan x="1116" dy="18.56">NSFC</tspan></text>
+<polyline id="edge-lit-idea-00" data-role="connector" points="258.000,153.000 316.000,153.000" fill="none" stroke="#8A96A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon id="edge-lit-idea-00--arrow" points="316.000,153.000 304.200,147.926 304.200,158.074" fill="#8A96A8"/>
+<text id="edge-label-lit-idea-00" data-role="label" x="243.0" y="137.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">spans</text>
+<polyline id="edge-idea-design-01" data-role="connector" points="520.000,153.000 578.000,153.000" fill="none" stroke="#8A96A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon id="edge-idea-design-01--arrow" points="578.000,153.000 566.200,147.926 566.200,158.074" fill="#8A96A8"/>
+<text id="edge-label-idea-design-01" data-role="label" x="505.0" y="137.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">G1</text>
+<polyline id="edge-design-figure-02" data-role="connector" points="782.000,153.000 840.000,153.000" fill="none" stroke="#8A96A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon id="edge-design-figure-02--arrow" points="840.000,153.000 828.200,147.926 828.200,158.074" fill="#8A96A8"/>
+<text id="edge-label-design-figure-02" data-role="label" x="767.0" y="137.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">schematic</text>
+<polyline id="edge-figure-paper-03" data-role="connector" points="1044.000,153.000 1102.000,153.000" fill="none" stroke="#8A96A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon id="edge-figure-paper-03--arrow" points="1102.000,153.000 1090.200,147.926 1090.200,158.074" fill="#8A96A8"/>
+<text id="edge-label-figure-paper-03" data-role="label" x="1029.0" y="137.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">figure_ref</text>
+<polyline id="edge-design-grant-04" data-role="connector" points="782.000,153.000 1102.000,253.000" fill="none" stroke="#8A96A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 7"/>
+<polygon id="edge-design-grant-04--arrow" points="1102.000,253.000 1092.251,244.637 1089.224,254.323" fill="#8A96A8"/>
+<text id="edge-label-design-grant-04" data-role="label" x="898.0" y="187.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">evidence map</text>
+<rect id="legend-0" data-role="legend" x="54" y="346" width="12" height="12" rx="3" fill="#EEF4FF" stroke="#3B6FB6" stroke-width="1.2"/>
+<text id="legend-label-0" data-role="label" x="72" y="353.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">文献</text>
+<rect id="legend-1" data-role="legend" x="146" y="346" width="12" height="12" rx="3" fill="#F3EEFF" stroke="#7059B8" stroke-width="1.2"/>
+<text id="legend-label-1" data-role="label" x="164" y="353.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">假设</text>
+<rect id="legend-2" data-role="legend" x="238" y="346" width="12" height="12" rx="3" fill="#EAF8F5" stroke="#2F8A78" stroke-width="1.2"/>
+<text id="legend-label-2" data-role="label" x="256" y="353.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">实验</text>
+<rect id="legend-3" data-role="legend" x="330" y="346" width="12" height="12" rx="3" fill="#FFF2EC" stroke="#C56856" stroke-width="1.2"/>
+<text id="legend-label-3" data-role="label" x="348" y="353.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">图表</text>
+<rect id="legend-4" data-role="legend" x="422" y="346" width="12" height="12" rx="3" fill="#FFF7E8" stroke="#B67A22" stroke-width="1.2"/>
+<text id="legend-label-4" data-role="label" x="440" y="353.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">稿件</text>
+<rect id="legend-5" data-role="legend" x="514" y="346" width="12" height="12" rx="3" fill="#F2F4F8" stroke="#667085" stroke-width="1.2"/>
+<text id="legend-label-5" data-role="label" x="532" y="353.0" dominant-baseline="central" font-family="Microsoft YaHei" font-size="10" font-weight="400" font-style="normal" fill="#667085">基金</text>
+</svg>

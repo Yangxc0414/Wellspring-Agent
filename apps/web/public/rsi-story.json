@@ -1,0 +1,703 @@
+{
+  "schema_version": "rsi-story-0.4",
+  "generated_at": "2026-11-07T16:12:23+00:00",
+  "source_fingerprint": "605f36cc0df98b1a",
+  "read_only": true,
+  "base": "one ledger: 4 episode(s); every count below describes that ledger only, not the project and not the harness",
+  "provenance": {
+    "simulation_episodes": 0,
+    "episodes": 4,
+    "source": "rsi step ledger"
+  },
+  "summary": {
+    "headline": "rsi-ccby-4:candidate-budget4：not evaluated: finalist budget exhausted or an earlier finalist passed; hidden held out；负结果与缺失门禁保留，等待人工或复核。",
+    "episodes": 4,
+    "pending": 0,
+    "approved": 0,
+    "rejected": 4,
+    "active_leases": 0,
+    "confirmed": 0,
+    "regressed": 0,
+    "capability_claims": 0,
+    "calibration": "uncalibrated",
+    "decided": 4,
+    "rejection_rate": 1.0,
+    "gate_verdict": "informative",
+    "simulation_episodes": 0,
+    "gate_stops": {
+      "confirmation:pending": 4,
+      "human:rejected": 4,
+      "lease:missing": 4,
+      "consume:not_recorded": 2,
+      "consume:recorded": 2,
+      "hidden:missing": 2,
+      "near_ood:missing": 2,
+      "regression:missing": 2,
+      "public:missing": 1
+    },
+    "rejection_verdict_boundary": "rejection_rate is a statement about the gate and the task set, not about proposal quality: gate_uninformative means nothing was rejected in this round, which is the same saturation failure the retrieval probes showed, and it is never reported as success; awaiting_decisions means the round has not been judged by a human yet"
+  },
+  "selected_episode_id": "EP-272163792c",
+  "timeline": [
+    {
+      "id": "observe",
+      "label": "观察",
+      "state": "done",
+      "detail": "budget prefilter on public rsi-ccby-4"
+    },
+    {
+      "id": "candidate",
+      "label": "候选",
+      "state": "done",
+      "detail": "rsi-ccby-4:candidate-budget4 · {\"policy_id\": \"candidate-budget4\", \"max_sources\": 4, \"retriever\": \"bm25\"}"
+    },
+    {
+      "id": "dry-run",
+      "label": "Dry-run",
+      "state": "passed",
+      "detail": "research_agent\\web\\data\\rsi-real\\dry-run-candidate-budget4.json"
+    },
+    {
+      "id": "public",
+      "label": "Public",
+      "state": "passed",
+      "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+    },
+    {
+      "id": "hidden",
+      "label": "Hidden",
+      "state": "missing",
+      "detail": ""
+    },
+    {
+      "id": "near_ood",
+      "label": "Near-OOD",
+      "state": "missing",
+      "detail": ""
+    },
+    {
+      "id": "regression",
+      "label": "Regression",
+      "state": "missing",
+      "detail": ""
+    },
+    {
+      "id": "human",
+      "label": "人工准入",
+      "state": "rejected",
+      "detail": "not evaluated: finalist budget exhausted or an earlier finalist passed; hidden held out"
+    },
+    {
+      "id": "lease",
+      "label": "租约",
+      "state": "missing",
+      "detail": "未授予"
+    },
+    {
+      "id": "consume",
+      "label": "消费 / trace",
+      "state": "not_recorded",
+      "detail": "尚无消费记录"
+    },
+    {
+      "id": "confirmation",
+      "label": "Sealed 复核",
+      "state": "pending",
+      "detail": "尚未记录租约后复核"
+    }
+  ],
+  "episodes": [
+    {
+      "episode_id": "EP-272163792c",
+      "candidate_id": "rsi-ccby-4:candidate-budget4",
+      "kind": "process",
+      "target": "literature.retrieval.budget",
+      "patch": "{\"policy_id\": \"candidate-budget4\", \"max_sources\": 4, \"retriever\": \"bm25\"}",
+      "rationale": "budget trial: reduce retrieval budget while preserving gold-span recall",
+      "predicted_effect": "same recall with fewer sources: 6 -> 4",
+      "predicted_metrics": {},
+      "scope": "S1/rsi-ccby-4",
+      "parent_id": "",
+      "created_at": "2026-11-05T05:49:57+00:00",
+      "decision": "rejected",
+      "reason": "not evaluated: finalist budget exhausted or an earlier finalist passed; hidden held out",
+      "simulation": false,
+      "claim_eligible": false,
+      "notes": [
+        "budget prefilter on public rsi-ccby-4",
+        "evaluation receipts attached; awaiting human admission"
+      ],
+      "actuals": {},
+      "public_eval": {
+        "split": "public",
+        "status": "passed",
+        "metrics": {
+          "gold_recall": 1.0,
+          "cost": 21,
+          "coverage_gaps": 0
+        },
+        "n": 3,
+        "simulation": false,
+        "claim_eligible": false,
+        "note": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+      },
+      "hidden_eval": {
+        "split": "hidden",
+        "status": "missing",
+        "metrics": {},
+        "n": 0
+      },
+      "near_ood_eval": {
+        "split": "near_ood",
+        "status": "missing",
+        "metrics": {},
+        "n": 0
+      },
+      "regression_eval": {
+        "split": "regression",
+        "status": "missing",
+        "metrics": {},
+        "n": 0
+      },
+      "lease": null,
+      "confirmation": null,
+      "gates": [
+        {
+          "id": "dry-run",
+          "label": "Dry-run",
+          "state": "passed",
+          "detail": "research_agent\\web\\data\\rsi-real\\dry-run-candidate-budget4.json"
+        },
+        {
+          "id": "public",
+          "label": "Public",
+          "state": "passed",
+          "metrics": {
+            "gold_recall": 1.0,
+            "cost": 21,
+            "coverage_gaps": 0
+          },
+          "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+        },
+        {
+          "id": "hidden",
+          "label": "Hidden",
+          "state": "missing",
+          "metrics": {},
+          "detail": ""
+        },
+        {
+          "id": "near_ood",
+          "label": "Near-OOD",
+          "state": "missing",
+          "metrics": {},
+          "detail": ""
+        },
+        {
+          "id": "regression",
+          "label": "Regression",
+          "state": "missing",
+          "metrics": {},
+          "detail": ""
+        },
+        {
+          "id": "human",
+          "label": "Human admission",
+          "state": "rejected",
+          "detail": "not evaluated: finalist budget exhausted or an earlier finalist passed; hidden held out"
+        },
+        {
+          "id": "lease",
+          "label": "Lease",
+          "state": "missing",
+          "detail": "未授予"
+        },
+        {
+          "id": "consume",
+          "label": "Consume / trace",
+          "state": "not_recorded",
+          "detail": "尚无消费记录"
+        },
+        {
+          "id": "confirmation",
+          "label": "Sealed confirmation",
+          "state": "pending",
+          "detail": "尚未记录租约后复核"
+        }
+      ],
+      "stage": "S1"
+    },
+    {
+      "episode_id": "EP-a2316d97de",
+      "candidate_id": "rsi-ccby-4:candidate-budget3",
+      "kind": "process",
+      "target": "literature.retrieval.budget",
+      "patch": "{\"policy_id\": \"candidate-budget3\", \"max_sources\": 3, \"retriever\": \"bm25\"}",
+      "rationale": "budget trial: reduce retrieval budget while preserving gold-span recall",
+      "predicted_effect": "same recall with fewer sources: 6 -> 3",
+      "predicted_metrics": {},
+      "scope": "S1/rsi-ccby-4",
+      "parent_id": "",
+      "created_at": "2026-11-05T05:49:57+00:00",
+      "decision": "rejected",
+      "reason": "hidden/near-OOD/regression gate failed",
+      "simulation": false,
+      "claim_eligible": false,
+      "notes": [
+        "budget prefilter on public rsi-ccby-4",
+        "evaluation receipts attached; awaiting human admission",
+        "evaluation receipts attached; awaiting human admission",
+        "prediction audit recorded"
+      ],
+      "actuals": {
+        "hidden_recall_delta": 0.0,
+        "hidden_cost_delta": -3,
+        "hidden_gap_delta": 0,
+        "near_ood_recall_delta": -0.33333333333333337,
+        "near_ood_gap_delta": 0,
+        "regression_recall_delta": 0.0,
+        "regression_gap_delta": 0
+      },
+      "public_eval": {
+        "split": "public",
+        "status": "passed",
+        "metrics": {
+          "gold_recall": 1.0,
+          "cost": 18,
+          "coverage_gaps": 0
+        },
+        "n": 3,
+        "simulation": false,
+        "claim_eligible": false,
+        "note": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+      },
+      "hidden_eval": {
+        "split": "hidden",
+        "status": "passed",
+        "metrics": {
+          "gold_recall": 1.0,
+          "cost": 18,
+          "coverage_gaps": 0
+        },
+        "n": 3,
+        "simulation": false,
+        "claim_eligible": false,
+        "note": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+      },
+      "near_ood_eval": {
+        "split": "near_ood",
+        "status": "passed",
+        "metrics": {
+          "gold_recall": 0.6666666666666666,
+          "cost": 18,
+          "coverage_gaps": 0
+        },
+        "n": 3,
+        "simulation": false,
+        "claim_eligible": false,
+        "note": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+      },
+      "regression_eval": {
+        "split": "regression",
+        "status": "passed",
+        "metrics": {
+          "gold_recall": 1.0,
+          "cost": 18,
+          "coverage_gaps": 0
+        },
+        "n": 3,
+        "simulation": false,
+        "claim_eligible": false,
+        "note": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+      },
+      "lease": null,
+      "confirmation": null,
+      "gates": [
+        {
+          "id": "dry-run",
+          "label": "Dry-run",
+          "state": "passed",
+          "detail": "research_agent\\web\\data\\rsi-real\\dry-run-candidate-budget3.json"
+        },
+        {
+          "id": "public",
+          "label": "Public",
+          "state": "passed",
+          "metrics": {
+            "gold_recall": 1.0,
+            "cost": 18,
+            "coverage_gaps": 0
+          },
+          "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+        },
+        {
+          "id": "hidden",
+          "label": "Hidden",
+          "state": "passed",
+          "metrics": {
+            "gold_recall": 1.0,
+            "cost": 18,
+            "coverage_gaps": 0
+          },
+          "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+        },
+        {
+          "id": "near_ood",
+          "label": "Near-OOD",
+          "state": "passed",
+          "metrics": {
+            "gold_recall": 0.6666666666666666,
+            "cost": 18,
+            "coverage_gaps": 0
+          },
+          "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+        },
+        {
+          "id": "regression",
+          "label": "Regression",
+          "state": "passed",
+          "metrics": {
+            "gold_recall": 1.0,
+            "cost": 18,
+            "coverage_gaps": 0
+          },
+          "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+        },
+        {
+          "id": "human",
+          "label": "Human admission",
+          "state": "rejected",
+          "detail": "hidden/near-OOD/regression gate failed"
+        },
+        {
+          "id": "lease",
+          "label": "Lease",
+          "state": "missing",
+          "detail": "未授予"
+        },
+        {
+          "id": "consume",
+          "label": "Consume / trace",
+          "state": "recorded",
+          "detail": "actuals: {\"hidden_recall_delta\": 0.0, \"hidden_cost_delta\": -3, \"hidden_gap_delta\": 0, \"near_ood_recall_delta\": -0.33333333333333337, \"near_ood_gap_delta\": 0, \"regression_recall_delta\": 0.0, \"regression_gap_delta\": 0}"
+        },
+        {
+          "id": "confirmation",
+          "label": "Sealed confirmation",
+          "state": "pending",
+          "detail": "尚未记录租约后复核"
+        }
+      ],
+      "stage": "S1"
+    },
+    {
+      "episode_id": "EP-fd853044af",
+      "candidate_id": "rsi-ccby-4:candidate-budget2",
+      "kind": "process",
+      "target": "literature.retrieval.budget",
+      "patch": "{\"policy_id\": \"candidate-budget2\", \"max_sources\": 2, \"retriever\": \"bm25\"}",
+      "rationale": "budget trial: reduce retrieval budget while preserving gold-span recall",
+      "predicted_effect": "same recall with fewer sources: 6 -> 2",
+      "predicted_metrics": {},
+      "scope": "S1/rsi-ccby-4",
+      "parent_id": "",
+      "created_at": "2026-11-05T05:49:57+00:00",
+      "decision": "rejected",
+      "reason": "hidden/near-OOD/regression gate failed",
+      "simulation": false,
+      "claim_eligible": false,
+      "notes": [
+        "budget prefilter on public rsi-ccby-4",
+        "evaluation receipts attached; awaiting human admission",
+        "evaluation receipts attached; awaiting human admission",
+        "prediction audit recorded"
+      ],
+      "actuals": {
+        "hidden_recall_delta": 0.0,
+        "hidden_cost_delta": -6,
+        "hidden_gap_delta": 0,
+        "near_ood_recall_delta": -0.33333333333333337,
+        "near_ood_gap_delta": 0,
+        "regression_recall_delta": 0.0,
+        "regression_gap_delta": 0
+      },
+      "public_eval": {
+        "split": "public",
+        "status": "passed",
+        "metrics": {
+          "gold_recall": 1.0,
+          "cost": 15,
+          "coverage_gaps": 0
+        },
+        "n": 3,
+        "simulation": false,
+        "claim_eligible": false,
+        "note": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+      },
+      "hidden_eval": {
+        "split": "hidden",
+        "status": "passed",
+        "metrics": {
+          "gold_recall": 1.0,
+          "cost": 15,
+          "coverage_gaps": 0
+        },
+        "n": 3,
+        "simulation": false,
+        "claim_eligible": false,
+        "note": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+      },
+      "near_ood_eval": {
+        "split": "near_ood",
+        "status": "passed",
+        "metrics": {
+          "gold_recall": 0.6666666666666666,
+          "cost": 15,
+          "coverage_gaps": 0
+        },
+        "n": 3,
+        "simulation": false,
+        "claim_eligible": false,
+        "note": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+      },
+      "regression_eval": {
+        "split": "regression",
+        "status": "passed",
+        "metrics": {
+          "gold_recall": 1.0,
+          "cost": 15,
+          "coverage_gaps": 0
+        },
+        "n": 3,
+        "simulation": false,
+        "claim_eligible": false,
+        "note": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+      },
+      "lease": null,
+      "confirmation": null,
+      "gates": [
+        {
+          "id": "dry-run",
+          "label": "Dry-run",
+          "state": "passed",
+          "detail": "research_agent\\web\\data\\rsi-real\\dry-run-candidate-budget2.json"
+        },
+        {
+          "id": "public",
+          "label": "Public",
+          "state": "passed",
+          "metrics": {
+            "gold_recall": 1.0,
+            "cost": 15,
+            "coverage_gaps": 0
+          },
+          "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+        },
+        {
+          "id": "hidden",
+          "label": "Hidden",
+          "state": "passed",
+          "metrics": {
+            "gold_recall": 1.0,
+            "cost": 15,
+            "coverage_gaps": 0
+          },
+          "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+        },
+        {
+          "id": "near_ood",
+          "label": "Near-OOD",
+          "state": "passed",
+          "metrics": {
+            "gold_recall": 0.6666666666666666,
+            "cost": 15,
+            "coverage_gaps": 0
+          },
+          "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+        },
+        {
+          "id": "regression",
+          "label": "Regression",
+          "state": "passed",
+          "metrics": {
+            "gold_recall": 1.0,
+            "cost": 15,
+            "coverage_gaps": 0
+          },
+          "detail": "Frozen CC-BY real-text probe (rsi-ccby-4); harness metric, not a research capability claim"
+        },
+        {
+          "id": "human",
+          "label": "Human admission",
+          "state": "rejected",
+          "detail": "hidden/near-OOD/regression gate failed"
+        },
+        {
+          "id": "lease",
+          "label": "Lease",
+          "state": "missing",
+          "detail": "未授予"
+        },
+        {
+          "id": "consume",
+          "label": "Consume / trace",
+          "state": "recorded",
+          "detail": "actuals: {\"hidden_recall_delta\": 0.0, \"hidden_cost_delta\": -6, \"hidden_gap_delta\": 0, \"near_ood_recall_delta\": -0.33333333333333337, \"near_ood_gap_delta\": 0, \"regression_recall_delta\": 0.0, \"regression_gap_delta\": 0}"
+        },
+        {
+          "id": "confirmation",
+          "label": "Sealed confirmation",
+          "state": "pending",
+          "detail": "尚未记录租约后复核"
+        }
+      ],
+      "stage": "S1"
+    },
+    {
+      "episode_id": "EP-2c87386031",
+      "candidate_id": "rsi-ccby-4:candidate-budget1",
+      "kind": "process",
+      "target": "literature.retrieval.budget",
+      "patch": "{\"policy_id\": \"candidate-budget1\", \"max_sources\": 1, \"retriever\": \"bm25\"}",
+      "rationale": "budget trial: reduce retrieval budget while preserving gold-span recall",
+      "predicted_effect": "same recall with fewer sources: 6 -> 1",
+      "predicted_metrics": {},
+      "scope": "S1/rsi-ccby-4",
+      "parent_id": "",
+      "created_at": "2026-11-05T05:49:57+00:00",
+      "decision": "rejected",
+      "reason": "critic/pruner: max_sources below 2 is too aggressive for coverage",
+      "simulation": false,
+      "claim_eligible": false,
+      "notes": [
+        "budget prefilter on public rsi-ccby-4"
+      ],
+      "actuals": {},
+      "public_eval": {
+        "split": "public",
+        "status": "missing",
+        "metrics": {},
+        "n": 0
+      },
+      "hidden_eval": {
+        "split": "hidden",
+        "status": "missing",
+        "metrics": {},
+        "n": 0
+      },
+      "near_ood_eval": {
+        "split": "near_ood",
+        "status": "missing",
+        "metrics": {},
+        "n": 0
+      },
+      "regression_eval": {
+        "split": "regression",
+        "status": "missing",
+        "metrics": {},
+        "n": 0
+      },
+      "lease": null,
+      "confirmation": null,
+      "gates": [
+        {
+          "id": "dry-run",
+          "label": "Dry-run",
+          "state": "passed",
+          "detail": "research_agent\\web\\data\\rsi-real\\dry-run-candidate-budget1.json"
+        },
+        {
+          "id": "public",
+          "label": "Public",
+          "state": "missing",
+          "metrics": {},
+          "detail": ""
+        },
+        {
+          "id": "hidden",
+          "label": "Hidden",
+          "state": "missing",
+          "metrics": {},
+          "detail": ""
+        },
+        {
+          "id": "near_ood",
+          "label": "Near-OOD",
+          "state": "missing",
+          "metrics": {},
+          "detail": ""
+        },
+        {
+          "id": "regression",
+          "label": "Regression",
+          "state": "missing",
+          "metrics": {},
+          "detail": ""
+        },
+        {
+          "id": "human",
+          "label": "Human admission",
+          "state": "rejected",
+          "detail": "critic/pruner: max_sources below 2 is too aggressive for coverage"
+        },
+        {
+          "id": "lease",
+          "label": "Lease",
+          "state": "missing",
+          "detail": "未授予"
+        },
+        {
+          "id": "consume",
+          "label": "Consume / trace",
+          "state": "not_recorded",
+          "detail": "尚无消费记录"
+        },
+        {
+          "id": "confirmation",
+          "label": "Sealed confirmation",
+          "state": "pending",
+          "detail": "尚未记录租约后复核"
+        }
+      ],
+      "stage": "S1"
+    }
+  ],
+  "stage_process": [
+    {
+      "stage": "S1",
+      "targets": [
+        "literature.retrieval.budget",
+        "literature.retrieval.budget",
+        "literature.retrieval.budget",
+        "literature.retrieval.budget"
+      ],
+      "candidates": [
+        "rsi-ccby-4:candidate-budget4",
+        "rsi-ccby-4:candidate-budget3",
+        "rsi-ccby-4:candidate-budget2",
+        "rsi-ccby-4:candidate-budget1"
+      ],
+      "status": "rejected",
+      "evidence": "missing",
+      "detail": "{\"policy_id\": \"candidate-budget1\", \"max_sources\": 1, \"retriever\": \"bm25\"}"
+    }
+  ],
+  "tracking": {
+    "status": "uncalibrated",
+    "episodes_with_actuals": 2,
+    "compared_episodes": 0,
+    "coverage": 0.0,
+    "metrics": {},
+    "episodes": []
+  },
+  "warnings": [
+    "negative results retained; do not retry without new evidence",
+    "actuals recorded without numeric predictions; calibration unavailable"
+  ],
+  "next_questions": [
+    "拒绝项是否形成可复用的负结果，而不是重复尝试？"
+  ],
+  "confirmations": [],
+  "boundary": "Audit reconstruction only: a confirmed harness change is not a capability claim; human admission and claim signatures remain separate.",
+  "ledger_path": "research_agent/web/data/rsi-real-ledger.json"
+}

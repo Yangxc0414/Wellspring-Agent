@@ -1,0 +1,128 @@
+/* Disclosure and consistency rules. Loaded last so the shared vocabulary wins
+   over the per-page copies without rewriting every component stylesheet. */
+
+.static-mode-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--amber-dim);
+  color: var(--amber);
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.5;
+}
+
+.static-mode-notice strong {
+  flex: none;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.static-mode-notice span {
+  color: var(--muted);
+}
+
+.demo-disclaimer {
+  margin: 0 0 8px;
+  padding: 6px 9px;
+  border-left: 2px solid var(--amber);
+  background: var(--amber-dim);
+  color: var(--amber);
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.5;
+}
+
+/* Recovery surfaces for the eight lazy panels: a failed chunk must never look
+   like an empty workspace, and a loading chunk must never look like nothing. */
+.app-error-boundary {
+  max-width: 560px;
+  margin: 12vh auto;
+  padding: 22px 24px;
+  border: 1px solid var(--coral);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+}
+
+.app-error-boundary strong {
+  display: block;
+  color: var(--coral);
+  letter-spacing: 0.04em;
+}
+
+.app-error-boundary p {
+  margin: 10px 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.app-error-boundary code {
+  display: block;
+  margin: 10px 0 16px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: calc(11px * var(--font-scale, 1));
+  overflow-wrap: anywhere;
+}
+
+.app-error-boundary button {
+  padding: 6px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--accent-deep);
+  cursor: pointer;
+}
+
+.overlay-loading {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 40;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+/* Seven different empty-state classes used to carry slightly different colours
+   and line heights. Unify only colour/leading here; each page keeps its own
+   padding, border and layout. */
+.settings-empty,
+.settings-empty-card,
+.context-empty,
+.context-empty-card,
+.palette-empty,
+.files-empty,
+.candidate-empty {
+  color: var(--faint);
+  line-height: 1.55;
+}
+
+/* The RUN strip mixes four selects/buttons in one flex row. On narrow screens
+   give the selects room to wrap instead of relying on horizontal scrolling. */
+@media (max-width: 760px) {
+  .run-controls {
+    gap: 6px;
+  }
+
+  .run-controls .control {
+    min-width: 0;
+  }
+
+  .run-controls select.control {
+    flex: 1 1 140px;
+  }
+
+  .stage-kv-grid {
+    overflow-x: auto;
+  }
+}

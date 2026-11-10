@@ -1,0 +1,11 @@
+**
+!apps/
+!apps/web/
+!apps/web/**
+!site/
+!site/**
+!deploy/
+!deploy/**
+apps/web/node_modules
+apps/web/dist
+apps/web/pw-*.mjs

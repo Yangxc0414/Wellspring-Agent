@@ -1,0 +1,61 @@
+# Local full clones: large external repositories, not for redistribution.
+# The manifest is the only tracked file under oss/full/.
+oss/full/*
+!oss/full/CLONES.md
+*.zip
+.env
+.env.*
+!.env.example
+
+# Machine-specific MCP config contains absolute paths. Commit the example instead.
+/.mcp.json
+
+# Agent-tool local state (machine-specific paths and caches); not part of the deliverable.
+.workbuddy/
+.claude/
+.qoder/
+.zcode/
+
+# Third-party research snapshots: local reference only, not part of the deliverable.
+oss/*-main/
+oss/*-master/
+oss/*-curated/
+research/anthropic/*
+!research/anthropic/README.md
+claude-code-main/
+template_refs/
+
+# Local research projects, downloaded papers, and unpublished manuscripts.
+/agent-reliability-survey/
+/manuscript/
+/research/frontier/
+__pycache__/
+*.pyc
+node_modules/
+.shot/
+.pytest_cache/
+runtime_data/
+runtime.log
+site.log
+.DS_Store
+
+# External Cortex snapshot for the audit; keep the local copy, do not redistribute it.
+cortex-agent/
+
+# External writing-skill repositories: local-only, not redistributed.
+# Track only the audit manifest.
+oss/writing-skills/*
+!oss/writing-skills/CLONES.md
+
+# AstraDraw is copied from a local source without a root license.
+# Keep it local; only the provenance note is tracked.
+research_agent/vendor/astradraw/
+!research_agent/vendor/README.md
+
+# Frontend build intermediates (site/app is the deployable build).
+apps/web/dist/
+apps/web/pw-*.mjs
+
+# Generated deployment bundles, not source.
+/dist-github/
+/dist-github-remote/

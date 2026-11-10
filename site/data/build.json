@@ -1,0 +1,34 @@
+{
+  "built_at": "2026-11-10T11:25:15.853Z",
+  "demo_sha256_16": "d72a37fc64e82138",
+  "docs": [
+    "README.md",
+    "16-科研Skill生态调研.md",
+    "17-上层微服务架构.md",
+    "18-GitHub Pages部署与多智能体Skill设计.md"
+  ],
+  "data_files": [
+    "build.json",
+    "digest.json",
+    "evolution.json",
+    "harness2.json",
+    "queries.json"
+  ],
+  "innovation_data": [
+    "demo.json",
+    "figure.svg",
+    "figure.scene.json",
+    "figure.manifest.json",
+    "paper.json",
+    "grant.json",
+    "specs.json"
+  ],
+  "harness2_story": "copied",
+  "evolution_story": "copied",
+  "stats": {
+    "tests_run": 1320,
+    "ok": true,
+    "source_fingerprint": "dea19f98c6c5e850",
+    "finished_at": "2026-11-07T17:53:36+00:00"
+  }
+}

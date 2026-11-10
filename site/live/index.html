@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Research Agent · Local Runtime</title>
+  <meta name="description" content="Research Agent 本地运行时：真实 pipeline 执行、SSE 事件流、产物预览与只读 RSI 审计。" />
+  <link rel="canonical" href="https://yangxc0414.github.io/research-agent/live/" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/base.css" />
+  <link rel="stylesheet" href="../assets/theme.css" />
+  <link rel="stylesheet" href="../assets/custom.css" />
+  <link rel="stylesheet" href="./live.css" />
+<link rel="stylesheet" href="../assets/subpage.css" />
+</head>
+<body class="live-page">
+<div class="sp-top"><a class="sp-home" href="../">← 返回主页</a><span class="sp-chip">配置说明 · 需本地 runtime</span><nav class="sp-sib"><a href="../demo/">运行</a><a href="../innovation/">创新</a><a href="../app/">工作台</a><a href="../qoder/">接入</a><a href="../rsi/">自进化</a></nav></div>
+
+  <a class="skip-link" href="#live-main">跳到内容</a>
+  <header class="live-top">
+    <a class="live-brand" href="../app/">← WORKSPACE</a>
+    <a class="live-kicker" href="../#strategy" style="color:var(--accent);text-decoration:none;">主页 / 策略视图 ↗</a>
+    <span class="live-kicker">LOCAL RUNTIME <i>/</i> ADVANCED SUBPAGE · PIPELINE + RSI AUDIT</span>
+    <a class="live-kicker" href="../models/" style="color:var(--accent);text-decoration:none;">MODELS ↗</a>
+    <span class="live-chip" id="conn-chip" data-state="checking"><i></i>CHECKING</span>
+  </header>
+
+  <main class="live-shell" id="live-main">
+    <aside class="live-col live-left">
+      <section class="panel live-panel">
+        <div class="panel-head">
+          <span class="panel-kicker">00 / RUNTIME</span>
+          <span class="mono" id="health-version">—</span>
+        </div>
+        <div class="api-row">
+          <label class="field">
+            <span>API base</span>
+            <input id="api-base" type="url" value="http://127.0.0.1:8787" spellcheck="false" autocomplete="off" />
+          </label>
+          <button class="btn btn-primary" id="connect-btn" type="button">连接</button>
+        </div>
+        <p class="live-note">本地服务默认只监听 <code>127.0.0.1:8787</code>。Pages 不能运行 Python；请先启动 runtime，再打开本页。</p>
+        <dl class="fact-grid" id="health-facts">
+          <div><dt>STATUS</dt><dd id="fact-status">未连接</dd></div>
+          <div><dt>QUEUE</dt><dd id="fact-queue">—</dd></div>
+          <div><dt>RSI</dt><dd id="fact-rsi">READ ONLY</dd></div>
+          <div><dt>SIGN</dt><dd>CLI / HUMAN</dd></div>
+        </dl>
+        <p class="live-alert" id="health-alert" hidden></p>
+      </section>
+
+      <section class="panel live-panel">
+        <div class="panel-head">
+          <span class="panel-kicker">01 / NEW RUN</span>
+          <span class="mono">REAL EXECUTION</span>
+        </div>
+        <div class="preset-row">
+          <button type="button" class="preset" data-preset="zh">中文核刊样例</button>
+          <button type="button" class="preset" data-preset="en">CC-BY 真实文本</button>
+        </div>
+        <form id="run-form" class="run-form" novalidate>
+          <label class="field">
+            <span>研究主题</span>
+            <textarea id="topic" rows="3" maxlength="500" required>钙钛矿太阳能电池的界面钝化与长期稳定性</textarea>
+          </label>
+          <div class="field-row">
+            <label class="field">
+              <span>语言</span>
+              <select id="language">
+                <option value="">自动</option>
+                <option value="zh" selected>中文</option>
+                <option value="en">英文</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Venue</span>
+              <select id="venue">
+                <option value="zh_core_journal" selected>中文核刊</option>
+                <option value="en_conference">英文会议</option>
+                <option value="en_journal">英文期刊</option>
+                <option value="zh_thesis">学位论文</option>
+              </select>
+            </label>
+          </div>
+          <div class="field-row">
+            <label class="field">
+              <span>Max sources</span>
+              <input id="max-sources" type="number" min="1" max="12" value="4" />
+            </label>
+            <label class="field">
+              <span>Grant</span>
+              <select id="grant">
+                <option value="">不生成</option>
+                <option value="nsfc">NSFC</option>
+                <option value="nssfc">NSSFC</option>
+                <option value="generic">Generic</option>
+              </select>
+            </label>
+          </div>
+          <div class="field-row">
+            <label class="field">
+              <span>Run dataset</span>
+              <select id="run-dataset">
+                <option value="">不跑实验</option>
+                <option value="iris">iris</option>
+                <option value="breast_cancer">breast_cancer</option>
+                <option value="chemlab">ChemLab</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Seeds</span>
+              <input id="run-seeds" type="number" min="1" max="10" value="3" />
+            </label>
+          </div>
+          <label class="check-row">
+            <input id="real-corpus" type="checkbox" />
+            <span>使用 4 篇 CC-BY 冻结正文（本地，不联网）</span>
+          </label>
+          <button class="btn btn-primary btn-block" id="run-btn" type="submit" disabled>启动真实运行 <span aria-hidden="true">→</span></button>
+          <p class="live-note">运行会执行现有 S1→S6→S8 模块；不调用外部 API，不自动 claim/sign，不导出。</p>
+        </form>
+      </section>
+    </aside>
+
+    <section class="live-col live-center">
+      <section class="panel live-panel run-head">
+        <div>
+          <span class="panel-kicker">02 / RUN CONSOLE</span>
+          <h1 id="run-title">等待一次真实运行</h1>
+          <p id="run-subtitle" class="live-sub">连接 runtime 后，阶段、事件与产物都来自本地执行，不是预录动画。</p>
+        </div>
+        <div class="run-meta">
+          <span class="run-state" id="run-state" data-state="idle">IDLE</span>
+          <span class="mono" id="job-id">—</span>
+        </div>
+      </section>
+
+      <section class="panel live-panel stage-panel">
+        <div class="panel-head">
+          <span class="panel-kicker">03 / STAGES</span>
+          <span class="mono">REAL EVENTS</span>
+        </div>
+        <div class="stage-rail" id="stage-rail" aria-label="运行阶段"></div>
+      </section>
+
+      <section class="panel live-panel console-panel">
+        <div class="panel-head">
+          <span class="panel-kicker">04 / COMMAND TRACE</span>
+          <span class="mono" id="event-count">0 events</span>
+        </div>
+        <div class="event-log" id="event-log" role="log" aria-live="polite">
+          <p class="empty-line">尚未启动。启动后会显示真实阶段事件、警告与完成状态。</p>
+        </div>
+      </section>
+
+      <section class="panel live-panel result-panel" id="result-panel" hidden>
+        <div class="panel-head">
+          <span class="panel-kicker">05 / RESULT</span>
+          <span class="mono" id="result-status">—</span>
+        </div>
+        <div class="result-grid" id="result-grid"></div>
+        <p class="live-arm-note" id="arm-note" hidden></p>
+        <div class="warning-list" id="warning-list"></div>
+        <div class="gate-list" id="gate-list"></div>
+      </section>
+    </section>
+
+    <aside class="live-col live-right">
+      <section class="panel live-panel artifacts-panel">
+        <div class="panel-head">
+          <span class="panel-kicker">06 / ARTIFACTS</span>
+          <span class="mono" id="artifact-count">0 files</span>
+        </div>
+        <div class="artifact-list" id="artifact-list">
+          <p class="empty-line">运行完成后可查看 demo.json、paper.json、figure.svg、run-capsule.json 等真实产物。</p>
+        </div>
+      </section>
+
+      <section class="panel live-panel preview-panel">
+        <div class="panel-head">
+          <span class="panel-kicker">07 / PREVIEW</span>
+          <span class="mono" id="preview-name">NO FILE</span>
+        </div>
+        <div class="preview-body" id="preview-body">
+          <p class="empty-line">点击左侧产物文件进行只读预览。</p>
+        </div>
+      </section>
+
+      <section class="panel live-panel rsi-panel">
+        <div class="panel-head">
+          <span class="panel-kicker">08 / RSI AUDIT</span>
+          <span class="badge cached">READ ONLY</span>
+        </div>
+        <div class="field-row">
+          <label class="field">
+            <span>Ledger</span>
+            <select id="rsi-ledger"><option value="">未连接</option></select>
+          </label>
+          <button class="btn btn-quiet" id="rsi-refresh" type="button">刷新</button>
+        </div>
+        <div class="rsi-tiles" id="rsi-tiles">
+          <div><b>—</b><span>episodes</span></div>
+          <div><b>—</b><span>active</span></div>
+          <div><b>—</b><span>confirmed</span></div>
+          <div><b>—</b><span>claims</span></div>
+        </div>
+        <div class="confirm-list" id="confirm-list"></div>
+        <div class="warning-list" id="rsi-warnings"></div>
+        <details class="trace-box">
+          <summary>Trace lease → run → confirmation</summary>
+          <form id="trace-form" class="trace-form">
+            <label class="field"><span>Scope</span><input id="trace-scope" value="S5/demo/chemlab" /></label>
+            <label class="field"><span>Capsule</span><input id="trace-capsule" placeholder="research_agent/web/data/.../run-capsule.json" /></label>
+            <label class="field"><span>Confirmation</span><input id="trace-confirmation" placeholder=".../s5-confirmation.json" /></label>
+            <button class="btn btn-quiet btn-block" type="submit">运行只读校验</button>
+          </form>
+          <div class="trace-result" id="trace-result"></div>
+        </details>
+        <p class="live-note">前端不能 approve、claim 或 sign；这些动作保留在 CLI 与人工流程。</p>
+      </section>
+    </aside>
+  </main>
+
+  <script src="./live.js" defer></script>
+<footer class="sp-foot">Research Agent · 各子页是同一系统的投影：实线 = 前向 · 虚线 = 反馈（回指更早阶段且改变下一步动作） · 红 = 人工门 · 青 = 自动门（默认拒绝）<br/>canonical 门禁：G1 想法=S3 / G2 设计=S4 / S5b 结果人签=S5c / G5 闭包=S16；真实执行 / 模型 / 签署只在本地 CLI / runtime</footer>
+</body>
+</html>
