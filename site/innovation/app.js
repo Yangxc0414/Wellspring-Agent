@@ -47,6 +47,12 @@ const ACTS = [
     noteTitle: "0/4 不是“无效应”",
     noteBody: "64 种子扩样（97–160）：raw 交互 4/4 判定；AUC 交互 0/4，且 breast/iris/wine 的 AUC 上界低于 raw 效应量级。digits 96 种子合并后只是 borderline（AUC 上界 0.1378 vs raw 0.1403）。结论是效应量依赖度量，不是无效应。",
     noteFact: "4/4", noteFactLabel: "RAW · 0/4 AUC", tags: ["pre-registered", "MDE80", "metric validity"]
+  },
+  {
+    key: "feedback", name: "判定", sub: "FEEDBACK / ACTION", title: "反馈被写下，不等于被用上。",
+    noteTitle: "7.5% 走完闭环，25 次拿的是随机反馈",
+    noteBody: "PerturbTrace 把闭环拆成反馈→状态→行动→结果逐段打分：576 次转换只有 43 次（7.5%）走完全程，其中 25 次拿的还是随机反馈，真实反馈也没稳定赢过随机。判定消费（策略②）要验证的正是：行动是否按证据质量变。",
+    noteFact: "7.5%", noteFactLabel: "FULL FEEDBACK LOOP", tags: ["PerturbTrace", "Q2", "M1"]
   }
 ];
 const CHECK_LABELS = {
@@ -234,10 +240,38 @@ function validityAct() {
       <div class="advantage-row"><b>GRANT</b><span>NSFC/NSSFC 模块、创新点、活页匿名、AI 声明</span><em>MCP tool</em></div>
       <div class="advantage-row"><b>BIBLIO</b><span>DataCite 快照：2 篇引用 verified；原始响应 SHA-256 与仓库快照一致</span><em>verified</em></div>
     </div>
-    <p class="source-note">数据来源：64 种子预注册扩样（97–160），见仓库 59- / 60- 文档；本页数字为研究快照，结论更新时需同步</p>`;
+    <div class="misevolution">
+      <b>自进化的副作用 · 准入与外部监督要挡的就是这些</b>
+      <div class="advantage-row"><b>GOODHART</b><span>DGM：删掉幻觉检测依赖的日志函数，基准满分却没解决问题——指标变成目标就不再是好指标；准入要有「退化检测」</span><em>documented</em></div>
+      <div class="advantage-row"><b>COST</b><span>DGM 80 轮 ≈ $22k / 两周，且主要在固定基准子集上评估；没有准入判据的自进化烧的就是这种预算</span><em>documented</em></div>
+      <div class="advantage-row"><b>NEG-TRANSFER</b><span>MCMA：细粒度记忆跨任务 −3.13%、高层抽象 +1.04%——按抽象层级 × 适用域联合准入（策略③），不照单全存</span><em>measured</em></div>
+    </div>
+    <p class="source-note">数据来源：64 种子预注册扩样（97–160），见仓库 59- / 60- 文档；失效模式读数来自 1110 策略论证 §03（DGM / MCMA 原文已核对）。本页数字为研究快照，结论更新时需同步</p>`;
 }
 
-const RENDERERS = [specAct, evidenceAct, figureAct, paperAct, boundaryAct, validityAct];
+function feedbackAct() {
+  return `<div class="act-head"><p class="eyebrow">ACT 07 / FEEDBACK → ACTION</p><h2>${esc(ACTS[6].title)}</h2><p>策略② · 判定消费：门禁、验证、失效的判定要进下一步行动，不能只躺在报告里。Q2（第一个诊断实验）同一任务给五类反馈，看行动是否按证据质量变。</p></div>
+    <div class="metric-row">
+      <div class="metric"><b>7.5%</b><span>完整反馈闭环</span><em>PerturbTrace · 43 / 576 次转换</em></div>
+      <div class="metric"><b>25 / 43</b><span>拿的是随机反馈</span><em>闭环完整 ≠ 反馈被消费</em></div>
+      <div class="metric"><b>5 类</b><span>对照反馈</span><em>真实 / 打乱 / 过时 / 含噪 / 矛盾</em></div>
+    </div>
+    <div class="fb-table">
+      <div class="fb-row fb-head"><span>反馈类型</span><span>应有的行动（平台机制对应）</span><span>不消费的后果</span></div>
+      <div class="fb-row"><span class="fb-kind is-real">真实</span><span>行动按证据收敛：改查询预算、缩 gap<span class="fb-mech">→ guidance 队列在阶段边界生效</span></span><span>无——唯一该改变行动的一类</span></div>
+      <div class="fb-row"><span class="fb-kind is-shuffled">打乱</span><span>相关性检查拦下，不进流水线<span class="fb-mech">→ 两级过滤快层（程序门）</span></span><span>照单全收，拿噪声改动作</span></div>
+      <div class="fb-row"><span class="fb-kind is-stale">过时</span><span>stale 判定拦截，先复验再行动<span class="fb-mech">→ 失效传播点名受影响结论</span></span><span>拿过期结论推进，产出作废稿件</span></div>
+      <div class="fb-row"><span class="fb-kind is-noisy">含噪</span><span>降权，先测一轮再准入<span class="fb-mech">→ 学习证据准入：先测后用</span></span><span>噪声进下一轮，方向被带偏</span></div>
+      <div class="fb-row"><span class="fb-kind is-conflict">矛盾</span><span>触发信念修订：改 / 保留不确定 / 再激活<span class="fb-mech">→ 策略④ · 交接协议记「谁提—谁评—谁消费—谁复验」</span></span><span>择优采信一边，另一边被丢弃</span></div>
+    </div>
+    <div class="gate-proof">
+      <div class="gate-banner"><span>Q2 · 可失败的验收</span><b>反馈敏感性与真实信息价值一致 → 切口不成立</b><small>M1 的证伪条件：随机反馈与真实反馈若不改变行动差异，「让判定改变行动」不成立，回炉重述。</small></div>
+      <div class="tamper-note"><b>平台侧对应物</b>guidance 队列、gate_stops、lineage 失效传播、交接协议字段——机制在，五类对照实验未跑；本幕为设计投影，非实验结果。</div>
+    </div>
+    <p class="source-note">读数来源：PerturbTrace（1110 策略论证 §01/§05 已核对原文）；五类对照的行动映射为本平台设计，SIM 标注 · 无真实 run</p>`;
+}
+
+const RENDERERS = [specAct, evidenceAct, figureAct, paperAct, boundaryAct, validityAct, feedbackAct];
 
 function animateCounts(root) {
   root.querySelectorAll("[data-count]").forEach((el) => {

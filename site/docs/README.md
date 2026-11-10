@@ -378,7 +378,7 @@ python -m research_agent.cli rsi gen propose --label "..." --patch fix.patch  # 
 │   ├── agent/                                       ← LEGACY 单文件工作台；保留旧链接，不再作为主入口
 │   ├── live/                                        ← 本地 runtime 控制台：真实运行/SSE/产物/RSI 只读
 │   ├── models/                                      ← 模型接入页：Provider / Profile / 思考 / Probe / 模块绑定
-│   ├── innovation/                                  ← 静态创新点演示：六幕舞台 + SVG/证据/稿件状态 + 度量有效性；无 API
+│   ├── innovation/                                  ← 静态创新点演示：七幕舞台 + SVG/证据/稿件状态 + 度量有效性 + 判定消费对照；无 API
 │   └── docs/                                        ← 关键设计文档副本
 ├── scripts/                                         ← build-site.mjs / refresh-digest.mjs
 ├── .github/workflows/                               ← pages.yml / refresh-digest.yml

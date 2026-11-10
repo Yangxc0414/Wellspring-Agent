@@ -591,3 +591,24 @@ body { font-size: 11pt; line-height: 1.7; }
 .roadmap-col.is-target { border-top: 3px solid var(--indigo); }
 .roadmap-col.is-target em { color: var(--indigo); }
 @media (max-width: 860px) { .roadmap { padding: 44px 14px 24px; } .roadmap-head { grid-template-columns: 1fr; gap: 10px; } .roadmap-grid { grid-template-columns: 1fr; } }
+
+/* ACT 06 · 自进化失效模式警示 */
+.misevolution { border: 1px solid rgba(180, 83, 9, .32); background: #fffcf5; border-radius: 12px; padding: 9px 12px; margin-top: 10px; }
+.misevolution > b { display: block; font-size: 11px; color: var(--amber); margin-bottom: 5px; }
+.misevolution .advantage-row { border-color: rgba(180, 83, 9, .18); background: #fff; }
+.misevolution .advantage-row b { color: var(--amber); }
+
+/* ACT 07 · 五类反馈对照 */
+.fb-table { display: grid; gap: 5px; margin-top: 10px; }
+.fb-row { display: grid; grid-template-columns: 84px minmax(0, 1.3fr) minmax(0, 1fr); gap: 7px; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 6px 10px; font-size: 10px; line-height: 1.55; color: var(--muted); }
+.fb-row > span:nth-child(2), .fb-row > span:nth-child(3) { color: var(--muted); }
+.fb-head { background: #f6f8fc; color: var(--faint); font-family: var(--mono, ui-monospace); font-size: 9px; letter-spacing: .08em; }
+.fb-kind { align-self: start; justify-self: start; border-radius: 999px; padding: 2px 9px; font-weight: 700; font-size: 10px; white-space: nowrap; border: 1px solid; }
+.fb-kind.is-real { color: var(--teal); border-color: rgba(15, 118, 110, .35); background: #ecfdf9; }
+.fb-kind.is-shuffled { color: #6d28d9; border-color: rgba(109, 40, 217, .3); background: #f5f3ff; }
+.fb-kind.is-stale { color: var(--amber); border-color: rgba(180, 83, 9, .3); background: #fff7e8; }
+.fb-kind.is-noisy { color: #0e7490; border-color: rgba(14, 116, 144, .3); background: #ecfeff; }
+.fb-kind.is-conflict { color: var(--rose); border-color: rgba(190, 18, 60, .3); background: #fff1f2; }
+.fb-mech { display: block; margin-top: 3px; font-family: var(--mono, ui-monospace); font-size: 9px; color: var(--teal); }
+.fb-row .fb-mech { color: var(--indigo); }
+@media (max-width: 860px) { .fb-row { grid-template-columns: 1fr; gap: 4px; } .fb-row > span:nth-child(3)::before { content: "不消费 → "; color: var(--rose); font-weight: 700; } }

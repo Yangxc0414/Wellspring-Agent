@@ -13,7 +13,7 @@
 
 同页的 **GENERATIONS** 区块做「对自进化本身做版本管理」：agent 轨记采纳树 SHA 与 episode，platform 轨记 `research_agent/**/*.py` 的指纹与提交，两条链由 `platform_fingerprint` 关联；数据读 `site/data/evolution.json`（由 `build-site.mjs` 从 `runtime_data/evolution/story.json` 同步）。平台变更后，旧 harness 世代会在这里被点名要求复验，但页面不提供任何回退/签核按钮。
 
-新增 **创新点演示**：`site/innovation/`，地址 **https://yangxc0414.github.io/research-agent/innovation/**。它是纯静态、无 API 的六幕舞台：SPEC 契约 → span/coverage → AstraDraw SVG audit → 论文/基金 pending 槽 → 可宣称边界 → 度量有效性（64 种子预注册扩样）；数据来自 `research_agent/web/data` 的 fixture，构建时由 `build-site.mjs` 同步到 `site/innovation/data`。单屏舞台、自动播放/手动切幕、全屏演示模式（每幕 15 秒，共 90 秒）；读图约定与主页一致：实线 = 前向、虚线 = 反馈回指且改变下一步动作、红 = 人工门、青 = 自动门。不包含真实检索或实验结果。
+新增 **创新点演示**：`site/innovation/`，地址 **https://yangxc0414.github.io/research-agent/innovation/**。它是纯静态、无 API 的七幕舞台：SPEC 契约 → span/coverage → AstraDraw SVG audit → 论文/基金 pending 槽 → 可宣称边界 → 度量有效性（64 种子预注册扩样）→ 判定消费（五类反馈对照，Q2）；数据来自 `research_agent/web/data` 的 fixture，构建时由 `build-site.mjs` 同步到 `site/innovation/data`。单屏舞台、自动播放/手动切幕、全屏演示模式（每幕 15 秒，共 105 秒）；读图约定与主页一致：实线 = 前向、虚线 = 反馈回指且改变下一步动作、红 = 人工门、青 = 自动门。不包含真实检索或实验结果。
 
 版式参考 `yangxc0414.github.io/agent-memory-push` 的宋体大标题、等宽标签、淡蓝网格与细线排版；`assets/base.css` / `theme.css` 是参考页的公开样式底座，`assets/custom.css` 是 research-agent 自有组件与响应式覆盖。研究台使用双环 HUD、阶段轨完成勾/进度条、增量对象流与 PENDING 占位、指令分组筛选、卡组圆点/锁定页/方向翻页、逐阶段记忆计数与 +Δ；新增 **聚焦视图**（收起日志、一屏显示对象流/阶段卡/当前指令，站点演示模式自动开启）、**阶段封印**（P·gate·SEALED）、对象节点光环与当前指令同步脉冲，以及可展开 **STAGE CONTRACT**（S 段/门禁、服务/端口、artifact 链、硬不变量、失败路由、PF-P0–P8 过程协议、角色与 SIM 限制）。移动端阶段轨横向滚动并做边缘渐隐，翻页器保持单行。所有 `SIM` 标注保留；`prefers-reduced-motion` 与无 JS 场景均可用。
 
