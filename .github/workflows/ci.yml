@@ -37,14 +37,50 @@ jobs:
           else
             echo "requirements-dev.txt not present (frontend-only public repo); skipping backend dependency install."
           fi
-      - name: Run offline test suite
+      - name: Run core offline suite (hard gate)
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          if [ -d tests ]; then
+            # The full suite needs local-only research data (research_agent/web/data,
+            # astradraw vendor) that this repository intentionally does not ship; that
+            # history is a separate advisory job. This list only pins modules whose
+            # inputs ship with the repository.
+            python -m unittest \
+              tests.test_evolution_generations \
+              tests.test_rsi_harness2 \
+              tests.test_plugin_bundle \
+              tests.test_evolution_policy \
+              tests.test_release_surface \
+              tests.test_release_integrity \
+              tests.test_workspace -v
+          else
+            echo "tests/ not present (frontend-only public repo); python suite not applicable. Web suite runs in the web job."
+          fi
+
+  python-full:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install local test dependencies
+        run: |
+          if [ -f requirements-dev.txt ]; then
+            python -m pip install -r requirements-dev.txt
+          else
+            echo "requirements-dev.txt not present; skipping."
+          fi
+      - name: Full offline suite (advisory: needs local-only research data)
         env:
           PYTHONIOENCODING: utf-8
         run: |
           if [ -d tests ]; then
             python -m unittest discover -s tests -v
           else
-            echo "tests/ not present (frontend-only public repo); python suite not applicable. Web suite runs in the web job."
+            echo "tests/ not present (frontend-only public repo)."
           fi
 
   web:

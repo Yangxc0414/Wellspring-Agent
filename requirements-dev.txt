@@ -3,6 +3,9 @@
 # Test and local tooling dependencies. These are not bundled; install in your
 # own environment or CI. PyMuPDF is optional and AGPL/commercial; see
 # THIRD_PARTY_NOTICES.md before shipping it in a distribution.
+fastapi>=0.100
+uvicorn>=0.23
+httpx>=0.24
 numpy>=1.24
 pandas>=2.0
 scikit-learn>=1.3
