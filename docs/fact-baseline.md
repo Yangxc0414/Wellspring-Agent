@@ -97,6 +97,17 @@ README 的四张策略投影图（`figures/01–04`）是设计投影，不是�
 - **术语对齐**：投影用语「三层验证」（结果/过程/证据链）在代码中无同名机制，对应实现是 S5 评估 + RunCapsule + closure checks 的组合——覆盖结果层与过程记录，「证据链复现」完整三层结构未实现。
 - **边界主张不受影响**：`/api/autopilot-status` 只读、永不触发委托（autopilot research 仅 CLI）；人工门、签名本地化、默认拒绝、存算分离四条主张无一处为实现破坏。
 
+## 整体架构六层反思（2026-11-10，实测口径）
+
+- **① 前端层（apps/web）**：state/adapters/domain/components 分层合理，31 组件；债 = `workspaceStore.ts` 3166 行（全前端最大文件），已做 memo/节流缓解但未拆分。收敛点：按域拆 zustand slice（workspace/autopilot/context/permission），以现有持久化订阅边界为切面，**不重写**。
+- **② 入口层（CLI / runtime / MCP）**：三入口共用同一工具契约，`test_adapter_equivalence` 逐文件比对产物——架构优点；债 = `cli.py` 6191 行巨石（58-清单已登记「cli 拆分」未达成），但它是命令注册面而非耦合面，逻辑在各自模块。收敛点：`cli_command_surface()` 派生清单保证对外契约可见，拆分只在动到相关命令时顺带做。
+- **③ 契约治理层（30 个能力 SPEC ↔ 125 个实现 py）**：契约面按能力聚合、不按文件，抽查 8 个新模块（study_claims/search_lab/host_model/handoff/guideline_memory/evolution_generations/memory_ab/prescreen）全部有 SPEC 归属——治理有效。小瑕疵：`modules/`（契约）与 `research_agent/modules/`（实现）同名异义，两处 README 应互相指路。
+- **④ 证据与门禁层（claim / EA / closure×3 / RunCapsule / 世代台账）**：概念多但每个有唯一实现与测试锚——三态呈现由 `comparison_verdicts()` 单点产生、护栏不变量 `guarded ⊆ unguarded` 有测试、复现/功效/推翻判定接入签署。复杂度有理由，非过度设计。
+- **⑤ 执行隔离层（平台 3.8 + Harness² 3.12 桥 + 外部 host）**：双解释器隔离理由充分（依赖版本），桥契约 `harness2-run-0.1` 与两个进程内补丁显式声明、`harness_matrix` ALL OK。收敛点：**不消除双解释器**（消除 = 全量升级平台依赖，收益低风险大）。
+- **⑥ 交付同步层（外层 → 发布树单向同步）**：SYNC_DIRS/SYNC_DOCS/RELEASE_OWNED/DENY/prune + `test_release_integrity`；历史演化产物，消除 = 合并两仓动 Pages 域名，不做。脆弱点在「改错侧」，纪律：新文件一律先入 SYNC 清单再建、文档改动后必跑外层 `build_release.py --prune`（**入口是外层 scripts/，不是发布树内的副本**）。
+- **顶层扁平债**：`research_agent/` 顶层 125 个 py（62173 行）、功能子域已自然聚簇（rsi_*/evolution_*、study_*/search_*、写作系、宿主系），但**不建议重组**——import 面 × 164 测试文件，收益低于风险。收敛点：**冻结顶层增长**——新能力优先进已有子包（runtime/ models/ orchestration/），顶层只允许能力模块主文件。
+- **总判断**：架构合理性是「测试钉出来的」（等价性/三态单点/护栏不变量/发布完整性均有锚）；真正的债只有三处且全部登记在案（cli 巨石、store 巨石、顶层扁平），均属「动到时顺带还」，现在强行动违反「一次只改一个模块」纪律且收益以美观为主——此处收敛，不再新增结构改造。
+
 ---
 
 *迁出自 README「当前事实基线」；研究结论更新时在本文件同步，README 不再承载逐条历程。*
