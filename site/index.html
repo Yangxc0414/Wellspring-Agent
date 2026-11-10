@@ -53,6 +53,23 @@
 .gate-map code{font-family:ui-monospace,monospace;font-size:11.5px;background:#eef2ff;color:#1d4ed8;padding:1px 5px;border-radius:4px}
 .gate-map b{color:#1f2937}
 .gate-map a{color:#1d4ed8;text-decoration:underline;text-underline-offset:2px}
+.strategy-map{max-width:920px;margin:14px auto 0;padding:16px 20px;border:1px solid #e5e9f0;background:#fff;border-radius:14px}
+.strategy-map h4{margin:0 0 4px;font-size:14px;font-weight:700;color:#1f2937}
+.strategy-map .sm-lede{margin:0 0 12px;font-size:12.5px;line-height:1.75;color:#5b6472}
+.sm-strategies{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.sm-strategy{border:1px solid #e5e9f0;border-radius:10px;padding:10px 12px;background:#fbfcff}
+.sm-strategy b{display:block;font-size:12.5px;color:#1f2937}
+.sm-strategy b em{font-style:normal;color:#1d4ed8;font-size:10.5px;font-family:ui-monospace,monospace;margin-left:6px}
+.sm-strategy span{display:block;margin-top:4px;font-size:11px;line-height:1.6;color:#5b6472}
+.sm-rows{display:grid;gap:6px;margin:0 0 12px}
+.sm-row{display:grid;grid-template-columns:74px minmax(0,1fr);gap:10px;align-items:baseline;font-size:11.5px;line-height:1.65}
+.sm-row .sm-key{font-family:ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:.06em;color:#1d4ed8}
+.sm-row p{margin:0;color:#42506b}
+.sm-row p b{color:#1f2937}
+.sm-novelty{border:1px dashed #c7d7f5;border-radius:10px;padding:10px 12px;margin:0 0 12px;background:#f6f9ff}
+.sm-novelty b{display:block;font-size:11.5px;color:#1f2937;margin-bottom:4px}
+.sm-novelty p{margin:0;font-size:11.5px;line-height:1.7;color:#42506b}
+@media (max-width:760px){.sm-strategies{grid-template-columns:1fr}.sm-row{grid-template-columns:1fr;gap:2px}}
 .flow-pane{display:block;margin:0;padding:8px 16px 10px}
 .flow-title{font-size:16px;font-weight:700;color:#1f2937;margin:22px 16px 0}
 .flow-gallery .flow-title:first-of-type{margin-top:14px}
@@ -522,6 +539,22 @@
       <p>四个人工门：<code>G1 想法选择 = S3</code> · <code>G2 设计批准 = S4</code> · <code>S5b 结果人签 = S5c</code> · <code>G5 闭包签署 = S16</code>。升级人签、降级自动；自动门（Q0 / Q1 / G3 / G4）未过走默认拒绝，不静默放行；四个门都不能由模型代签。</p>
       <p>图① 的「人门·假设选择 / 设计批准·契约 / 签署」分别对应 G1 / G2 / <b>S5b 结果签署</b>，青色「统计 / 复现门」是自动门。<b>G5 闭包签署在导出边界</b>（图③ 核验外部结果之后的授权收口），不在图① 的七阶段投影内 —— 不要把两者混读；图③ 的「必要时人签」落到实现就是 G2 / S5b。</p>
       <p>四条反馈（T6b 证伪 / 反事实、信念修订 / 假设再激活、同质化监测、溯源 / 失效传播）都<b>回指更早阶段并改变下一步动作</b>，而不是只写反思文本。子页 <a href="./demo/">18 阶段全链</a>、<a href="./qoder/">接入闭环</a>、<a href="./innovation/">六幕演示</a> 与自进化循环按同一套语义绘制，门禁标签不另造口径。</p>
+    </div>
+    <div class="strategy-map">
+      <h4>研究主线 · 四条策略 × 三个方向 × 四个可证伪问题（1110 组会口径）</h4>
+      <p class="sm-lede">一句话主张：<b>不做端到端「自动写论文」</b>——做两件事：<b>让过程可信</b>，<b>让判定真正改变下一步行动</b>。四条策略都是待验证的计划，不是已实现的功能；每条带一个能把它证伪的入口。新颖性只落在四处：<b>证据链复现 · 失效传播 · 判定消费 · 学习证据准入</b>。</p>
+      <div class="sm-strategies">
+        <div class="sm-strategy"><b>策略① 过程可信底座<em>方向 B · 守内核</em></b><span>三层可验证（结果 / 过程 / 证据链）+ 溯源数据 + 失效传播。验证入口：留出集改上游，看系统能否推准失效范围。</span></div>
+        <div class="sm-strategy"><b>策略② 反馈 → 行动（判定消费）<em>Q2 · 第一个诊断实验</em></b><span>同一任务给真实 / 打乱 / 过时 / 含噪 / 矛盾五类反馈，看下一步行动是否按证据质量变。反馈敏感性与信息价值一致 → 切口不成立。</span></div>
+        <div class="sm-strategy"><b>策略③ 学习证据准入<em>方向 A · 第一切口</em></b><span>已验证技能什么时候能安全用到新任务：直接复用 / 先测一轮 / 拒绝。验证入口：全存 / 全不存 / 重放后存 / 独立验证后存，四存储策略对照。</span></div>
+        <div class="sm-strategy"><b>策略④ 多样性保持 + 证伪 / 信念修订<em>方向 C · 后续前沿</em></b><span>盯群体同质化 + 反事实证伪；证据打架时决定修订信念、保留不确定或再激活被否决假设。评测环境自建，成本高放后面。</span></div>
+      </div>
+      <div class="sm-rows">
+        <div class="sm-row"><span class="sm-key">顺序</span><p><b>B 守内核，A 做第一个切口，C 放后面</b>；②始终作为诊断实验贯穿。读图顺序 ③ → ① → ② → ④。</p></div>
+        <div class="sm-row"><span class="sm-key">里程碑</span><p><b>M0</b> 最小证据闭合实例（能签署且变更锁导出）→ <b>M1</b> 五类反馈对照（Q2）→ <b>M2</b> 四存储策略 + 失效探针（Q3/N4）→ <b>M3</b> 论文与外部评审。每步的验收都是「可失败的」：达不到就重述口径，不换指标。</p></div>
+        <div class="sm-row"><span class="sm-key">四不做</span><p>不追端到端生成（42% 实验失败、基线幻觉 90% 的赛道）；<b>不重造度量</b>（ARS / CCFA 信封借来用）；不照搬静态 skill 目录；不放开无约束自主执行——人工门留在假设选择、设计批准、签署三处，自动化只跑门与门之间。</p></div>
+        <div class="sm-row"><span class="sm-key">工程借鉴</span><p>控制面 / 执行面分离、两级过滤（程序快层 → 语义慢层）、任务线程直通、异步推理、存算分离、独立外部监督——来自 DeepSeek 两篇工程文章（非同行评审，只作设计参照）。</p></div>
+      </div>
     </div>
     <p class="fineprint">门禁与读法以上方 canonical 卡片为准；demo 阶段映射 G1=S3 · G2=S4 · S5b=S5c · G5=S16，各子页投影的标签均映射到此统一口径。</p>
     <p class="fineprint flow-source">图来源：科研智能体策略论证（1110 可读性修订版）· 第 07 节。四张图是策略投影，不是实现地图；当前实现状态以功能地图为准，本站为静态镜像、无真实执行。</p>
