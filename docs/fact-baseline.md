@@ -87,6 +87,16 @@
 - AstraDraw 已 vendored；7 个模板可渲染方法/框架示意图 SVG/PNG/audit/manifest（`schematic=true`，`renderer=astradraw`）；实证结果图则由 matplotlib 从 verified evidence 生成（`kind=data_result_plot`，`astradraw=false`），两者不混用；
 - **尚未实现**：任意本地实验环境、通用 SkillRuntime、CapabilityRegistry、期刊官方模板、同行评审。
 
+## README 四张投影图 × 跑通行为对照（2026-11-10）
+
+README 的四张策略投影图（`figures/01–04`）是设计投影，不是实现地图。逐环节对照当前实现，答辩口径以本节为准：
+
+- **真实发生**：pipeline 七阶段链（literature→idea→experiment→run→figure→paper，逐段 `stage_start`）；Q0/G1/G2 为 `flow.py` 执行守卫（门前停下等人签）；S5b/G5 = `closure.py` S13–S16 导出门；claim 断言核验 + RunCapsule 过程记录；autopilot 授权范围前置（scope）/越界即停/不覆盖已有 claim/bundle/ingest 哈希核验；MCP 零签名入口 + `venue_audit` blocked 默认拒绝；`memory_ab` 记忆注入 A/B；世代台账失效点名复验（`platform_fingerprint` → `rsi gen verify`，同树复跑自动 supersede）。
+- **窄版存在**：图① T6b 证伪/反事实 → 仅 idea_review/innovation_review/rsi 审计项，无自动回指闭环；图④ 两级过滤 → `prescreen` Stage1 硬过滤 + Stage2 排序，仅论文候选且不跨门；图④ 隔离执行单元 → 外部 host 进程 + Harness² 3.12 桥进程，非平台内单元池；图② 绑定执行契约 → 世代台账摘要记录，非运行时绑定。
+- **未实现（roadmap）**：图① 信念修订/同质化监测（运行时机制，`idea_review` 现只有 source_diversity 三态）；图② 类型化记忆图谱 + 运行时自动准入门（先 M2 四存储策略实验后固化）；图③ 常驻触发→相关性检查→回指委托循环（autopilot 为单次委托）；图④ 独立外部监督控制回路。
+- **术语对齐**：投影用语「三层验证」（结果/过程/证据链）在代码中无同名机制，对应实现是 S5 评估 + RunCapsule + closure checks 的组合——覆盖结果层与过程记录，「证据链复现」完整三层结构未实现。
+- **边界主张不受影响**：`/api/autopilot-status` 只读、永不触发委托（autopilot research 仅 CLI）；人工门、签名本地化、默认拒绝、存算分离四条主张无一处为实现破坏。
+
 ---
 
 *迁出自 README「当前事实基线」；研究结论更新时在本文件同步，README 不再承载逐条历程。*
