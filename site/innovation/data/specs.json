@@ -610,7 +610,7 @@
     "id": "closure",
     "name": "闭合与导出",
     "stage": "S13–S16",
-    "version": "0.18.0",
+    "version": "0.18.1",
     "status": "draft",
     "owner": "research-agent",
     "outputs": [
@@ -1202,5 +1202,29 @@
       "状态只能是 ready_for_human / needs_revision / blocked，submission_ready 恒为 false"
     ],
     "spec": "modules/venue-audit/SPEC.md"
+  },
+  {
+    "id": "verdict-ledger",
+    "name": "判定总线",
+    "stage": "S5–S16",
+    "version": "0.1.0",
+    "status": "draft",
+    "owner": "research-agent",
+    "outputs": [
+      "VerdictLedger"
+    ],
+    "tools": [
+      "verdicts.collect",
+      "verdicts.show"
+    ],
+    "gates": [],
+    "invariants": [
+      "只读投影：不产生新判定，不写 Claim / EA / gate / signature / evidence",
+      "每行绑定其来源产物的 sha256；来源不可读时该行 fail-visible（status=unreadable），不静默",
+      "确定性：同一批产物收集两次，输出逐字节相同（无墙钟字段）；审计靠重放不靠信任",
+      "snapshot_drift 只报告「重算 vs 快照」的差异，绝不改写快照本身",
+      "输出不含绝对路径（可经 HTTP / MCP 只读面发布）"
+    ],
+    "spec": "modules/verdict-ledger/SPEC.md"
   }
 ]

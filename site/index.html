@@ -562,7 +562,7 @@
       <h4>接下来做什么 · 一个总线 + 四个端口（71 号设计文档 · 2026-11-10 立项）</h4>
       <p class="sm-lede">四图对照的结论：四条反馈环只有「溯源 / 失效传播」一条真实自动闭环，其余是审计项或 roadmap。解耦设计把"判定改变下一步行动"做成<b>可插拔、可单独开关与测量的对象</b>——这正是四条策略的实验台。</p>
       <div class="sm-strategies">
-        <div class="sm-strategy"><b>第一步 · 判定总线（Verdict Ledger）<em>只读投影</em></b><span>append-only 判定账本：三态判定 / closure blockers / lineage stale / rsi regressed / 护栏拦截统一入账；消费者（next_actions、反馈环、autopilot）只读总线。生产者不变、门禁语义不变、缺失 fail-closed。</span></div>
+        <div class="sm-strategy"><b>第一步 · 判定总线（Verdict Ledger）<em>✅ 已落地 · verdict-ledger 0.1.0</em></b><span>append-only 判定账本：三态判定 / closure blockers / lineage stale / rsi regressed / 护栏拦截统一入账；消费者（next_actions、反馈环、autopilot）只读总线。生产者不变、门禁语义不变、缺失 fail-closed。实测已抓到真实缺陷：autopilot 代签后 capsule 快照仍报 CLOSURE_UNSIGNED——漂移从静默变为一等行（<code>verdicts collect</code>）。</span></div>
         <div class="sm-strategy"><b>第二步 · FeedbackPort（反馈环一等化）<em>默认拒绝</em></b><span>observe → propose → gate → apply → record；T6b 证伪 / 信念修订 / 溯源失效 / 同质化各为一个可开关实现。可失败的验收：关闭全部环 = 与今日行为逐字节一致。</span></div>
         <div class="sm-strategy"><b>第三步 · M1 五类反馈对照<em>Q2 · 诊断实验</em></b><span>真实 / 打乱 / 过时 / 含噪 / 矛盾五类反馈跑在 FeedbackPort 上——反馈敏感性与信息价值一致 → 切口不成立，如实记录。</span></div>
         <div class="sm-strategy"><b>第四步 · MemoryWritePort + M2<em>方向 A · 第一切口</em></b><span>记忆写入收敛一个端口，全存 / 全不存 / 重放后存 / 独立验证后存四策略可插拔对照；类型化记忆图谱等 M2 结果出来再定型，不提前固化。</span></div>

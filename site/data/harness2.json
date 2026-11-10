@@ -1,6 +1,6 @@
 {
   "schema": "harness2-story-0.1",
-  "generated_at": "2026-11-10T11:25:09Z",
+  "generated_at": "2026-11-10T16:42:30Z",
   "available": true,
   "problems": [],
   "platform_fingerprint": "7594c67a27762064",
@@ -13,9 +13,9 @@
       "agg",
       "seq"
     ],
-    "wall_s": 11.289,
-    "started_at": "2026-11-10T11:24:57Z",
-    "finished_at": "2026-11-10T11:25:09Z"
+    "wall_s": 51.086,
+    "started_at": "2026-11-10T16:41:38Z",
+    "finished_at": "2026-11-10T16:42:30Z"
   },
   "budget": {
     "R": 48,
