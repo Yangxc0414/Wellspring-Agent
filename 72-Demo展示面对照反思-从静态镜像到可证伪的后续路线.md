@@ -51,6 +51,13 @@ SIM 标记整体诚实，无需重写：demo 129 处 SIM + meta 明示「不调�
 - demo 页不新增未经测试锚定的声称；路线图内容全部出自 71 号文档与 `docs/fact-baseline.md`，标注「待验证的计划，不是已实现的功能」（与主页策略口径同款措辞）。
 - demo 内部叙事模型（9 幕、4 场景、SIM）保留其自我解释；只统一与 canonical（S0–S16 / 门禁）的引用措辞，不改 SIM 数据。
 
+## 7. 追记（2026-11-11）：demo 仓 CI 硬门假绿的暴露与修复
+
+- **现象**：把 `tests/test_release_integrity.py` 入库（4d8c1fa）后，research-agent 仓的 `python` 硬门 job 立刻红（ci run 29 failure），而此前 28 次 run 全绿。
+- **根因**：该仓 git 只跟踪了极少量 tests 文件；此前 `tests/` 目录在 CI checkout 中不存在 → `if [ -d tests ]` 走 else 分支（echo + exit 0）→ **28 次成功全部是"目录不存在"的假绿**。入库一个测试文件后目录存在，硬门开始逐个 import 7 个被钉住的模块，其中 6 个（test_workspace / test_evolution_generations / test_rsi_harness2 / test_plugin_bundle / test_evolution_policy / test_release_surface）在该仓根本没有跟踪 → ImportError。这正是本仓库反复记录的「绿色来自与自身比对」又一例：断言的是目录存在性，不是测试真的跑了。
+- **修复**：`.github/workflows/ci.yml` 的 python 硬门改为**逐模块存在性守卫**——被钉住的模块只有文件真的被跟踪才运行，缺失的显式 echo 出来（skipped, not run），绝不静默假设绿。产品仓（Wellspring-Agent，7 模块齐全）行为逐字节不变；demo 仓只跑存在的模块并诚实报告缺失。
+- **另记**：本地 Windows 上钉住套件 3 局出现 1 次偶发失败（74 中 1，随后两次复跑全绿，未定位到具体用例，疑似文件系统/并发状态敏感）——登记在案；CI（ubuntu/3.11）同套件历次全绿。
+
 ---
 
 *本文件是 demo 展示面第一轮对照反思的沉淀；后续展示面改动对照此清单增量记录。产品定位以 Wellspring-Agent README 为准，研究口径以 `docs/fact-baseline.md` 为准。*
