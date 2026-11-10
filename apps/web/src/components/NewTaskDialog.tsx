@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { DOMAINS, ACCESS_META, ACCESS_ORDER, MODE_META, MODE_ORDER } from "../domain/catalog";
 import type { AccessMode, Mode } from "../domain/types";
+import { useDialogFocus } from "../hooks/ui";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import { Icon } from "./Icon";
 
@@ -10,6 +11,8 @@ export function NewTaskDialog() {
   const activeWorkspaceId = useWorkspaceStore((state) => state.activeWorkspaceId);
   const actions = useWorkspaceStore((state) => state.actions);
   const newTaskMode = useWorkspaceStore((state) => state.ui.newTaskMode);
+  const dialogRef = useRef<HTMLElement>(null);
+  useDialogFocus(dialogRef, true);
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
   const [workspaceId, setWorkspaceId] = useState(activeWorkspaceId);
@@ -31,7 +34,7 @@ export function NewTaskDialog() {
     <div className="modal-layer" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) close();
     }}>
-      <section className="modal new-task-modal" role="dialog" aria-modal="true" aria-label="新建任务">
+      <section className="modal new-task-modal" role="dialog" aria-modal="true" aria-label="新建任务" ref={dialogRef}>
         <header className="modal-head">
           <div>
             <span className="eyebrow">NEW TASK / LOCAL</span>

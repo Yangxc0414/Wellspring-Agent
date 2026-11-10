@@ -1575,6 +1575,11 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
           notify("全自动运行中的任务不能删除；先停止");
           return;
         }
+        // Kill any live poll chain / SSE stream tied to this task before removing it;
+        // otherwise the deleted task keeps polling the runtime as an orphan.
+        liveRunTokens.delete(id);
+        liveRunStreams.get(id)?.close();
+        liveRunStreams.delete(id);
         const remaining = state.tasks.filter((item) => item.id !== id);
         const selected = task.id === state.selectedTaskId;
         const next = remaining[0];
@@ -2314,6 +2319,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
           notify("已有本地 API 运行进行中");
           return;
         }
+        // Bump the token so any stale poll chain from a previous run on this task
+        // stops at its next tick instead of racing the new job's updates.
+        const runToken = (liveRunTokens.get(task.id) ?? 0) + 1;
+        liveRunTokens.set(task.id, runToken);
         const chosen = source ?? defaultRuntimeSource(task);
         const chosenType = taskType ?? "auto";
         const topic = (task.goal || task.name).trim().slice(0, 500);
@@ -2383,6 +2392,12 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
                 card: {
                   ...entry.card,
                   ...patch,
+                  // SSE writes the newest seq while the 900ms poll writes
+                  // job.events_count, which can lag; never let the count go backwards.
+                  events:
+                    patch.events === undefined
+                      ? entry.card.events
+                      : Math.max(entry.card.events ?? 0, patch.events),
                   eventLog: merged.length ? merged : undefined
                 }
               };
@@ -2402,6 +2417,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
         let lastSeq = 0;
         let pollErrors = 0;
         const poll = async (jobId: string) => {
+          // Token changed (task deleted, or a newer run started): this chain is stale.
+          if (liveRunTokens.get(task.id) !== runToken) return;
           try {
             const [job, eventBody] = await Promise.all([
               getRun(jobId),
@@ -2617,6 +2634,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
                 `/api/runs/${encodeURIComponent(job.job_id)}/events/stream?after=0`
               )
             );
+            liveRunStreams.set(task.id, stream);
             stream.onmessage = (message) => {
               try {
                 const event = JSON.parse(message.data) as RunEvent;
@@ -2645,6 +2663,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
               notify("实时事件通道断开；已由 900ms 轮询继续同步，产物不会丢失");
               stream?.close();
               stream = null;
+              if (liveRunStreams.get(task.id)) liveRunStreams.delete(task.id);
             };
           } catch {
             stream = null;
@@ -2654,6 +2673,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
           } finally {
             stream?.close();
             stream = null;
+            if (liveRunStreams.get(task.id)) liveRunStreams.delete(task.id);
           }
         } catch (error) {
           const detail = error instanceof Error ? error.message : String(error);
@@ -3108,6 +3128,12 @@ let lastSaved = "";
 let saveTimer = 0;
 let lastReferences: Record<string, unknown> = {};
 let pendingSnapshot: PersistedWorkspace | null = null;
+
+// Live runtime-run bookkeeping: one token per task so an old poll chain dies as soon
+// as the task is deleted or a new run supersedes it, and one registry of open
+// EventSources so deleteTask can close the stream immediately.
+const liveRunTokens = new Map<string, number>();
+const liveRunStreams = new Map<string, EventSource>();
 
 function persistNow(): void {
   if (!pendingSnapshot) return;

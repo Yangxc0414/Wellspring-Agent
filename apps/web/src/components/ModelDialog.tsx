@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   clampModel,
   compressionNote,
@@ -8,6 +8,7 @@ import {
 } from "../domain/catalog";
 import { siteHref } from "../domain/links";
 import type { ModelProfile, ModelSettings } from "../domain/types";
+import { useDialogFocus } from "../hooks/ui";
 import { useAllModelProfiles } from "../state/modelStore";
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { Icon } from "./Icon";
@@ -16,6 +17,8 @@ export function ModelDialog() {
   const task = useWorkspaceStore(selectCurrentTask);
   const actions = useWorkspaceStore((state) => state.actions);
   const profiles = useAllModelProfiles();
+  const dialogRef = useRef<HTMLElement>(null);
+  useDialogFocus(dialogRef, true);
   const [draft, setDraft] = useState<ModelSettings>(() => clampModel({ ...(task?.model ?? {
     profileId: "gpt-5",
     contextLimit: 128000,
@@ -63,7 +66,7 @@ export function ModelDialog() {
     <div className="modal-layer" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) close();
     }}>
-      <section className="modal model-modal" role="dialog" aria-modal="true" aria-label="模型设置">
+      <section className="modal model-modal" role="dialog" aria-modal="true" aria-label="模型设置" ref={dialogRef}>
         <header className="modal-head">
           <div>
             <span className="eyebrow">MODEL SETTINGS / STATIC</span>

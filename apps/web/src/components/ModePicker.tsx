@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { MODE_META, MODE_ORDER } from "../domain/catalog";
 import type { Mode } from "../domain/types";
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
+import { useDismissable } from "../hooks/ui";
 import type { IconName } from "./Icon";
 import { Icon } from "./Icon";
 
@@ -18,21 +19,7 @@ export function ModePicker() {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
+  useDismissable(rootRef, open, () => setOpen(false));
 
   if (!task) return null;
   const current: Mode = task.auto.running ? "auto" : task.mode;

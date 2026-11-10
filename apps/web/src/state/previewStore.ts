@@ -27,19 +27,23 @@ interface PreviewState {
   toggleDock: () => void;
 }
 
-const PREVIEWABLE_EXTENSIONS = new Set([
+export const TEXT_EXTENSIONS = new Set([
   "txt", "md", "markdown", "json", "csv", "tsv", "js", "mjs", "cjs", "ts", "tsx", "jsx",
   "py", "java", "c", "h", "cpp", "hpp", "rs", "go", "css", "html", "xml", "yaml", "yml",
-  "toml", "ini", "cfg", "log", "sh", "bash", "sql", "tex", "bib", "r", "m", "png", "jpg",
-  "jpeg", "gif", "webp", "svg", "bmp", "avif", "pdf"
+  "toml", "ini", "cfg", "log", "sh", "bash", "sql", "tex", "bib", "r", "m"
 ]);
+export const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"]);
+export const MARKDOWN_EXTENSIONS = new Set(["md", "markdown"]);
+const PREVIEWABLE_EXTENSIONS = new Set<string>([...TEXT_EXTENSIONS, ...IMAGE_EXTENSIONS, "pdf"]);
 
-function extensionOf(name: string): string {
+// Single source of truth for extension classification: the preview window and the
+// file-accept filter must agree, so both read from here instead of keeping two sets.
+export function extensionOf(name: string): string {
   const index = name.lastIndexOf(".");
   return index >= 0 ? name.slice(index + 1).toLowerCase() : "";
 }
 
-function isPreviewable(file: File): boolean {
+export function isPreviewable(file: File): boolean {
   return file.type.startsWith("text/") || file.type.startsWith("image/") ||
     file.type === "application/pdf" || PREVIEWABLE_EXTENSIONS.has(extensionOf(file.name));
 }

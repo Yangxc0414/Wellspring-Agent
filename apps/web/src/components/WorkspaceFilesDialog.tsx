@@ -3,6 +3,7 @@ import type { ChangeEvent } from "react";
 import { workspaceFiles } from "../adapters/workspaceFiles";
 import type { WorkspaceFileEntry, WorkspaceFileScan } from "../domain/types";
 import { formatBytes, isoNow } from "../domain/utils";
+import { useDialogFocus } from "../hooks/ui";
 import { usePreviewStore } from "../state/previewStore";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import { Icon } from "./Icon";
@@ -26,7 +27,10 @@ export function WorkspaceFilesDialog() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
   const workspace = workspaces.find((item) => item.id === workspaceId) ?? null;
+  // Focus trap + restore; Esc handling stays in App's global overlay fallback.
+  useDialogFocus(dialogRef, open);
 
   useEffect(() => {
     if (!open || !workspaceId) return;
@@ -148,7 +152,7 @@ export function WorkspaceFilesDialog() {
         if (event.target === event.currentTarget) actions.setUI({ filesOpen: false });
       }}
     >
-      <section className="modal files-modal" role="dialog" aria-modal="true" aria-label="工作区文件">
+      <section className="modal files-modal" role="dialog" aria-modal="true" aria-label="工作区文件" ref={dialogRef}>
         <header className="files-head">
           <div>
             <span className="eyebrow">WORKSPACE / FILES</span>

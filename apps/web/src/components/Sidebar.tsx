@@ -34,6 +34,7 @@ export function Sidebar() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const [planning, setPlanning] = useState(false);
 
   useEffect(() => {
     if (!pendingDelete) return;
@@ -77,6 +78,7 @@ export function Sidebar() {
       actions.openNewTask("auto");
       return;
     }
+    if (planning) return;
     const task = selectedTask;
     if (!task) return;
     actions.setMode("auto");
@@ -89,6 +91,7 @@ export function Sidebar() {
         : dataset.includes("iris")
           ? "iris"
           : "";
+    setPlanning(true);
     try {
       const plan = await requestAutomationPlan({
         topic: task.goal || task.name,
@@ -96,12 +99,15 @@ export function Sidebar() {
         run_dataset: runDataset,
         run_seeds: task.protocol?.seeds ?? 3
       });
+      // A late response for a superseded request must not overwrite the newest plan.
       actions.setAutoPlan(task.id, plan);
       actions.notify(
         `后端运行计划 ${plan.fingerprint.slice(-8)} 已生成：${plan.stages.length} 阶段，停在 ${plan.stop_at}`
       );
     } catch {
       actions.notify("已切换到全自动；runtime 离线，使用本地阶段计划");
+    } finally {
+      setPlanning(false);
     }
   };
 
@@ -180,10 +186,11 @@ export function Sidebar() {
               type="button"
               className="quick-tile"
               onClick={() => void handleAutomation()}
+              disabled={planning}
               title="自动化：欢迎页预填全自动；会话内生成后端运行计划并打开 RUN"
             >
               <span className="quick-tile-icon is-play"><Icon name="play" size={13} /></span>
-              <span>自动化</span>
+              <span>{planning ? "计划生成中…" : "自动化"}</span>
             </button>
             <button
               type="button"

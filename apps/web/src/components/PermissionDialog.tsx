@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { ACCESS_META } from "../domain/catalog";
+import { useDialogFocus } from "../hooks/ui";
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { Icon } from "./Icon";
 
@@ -15,36 +16,7 @@ export function PermissionDialog() {
   const actions = useWorkspaceStore((state) => state.actions);
   const dialogRef = useRef<HTMLElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
-  const restoreRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    if (!request) return;
-    restoreRef.current = document.activeElement as HTMLElement | null;
-    cancelRef.current?.focus();
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Tab") return;
-      const focusables = dialog.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (!focusables.length) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-    dialog.addEventListener("keydown", onKeyDown);
-    return () => {
-      dialog.removeEventListener("keydown", onKeyDown);
-      restoreRef.current?.focus?.();
-    };
-  }, [request]);
+  useDialogFocus(dialogRef, Boolean(request), cancelRef);
 
   if (!request) return null;
   const access = ACCESS_META[task?.access ?? "ask"];

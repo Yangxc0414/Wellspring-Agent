@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CLI_ONLY_NOTE } from "../domain/gateCommands";
 import { Icon } from "./Icon";
 
@@ -7,6 +7,16 @@ type CopyState = "idle" | "copied" | "selected";
 export function GateCommandItem({ command }: { command: string }) {
   const codeRef = useRef<HTMLElement>(null);
   const [state, setState] = useState<CopyState>("idle");
+  // This component keeps its own three-state copy flow (clipboard → fallback text
+  // selection) instead of useCopyToClipboard, but the reset timer is still cleaned up.
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    },
+    []
+  );
 
   const selectCommand = () => {
     const node = codeRef.current;
@@ -25,7 +35,8 @@ export function GateCommandItem({ command }: { command: string }) {
       void navigator.clipboard.writeText(command).then(
         () => {
           setState("copied");
-          window.setTimeout(() => setState("idle"), 1400);
+          if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+          timerRef.current = window.setTimeout(() => setState("idle"), 1400);
         },
         () => setState(selectCommand() ? "selected" : "idle")
       );
