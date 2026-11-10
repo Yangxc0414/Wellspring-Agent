@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { Icon } from "./Icon";
 
@@ -137,7 +137,9 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
 }
 
 export function RichText({ text }: { text: string }) {
-  const blocks = parse(text);
+  // Parsing is O(lines × regex); without this cache every store mutation re-parses
+  // every rendered message (the runtime poll updates a card ~1/s).
+  const blocks = useMemo(() => parse(text), [text]);
   return (
     <div className="rich-text">
       {blocks.map((block, index) => {

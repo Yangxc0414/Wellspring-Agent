@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { ACCESS_META, MODE_META, modelProfile, thinkingLabel } from "../domain/catalog";
 import type { Card, Message } from "../domain/types";
 import { runtimeRunState } from "../domain/runtimeSnapshot";
@@ -116,7 +116,9 @@ function TaskHeader() {
   );
 }
 
-function MessageView({ item }: { item: Message }) {
+// Message content is immutable once appended; memo keeps the runtime poll (which
+// rewrites only the last message's card) from re-rendering the whole transcript.
+const MessageView = memo(function MessageView({ item }: { item: Message }) {
   if (item.role === "system") {
     return (
       <div className="system-line">
@@ -144,7 +146,7 @@ function MessageView({ item }: { item: Message }) {
       </div>
     </div>
   );
-}
+});
 
 function RunIndicator() {
   const task = useWorkspaceStore(selectCurrentTask);

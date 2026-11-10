@@ -2399,16 +2399,18 @@ export function ContextPanel() {
         </button>
       </div>
       <div className="context-body">
-        {tab === "brief" && <BriefContext task={task} />}
-        {tab === "run" && <RunContext task={task} />}
-        {tab === "evidence" && <EvidenceContext task={task} />}
+        {/* key={task.id}: RunContext 等 tab 面板持有本地表单状态（runtimeSource/seeds/文件路径…），
+            不加 key 时切换任务会沿用上一个任务的表单值，可能带着 A 任务的 seeds 去 run B 任务。 */}
+        {tab === "brief" && <BriefContext key={task.id} task={task} />}
+        {tab === "run" && <RunContext key={task.id} task={task} />}
+        {tab === "evidence" && <EvidenceContext key={task.id} task={task} />}
         {tab === "projects" && (
           <div className="context-stack">
             <ProjectExperimentInventoryPanel />
           </div>
         )}
-        {tab === "evolution" && <EvolutionContext task={task} />}
-        {tab === "eval" && <EvaluationContext task={task} />}
+        {tab === "evolution" && <EvolutionContext key={task.id} task={task} />}
+        {tab === "eval" && <EvaluationContext key={task.id} task={task} />}
       </div>
       <div className="context-foot">
         <span>

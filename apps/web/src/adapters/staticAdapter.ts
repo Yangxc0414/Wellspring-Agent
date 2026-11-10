@@ -29,6 +29,24 @@ export function isSnapshot(value: unknown): value is PersistedWorkspace {
   );
 }
 
+const BACKUP_SUFFIX = ".backup-v";
+
+/**
+ * A schema-version mismatch used to silently discard the whole workspace (load →
+ * null → seed data). Now the old payload is parked under a versioned backup key
+ * first, so a migration bug can never lose user work beyond recovery.
+ */
+function parkIncompatibleSnapshot(parsed: unknown, version: unknown): void {
+  if (!parsed || typeof parsed !== "object") return;
+  try {
+    const key = `${STORAGE_KEY}${BACKUP_SUFFIX}${String(version ?? "unknown")}`;
+    const existing = localStorage.getItem(key);
+    if (!existing) localStorage.setItem(key, JSON.stringify(parsed));
+  } catch {
+    /* quota / private mode: nothing more we can do here */
+  }
+}
+
 export const staticAdapter: WorkspaceAdapter = {
   kind: "static",
   label: "STATIC · localStorage",
@@ -37,7 +55,13 @@ export const staticAdapter: WorkspaceAdapter = {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
       const parsed: unknown = JSON.parse(raw);
-      if (!isSnapshot(parsed)) return null;
+      if (!isSnapshot(parsed)) {
+        const version = (parsed as { version?: unknown } | null)?.version;
+        if (version !== STORAGE_VERSION && version !== undefined) {
+          parkIncompatibleSnapshot(parsed, version);
+        }
+        return null;
+      }
       parsed.tasks = parsed.tasks.map((task) => {
         const usage = task.usage ?? {};
         const usageDays = task.usageDays ?? (Object.keys(usage).length ? { [isoDateOffset(0)]: usage } : {});

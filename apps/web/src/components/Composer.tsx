@@ -291,6 +291,9 @@ export function Composer() {
               setSlashDismissed(false);
             }}
             onKeyDown={(event) => {
+              // IME composition (e.g. Chinese input confirming candidates) sends Enter
+              // keydowns too; without this guard an open slash menu hijacks them.
+              if (event.nativeEvent.isComposing) return;
               if (showSlash) {
                 if (event.key === "ArrowDown") {
                   event.preventDefault();

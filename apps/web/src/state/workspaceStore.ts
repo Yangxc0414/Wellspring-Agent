@@ -3083,17 +3083,73 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
   };
 });
 
+// Persistence pipeline (perf-critical): runtime polling / SSE can mutate task state
+// many times per second, and each mutation used to pay for a full-workspace
+// JSON.stringify plus a synchronous localStorage write. Two guards fix that:
+//   1. reference short-circuit — persisted parts are only re-serialized when one of
+//      their array/object references actually changed (zustand replaces references on
+//      mutation, so unchanged parts are skipped outright);
+//   2. trailing debounce — localStorage writes coalesce within 250ms while
+//      folderStorage keeps its own 700ms queue.
+const PERSIST_KEYS = [
+  "version",
+  "selectedTaskId",
+  "activeWorkspaceId",
+  "preferences",
+  "workspaces",
+  "tasks",
+  "plugins",
+  "skills",
+  "memory",
+  "archivedTaskIds"
+] as const;
+
 let lastSaved = "";
-useWorkspaceStore.subscribe((state) => {
-  const snapshot = persistedSnapshot(state);
+let saveTimer = 0;
+let lastReferences: Record<string, unknown> = {};
+let pendingSnapshot: PersistedWorkspace | null = null;
+
+function persistNow(): void {
+  if (!pendingSnapshot) return;
+  const snapshot = pendingSnapshot;
+  pendingSnapshot = null;
   const serialized = JSON.stringify(snapshot);
   if (serialized === lastSaved) return;
   lastSaved = serialized;
   staticAdapter.save(snapshot);
+}
+
+useWorkspaceStore.subscribe((state) => {
+  const snapshot = persistedSnapshot(state);
+  let changed = false;
+  for (const key of PERSIST_KEYS) {
+    if (lastReferences[key] !== snapshot[key]) {
+      lastReferences[key] = snapshot[key];
+      changed = true;
+    }
+  }
+  if (!changed) return;
+  pendingSnapshot = snapshot;
   folderStorage.queue(snapshot);
+  if (saveTimer) window.clearTimeout(saveTimer);
+  saveTimer = window.setTimeout(() => {
+    saveTimer = 0;
+    persistNow();
+  }, 250);
 });
 
 folderStorage.prime(persistedSnapshot(useWorkspaceStore.getState()));
+
+// A debounced write must not lose the last mutation when the tab closes.
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeunload", () => {
+    if (saveTimer) {
+      window.clearTimeout(saveTimer);
+      saveTimer = 0;
+    }
+    persistNow();
+  });
+}
 
 export const selectCurrentTask = (state: WorkspaceStore): ResearchTask | undefined =>
   state.tasks.find((task) => task.id === state.selectedTaskId) ?? state.tasks[0];
