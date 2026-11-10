@@ -68,6 +68,7 @@ RELEASE_OWNED = (
 # DISTRIBUTION, LICENSING, ...) are owned by the release folder and left untouched.
 SYNC_DOCS = (
     "apps/web/index.html",
+    "docs/fact-baseline.md",
     "PRODUCTION-READINESS.md",
     "ARCHITECTURE.md",
     "AGENTS.md",
