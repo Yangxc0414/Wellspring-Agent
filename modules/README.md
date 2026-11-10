@@ -25,6 +25,7 @@ modules/
   host-model/SPEC.md     # 宿主模型交接（META）：无外部 key 的生成能力供给
   autopilot/SPEC.md      # 策略自动驾驶（META）：人授权一次，G1/G2/S5b/G5 在边界内代跑
   mandate/SPEC.md        # 持续委托投影（META）：只读聚合 blockers/next_actions/policy，不新增权限
+  verdict-ledger/SPEC.md # 判定总线（S5–S16）：确定性只读投影已存在的判定，快照漂移 fail-visible
   ccfa-audit/SPEC.md     # S4 CCF-A 实验设计披露审计（拆分研究设计与本地 run 设计）
   literature/fixtures/   # 仅离线测试用的 fixture 语料
 ```

@@ -887,6 +887,30 @@ def _cmd_loop_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_verdicts_collect(args: argparse.Namespace) -> int:
+    from .verdict_ledger import collect, write_ledger
+
+    try:
+        ledger = collect(Path(args.project), limit=args.limit)
+    except (OSError, ValueError) as exc:
+        raise SystemExit(str(exc))
+    if args.output:
+        _print_json(write_ledger(Path(args.output), ledger))
+        return 0
+    _print_json(ledger)
+    return 0
+
+
+def _cmd_verdicts_show(args: argparse.Namespace) -> int:
+    from .storage import read_json
+
+    try:
+        _print_json(read_json(args.ledger))
+    except (OSError, ValueError) as exc:
+        raise SystemExit(str(exc))
+    return 0
+
+
 def _cmd_experiment_closure(args: argparse.Namespace) -> int:
     from .experiment_closure import (
         ExperimentClosureError,
@@ -4856,6 +4880,21 @@ def build_parser() -> argparse.ArgumentParser:
     loop_status.add_argument("--run-id", required=True)
     loop_status.add_argument("--output-dir", default="")
     loop_status.set_defaults(func=_cmd_loop_status)
+
+    verdicts_parser = sub.add_parser(
+        "verdicts", help="deterministic read-only ledger of the decisions a project's artifacts contain"
+    )
+    verdicts_sub = verdicts_parser.add_subparsers(dest="verdicts_command", required=True)
+    verdicts_collect = verdicts_sub.add_parser(
+        "collect", help="re-derive every verdict from its single-point producer and compare snapshots"
+    )
+    verdicts_collect.add_argument("--project", required=True)
+    verdicts_collect.add_argument("--output", default="", help="write the ledger JSON here; default stdout")
+    verdicts_collect.add_argument("--limit", type=int, default=50)
+    verdicts_collect.set_defaults(func=_cmd_verdicts_collect)
+    verdicts_show = verdicts_sub.add_parser("show", help="print a previously collected ledger")
+    verdicts_show.add_argument("--ledger", required=True)
+    verdicts_show.set_defaults(func=_cmd_verdicts_show)
 
     innovation_parser = sub.add_parser("innovation", help="multi-role innovation review over a run")
     innovation_sub = innovation_parser.add_subparsers(dest="innovation_command", required=True)

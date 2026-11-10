@@ -1,9 +1,9 @@
 {
   "schema_version": "workspace-0.1",
-  "generated_at": "2026-11-10T10:54:40+00:00",
-  "count": 213,
+  "generated_at": "2026-11-10T16:58:30+00:00",
+  "count": 215,
   "curated": 51,
-  "derived": 162,
+  "derived": 164,
   "commands": [
     {
       "id": "study.baseline",
@@ -1721,6 +1721,24 @@
       "label": "audit",
       "syntax": "python -m research_agent venue audit",
       "description": "usage: research_agent venue audit [-h] --file FILE [--kind {zh_journal,grant}]\n                                  [--profile {zh_core_journal,software_journal,computer_journal}]\n                                  [--scheme {nsfc,nssfc,generic}]\n                                  [--anonymous] [--identity-removed]\n                                  [--ai-statement] [--skill-pack SKILL_PACK]\n                                  [--skill-max-items SKILL_MAX_ITEMS]\n                                  [--skill-pack-root SKILL_PACK_ROOT]\n                                  [--venue VENUE]\n                                  [--skill-stage {,idea,design,writing,submission,review,reproducibility,general}]\n                                  [--skill-profile {,design,draft,submission,revision}]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "verdicts.collect",
+      "group": "verdicts",
+      "label": "collect",
+      "syntax": "python -m research_agent verdicts collect",
+      "description": "usage: research_agent verdicts collect [-h] --project PROJECT\n                                       [--output OUTPUT] [--limit LIMIT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "verdicts.show",
+      "group": "verdicts",
+      "label": "show",
+      "syntax": "python -m research_agent verdicts show",
+      "description": "usage: research_agent verdicts show [-h] --ledger LEDGER",
       "safety": "catalog_only",
       "curated": false
     },

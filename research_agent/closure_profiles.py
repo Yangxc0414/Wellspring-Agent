@@ -102,6 +102,15 @@ def _claim_candidates(root: Path, run: Path) -> List[Path]:
     return candidates
 
 
+def claim_candidates(root: Path, run: Path) -> List[Path]:
+    """Public alias for the single-point list of where a run's claim may live.
+
+    verdict_ledger binds claim verdict rows to the same file this module reads;
+    the candidate list must have exactly one definition.
+    """
+    return _claim_candidates(root, run)
+
+
 def _signed_claim_exists(project: Path, run: Path) -> bool:
     for path in _claim_candidates(project, run):
         if path.is_file() and str(_load(path).get("status") or "") in ("supported", "approved"):

@@ -106,9 +106,11 @@ def main() -> int:
             else contract
         )
         body = body if isinstance(body, dict) else {}
+        # the schema pin is deliberate and rides the contract version (host-contract-0.3):
+        # bump it together with handoff.py, same discipline as tests/test_handoff
         check(
             "host_contract.no_api_key",
-            body.get("schema_version") == "host-contract-0.1" and not body.get("blocked"),
+            body.get("schema_version") == "host-contract-0.3" and not body.get("blocked"),
             "schema=%s blocked=%s" % (body.get("schema_version"), body.get("blocked")),
         )
         check(

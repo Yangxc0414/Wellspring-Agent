@@ -2,7 +2,7 @@
 id: closure
 name: 闭合与导出
 stage: S13–S16
-version: 0.18.0
+version: 0.18.1
 status: draft
 owner: research-agent
 inputs:
@@ -95,6 +95,7 @@ invariants:
 4. 跑 `python -m unittest discover -s tests -v`。
 
 ## Changelog
+- 2026-11-11 · v0.18.1 · status=draft · 为 verdict-ledger 暴露只读别名 `claim_candidates(root, run)`：判定总线需要把 claim 判定行绑定到本模块实际读取的同一份 claim 文件，候选清单必须只有一处定义；`_claim_candidates` 行为一字未动，盘点输出不变。调用方 tests/test_verdict_ledger 钉绑定行为。最小改进，升 patch。
 - 2026-11-02 · v0.18.0 · status=draft · 盘点每行研究带上能不能再验证：schema closure-profiles-0.6 → 0.7，search_study 行新增只读 integrity（state = derivable | non_derivable | incomplete、failures、missing、code_fingerprint = match | stale | absent），盘点顶层新增 study_integrity_layers，replication 块透传全库存 chain_layers。实现来自 search-study 0.54.0 的 study_integrity 模块，代码指纹在一次盘点中只算一次再逐包比较。实测 runtime_data/gapbatch-20seeds 等 27 个项目 101 个包：96 derivable / 5 non_derivable，5 个不可验证包分别是 gapbatch-prefix-fix 的 breast_cancer/iris/wine（带 study.self_hash + evidence.binds_spec 两处不符，即计时字段进入内容哈希那个缺陷的产物）与 study-cli/STUDY-wine、study-demo/STUDY-iris（spec.binds_study 不符）。只读展示，人工门与判定集合一字未动。
 - 2026-10-30 · v0.17.1 · status=draft · 盘点 next action 与研究设计一致：canonical_run 的 study_design.audit.status=incomplete 时，next 改为 fix study design; G2 is blocked，而不是继续提示 claim sign；避免页面把一个 G2 被阻断的 run 说成下一步去签 claim。实测 ccfa-gate-probe 的盘点返回该文案；tests.test_closure_profiles 17 项 OK。只读投影文案变化，升 patch。
 - 2026-10-30 · v0.17.0 · status=draft · 闭合盘点带出研究设计披露：canonical_run 行新增只读 study_design（status/ccfa_level/blockers），从 run/demo.json 的 modules.study_design.audit 读取；没有 study design 时为 null。schema 升 closure-profiles-0.6，前端 ClosureRow 同步并在 incomplete 时显示“研究设计披露不完整，G2 不应冻结”。实测 ccfa-gate-probe 返回 incomplete/disclosure_incomplete 与前 5 条 blocker；tests.test_closure_profiles 17 项 OK，typecheck 通过。输出契约新增字段，升 minor。

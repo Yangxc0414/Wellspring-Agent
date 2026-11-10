@@ -315,6 +315,7 @@ python -m unittest discover -s tests -v
 | rsi | META | `research_agent/rsi.py` | `modules/rsi/SPEC.md` |
 | autopilot | S2–S16（委托门） | `research_agent/autopilot.py` + `cli_autopilot.py` | `modules/autopilot/SPEC.md` |
 | mandate | META（只读委托投影） | `research_agent/mandate.py` | `modules/mandate/SPEC.md` |
+| verdict-ledger | S5–S16（判定总线） | `research_agent/verdict_ledger.py` | `modules/verdict-ledger/SPEC.md` |
 | ccfa-audit | S4 | `research_agent/ccfa_audit.py` + `cli_design.py` | `modules/ccfa-audit/SPEC.md` |
 
 每个模块的测试在 `tests/`；完整纵切见 `research_agent/pipeline.py`。`research_agent/vendor/astradraw/` 是从本地完整复制的第三方绘图工作流，**不要改上游脚本**；需要适配时只改 `research_agent/adapters/astradraw_renderer.py` 与 `svg_audit.py`。
