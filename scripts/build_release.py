@@ -84,6 +84,10 @@ SKIP_SUFFIXES = {".pyc", ".pyo"}
 # Run data lives inside the package directory.  It is local experiment output, not source,
 # and shipping it would publish the owner's research history.
 DENY = (
+    # Pages deployment belongs to the showcase repository; the bundle repo is the
+    # product itself and should not run a second site deploy on push.
+    ".github/workflows/pages.yml",
+    ".github/workflows/refresh-digest.yml",
     "research_agent/web/data",
     "runtime_data",
     "research_agent/web/data/",
