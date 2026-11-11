@@ -87,11 +87,9 @@ SYNC_DOCS = (
     "THIRD_PARTY_NOTICES.md",
 )
 # The owner's design archive ships as text source so the upload folder is self-contained.
-# Binary media (figures/, docs/ audit screenshots, PDF/DOCX) stays out: the bundle is kept
-# source-sized by the integrity test's 40 MB cap, and media is not source.
-SYNC_DOCS = SYNC_DOCS + tuple(sorted(p.name for p in ROOT.glob("[0-9][0-9]-*.md")))
-SYNC_DOCS = SYNC_DOCS + tuple(sorted(p.name for p in ROOT.glob("组会汇报-*.md")))
-SYNC_DOCS = SYNC_DOCS + ("1110讨论.html",)
+# Numbered design docs (00-73) live in design/ at the repository root.
+SYNC_DIRS = SYNC_DIRS + ("design",)
+SYNC_DOCS = SYNC_DOCS + tuple(sorted(p.name for p in (ROOT / "design").glob("组会汇报-*.md")))
 SKIP_NAMES = {"__pycache__", "node_modules", "dist", "test-results", ".pytest_cache", ".ruff_cache"}
 SKIP_SUFFIXES = {".pyc", ".pyo"}
 # Run data lives inside the package directory.  It is local experiment output, not source,

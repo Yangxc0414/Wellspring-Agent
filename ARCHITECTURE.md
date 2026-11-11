@@ -22,7 +22,7 @@
 
 评审独立性不靠“多问几次同一个模型”：`research_support_panel` 把多个 judge profile 的逐句 verdict 做分歧账本，分歧项进入 `pending_human`，strict 下未裁决即阻断；run 目录存在 `support-panel.json` 时，canonical、local experiment 与 search study 三套 closure 的 `support_panel_ready` 都要求 ready/not_applicable，未裁决分歧不能人签；local 还要求 panel 的 draft hash 与最终手稿一致。profile id 由调用方提供，不能证明 provider 真的不同，kappa 也不是 human gold。
 
-差异是这四件事的**交集**，不是每一列的首创；当前仍缺独立人类 gold、跨提供商评审、真实本地实验执行与 HPO，详见 [`49-差异化设计-证据闭合运行时与现有科研智能体对照.md`](49-差异化设计-证据闭合运行时与现有科研智能体对照.md)。证据链只证明存在性与身份，不证明正确性、语义蕴含、同行评审或可投稿。
+差异是这四件事的**交集**，不是每一列的首创；当前仍缺独立人类 gold、跨提供商评审、真实本地实验执行与 HPO，详见 [`49-差异化设计-证据闭合运行时与现有科研智能体对照.md`](design/49-差异化设计-证据闭合运行时与现有科研智能体对照.md)。证据链只证明存在性与身份，不证明正确性、语义蕴含、同行评审或可投稿。
 
 ## 2. 四层架构
 

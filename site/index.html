@@ -592,7 +592,7 @@
       <h4>接下来做什么 · 一个总线 + 四个端口（71 号设计文档 · 2026-11-10 立项）</h4>
       <p class="sm-lede">四图对照的起点：四条反馈环曾只有「溯源 / 失效传播」一条真实自动闭环。本轮把其余三条的<b>回指侧</b>也接通——判定变成下一轮假设生成的输入（默认关闭、逐环开启、来源哈希过期即拒绝），并给图③补上「触发 → 相关性检查 → 下一次 run 消费」的委托骨架。解耦设计把"判定改变下一步行动"做成<b>可插拔、可单独开关与测量的对象</b>——这正是四条策略的实验台。</p>
       <div class="sm-strategies">
-        <div class="sm-strategy"><b>第一步 · 判定总线（Verdict Ledger）<em>✅ 已落地 · verdict-ledger 0.1.0</em></b><span>append-only 判定账本：三态判定 / closure blockers / lineage stale / rsi regressed / 护栏拦截统一入账；消费者（next_actions、反馈环、autopilot）只读总线。生产者不变、门禁语义不变、缺失 fail-closed。实测已抓到真实缺陷：autopilot 代签后 capsule 快照仍报 CLOSURE_UNSIGNED——漂移从静默变为一等行（<code>verdicts collect</code>）。</span></div>
+        <div class="sm-strategy"><b>第一步 · 判定总线（Verdict Ledger）<em>✅ 已落地 · verdict-ledger 0.2.0</em></b><span>append-only 判定账本：三态判定 / closure blockers / lineage stale / rsi regressed / 护栏拦截统一入账；消费者（next_actions、反馈环、autopilot）只读总线。生产者不变、门禁语义不变、缺失 fail-closed。实测已抓到真实缺陷：autopilot 代签后 capsule 快照仍报 CLOSURE_UNSIGNED——漂移从静默变为一等行（<code>verdicts collect</code>）。</span></div>
         <div class="sm-strategy"><b>第二步 · FeedbackPort（反馈环一等化）<em>✅ 4/4 环接入下一步动作 · feedback 0.6.0</em></b><span>observe → propose → gate → apply → record；四环各为可开关实现。消费侧类型化：约束带 <code>constraint_kind + payload</code>，生成端按类型分派（文本仅供人读，旧账本消费边缘一次性推断）——改一句措辞不会让闭环静默失效。T6b 携带已执行否证条件、信念修订对「revise or drop」候选降权、同质化强制第二视角；idea.json 写 <code>feedback_constraints_applied</code> provenance。消费时重算来源 sha256，stale 默认拒绝。关闭全部环 = 逐字节一致。</span></div>
         <div class="sm-strategy"><b>第三步 · M1 五类反馈对照<em>✅ 判别力 supported · 多 run 测量待执行</em></b><span>真实 / 打乱 / 过时 / 含噪 / 矛盾五类反馈跑在 FeedbackPort 上：real 1.0 / 退化均值 0.333 / 矛盾 5/5 升级人工；决策表接入 next_actions 端到端 behavior_changed=True。多 run 统计脚本就绪、按指示延后取数。</span></div>
         <div class="sm-strategy"><b>第四步 · MemoryWritePort + M2<em>◐ 准入半程 · memory-port 0.1.0</em></b><span>四准入策略（全存 / 全不存 / 重放后存 / 独立验证后存）可插拔，严格度对照 4/4→2/4→1/4→0/4 两两互异（verdict=supported）；跨任务收益需多会话测量，按 73- 号设计延后。类型化记忆图谱等 M2 结果出来再定型，不提前固化。</span></div>
@@ -602,7 +602,7 @@
       <div class="sm-rows">
         <div class="sm-row"><span class="sm-key">已实测基线</span><p>search-study 三态判定（区间跨零即「不可判定」）· 复现计数 + 功效阶梯（会推翻自己的旧结论）· 护栏开火率 8.1% · Host-as-Model 零 key 闭环 · autopilot 单次委托 · 46 工具零签名入口 · <b>M1 反馈敏感性实测（2026-11-11）：真实判定 1.0 自复现、退化类均值 0.333、矛盾判定 5/5 升级人工；端到端 behavior_changed=True</b>（stale 重签建议被 verify_bundle 取代，见 73- 号设计文档）· <b>反馈回指消费 E2E（2026-11-11）：pipeline 读新鲜约束进 idea 生成、stale 约束默认拒绝、委托事件下一次 run 消费并标 acted</b>（tests/test_pipeline FeedbackLoopWiringTest 钉住）。</p></div>
         <div class="sm-row"><span class="sm-key">四个问题</span><p><b>Q1</b> 指标收益与独立证据是否脱钩（优先预实验）· <b>Q2</b> 反馈何时真改变行动 · <b>Q3</b> 一次成功何时值得沉淀为经验 · <b>Q4</b> 自主循环是否越走越窄。</p></div>
-        <div class="sm-row"><span class="sm-key">出处</span><p><a href="https://github.com/Yangxc0414/research-agent/blob/main/71-四图对照与解耦设计-判定总线与反馈环一等化.md">71-四图对照与解耦设计</a>（四图逐环节对照 + 可失败的验收）· <a href="https://github.com/Yangxc0414/research-agent/blob/main/73-M1M2收尾设计-单会话与多会话可选的反馈测量.md">73-M1/M2 收尾设计</a>（单会话/多会话可选）· 逐项实测读数见仓库 docs/fact-baseline.md。</p></div>
+        <div class="sm-row"><span class="sm-key">出处</span><p><a href="https://github.com/Yangxc0414/research-agent/blob/main/design/71-四图对照与解耦设计-判定总线与反馈环一等化.md">71-四图对照与解耦设计</a>（四图逐环节对照 + 可失败的验收）· <a href="https://github.com/Yangxc0414/research-agent/blob/main/design/73-M1M2收尾设计-单会话与多会话可选的反馈测量.md">73-M1/M2 收尾设计</a>（单会话/多会话可选）· 逐项实测读数见仓库 docs/fact-baseline.md。</p></div>
       </div>
     </div>
     <p class="fineprint">门禁与读法以上方 canonical 卡片为准；demo 阶段映射 G1=S3 · G2=S4 · S5b=S5c · G5=S16，各子页投影的标签均映射到此统一口径。</p>

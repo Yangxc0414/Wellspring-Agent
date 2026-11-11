@@ -901,7 +901,7 @@
     "id": "mandate",
     "name": "持续委托投影",
     "stage": "META",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "status": "draft",
     "owner": "research-agent",
     "outputs": [
@@ -913,7 +913,7 @@
     "gates": [],
     "invariants": [
       "只读投影：不创建 Claim/EA/Verdict，不签名、不批准、不执行、不写项目状态",
-      "触发来自已有 loop-capsule 的 blockers/next_actions，不重新计算门禁；capsule 快照与判定总线冲突时以总线为准并留 stale_snapshot_suppressed 审计行",
+      "触发来自 loop-capsule blockers/next_actions 的【读时重算】（build_loop_capsule 以产物为准），不重新计算门禁；重算失败回退快照并以判定总线交叉核验为第二道保险（stale_snapshot_suppressed 审计行）",
       "缺失 artifact 不是 pass；过期或撤销的委托必须停止",
       "委托授权只能由人写入；agent 不得创建、放宽或续期",
       "状态只能是 empty/active/partial/needs_human/stopped"

@@ -1,0 +1,185 @@
+% 本仓库的对外综述：实现形状、与现有科研智能体的差异、以及本机实测数字。
+% 编译：xelatex（需 ctex/booktabs/longtable）。所有数字均来自本仓库 runtime_data/ 与 studies/ 产物。
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+
+\definecolor{accent}{RGB}{20,60,120}
+\ctexset{section={name={§,},format={\color{accent}\large\bfseries}}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\footnotesize\thepage}
+\fancyhead[L]{\footnotesize 证据闭合的科研运行时 · 2026-10-30}
+\fancyhead[R]{\footnotesize 本机实测，非外部效度}
+
+\setlength{\parskip}{0.4em}
+\linespread{1.12}
+
+\title{\color{accent}\textbf{证据闭合的科研运行时}}
+\author{实现形状 · 差异化定位 · 实测效果}
+\date{\small 状态基线 2026-10-30：38 个 MCP 工具 · 712 项测试 · 185 个源文件（构建指纹 \texttt{439dcec80cafdbbb}）}
+
+\begin{document}
+\maketitle
+\vspace{-1.4em}
+\begin{center}
+\small\itshape 一句话：不是"又一个会自动写论文的 agent"，而是一个会拒绝结论的运行时。\\
+它的产出不是稿件，而是"哪些结论此刻有资格被写下来"的判定与证据链。
+\end{center}
+
+\section{整体实现}
+
+系统是一条可审计的科研流水线：内核只定义对象与门禁，能力层把每个阶段做成可调用工具，
+Skill 层提供流程知识，适配器层负责外部来源与宿主接入。MCP、HTTP 与 Python 三个入口
+共用同一份 dispatch，因此"接入 Qoder/Claude Code/Codex/Zcode"不改变任何语义。
+
+\begin{longtable}{p{2.9cm}p{5.1cm}p{6.6cm}}
+\toprule
+\textbf{层 / 机制} & \textbf{做什么} & \textbf{关键约束（不是装饰）} \\
+\midrule
+\endhead
+Host-as-Model & 无外部 API key：生成步骤落成持久 \texttt{ModelTurn}，由宿主 Agent（如 Qoder 的模型）作答，按请求哈希绑定、形状校验、一次性消费 & 禁止静默降级；\texttt{host\_label} 只说明"谁供给"，不证明输出独立 \\
+\addlinespace
+可执行注册表 & 每个数据集档位同时声明 supports 与 cannot\_test；想法的 \texttt{experiment\_plan} 必须匹配档位，否则在生成阶段就被拒 & 只约束"本系统能否执行"，不保证实验设计正确 \\
+\addlinespace
+声明式研究 & 因子写成数据（memory / gate / operators / min\_delta / parent\_selection），第一水平是参照格；未知因子、格子数 $>12$、种子 $<4$ 直接拒绝 & 种子数不进入 RNG 键，两臂共用变异流，差异可归因于策略 \\
+\addlinespace
+三态判定 & 只有 95\% 配对区间不跨零的比较才算"判定"；跨零是 \emph{非结果}，不用点估计冒充 & 单一来源函数，闭包 / 复现 / 签署共用，结构性排除"能签不能闭" \\
+\addlinespace
+复现与功效 & 按 (设计, 数据集) 分组，同设计跨数据集算复现计数；同数据不同种子算功效阶梯，最高功效那份代表该数据集 & 分组只在证据池内进行，绝不把不同预算/指标当成同一实验 \\
+\addlinespace
+签署护栏 & 被同设计同数据集的更高功效研究推翻的比较，不进入可签署断言；全被推翻则拒绝产出草稿 & 只能减少可签署内容；反事实臂 \texttt{-\/-no-guard} 不能签名 \\
+\addlinespace
+闭包与血缘 & 三套 closure profile（canonical run / 本地实验 / search\_study），词汇不互换；代码整文件哈希 + 金丝雀 + \texttt{-\/-verify-repro} 重跑 & 结构化闭合 $\neq$ 结论正确 \\
+\addlinespace
+人工门 & claim / approve / sign / freeze / publish / export 只存在于 CLI；MCP 与本地 runtime 不提供写签核的入口 & 本会话所有产物均为 \texttt{status=draft}、\texttt{signed=false} \\
+\bottomrule
+\end{longtable}
+
+\section{差异化：三个判定，而不是功能清单}
+
+与已有系统对照，差异不在"我们也生成想法和稿件"，而在我们让哪些句子\emph{没有资格}进入稿件：
+
+\begin{longtable}{p{3.3cm}p{5.2cm}p{5.9cm}}
+\toprule
+\textbf{工作族} & \textbf{它们已证明的} & \textbf{本工作补的那一块} \\
+\midrule
+\endhead
+假设锦标赛（Co-Scientist 等） & 稳定产出可检验假设，专家反馈入环 & 假设之后的\emph{失效判定}：结论何时被更高功效或跨环境证据撤销 \\
+\addlinespace
+端到端写论文（AI-Scientist v2 等） & 少人干预跑完想法$\to$实验$\to$手稿$\to$评审 & 句子级证据绑定与写作包哈希绑定；未签核不报结果数字 \\
+\addlinespace
+长程运行与续跑（ARIS / DeepScientist） & 阶段可恢复、预算可控 & 恢复时的\emph{一致性}判定：产物字节与代码哈希不符即 stale \\
+\addlinespace
+自改进 / RSI（RSI-Anything 等） & 改进可度量、可拒绝、可回滚 & 改进对象是配置与技能，科研产物侧保留人签门禁；拒绝会沿血缘传播 \\
+\addlinespace
+独立评测（PaperBenchX / AGENT4SCI） & 隔离评测，防自评自过 & 评测与签署同池：反事实臂只测开火率，不能签名 \\
+\addlinespace
+Agent 宿主（Qoder / Claude Code / Codex） & 现成的编排、权限与会话 & 领域证据模型 + 人工门 + 可审计产物；宿主同时充当模型供给 \\
+\bottomrule
+\end{longtable}
+
+归纳成三个判定：\textbf{资格}（哪些比较可以成为断言）、\textbf{完成}（一个 run 缺什么不能闭）、
+\textbf{失效}（改了代码或来了更高功效证据，旧结论还能不能被引用）。四元交叉里
+"资格 + 完成 + 失效 + 生成能力供给可移植"这一格是空的，这就是本工作的位置。
+
+\section{效果在哪里：本机实测数字}
+
+以下全部来自本仓库磁盘上的真实研究包与产物，可用附录命令逐条复算。
+\emph{它们度量的是确定性搜索回路的控制策略，不是任何已发表智能体的自我修改。}
+
+\subsection{能被拒绝的结论，才叫发现}
+
+\begin{longtable}{p{4.1cm}p{4.0cm}p{6.0cm}}
+\toprule
+\textbf{结论} & \textbf{实测} & \textbf{它是怎么站住的} \\
+\midrule
+\endhead
+归档 $\times$ 贪婪门控 一起用伤害搜索 & iris $-0.115$、wine、breast\_cancer 同量级，digits $-0.180$（CI $[-0.237,-0.123]$） & 四个独立环境同号判定 $\Rightarrow$ \texttt{generalizes=true} \\
+\addlinespace
+贪婪挑选最优父本 比随机挑选更差 & $-0.2365$ / $-0.1578$ / $-0.1922$（三环境同号） & 新因子 \texttt{parent\_selection}，两臂共用变异流；3/3 复现 \\
+\addlinespace
+"只用归档就更好" 是小样本假象 & 16 种子 $+0.1208$，CI $[0.0500,0.1916]$；64 种子、128 种子与\emph{不相交}的 65--128 全部跨零 & 该 anecdote 三次出现三次落空，现被护栏挡在可签署断言之外 \\
+\bottomrule
+\end{longtable}
+
+第三条最能说明系统的取向：我们没有把"曾经为正"写成结论，而是把它变成一个\emph{可被拒绝的对象}。
+
+\subsection{过早判定的代价，以及护栏到底拦了什么}
+
+\begin{longtable}{p{4.9cm}p{4.0cm}p{6.4cm}}
+\toprule
+\textbf{度量} & \textbf{数值} & \textbf{读法} \\
+\midrule
+\endhead
+低功效判定在更高功效上不再成立（反转率） & $3/31 = 9.68\%$ & 全部是"区间回到零"，\textbf{0 例符号翻转} $\Rightarrow$ 该剔除断言，不该怀疑方向 \\
+\addlinespace
+护栏开火率（6 项目 21 包） & $3/37 = 8.1\%$；可审计口径 $3/33 = 9.1\%$ & \texttt{packages\_fully\_blocked=0}：护栏只摘断言，从不掏空一个包 \\
+\addlinespace
+E1 两臂对照（3 个真实包） & 带护栏 3 条可签 vs 不带 6 条 & 被拦的 3 条是\emph{同一条} \texttt{memory\_on\_gate\_off}，即三次复现的同一过度声明 \\
+\addlinespace
+留出检验（新种子未参与拦截判定） & 65--128 种子 $-0.0109$；1--128 $-0.0126$ & 运行时自己把 \texttt{superseded\_by} 指向留出包 $\Rightarrow$ 护栏没有冤枉它 \\
+\addlinespace
+记忆的 run 内 A/B & 功效感知的停止规则 $1.0$ vs $0.8$ & 首个有动态范围的信号；两臂仍由同一宿主作答，自答偏差已在产物中声明 \\
+\bottomrule
+\end{longtable}
+
+\subsection{工程性的自查也产出数字}
+
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{指标饱和审查}：133 份写作审计里 21 个检查项有 15 个从未出现非默认值，
+        而 127/133 是 fixture 模式（真实语料稿仅 6 份）。恒 \texttt{pass} 的项可以是回归护栏，
+        但不是信息通道，\emph{不得}进入任何"改进有没有用"的效果表。
+  \item \textbf{顺带照出的过度记分}：章节检查按标题子串匹配，一份只有 6 个标题的稿
+        （"实验与结果""讨论与结论"）报 9/9 \texttt{pass} 且无 blocker。
+        新增 \texttt{structure.merged\_headings}（warning 级、永不阻断）点名合并，同时补上此前零测试引用的失败分支。
+  \item \textbf{注册表加因子 = 旧证据退役}：新增 \texttt{parent\_selection} 后，新包的比较键变了，
+        留出包被放进了 \texttt{unreplicated}——复现分组与签署护栏\emph{同时}对新旧包失明，且全程不报错、测试全绿。
+        修法是把可比性写成规则：停在在任水平的单水平因子不进比较键，
+        而"在任水平必须等于 runner 默认值"用签名反射绑成测试。
+  \item \textbf{确定性}：注册表与元数据改动后重跑，三个 64 种子包的数值逐位相同；
+        闭包报告里 \texttt{code.unchanged=fail} 与 \texttt{code.reproduced=pass} 并存——
+        "代码确实变了，但这些数字在当前代码下重现"第一次成为产物字段而不是人工说明。
+  \item \textbf{活体判定}：同一份磁盘代码，新进程返回 \texttt{build.fingerprint=439dcec80cafdbbb}、
+        证据池 30 包，而宿主里长驻的连接器进程没有 \texttt{build} 字段、只看见 2 包。
+        结论：凡"已通过 Qoder 验证"的说法，必须先比指纹再读结果。
+\end{itemize}
+
+\section{还没做到的}
+
+\begin{enumerate}[leftmargin=1.9em]
+  \item E1 只有 3 个包、且被拦断言同源（有效样本量近似 1）。要把它写成主张，需要一批想法
+        （$\ge 8$ 条）两臂各跑，指标是"进入人签的假阳比例"与返工次数。
+  \item 数据集是我自选的四个公开表格，与外部自改进系统没有可比面；基准子集与其口径仍待定义。
+  \item 独立评审的"第二供给"仍缺：\texttt{single\_author\_review} 可以解除，但解除后仍是单源。
+  \item 双人 gold 标注、跨提供商真实实测、真实实验的签核尚未完成；\texttt{submission\_ready} 恒为 \texttt{false}。
+  \item \texttt{cli.py} 与 \texttt{mcp\_server.py} 仍是巨型入口文件，分域拆分需要一次专门的重构。
+  \item 用户侧动作：重载 Qoder 的 \texttt{research-agent} 连接器，然后用构建指纹复核宿主可见行为。
+\end{enumerate}
+
+\section*{附录：逐条复算}
+\vspace{-0.6em}
+\begin{verbatim}
+python -m research_agent study search --dataset iris --seeds 1,2,...,128 --budget 60
+python -m research_agent study replicate --project runtime_data/guard-heldout-studies
+python -m research_agent study claim --study-dir <包目录> --scope E1/PILOT
+python -m research_agent study claim --study-dir <包目录> --scope E1/PILOT --no-guard
+python -m research_agent closure guard-audit --project runtime_data/power-ladder
+python -m research_agent manuscript audit --project P --run-id R --draft <稿>
+python scripts/mcp_build_probe.py --project runtime_data/power-ladder
+python -m unittest discover -s tests
+\end{verbatim}
+
+\begin{center}
+\small 边界：本研究产物是"配置层面的改进搜索"这一结构类比；\texttt{analogue=true}、
+\texttt{exploratory=true}、\texttt{significance\_claimed=false} 恒为真；
+没有任何结论被自动签核，也没有复现任何外部系统。
+\end{center}
+
+\end{document}
