@@ -931,18 +931,54 @@ def create_app(settings: Optional[RuntimeSettings] = None) -> FastAPI:
         except KeyError:
             raise HTTPException(status_code=404, detail="job not found")
         # 判定总线到 workbench 的载荷增补（ContextPanel 数据流对接）：单 run 闭包
-        # 判定经 verdict-ledger 单点；失败不打断 run 状态本身。
+        # 判定经 verdict-ledger 单点 + capsule_source 溯源 + 快照冲突 override；
+        # 失败不打断 run 状态本身。
         try:
             from ..verdict_ledger import closure_verdict_for_run
+            from ..loop_capsule import build_loop_capsule
 
             job = manager.get(job_id)
+            # 读时重算：产物为准（与 mandate 0.3.0 同语义）；快照 blockers 只用于
+            # 冲突对照（override），不再作为触发来源。
+            capsule_source = "recomputed"
+            snapshot_blockers: list = []
+            try:
+                capsule = build_loop_capsule(job.output_dir)
+            except Exception:
+                capsule_source = "snapshot_fallback"
+                capsule = _load_capsule_snapshot(job.output_dir / "loop-capsule.json")
+            if capsule_source == "recomputed":
+                snapshot_blockers = _snapshot_blockers(job.output_dir / "loop-capsule.json")
+            verdict_override = None
+            closure_row = closure_verdict_for_run(job.output_dir)
+            if "CLOSURE_UNSIGNED" in snapshot_blockers and closure_row.get("status") == "signed":
+                verdict_override = {
+                    "snapshot": "CLOSURE_UNSIGNED",
+                    "recomputed": "signed",
+                    "source_sha256": str(closure_row.get("source_sha256") or ""),
+                }
             payload["verdict_bus"] = {
-                "closure": closure_verdict_for_run(job.output_dir),
+                "closure": closure_row,
+                "capsule_source": capsule_source,
+                "verdict_override": verdict_override,
                 "boundary": "closure verdict re-derived from artifacts (verdict-ledger); prompt-side only, never a gate",
             }
         except Exception:
             payload["verdict_bus"] = {"closure": None, "error": "verdict bus unavailable"}
         return payload
+
+    def _snapshot_blockers(capsule_path: Path) -> list:
+        try:
+            payload = json.loads(capsule_path.read_text(encoding="utf-8"))
+            return [str(item) for item in (payload.get("blockers") or [])]
+        except (OSError, ValueError):
+            return []
+
+    def _load_capsule_snapshot(capsule_path: Path) -> Dict[str, Any]:
+        try:
+            return json.loads(capsule_path.read_text(encoding="utf-8")) or {}
+        except (OSError, ValueError):
+            return {}
 
     @app.get("/api/runs/{job_id}/events")
     def get_events(job_id: str, after: int = Query(default=0, ge=0)) -> Dict[str, Any]:

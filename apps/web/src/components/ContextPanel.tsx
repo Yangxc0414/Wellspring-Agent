@@ -590,6 +590,19 @@ function RunContext({ task }: { task: ResearchTask }) {
                 <span>CLAIM <b>{runtimeCard.verdictBus.closure.has_signed_claim ? "signed" : "unsigned"}</b></span>
               </div>
             ) : null}
+            {runtimeCard?.verdictBus?.capsule_source ? (
+              <div className="run-numbers">
+                <span>
+                  CAPSULE <b>{runtimeCard.verdictBus.capsule_source === "recomputed" ? "产物为准 · 读时重算" : "快照兜底"}</b>
+                </span>
+              </div>
+            ) : null}
+            {runtimeCard?.verdictBus?.verdict_override ? (
+              <p className="run-hint">
+                快照冲突已由判定总线裁定：快照说 {runtimeCard.verdictBus.verdict_override.snapshot}，
+                重算 = <b>{runtimeCard.verdictBus.verdict_override.recomputed}</b>——以总线为准，不要按快照建议重签。
+              </p>
+            ) : null}
             {runtimeCard?.verdictBus?.error ? (
               <p className="run-hint">判定总线不可用：{runtimeCard.verdictBus.error}</p>
             ) : (

@@ -49,6 +49,12 @@ export interface RunJob {
       source_path?: string;
       source_sha256?: string;
     } | null;
+    capsule_source?: "recomputed" | "snapshot_fallback";
+    verdict_override?: {
+      snapshot: string;
+      recomputed: string;
+      source_sha256?: string;
+    } | null;
     boundary?: string;
     error?: string;
   };
