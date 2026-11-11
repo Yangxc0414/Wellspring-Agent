@@ -1,6 +1,6 @@
 {
   "schema_version": "workspace-0.1",
-  "generated_at": "2026-11-11T00:24:21+00:00",
+  "generated_at": "2026-11-11T00:44:09+00:00",
   "count": 217,
   "curated": 51,
   "derived": 166,
@@ -1027,7 +1027,7 @@
       "group": "memory",
       "label": "guidelines",
       "syntax": "python -m research_agent memory guidelines",
-      "description": "usage: research_agent memory guidelines [-h] --project PROJECT\n                                        [--propose-file PROPOSE_FILE]\n                                        [--step STEP]",
+      "description": "usage: research_agent memory guidelines [-h] --project PROJECT\n                                        [--propose-file PROPOSE_FILE]\n                                        [--step STEP] [--admission ADMISSION]",
       "safety": "catalog_only",
       "curated": false
     },

@@ -318,6 +318,7 @@ python -m unittest discover -s tests -v
 | mandate | META（只读委托投影） | `research_agent/mandate.py` | `modules/mandate/SPEC.md` |
 | verdict-ledger | S5–S16（判定总线） | `research_agent/verdict_ledger.py` | `modules/verdict-ledger/SPEC.md` |
 | feedback | S5–S16（反馈端口） | `research_agent/feedback.py` | `modules/feedback/SPEC.md` |
+| memory-port | META（记忆写入端口） | `research_agent/memory_port.py` | `modules/memory-port/SPEC.md` |
 | ccfa-audit | S4 | `research_agent/ccfa_audit.py` + `cli_design.py` | `modules/ccfa-audit/SPEC.md` |
 
 每个模块的测试在 `tests/`；完整纵切见 `research_agent/pipeline.py`。`research_agent/vendor/astradraw/` 是从本地完整复制的第三方绘图工作流，**不要改上游脚本**；需要适配时只改 `research_agent/adapters/astradraw_renderer.py` 与 `svg_audit.py`。

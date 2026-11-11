@@ -3715,7 +3715,14 @@ def _cmd_memory_guidelines(args: argparse.Namespace) -> int:
         proposed = payload.get("proposals") if isinstance(payload, dict) else payload
         if not isinstance(proposed, list):
             raise SystemExit("propose file must be a JSON list of {text, sources} objects")
-        result = merge(load(project), proposed, step=step, project=project)
+        from .memory_port import admit
+
+        admission_strategy = getattr(args, "admission", "") or "store_all"
+        try:
+            admission = admit(proposed, strategy=admission_strategy, project=project)
+        except ValueError as exc:
+            raise SystemExit(str(exc))
+        result = merge(load(project), admission["admitted"], step=step, project=project)
         path = save(project, result["entries"], step)
         _print_json(
             {
@@ -3725,6 +3732,13 @@ def _cmd_memory_guidelines(args: argparse.Namespace) -> int:
                 "accepted": result["accepted"],
                 "rejected": result["rejected"],
                 "expired": result["expired"],
+                "admission": {
+                    "strategy": admission["strategy"],
+                    "proposed": admission["counts"]["proposed"],
+                    "admitted": admission["counts"]["admitted"],
+                    "rejected_by_strategy": admission["counts"]["rejected"],
+                    "rows": admission["rows"],
+                },
                 "next": (
                     "these lines are appended to the idea-generation prompt on the next review; "
                     "they are advice, not evidence, and cannot reach a claim or a gate"
@@ -4331,6 +4345,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="JSON list of {text: 'trigger -> mechanism -> action', sources: [artifact paths]}",
     )
     guidelines_parser.add_argument("--step", default="0")
+    guidelines_parser.add_argument(
+        "--admission",
+        default="store_all",
+        help="memory admission strategy: store_all (default) | store_none | replay_then_store | independent_verify_then_store",
+    )
     guidelines_parser.set_defaults(func=_cmd_memory_guidelines)
 
     ab_parser = memory_sub.add_parser(
