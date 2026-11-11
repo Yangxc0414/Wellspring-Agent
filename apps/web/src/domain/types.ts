@@ -135,6 +135,11 @@ export interface Coverage {
 }
 
 export interface RuntimeLoop {
+  feedback?: {
+    constraints_applied: number;
+    loops: string[];
+    effects: string[];
+  };
   idea?: {
     status?: string;
     selection?: string;

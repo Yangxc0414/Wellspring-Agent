@@ -1541,6 +1541,17 @@ function RuntimeLoopMap({ task }: { task: ResearchTask }) {
         : "尚未产出 idea.json",
       note: idea?.candidates[0]?.title ?? "候选不是 claim；G1 由人选定"
     },
+    ...(loop?.feedback
+      ? [{
+          stage: "S2·FB",
+          label: "反馈约束消费",
+          tone: loop.feedback.constraints_applied > 0 ? "ready" : "partial",
+          detail: `${loop.feedback.constraints_applied} constraints · loops: ${loop.feedback.loops.join(", ") || "—"}`,
+          note: loop.feedback.constraints_applied > 0
+            ? "判定→生成的 provenance（loop_id/subject/effect 已写 idea.json）；stale 约束已被拒绝"
+            : "capsule 带反馈投影但本 run 未消费约束（环关闭或无匹配候选）"
+        }]
+      : []),
     {
       stage: "S4",
       label: "实验设计",

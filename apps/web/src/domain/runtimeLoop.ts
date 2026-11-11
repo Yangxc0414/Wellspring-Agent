@@ -66,6 +66,17 @@ export function compactRuntimeLoop(input: RuntimeLoopArtifacts): RuntimeLoop {
   const closure = object(input.closure);
   const capsule = object(input.loopCapsule);
   const writing = object(capsule.writing);
+  // feedback 投影（round 2 起 capsule 自带；旧产物无此键 → undefined，UI 不渲染）
+  const feedbackRaw = object(capsule.feedback);
+  const feedbackApplied = number(feedbackRaw.constraints_applied);
+  const feedbackLoops = array<string>(feedbackRaw.loops).slice(0, 6).map((item) => text(item, 60));
+  const feedback = "feedback" in capsule
+    ? {
+        constraints_applied: feedbackApplied,
+        loops: feedbackLoops,
+        effects: array<string>(feedbackRaw.effects).slice(0, 6).map((item) => text(item, 120))
+      }
+    : undefined;
   const externalGates = object(writing.external_gates);
   const appliedPolicy = object(input.appliedPolicy);
   const activeLease = object(input.activeLease);
@@ -128,6 +139,7 @@ export function compactRuntimeLoop(input: RuntimeLoopArtifacts): RuntimeLoop {
           checks: array(closure.checks).length
         }
       : undefined,
+    feedback: feedback ? { ...feedback, constraints_applied: feedback.constraints_applied || 0 } : undefined,
     observationId: text(input.observationId, 80) || undefined,
     activePolicyId: text(input.activePolicyId, 80) || undefined,
     appliedPolicy: Object.keys(appliedPolicy).length
