@@ -85,6 +85,13 @@ class ClassificationTest(unittest.TestCase):
             self.assertIn(row["kind"], KINDS)
             self.assertTrue(row["reason"], row["path"])
 
+    def test_run_relative_lineage_manifest_is_a_relative_artifact(self):
+        rows = classify_references(
+            "observe = 对每个含 `lineage/lineage.json` 的 run 重跑 verify", REPO
+        )
+        self.assertEqual([r["kind"] for r in rows], ["relative_artifact"])
+        self.assertTrue(rows[0]["reason"])
+
 
 class RealDocumentAuditTest(unittest.TestCase):
     @classmethod

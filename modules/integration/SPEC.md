@@ -2,7 +2,7 @@
 id: integration
 name: 通用 MCP 与项目目录
 stage: META
-version: 0.49.0
+version: 0.51.0
 status: pilot
 owner: research-agent
 inputs:
@@ -202,6 +202,8 @@ MCP 协议：
 
 - `research_agent/project.py`：项目 manifest、固定目录、run 目录、run index、越界校验、产物列表/读取；
 - `research_agent/mcp_server.py`：stdio transport、工具表、参数校验、TaskAgent 调用、模型工具解析、next actions；
+- v0.50.0 闭环接线：`pipeline.py` idea 阶段经 `loop_capsule.project_root_for_run` 定位项目，读 `feedback.generation_constraints`（新鲜约束进 `IdeaRequest.generation_constraints`；stale 默认拒绝入 warnings；emit `feedback_constraints` 事件），并消费 `waitpoints.pending_delegation_events`（emit `delegation_events` + warnings + `mark_delegation_acted`，图③ 06 回指）；`research_next_actions` 增 `kind=delegation_event`（含 task-less 分支）。不跨人工门、不写 Claim/EA/gate/signature。
+- v0.51.0 快照消费者读时重算：`mcp_server._loop_capsule_summary`（research_status / next_actions 的 capsule 摘要）不再信任 `loop-capsule.json` 的 blockers/next_actions/nodes 判定字段，改为 `build_loop_capsule(target)` 读时重算（artifact 为准）；快照只保留历史与 runtime META（observation_id/active_policy_id 回填节点）；输出增 `recompute` 只读回执（snapshot_blockers vs recomputed_blockers）；`CLOSURE_UNSIGNED` 被移除时给 `verdict_override`（source=read-time-recompute、总线 sha256 绑定；无总线行时 recomputed=unknown，不冒充 signed）。
 - `scripts/research_mcp_server.py`：固定 cwd/import path 到本仓库的 stdio 启动器，避免客户端从自己的安装目录启动时导入旧代码；
 - `research_agent/framework_api.py`：框架无关 capabilities + `dispatch_tool`；MCP/HTTP/Python 共用；
 - `research_agent/client.py`：`ResearchAgentClient`（HTTP）与 `LocalResearchAgent`（进程内）；
@@ -245,6 +247,10 @@ MCP 协议：
 5. 若工具名或参数变化，同步更新三端 `SKILL.md` 与 `integrations/README.md`。
 
 ## Changelog
+- 2026-11-11 · v0.51.0 · status=pilot · 快照消费者读时重算：research_status/_loop_capsule_summary 不再信任 loop-capsule.json 的 blockers/next_actions/nodes 判定字段，改为 build_loop_capsule(target) 读时重算（artifact 为准）；快照只保留历史与 runtime META（observation_id/active_policy_id 覆盖回节点）；增只读 recompute 回执（snapshot_blockers vs recomputed_blockers）；CLOSURE_UNSIGNED 被移除时仍给 verdict_override（source=read-time-recompute、总线 sha256 绑定，无总线行时不冒充 signed）。tests/test_verdict_ledger ConsumerMigrationTest 与 tests/test_next_actions_fallback 改为钉读时重算语义（快照命令不再被当权威回显；无 artifact 的 run 由新鲜重算给出动作）。
+- 2026-11-11 · v0.50.2 · status=pilot · loop-capsule 增只读 feedback 投影（constraints_applied/loops/effects），从 idea.json 的 feedback_constraints_applied 派生——闭环是否消费了上一轮判定对宿主/工作台可见；additive，不改门禁/blockers/next_actions 语义。tests/test_loop_capsule 增断言。
+- 2026-11-11 · v0.50.1 · status=pilot · doc_interfaces 分类修复：lineage 纳入 RELATIVE_PREFIXES——lineage/lineage.json 是 run 相对产物目录（与 run/claim/closure 同类），feedback SPEC 的该引用在 HEAD 即未分类（存量红灯，非本轮引入）；tests/test_doc_interfaces 增 relative_artifact 断言。
+- 2026-11-11 · v0.50.0 · status=pilot · 闭环接线：pipeline idea 阶段经 project_root_for_run 读 feedback.generation_constraints（新鲜约束进 IdeaRequest，stale 默认拒绝入 warnings，emit feedback_constraints 事件）；消费 pending_delegation_events（emit delegation_events + warnings + mark_acted，图③ 06）；research_next_actions 增 kind=delegation_event（含 task-less 分支）。idea 0.25.0 / feedback 0.4.0 / waitpoints 0.2.0 同轮。
 - 2026-11-11 · v0.49.0 · status=pilot · research_next_actions 读判定总线（71-§5 步 3 第二半）：`_next_actions` 追加 `_verdict_actions`（feedback.verdict_action_table 过本 run subject，kind=verdict_action、绑来源 sha256）；同函数两处 stale 快照判定改新鲜检查——G5 的「closure-signature/signature.json not in artifacts」与 S5b 的「claim/claim.json not in artifacts」用的都是 task.json 写入时刻的 artifacts 快照，autopilot 代签后会对已签闭包/已签 claim 重复给签署建议（与 verdict-ledger 抓到的 CLOSURE_UNSIGNED 同类漂移），改为读盘上的 signature 文件与 claim status；E2E RUN-E2E-02 实测 research_next_actions 从 stale 重签建议翻转为 verify_bundle/closure_check（runtime_data/m1-feedback/e2e-next-actions.json，behavior_changed=True）。输出新增 verdict_action 种类，升 minor。
 - 2026-11-07 · v0.48.0 · status=pilot · 判定第一次改变下一次行为（有界、不跨人工门）：上一轮整体反思的结论是系统为单向投影架构，四种判定（资格/完成/失效/供给）的下游全是只读文字，唯一回路靠人在 CLI 显式重跑。本轮落地最小一条真回路：S1 覆盖判定驱动下一轮检索预算。新增 research_agent/research_cycle.py（observe 只读提取覆盖信号、decide_next_cycle 纯函数决策、run_literature_cycle 多轮执行并把每轮观测与决策写进 append-only 事件链，饱和或预算耗尽即停，耗尽显式标需人补语料）；PipelineRequest 末尾加默认 False 的 adaptive_retrieval，开启时 pipeline 的 S1 走回路并把 adaptive_cycle 投影与一行回执写进产物；CLI pipeline run 加 --adaptive-retrieval。实测基线（7 篇本地 CC-BY 全文）：预算 3 → 3 来源 / 24 span / coverage 0.675 / partial，下一轮预算 6 → 6 来源 / 48 span / 1.000 / saturated 并收敛。边界：只改检索预算，不改 Q0/G1/G2/G3/G5、不写 Claim/EA/gate/signature、不置真 submission_ready、不编造语料；默认关闭时既有行为逐字不变。新增 tests/test_research_cycle.py 与 pipeline 集成用例钉住预算有界、饱和即停、判定确实改变下一轮参数、默认关闭无回归。
 - 2026-11-07 · v0.47.0 · status=pilot · 闭环状态可核对（只补骨架与单一权威，不改门禁语义）：对照 SciForge 的事件溯源与边界提交后复核，本系统仍有三处可定位缺口——pipeline.py:1098-1099 的 G3/G5 是硬编码字符串，write_pipeline_artifacts():1622-1637 又在产物后处理里就地 mutate 同一批 gate dict，存在两个互相覆盖的判定来源；主 run 只有 event_sink 内存回调与 job.json 整文件重写，没有 append-only 事件流、没有哈希链、没有「门禁未全过就不提交边界」的原子判定；scripts/record_test_verdict.py 调用 verdict_record 时未传 failures/errors，导致上一轮真实红灯 FAILED (errors=58) 的判定 JSON 里 errors=0 而 summary_line 写 58（D9 残余）。本轮：新增 research_agent/run_events.py（append_event/verify_events/commit_boundary/replay_boundaries/write_events/read_events，SHA-256 链 + append-only 落盘）；PipelineResult 末尾加默认空 events 字段，PipelineRunner._emit 同时写事件链；新增纯函数 evaluate_g3_g5 作为 G3/G5 唯一权威，run() 与 write_pipeline_artifacts() 都调用它并删除就地改写；产物写 events.ndjson 并在门禁未全过时写 gate_rejected；verdicts.parse_unittest_output 解析 failures/errors 且 record_test_verdict 传参。边界不变：不自动续跑、不自动跨人工门、不把 submission_ready 置真、不改 G1/G2/Q0 判定、不写 Claim/EA/gate/signature、events.ndjson 与 commit_boundary 都是可核对状态而非放行开关。新增 tests/test_run_events.py 与 tests/test_verdict_record.py 用例钉住链断裂可报、门禁失败不提交、G3/G5 单一来源、失败数解析。

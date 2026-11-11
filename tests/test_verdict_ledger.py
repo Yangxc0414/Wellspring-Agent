@@ -169,32 +169,37 @@ class ConsumerMigrationTest(unittest.TestCase):
             _fabricate_run(root, signed=True, capsule_blockers=["CLOSURE_UNSIGNED", "FIXTURE_ONLY"])
             summary = self._summary(root)
             self.assertNotIn("CLOSURE_UNSIGNED", summary["blockers"])
-            self.assertIn("FIXTURE_ONLY", summary["blockers"])
+            # read-time recompute is authoritative: a snapshot blocker the artifacts
+            # do not support (FIXTURE_ONLY without a fixture demo) is not echoed, but
+            # it stays visible in the snapshot side of the recompute receipt
+            self.assertNotIn("FIXTURE_ONLY", summary["blockers"])
+            self.assertIn("FIXTURE_ONLY", summary["recompute"]["snapshot_blockers"])
+            self.assertEqual(summary["recompute"]["authoritative"], "read-time")
             override = summary["verdict_override"]
             self.assertEqual(override["recomputed"], "signed")
             self.assertEqual(override["snapshot"], "CLOSURE_UNSIGNED")
+            self.assertEqual(override["source"], "read-time-recompute")
             self.assertTrue(override["source_sha256"])
             for action in summary["next_actions"]:
                 self.assertNotIn("closure sign", str(action.get("command") or ""))
 
-    def test_consistent_snapshot_is_untouched(self):
+    def test_consistent_snapshot_is_superseded_by_fresh_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             _fabricate_run(root, signed=False, capsule_blockers=["CLOSURE_UNSIGNED"], closure_status="ready")
-            capsule_payload = {
-                "run_id": "RUN-TEST-01",
-                "blockers": ["CLOSURE_UNSIGNED"],
-                "next_actions": [{"owner": "human", "gate": "G5", "command": "python -m research_agent closure sign --report x"}],
-                "nodes": [],
-                "boundary": "test",
-            }
-            (root / "runs" / "RUN-TEST-01" / "loop-capsule.json").write_text(
-                json.dumps(capsule_payload, ensure_ascii=False), encoding="utf-8"
-            )
             summary = self._summary(root)
+            # the snapshot and the artifacts agree on the unsigned closure: no override
+            self.assertIn("CLOSURE_UNSIGNED", summary["blockers"])
             self.assertIsNone(summary["verdict_override"])
-            self.assertEqual(summary["blockers"], ["CLOSURE_UNSIGNED"])
-            self.assertEqual(len(summary["next_actions"]), 1)
+            self.assertIn(
+                "CLOSURE_UNSIGNED", summary["recompute"]["recomputed_blockers"]
+            )
+            self.assertTrue(
+                any(
+                    "closure sign" in str(action.get("command") or "")
+                    for action in summary["next_actions"]
+                )
+            )
 
     def test_missing_capsule_returns_empty(self):
         with tempfile.TemporaryDirectory() as tmp:

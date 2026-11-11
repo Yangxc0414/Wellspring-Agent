@@ -149,6 +149,18 @@
 .scope-note b{color:#1f2937}
 .scope-note code{font-family:ui-monospace,monospace;font-size:11.5px;background:#eef2ff;color:#1d4ed8;padding:1px 5px;border-radius:4px}
 @media (max-width:760px){.scope-grid{grid-template-columns:1fr}.scope-col{padding:16px 18px}}
+.vision-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.vision-card{border:1px solid #e5e9f0;background:#fff;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.vision-card b{font-size:14px}
+.vision-card svg{width:100%;height:auto}
+.vision-card p{font-size:12px;line-height:1.7;color:#5b6472;margin:0}
+.vision-chain,.vision-lease{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:11.5px;font-weight:600}
+.vision-chain span,.vision-lease span{border:1px solid #dbe4f0;background:#f4f8fd;color:#23406e;border-radius:7px;padding:4px 8px}
+.vision-chain i,.vision-lease i{color:#8a94a6;font-style:normal}
+.vision-chain .pass,.vision-lease .pass{background:#0f766e;color:#fff;border-radius:7px;padding:4px 10px;font-style:normal}
+.vision-chain .block,.vision-lease .block{background:#e11d48;color:#fff;border-radius:7px;padding:4px 10px;font-style:normal}
+.vision-chain .stale,.vision-lease .stale{background:#fff7ed;color:#9a3412;border-color:#f0d9b8}
+.vision-chain.dim,.vision-lease.dim{opacity:.85}
 .lp-bound{border:1px solid #e6d7b4;background:#fff8e7;border-radius:14px;padding:20px 24px;color:#6b5010;font-size:13px;line-height:1.8}
 .lp-bound b{display:block;margin-bottom:6px}
 .lp-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:16px 38px;max-width:780px;margin:28px auto 0;padding-top:22px;border-top:1px solid #e5e9f0}
@@ -156,6 +168,10 @@
 .lp-stats b{display:block;font-size:28px;font-weight:800;letter-spacing:-.03em;color:#0f172a}
 .lp-stats span{display:block;margin-top:4px;font-size:11px;font-weight:600;color:#5f6d80}
 .lp-stats-note{margin:10px auto 0;max-width:660px;font-size:11px;line-height:1.6;color:#5f6d80;text-align:center}
+.lp-glossary{margin:14px auto 0;max-width:860px;text-align:left;font-size:12px;line-height:1.7;color:#414d61;background:#f4f7fb;border:1px solid #dbe4f0;border-radius:10px;padding:10px 16px}
+.lp-glossary summary{cursor:pointer;font-weight:600;color:#24344d}
+.lp-glossary ul{margin:10px 0 4px;padding-left:18px}
+.lp-glossary li{margin:6px 0}
 @media (max-width:760px){.lp-stats{gap:12px 22px}.lp-stats b{font-size:22px}}
 .lp-foot{border-top:1px solid #e5e9f0;padding:22px;text-align:center;color:#5f6d80;font-size:12px}
 @media (max-width:760px){.lp-hero{padding:44px 16px 32px}.lp-hero h1{font-size:30px}.lp-nav{padding:10px 14px}.lp-menu{display:none}.lp-section{padding:30px 14px}}
@@ -167,6 +183,8 @@
   <a class="lp-brand" href="./">RESEARCH AGENT <small>· 可核验的科研智能体</small></a>
   <nav class="lp-menu" aria-label="页内导航">
     <a href="#features">特性</a>
+    <a href="#vision">愿景</a>
+    <a href="#metrics">指标</a>
     <a href="#design">系统设计</a>
     <a href="#demos">演示与接入</a>
     <a href="#scope">平台分工</a>
@@ -189,13 +207,23 @@
       <span>span-only 证据</span><span>独立重跑复现</span><span>升级人签 · 降级自动</span><span>MCP / HTTP / CLI</span><span>host-model 无外部 key</span>
     </div>
     <div class="lp-stats" aria-label="当前实现规模">
-      <div><b>28</b><span>模块 SPEC</span></div>
+      <div><b>32</b><span>模块 SPEC</span></div>
       <div><b>46</b><span>MCP 工具</span></div>
       <div><b>1300+</b><span>自动测试用例</span></div>
       <div><b>4</b><span>人工门 · G1/G2/S5b/G5</span></div>
-      <div><b>1/4</b><span>反馈环已自动闭环</span></div>
+      <div><b>4/4</b><span>反馈环改变下一步动作 · 默认关</span></div>
     </div>
     <p class="lp-stats-note">数字截至 2026-11，随版本变化；测试数取自已记录的判定，不写成宣传口径。</p>
+    <details class="lp-glossary">
+      <summary>这些数字对第一次看的人意味着什么？</summary>
+      <ul>
+        <li><b>32 模块 SPEC</b> —— 每个能力先写「合同」再写代码：改行为必须先改合同，代码不能偷偷越权。价值：别人（或别的 Agent）扩展平台时，边界是读得懂、测得到的。</li>
+        <li><b>46 MCP 工具</b> —— Claude Code / Qoder / Codex / Zcode 用同一份工具表接入；里面<b>没有任何签名/批准按钮</b>。价值：外部 Agent 能干活，但签字永远在人手里。</li>
+        <li><b>1300+ 自动测试</b> —— 每条边界（摘要不能当证据、未签不能导出、fixture 必须自报…）都有测试钉住。价值：改坏了立刻红，而不是演示时才发现。</li>
+        <li><b>4 人工门</b> —— 选想法 G1、批设计 G2、签结果 S5b、签导出 G5 必须人签（或人预先写策略授权 autopilot 代签并留痕）。价值：自动化跑门与门之间，高杠杆决定留给人。</li>
+        <li><b>4/4 反馈环</b> —— 上一轮的判定（证伪 / 评审 / 同质化 / 失效）会真实改变下一轮动作：否证条件带进新假设、被评审否掉的候选降权、单一视角强制换轴、失效沿哈希链锁导出。默认关闭、逐环开启；约束来源哈希过期即拒绝。价值：反思不是日志，是下一步的输入。</li>
+      </ul>
+    </details>
   </section>
 
   <section class="lp-section" id="demos">
@@ -560,19 +588,19 @@
     </div>
     <div class="strategy-map">
       <h4>接下来做什么 · 一个总线 + 四个端口（71 号设计文档 · 2026-11-10 立项）</h4>
-      <p class="sm-lede">四图对照的结论：四条反馈环只有「溯源 / 失效传播」一条真实自动闭环，其余是审计项或 roadmap。解耦设计把"判定改变下一步行动"做成<b>可插拔、可单独开关与测量的对象</b>——这正是四条策略的实验台。</p>
+      <p class="sm-lede">四图对照的起点：四条反馈环曾只有「溯源 / 失效传播」一条真实自动闭环。本轮把其余三条的<b>回指侧</b>也接通——判定变成下一轮假设生成的输入（默认关闭、逐环开启、来源哈希过期即拒绝），并给图③补上「触发 → 相关性检查 → 下一次 run 消费」的委托骨架。解耦设计把"判定改变下一步行动"做成<b>可插拔、可单独开关与测量的对象</b>——这正是四条策略的实验台。</p>
       <div class="sm-strategies">
         <div class="sm-strategy"><b>第一步 · 判定总线（Verdict Ledger）<em>✅ 已落地 · verdict-ledger 0.1.0</em></b><span>append-only 判定账本：三态判定 / closure blockers / lineage stale / rsi regressed / 护栏拦截统一入账；消费者（next_actions、反馈环、autopilot）只读总线。生产者不变、门禁语义不变、缺失 fail-closed。实测已抓到真实缺陷：autopilot 代签后 capsule 快照仍报 CLOSURE_UNSIGNED——漂移从静默变为一等行（<code>verdicts collect</code>）。</span></div>
-        <div class="sm-strategy"><b>第二步 · FeedbackPort（反馈环一等化）<em>默认拒绝</em></b><span>observe → propose → gate → apply → record；T6b 证伪 / 信念修订 / 溯源失效 / 同质化各为一个可开关实现。可失败的验收：关闭全部环 = 与今日行为逐字节一致。</span></div>
-        <div class="sm-strategy"><b>第三步 · M1 五类反馈对照<em>Q2 · 诊断实验</em></b><span>真实 / 打乱 / 过时 / 含噪 / 矛盾五类反馈跑在 FeedbackPort 上——反馈敏感性与信息价值一致 → 切口不成立，如实记录。</span></div>
-        <div class="sm-strategy"><b>第四步 · MemoryWritePort + M2<em>方向 A · 第一切口</em></b><span>记忆写入收敛一个端口，全存 / 全不存 / 重放后存 / 独立验证后存四策略可插拔对照；类型化记忆图谱等 M2 结果出来再定型，不提前固化。</span></div>
-        <div class="sm-strategy"><b>第五步 · ExecPort + waitpoints<em>图③ 骨架</em></b><span>三执行面（平台 3.8 / Harness² 3.12 桥 / 外部 host）统一抽象；事件进 waitpoint → 程序快层相关性检查 → 判定总线 → 下一次 run 消费。不引入常驻进程，autopilot 单次委托语义不动。</span></div>
+        <div class="sm-strategy"><b>第二步 · FeedbackPort（反馈环一等化）<em>✅ 4/4 环接入下一步动作 · feedback 0.6.0</em></b><span>observe → propose → gate → apply → record；四环各为可开关实现。消费侧类型化：约束带 <code>constraint_kind + payload</code>，生成端按类型分派（文本仅供人读，旧账本消费边缘一次性推断）——改一句措辞不会让闭环静默失效。T6b 携带已执行否证条件、信念修订对「revise or drop」候选降权、同质化强制第二视角；idea.json 写 <code>feedback_constraints_applied</code> provenance。消费时重算来源 sha256，stale 默认拒绝。关闭全部环 = 逐字节一致。</span></div>
+        <div class="sm-strategy"><b>第三步 · M1 五类反馈对照<em>✅ 判别力 supported · 多 run 测量待执行</em></b><span>真实 / 打乱 / 过时 / 含噪 / 矛盾五类反馈跑在 FeedbackPort 上：real 1.0 / 退化均值 0.333 / 矛盾 5/5 升级人工；决策表接入 next_actions 端到端 behavior_changed=True。多 run 统计脚本就绪、按指示延后取数。</span></div>
+        <div class="sm-strategy"><b>第四步 · MemoryWritePort + M2<em>◐ 准入半程 · memory-port 0.1.0</em></b><span>四准入策略（全存 / 全不存 / 重放后存 / 独立验证后存）可插拔，严格度对照 4/4→2/4→1/4→0/4 两两互异（verdict=supported）；跨任务收益需多会话测量，按 73- 号设计延后。类型化记忆图谱等 M2 结果出来再定型，不提前固化。</span></div>
+        <div class="sm-strategy"><b>第五步 · ExecPort + waitpoints<em>◐ 骨架+接缝落地 · waitpoints 0.2.0 / exec-port 0.1.0</em></b><span>事件进 waitpoint → 程序快层相关性检查（无 scope / 无匹配 = 默认拒绝带收据）→ 追加式事件账本 → 下一次 run 消费并标 acted（图③ 01/06 回指）；next_actions 增 delegation_event。ExecPort 把三执行面（inprocess 3.8 / bridge 3.12 / host_agent）登记为可注册接缝（<code>exec faces</code> 只读），新面可注册；「路由只经端口分派」仍 roadmap。不引入常驻进程，autopilot 单次委托语义不动。</span></div>
         <div class="sm-strategy"><b>贯穿 · 接入面收尾<em>Zcode / Qoder / Codex</em></b><span>SKILL.md 第 0 步 = 先比 build fingerprint 再读结果（宿主里"测过"默认测的是历史快照）；接入矩阵随发行同步，产品仓自证 46 工具 ready + 零签名入口。</span></div>
       </div>
       <div class="sm-rows">
-        <div class="sm-row"><span class="sm-key">已实测基线</span><p>search-study 三态判定（区间跨零即「不可判定」）· 复现计数 + 功效阶梯（会推翻自己的旧结论）· 护栏开火率 8.1% · Host-as-Model 零 key 闭环 · autopilot 单次委托 · 46 工具零签名入口。</p></div>
+        <div class="sm-row"><span class="sm-key">已实测基线</span><p>search-study 三态判定（区间跨零即「不可判定」）· 复现计数 + 功效阶梯（会推翻自己的旧结论）· 护栏开火率 8.1% · Host-as-Model 零 key 闭环 · autopilot 单次委托 · 46 工具零签名入口 · <b>M1 反馈敏感性实测（2026-11-11）：真实判定 1.0 自复现、退化类均值 0.333、矛盾判定 5/5 升级人工；端到端 behavior_changed=True</b>（stale 重签建议被 verify_bundle 取代，见 73- 号设计文档）· <b>反馈回指消费 E2E（2026-11-11）：pipeline 读新鲜约束进 idea 生成、stale 约束默认拒绝、委托事件下一次 run 消费并标 acted</b>（tests/test_pipeline FeedbackLoopWiringTest 钉住）。</p></div>
         <div class="sm-row"><span class="sm-key">四个问题</span><p><b>Q1</b> 指标收益与独立证据是否脱钩（优先预实验）· <b>Q2</b> 反馈何时真改变行动 · <b>Q3</b> 一次成功何时值得沉淀为经验 · <b>Q4</b> 自主循环是否越走越窄。</p></div>
-        <div class="sm-row"><span class="sm-key">出处</span><p><a href="https://github.com/Yangxc0414/research-agent/blob/main/71-四图对照与解耦设计-判定总线与反馈环一等化.md">71-四图对照与解耦设计</a>（四图逐环节对照 + 可失败的验收）· 逐项实测读数见仓库 docs/fact-baseline.md。</p></div>
+        <div class="sm-row"><span class="sm-key">出处</span><p><a href="https://github.com/Yangxc0414/research-agent/blob/main/71-四图对照与解耦设计-判定总线与反馈环一等化.md">71-四图对照与解耦设计</a>（四图逐环节对照 + 可失败的验收）· <a href="https://github.com/Yangxc0414/research-agent/blob/main/73-M1M2收尾设计-单会话与多会话可选的反馈测量.md">73-M1/M2 收尾设计</a>（单会话/多会话可选）· 逐项实测读数见仓库 docs/fact-baseline.md。</p></div>
       </div>
     </div>
     <p class="fineprint">门禁与读法以上方 canonical 卡片为准；demo 阶段映射 G1=S3 · G2=S4 · S5b=S5c · G5=S16，各子页投影的标签均映射到此统一口径。</p>
@@ -616,6 +644,64 @@
     <div class="scope-note">
       <b>接口现状：</b>MCP / HTTP / CLI 三入口共用 <code>framework_api.dispatch</code>；递归改进的执行已接到外部 <a href="./rsi/">Harness²（自进化接缝）</a>，平台只消费 <code>harness2-run-0.1</code> 产物并做准入；流水线编排 / 版本回滚 / 评测调度的其余部分仍是 roadmap。不把「已实现的控制面」说成「已完成对接」。<br/>
       <b>分工口径：</b>自迭代的<b>执行</b>下沉到 RSI 服务；平台只保留判据（准入理由 / 租约 / 撤销传播）与数据基础，不为每个循环重造一遍基础设施。
+    </div>
+  </section>
+
+  <section class="lp-section" id="vision">
+    <div class="lp-sechead">
+      <p class="index">VISION / 预期效果</p>
+      <h2>我们要把科研做成什么样。</h2>
+      <p>以下为<b>演示愿景</b>（SIM · 非实测）：展示系统建成后预期的判定与效果形态，数字为示意，不代表真实实验结果。</p>
+    </div>
+    <div class="vision-grid">
+      <div class="vision-card">
+        <b>经验复用 · 对照预期</b>
+        <svg viewBox="0 0 260 150" role="img" aria-label="带/不带 guidance 的单位验证算力改进率对照（示意）">
+          <line x1="30" y1="120" x2="240" y2="120" stroke="#e4e9f2" stroke-width="1"/>
+          <line x1="30" y1="70" x2="240" y2="70" stroke="#e4e9f2" stroke-width="1" stroke-dasharray="3 3"/>
+          <rect x="60" y="92" width="46" height="28" rx="4" fill="#94a3b8"/>
+          <rect x="150" y="42" width="46" height="78" rx="4" fill="#2563eb"/>
+          <text x="83" y="136" text-anchor="middle" font-size="10" fill="#5b6472">不带 guidance</text>
+          <text x="173" y="136" text-anchor="middle" font-size="10" fill="#5b6472">带 guidance</text>
+          <text x="83" y="86" text-anchor="middle" font-size="10" fill="#5b6472">基线</text>
+          <text x="173" y="36" text-anchor="middle" font-size="10" fill="#2563eb" font-weight="700">+Δ 示意</text>
+        </svg>
+        <p>记忆/门控对照以配对区间判定；区间跨零即"不可判定"，不冒充结论。</p>
+      </div>
+      <div class="vision-card">
+        <b>证据链 · 闭合预期</b>
+        <div class="vision-chain">
+          <span>claim</span><i>→</i><span>span / EA</span><i>→</i><span>人签</span><i>→</i><em class="pass">PASS</em>
+        </div>
+        <div class="vision-chain dim">
+          <span>数字≠EA</span><i>→</i><span class="stale">stale</span><i>→</i><em class="block">G5 blocked</em>
+        </div>
+        <p>每句结论落到 span 或人签实验证据；变更沿链标 stale，导出 fail-closed。</p>
+      </div>
+      <div class="vision-card">
+        <b>自进化 · 受治理预期</b>
+        <div class="vision-lease">
+          <span>propose</span><i>→</i><span>eval</span><i>→</i><span>人签 admit</span><i>→</i><span>lease</span><i>→</i><span>confirm</span>
+        </div>
+        <div class="vision-lease dim">
+          <span class="stale">regressed</span><i>→</i><em class="block">自动 revoke</em><i>·</i><span>v+1 / 平台指纹</span>
+        </div>
+        <p>升级人签、降级自动；候选版本与平台指纹绑定，可关联、可回滚。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="metrics">
+    <div class="lp-sechead">
+      <p class="index">METRICS / 数字怎么读</p>
+      <h2>每个数字的实际价值。</h2>
+      <p>不堆指标。下面每个读数都对应一个可检查的工程事实，以及它对"科研可信"的实际作用。</p>
+    </div>
+    <div class="vision-grid">
+      <div class="vision-card"><b>SPEC 模块契约</b><p><b>含义</b>：每个子智能体先有 Markdown 契约（输入/输出/门禁/不变量）。<b>价值</b>：改一个模块不必理解全部代码；同学可据此做细粒度自进化而不破坏边界。</p></div>
+      <div class="vision-card"><b>自动测试数</b><p><b>含义</b>：离线回归测试总量，随提交增长。<b>价值</b>：任何改动破坏证据链/门禁会立刻红，保证"可核验"不是口号。</p></div>
+      <div class="vision-card"><b>人工门禁 G1/G2/S5b/G5</b><p><b>含义</b>：想法选择/设计批准/结果人签/闭包签署四个把关节点。<b>价值</b>：机器起草、人作判断；未签名的结论进不了导出，杜绝"AI 自己说了算"。</p></div>
+      <div class="vision-card"><b>0 外部 API · 0 效果数字</b><p><b>含义</b>：静态 demo 不联网、不引用外部效果数。<b>价值</b>：展示的是机制与证据结构，而非不可复现的营销数字；真实效果须由本地 run+EA+人签产生。</p></div>
     </div>
   </section>
 

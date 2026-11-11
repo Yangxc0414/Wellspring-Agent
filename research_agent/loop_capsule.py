@@ -574,6 +574,15 @@ def build_loop_capsule(
                 if isinstance(writing.get(name), dict)
             },
         } if writing else {},
+        "feedback": {
+            "constraints_applied": len(idea.get("feedback_constraints_applied") or []),
+            "loops": sorted(
+                {str(c.get("loop_id") or "") for c in (idea.get("feedback_constraints_applied") or [])}
+            ),
+            "effects": sorted(
+                {str(c.get("effect") or "") for c in (idea.get("feedback_constraints_applied") or [])}
+            ),
+        },
         "artifact_refs": {
             name: str(root / name)
             for name in (

@@ -190,6 +190,7 @@ class IdeaResult:
     brief: Optional[IdeaBrief] = None
     prior_art_report: List[Dict[str, Any]] = field(default_factory=list)
     shortlist: Optional[IdeaShortlist] = None
+    feedback_constraints_applied: List[Dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass

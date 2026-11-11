@@ -2,7 +2,7 @@
 id: writing
 name: 写作包与手稿预审
 stage: S8–S12
-version: 0.8.2
+version: 0.9.0
 status: draft
 owner: research-agent
 inputs:
@@ -147,6 +147,7 @@ invariants:
 - `<run>/support-gold.json|md`：双人（或多人）标注的逐句 labels、majority、observed agreement、pairwise Cohen's kappa、annotator 列表，以及可选 panel-vs-gold accuracy/confusion/disagreements；`status=complete|incomplete`；
 - `<run>/support-gold-annotations-<annotator>.json` + `support-gold-template.json|md`：由 panel 生成的空白标注模板，含句子/refs/evidence 与空 status/note；不包含 panel 的 verdict/rationale，避免锚定；
 - `claim_plan`：写作包内每个候选主张绑定一个 `ref_id`/`span_id`/`quote`，并列出无可用 span 的 `unusable_refs`；writer 优先从中取句，每句一个 REF。
+- 评审环进展谓词（v0.9.0，借鉴 CCFA continuity）：`review_progress(prev, cur)` 纯函数显式定义「什么不算进展」——同一非空 `must_fix` 集合被重新打分（即使 overall 微涨）判 `no_progress_same_concerns` 并停止；no-op 修订（候选文本与现稿相同）拒收 `no_op_revision`。谓词置于阈值/分数单调检查之后，不改变过阈值即停的既有行为。`manuscript-review.json` 增 `stop_reason`（`threshold_reached/score_plateau/no_progress_same_concerns/rounds_exhausted/revision_rejected/support_no_candidate`），review 迭代增 `progress` 字段；停止原因只读披露，不创建 Claim/EA/gate。
 
 写作契约：
 
@@ -200,6 +201,7 @@ invariants:
 
 ## Changelog
 
+- 2026-11-11 · v0.9.0 · status=draft · 评审环进展谓词（借鉴 CCFA continuity，71-§4.2 设计输入 6）：review_progress 纯函数显式定义「什么不算进展」——同一 must_fix 集合被重新打分（即使分数微涨）= 空转，停止并记 stop_reason=no_progress_same_concerns；no-op 修订（文本不变）拒收 reason=no_op_revision。result 增 stop_reason（threshold_reached/score_plateau/no_progress_same_concerns/rounds_exhausted/revision_rejected/support_no_candidate），review 迭代增 progress 字段。谓词置于阈值/单调检查之后，现有过阈值多轮测试不受影响。tests/test_review_loops 增 3 项。
 - 2026-11-02 · v0.8.2 · status=draft · 新增 script.punctuation 审计：按写作包声明的语言检查文字/标点脚本泄漏（en 稿出现全角标点或汉字即报警，zh 稿只检查夹在两个汉字之间的半角标点），两个方向都输出分母计数；语言缺失时记为 not_assessable 并写入 warnings，不再静默全绿。
 - 2026-11-01 · v0.8.1 · status=draft · Reproduction map keeps the pack claim status verbatim (signed / draft_needs_human / missing) instead of collapsing it to unsigned: a projection must not be vaguer than the field it reports.
 - 2026-11-01 · v0.8.0 · status=draft · Writing pack now carries a reproduction_map: the claim status, a re-run command rebuilt from the parameters the RunCapsule recorded, the dataset/code/protocol hashes and the named artifacts. The capsule stores no invocation, so the command is reconstructed rather than replayed, it is withheld when the dataset or seed list does not name a runnable surface, and the renderer states that nothing here re-ran the experiment. Adds the reviewer-facing claim-to-command-to-artifact table the reproducibility checklist asks for.

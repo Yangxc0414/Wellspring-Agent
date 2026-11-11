@@ -8,6 +8,7 @@ import type { IconName } from "../Icon";
 import { LineagePage } from "./LineagePage";
 import { ShortcutSettingsPage } from "./ShortcutSettings";
 import { UsageStats } from "./UsageStats";
+import { FeedbackModeSettings } from "./FeedbackModeSettings";
 import {
   AgentsSettingsPage,
   ArchiveSettingsPage,
@@ -94,7 +95,12 @@ function SectionContent({ section }: { section: SettingsSection }) {
     case "model":
       return <ModelSettingsPage />;
     case "memory":
-      return <MemorySettingsPage />;
+      return (
+        <>
+          <MemorySettingsPage />
+          <FeedbackModeSettings />
+        </>
+      );
     case "agents":
       return <AgentsSettingsPage />;
     case "commands":

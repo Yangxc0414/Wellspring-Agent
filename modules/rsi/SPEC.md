@@ -2,7 +2,7 @@
 id: rsi
 name: 受治理的递归改进
 stage: META
-version: 0.11.0
+version: 0.12.0
 status: pilot
 owner: research-agent
 inputs:
@@ -74,6 +74,7 @@ invariants:
   - 策略只允许切换 literature.memory_order / literature.query_planner / orchestrator.facet_budget；claim/evidence/gate/rubric/held-out/closure/signature/export 不在可切换集合内
   - 确认不可动作于升级，但 regressed 确认必须可动作于降级：自动撤销该候选的 active 租约；升级仍需人工签署
   - 每个 episode 记录 platform_fingerprint（平台代码指纹）与 candidate.version（自进化候选版本），供自进化版本管理与平台自我迭代的关联/回滚；平台只记账与提供接缝，不实现自进化算法
+  - EvalEvidence 自动绑定 code_fingerprint（产生该证据的平台代码指纹），verdict 不得跨构建静默复用；ProposerPort/EvaluatorPort 为候选/评测供给接缝（内部简单自改进、外部 Agent、同学细粒度自进化均可实现），平台只校验证据形状与哈希、不伪造指标
 ---
 
 # 受治理的递归改进（RSI 控制面）
@@ -186,6 +187,7 @@ invariants:
 
 ## Changelog
 
+- 2026-11-10 · v0.12.0 · status=pilot · 解耦接缝与证据代码指纹：ports.py 新增 `ProposerPort`/`EvaluatorPort` 协议（候选/评测供给契约），内部简单自改进、外部 Agent（Claude Code/Codex/Qoder/Zcode）与同学后续细粒度自进化引擎均可实现，平台只校验证据形状与哈希、不伪造指标；`EvalEvidence` 新增 `code_fingerprint` 并在 `__post_init__` 自动绑定产生该证据的平台代码指纹（D9 verdict 绑定，verdict 不得跨构建静默复用）。与 v0.9–0.11 的版本接缝/世代/harness² 互补：执行与供给可替换，判据与台账不搬家。新增 tests/test_rsi_ports.py（外部 fake proposer/evaluator 走通 propose→evaluate、证据自动绑指纹）。
 - 2026-11-10 · v0.11.0 · status=pilot · 自进化本身做双轨版本管理：agent 轨道记采纳树 SHA-256 + episode + 证据摘要，platform 轨道记 research_agent/**/*.py 的代码指纹 + 提交/备注；两条轨道由 platform_fingerprint 关联。新增 Generation/GenerationStore（append-only + 哈希链，open/close/compare/verify/story）、agent_generation_from_run（同树换平台自动 supersede 旧记录）、platform_snapshot、propose_platform_patch（只记 git apply --check 结果，不应用）；CLI rsi gen 七个子命令、runtime /api/rsi/generations、/rsi/ 世代区块与 site/data/evolution.json。跨轨耦合：adopted agent 世代的平台指纹与当前不一致时 verify 报 stale_agents 并要求复验，但不自动撤销租约、不改 claim。实跑 P1→P2→P3 + G0→G1 五条记录、8 条事件，verify ok、0 warning。新增 tests/test_evolution_generations.py 19 例。
 - 2026-11-10 · v0.10.0 · status=pilot · 自进化执行下沉到外部 Harness²，平台只保留接缝。新增 harness2-run-0.1 冻结契约（预算恒等式 R=4k/P=3k、任务状态、采纳树、经验证据、classification 与 task_pack_sha256）、conformance 自检（10 项）、Candidate 去重与不可变面拦截、public/hidden 证据映射（强制 simulation=true、claim_eligible=false）、held-out 由平台侧执行；新 scope harness2.harness 只登记可编辑面，record 只写 pending_human。动机：会议设定要求「剥离自迭代、调用 RSI 基础设施」，而上一版平台自带最小控制面，容易被误读为重复造轮子；接缝让执行侧可替换、判据侧不搬家。新增 tests/test_rsi_harness2.py；实跑 k=2 双模式 R=48/48、P=36/36、留出 1/1（基线 0/1）。
 - 2026-11-10 · v0.9.0 · status=pilot · 平台与自进化互补的版本接缝：`Candidate.version`（自进化候选版本，由进化核心/同学填写）与 `StepRecord.platform_fingerprint`（propose 时自动取 `paths.build_fingerprint()`）写入 ledger 与 propose 事件。动机：同学的自进化基础设施要对"自进化本身"做版本管理、并对平台代码做自我迭代；平台侧必须把"哪一版平台代码产生了哪一版候选/episode"记下来，才能关联、复现与回滚，而不必平台自己实现进化算法。契约新增字段（向后兼容，默认空/自动指纹），不改变 claim/EA/gate 不变量。新增 tests/test_rsi_version_hook.py。

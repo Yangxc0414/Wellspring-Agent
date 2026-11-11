@@ -807,5 +807,82 @@ class RunEventIntegrationTest(unittest.TestCase):
             self.assertEqual(len(rows), len(result.events))
 
 
+class FeedbackLoopWiringTest(unittest.TestCase):
+    def _project(self, root: Path) -> Path:
+        (root / "project.json").write_text(
+            json.dumps({"schema_version": "project-0.1", "name": "wiring"}),
+            encoding="utf-8",
+        )
+        study = root / "studies" / "STUDY-WIRE"
+        study.mkdir(parents=True)
+        (study / "study-origin.json").write_text(
+            json.dumps({"falsification": "effect reverses under doubled seeds", "idea_id": "IDEA-01"}),
+            encoding="utf-8",
+        )
+        return study
+
+    def test_pipeline_consumes_constraints_and_delegation_events(self):
+        import tempfile
+
+        from research_agent.feedback import run_feedback
+        from research_agent.waitpoints import record_delegation_events
+
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            self._project(project)
+            run_feedback(project, loops=["t6b_falsification"])
+            record_delegation_events(
+                project,
+                [
+                    {
+                        "wake_id": "WK-wire1",
+                        "waitpoint_id": "WP-wire",
+                        "label": "iris training finished",
+                        "intent": "compare loss",
+                        "fired_at": "2026-11-11T00:00:00+00:00",
+                        "signals": [{"message": "loss 0.42"}],
+                    }
+                ],
+                ["iris"],
+            )
+            out = project / "runs" / "RUN-WIRE"
+            result = PipelineRunner(run_output_dir=out / "run").run(
+                PipelineRequest(topic="钙钛矿 界面 钝化 稳定性", language="zh", run_id="RUN-WIRE")
+            )
+            applied = result.modules["idea"].get("feedback_constraints_applied") or []
+            self.assertTrue(applied)
+            self.assertEqual(applied[0]["loop_id"], "t6b_falsification")
+            self.assertTrue(any("delegation_event_consumed" in w for w in result.warnings))
+            kinds = [event.get("kind") for event in result.events]
+            self.assertIn("feedback_constraints", kinds)
+            self.assertIn("delegation_events", kinds)
+            ledger = json.loads(
+                (project / "delegation-events.json").read_text(encoding="utf-8")
+            )
+            self.assertTrue(ledger["events"][0]["acted_at"])
+
+    def test_stale_constraint_is_denied_with_warning(self):
+        import tempfile
+
+        from research_agent.feedback import run_feedback
+
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            study = self._project(project)
+            run_feedback(project, loops=["t6b_falsification"])
+            (study / "study-origin.json").write_text(
+                json.dumps({"falsification": "changed", "idea_id": "IDEA-01"}),
+                encoding="utf-8",
+            )
+            out = project / "runs" / "RUN-WIRE-STALE"
+            result = PipelineRunner(run_output_dir=out / "run").run(
+                PipelineRequest(topic="钙钛矿 界面 钝化 稳定性", language="zh", run_id="RUN-WIRE-STALE")
+            )
+            self.assertEqual(result.modules["idea"].get("feedback_constraints_applied"), [])
+            self.assertTrue(
+                any(w.startswith("feedback_constraint_stale_denied:") for w in result.warnings)
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

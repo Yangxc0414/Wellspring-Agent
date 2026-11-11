@@ -10,7 +10,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from .project import run_dir
 from .storage import write_json_atomic
@@ -219,6 +219,28 @@ def _review_prompt(
         draft[:MAX_REVIEW_CONTEXT],
     )
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
+
+
+def _concern_fingerprint(review: Dict[str, Any]) -> Tuple[str, ...]:
+    return tuple(sorted({str(item) for item in review.get("must_fix") or [] if str(item).strip()}))
+
+
+def review_progress(
+    previous_review: Optional[Dict[str, Any]], current_review: Dict[str, Any]
+) -> Dict[str, Any]:
+    """CCFA continuity borrow: explicitly define what does NOT count as progress.
+
+    Re-scoring the same concern set (identical non-empty must_fix) is not
+    progress even if the overall score nudges upward — the reviewer is rehashing
+    the same demands, so another revision round would spin. Pure and
+    deterministic so the stop rule is auditable by replay.
+    """
+    previous = _concern_fingerprint(previous_review) if previous_review else ()
+    current = _concern_fingerprint(current_review)
+    same = bool(current) and previous == current
+    if same:
+        return {"progress": False, "reason": "no_progress_same_concerns", "same_concerns": True}
+    return {"progress": True, "reason": "", "same_concerns": False}
 
 
 def _normalise_review(payload: Any) -> Dict[str, Any]:
@@ -745,6 +767,8 @@ def run_manuscript_review(
     best_overall = 0.0
     current_path = draft_path
     previous_score: Optional[float] = None
+    previous_review: Optional[Dict[str, Any]] = None
+    stop_reason = ""
     for round_index in range(1, rounds + 1):
         current_audit = _audit_candidate(current_path, pack)
         current_support = run_support(current_path)
@@ -778,11 +802,20 @@ def run_manuscript_review(
             best_audit = current_audit
             best_support = current_support
         if review["overall"] >= threshold:
+            stop_reason = "threshold_reached"
             break
         if previous_score is not None and review["overall"] <= previous_score:
+            stop_reason = "score_plateau"
             break
+        progress = review_progress(previous_review, review)
+        iterations[-1]["progress"] = progress
+        if not progress["progress"]:
+            stop_reason = progress["reason"]
+            break
+        previous_review = review
         previous_score = review["overall"]
         if round_index >= rounds:
+            stop_reason = "rounds_exhausted"
             break
         revised_sections = []
         candidate_text = ""
@@ -805,6 +838,7 @@ def run_manuscript_review(
                 round_index,
             )
         if mode == "support" and not candidate_text:
+            stop_reason = "support_no_candidate"
             break
         if not candidate_text:
             revision_raw = model.complete(
@@ -819,9 +853,12 @@ def run_manuscript_review(
         candidate_path.write_text(candidate_text, encoding="utf-8")
         candidate_audit = _audit_candidate(candidate_path, pack)
         candidate_support = run_support(candidate_path)
-        accepted, reason = _accept_candidate(
-            current_text, candidate_text, current_audit, candidate_audit
-        )
+        if candidate_text.strip() == current_text.strip():
+            accepted, reason = False, "no_op_revision"
+        else:
+            accepted, reason = _accept_candidate(
+                current_text, candidate_text, current_audit, candidate_audit
+            )
         if accepted and candidate_support is not None and current_support is not None:
             current_bad = int(current_support.get("unresolved_refs") or 0) + sum(
                 int((current_support.get("counts") or {}).get(key) or 0)
@@ -916,6 +953,7 @@ def run_manuscript_review(
             current_text = candidate_text
             current_path = candidate_path
         else:
+            stop_reason = "revision_rejected"
             break
     final_path = destination / "final.md"
     best_text = ensure_pack_marker(best_text, pack)
@@ -945,6 +983,7 @@ def run_manuscript_review(
         "score_progression": review_scores,
         "best_score": round(best_overall, 3),
         "improved": bool(review_scores and best_overall > review_scores[0]),
+        "stop_reason": stop_reason,
         "status": (
             "reviewed"
             if best_overall >= threshold

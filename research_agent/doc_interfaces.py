@@ -40,7 +40,7 @@ SPEC_GLOB = "modules/*/SPEC.md"
 # These are not files in the checkout and must never be "fixed" by creating them at the root.
 RELATIVE_PREFIXES = (
     "autopilot", "claim", "closure", "closure-signature", "closed-loop", "fixtures",
-    "flow", "inbox", "inputs", "outbox", "pipeline-chemlab", "run",
+    "flow", "inbox", "inputs", "lineage", "outbox", "pipeline-chemlab", "run",
 )
 
 EXISTS = "exists"

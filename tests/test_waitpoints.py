@@ -5,7 +5,14 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from research_agent.waitpoints import WaitpointError, WaitpointStore
+from research_agent.waitpoints import (
+    WaitpointError,
+    WaitpointStore,
+    mark_delegation_acted,
+    pending_delegation_events,
+    record_delegation_events,
+    triage_notices,
+)
 
 
 class WaitpointTest(unittest.TestCase):
@@ -123,6 +130,58 @@ class WaitpointTest(unittest.TestCase):
             self.store.create(label="x", intent="x", owner="o", members=["a", "a"])
         with self.assertRaises(WaitpointError):
             self.store.create(label="x", intent="x", owner="o", members=["a"], quorum=2)
+
+
+class DelegationTriageTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.project = self.root / "project"
+        self.project.mkdir()
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _notice(self, wake_id="WK-1", label="iris training finished"):
+        return {
+            "wake_id": wake_id,
+            "waitpoint_id": "WP-1",
+            "label": label,
+            "intent": "compare loss",
+            "fired_at": "2026-11-11T00:00:00+00:00",
+            "signals": [{"message": "loss 0.42"}],
+        }
+
+    def test_no_scope_defaults_to_reject(self):
+        triage = triage_notices([self._notice()], None)
+        self.assertEqual(triage["relevant"], [])
+        self.assertEqual(len(triage["discarded"]), 1)
+        self.assertIn("default reject", triage["discarded"][0]["reason"])
+
+    def test_scope_match_is_relevant(self):
+        triage = triage_notices([self._notice()], ["iris"])
+        self.assertEqual(len(triage["relevant"]), 1)
+        self.assertEqual(triage["relevant"][0]["matched_terms"], ["iris"])
+        self.assertEqual(triage["discarded"], [])
+
+    def test_ledger_append_only_idempotent_and_acted(self):
+        notices = [self._notice(), self._notice("WK-2", "unrelated job")]
+        first = record_delegation_events(self.project, notices, ["iris"])
+        self.assertEqual(first["added"], 2)
+        second = record_delegation_events(self.project, notices, ["iris"])
+        self.assertEqual(second["added"], 0)
+        pending = pending_delegation_events(self.project)
+        self.assertEqual([e["wake_id"] for e in pending], ["WK-1"])
+        self.assertEqual(mark_delegation_acted(self.project, ["WK-1"]), 1)
+        self.assertEqual(pending_delegation_events(self.project), [])
+        ledger = json.loads(
+            (self.project / "delegation-events.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(len(ledger["events"]), 2)
+        self.assertTrue(all(e["data_is_untrusted"] for e in ledger["events"]))
+        self.assertEqual(
+            [e["relevance"] for e in ledger["events"]], ["relevant", "discarded"]
+        )
 
 
 if __name__ == "__main__":

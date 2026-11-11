@@ -1,3 +1,4 @@
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -129,6 +130,74 @@ class CLITests(unittest.TestCase):
             compared = run("memory", "ab", "compare", "--project", str(project))
             payload = json.loads(compared.stdout[compared.stdout.index("{"):])
             self.assertEqual(payload["comparison"]["direction"], "no_difference")
+
+
+class SessionModeTest(unittest.TestCase):
+    """M1/M2 收尾：单会话/多会话可选——multi 强制 host_label 分离，single 带同源偏差边界。"""
+
+    def _arm(self, label=None):
+        arm = {
+            "n": 4,
+            "rates": {"grounded_rate": 1.0, "falsifiable_rate": 1.0, "executable_plan_rate": 1.0,
+                      "distinct_sources_mean": 2.0, "power_aware_stopping_rate": 1.0, "risk_noted_rate": 0.5},
+            "per_idea": [
+                {"score_wide": 3 + i, "score": 2 + i} for i in range(4)
+            ],
+        }
+        if label is not None:
+            arm["session"] = {"session_id": "s-" + label, "host_label": label}
+        return arm
+
+    def test_schema_bumped_to_0_2(self):
+        from research_agent.memory_ab import MEMORY_AB_SCHEMA
+
+        self.assertEqual(MEMORY_AB_SCHEMA, "memory-ab-0.2")
+
+    def test_multi_mode_blocks_same_host_label(self):
+        verdict = compare(self._arm("Zcode-1"), self._arm("Zcode-1"), session_mode="multi")
+        self.assertEqual(verdict["session_check"]["status"], "blocked")
+        self.assertEqual(verdict["direction"], "")
+        self.assertIn("distinct sessions", verdict["reading"])
+
+    def test_multi_mode_blocks_missing_session_metadata(self):
+        verdict = compare(self._arm(None), self._arm("Qoder-1"), session_mode="multi")
+        self.assertEqual(verdict["session_check"]["status"], "blocked")
+        self.assertIn("--session-host-label", verdict["reading"])
+
+    def test_multi_mode_passes_with_distinct_labels(self):
+        verdict = compare(self._arm("Zcode-1"), self._arm("Qoder-1"), session_mode="multi")
+        self.assertEqual(verdict["session_check"]["status"], "ok")
+        self.assertEqual(verdict["session_check"]["with_host_label"], "Zcode-1")
+
+    def test_single_mode_carries_same_source_boundary(self):
+        verdict = compare(self._arm("Zcode-1"), self._arm("Zcode-1"), session_mode="single")
+        self.assertIn("same-source bias", verdict["reading"])
+
+    def test_unknown_mode_raises(self):
+        with self.assertRaises(ValueError):
+            compare(self._arm("A"), self._arm("B"), session_mode="both")
+
+    def test_record_stores_session_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            literature = {"spans": [{"span_id": "SP-1", "source_id": "A"}, {"span_id": "SP-2", "source_id": "B"}]}
+            record(project, run_id="RUN-1", arm="with", ideas=[_good()], literature=literature,
+                   session={"session_id": "s-1", "host_label": "Zcode-1"})
+            store = json.loads((project / "memory" / "ab.json").read_text(encoding="utf-8"))
+            self.assertEqual(store["schema_version"], "memory-ab-0.2")
+            self.assertEqual(store["arms"]["with"]["session"]["host_label"], "Zcode-1")
+
+    def test_analysis_passes_session_mode(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            literature = {"spans": [{"span_id": "SP-1", "source_id": "A"}, {"span_id": "SP-2", "source_id": "B"}]}
+            record(project, run_id="RUN-1", arm="with", ideas=[_good(index=1) for _ in range(4)], literature=literature,
+                   session={"session_id": "s-1", "host_label": "Zcode-1"})
+            record(project, run_id="RUN-1", arm="without", ideas=[_good(index=5) for _ in range(4)], literature=literature,
+                   session={"session_id": "s-2", "host_label": "Qoder-1"})
+            result = analysis(project, session_mode="multi")
+            self.assertEqual(result["comparison"]["session_check"]["status"], "ok")
+            self.assertEqual(result["comparison"]["session_mode"], "multi")
 
 
 if __name__ == "__main__":

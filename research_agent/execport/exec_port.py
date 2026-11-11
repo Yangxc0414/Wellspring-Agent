@@ -1,0 +1,104 @@
+"""ExecPort: one registerable seam over the isolated execution faces (71-§4.4).
+
+The platform already runs work on three real faces: deterministic local compute
+on the platform interpreter (inprocess), the Harness² recursion on a separate
+Python 3.12 bridge process (bridge), and model generation supplied by an
+external host agent (host_agent). They exist and are authorized differently,
+but there was no single object naming them, so "isolated execution units" in
+the strategy figure stayed a narrative.
+
+This module makes that boundary explicit and registerable WITHOUT rerouting
+existing dispatch: callers still invoke the faces directly today (routing via
+the port is roadmap). The port is the single place a new face (conda, docker,
+remote) registers its kind, interpreter and authorization boundary, and the
+read-only projection exposes the pool. It never starts, kills or schedules a
+process and never creates Claim/EA/gate/signature.
+"""
+
+from dataclasses import dataclass, asdict
+from typing import Any, Dict, List
+
+EXEC_PORT_SCHEMA = "exec-port-0.1"
+
+_BOUNDARY = (
+    "read-only description of the execution-face pool; registering a face records "
+    "its kind/interpreter/authorization only — it does not start, kill or schedule "
+    "processes, does not reroute existing dispatch, and creates no Claim/EA/gate/"
+    "signature; execution authorization and audit semantics are unchanged"
+)
+
+
+class ExecPortError(RuntimeError):
+    pass
+
+
+@dataclass
+class ExecFace:
+    kind: str
+    name: str
+    interpreter: str
+    entry: str
+    isolation: str
+    authorization: str
+
+
+_FACES: Dict[str, ExecFace] = {}
+
+
+def register_face(face: ExecFace) -> None:
+    kind = str(face.kind or "").strip()
+    if not kind:
+        raise ExecPortError("exec face kind must not be empty")
+    if kind in _FACES:
+        raise ExecPortError("exec face already registered: " + kind)
+    _FACES[kind] = face
+
+
+def registered_faces() -> List[str]:
+    return sorted(_FACES)
+
+
+def resolve(kind: str) -> ExecFace:
+    if kind not in _FACES:
+        raise ExecPortError(
+            "unknown exec face: %s; registered: %s" % (kind, ", ".join(registered_faces()))
+        )
+    return _FACES[kind]
+
+
+def describe() -> Dict[str, Any]:
+    return {
+        "schema_version": EXEC_PORT_SCHEMA,
+        "faces": [asdict(_FACES[kind]) for kind in sorted(_FACES)],
+        "boundary": _BOUNDARY,
+    }
+
+
+register_face(ExecFace(
+    kind="inprocess",
+    name="platform-local",
+    interpreter="3.8",
+    entry="research_agent/executable.py",
+    isolation="same-process deterministic compute",
+    authorization="local user environment; no network; no dependency install; "
+                  "explicit human approval before execution",
+))
+register_face(ExecFace(
+    kind="bridge",
+    name="harness2-bridge",
+    interpreter="3.12",
+    entry="research_agent/rsi_harness2.py",
+    isolation="separate Python 3.12 bridge process",
+    authorization="Harness² (Apache-2.0) recursion; budget identity R=4k/P=3k and "
+                  "10-point conformance enforced before record; platform keeps "
+                  "criteria/ledger/human-sign only",
+))
+register_face(ExecFace(
+    kind="host_agent",
+    name="host-as-model",
+    interpreter="host",
+    entry="research_agent/host_model.py",
+    isolation="external host agent process (Qoder/Claude Code/Codex/Zcode)",
+    authorization="host supplies the model with zero external API key; hash-bound "
+                  "one-time turns; no sign/approve/freeze/publish/export tool",
+))

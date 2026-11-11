@@ -654,5 +654,139 @@ class PredictionContractTest(unittest.TestCase):
         self.assertEqual(result.candidates[0].prediction_status, "not_testable_here")
 
 
+class FeedbackConstraintConsumptionTest(unittest.TestCase):
+    def setUp(self):
+        self.spec = SpecStore().load("idea")
+        self.agent = IdeaAgent(self.spec)
+
+    def _collapse_spans(self):
+        return [
+            Span("C-1", "FX-1", "Results", "湿热条件下钝化层稳定性结果。", 0, 20),
+            Span("C-2", "FX-2", "Results", "光照条件下界面缺陷密度测量结果。", 0, 20),
+        ]
+
+    def test_no_constraints_keeps_provenance_empty(self):
+        result = self.agent.run(
+            IdeaRequest("稳定性", self._collapse_spans(), max_candidates=2, run_id="IDEA-CONS-0")
+        )
+        self.assertEqual(result.feedback_constraints_applied, [])
+        self.assertFalse(
+            any(w.startswith("feedback_constraints_applied=") for w in result.warnings)
+        )
+
+    def test_homogeneity_constraint_enforces_second_lens(self):
+        spans = self._collapse_spans()
+        base = self.agent.run(
+            IdeaRequest("稳定性", spans, max_candidates=2, run_id="IDEA-CONS-1")
+        )
+        self.assertEqual(len({c.lens for c in base.candidates}), 1)
+        constrained = self.agent.run(
+            IdeaRequest(
+                "稳定性", spans, max_candidates=2, run_id="IDEA-CONS-1",
+                generation_constraints=[
+                    {
+                        "loop_id": "homogeneity",
+                        "subject": "runs/R",
+                        "constraint": "inject diversity: require at least two distinct lenses",
+                        "source_path": "runs/R/idea.json",
+                        "source_sha256": "a" * 64,
+                    }
+                ],
+            )
+        )
+        self.assertGreaterEqual(len({c.lens for c in constrained.candidates}), 2)
+        self.assertIn(
+            "lens_diversity_enforced",
+            [p["effect"] for p in constrained.feedback_constraints_applied],
+        )
+
+    def test_belief_constraint_demotes_matching_candidate(self):
+        spans = self._collapse_spans()
+        base = self.agent.run(
+            IdeaRequest("稳定性", spans, max_candidates=2, run_id="IDEA-CONS-2")
+        )
+        title = base.candidates[0].title[:120]
+        constraint = {
+            "loop_id": "belief_revision",
+            "subject": "runs/R/IDEA-01",
+            "constraint": "next generation: revise or drop '%s' — review verdict revise" % title,
+            "source_path": "runs/R/idea.json",
+            "source_sha256": "a" * 64,
+        }
+        result = self.agent.run(
+            IdeaRequest(
+                "稳定性", spans, max_candidates=2, run_id="IDEA-CONS-2",
+                generation_constraints=[constraint],
+            )
+        )
+        demoted = [r for r in result.shortlist.ranked if r.get("feedback_demoted")]
+        self.assertEqual(len(demoted), 1)
+        self.assertEqual(demoted[0]["rank"], len(result.shortlist.ranked))
+        self.assertTrue(
+            any(p["effect"] == "shortlist_demoted" for p in result.feedback_constraints_applied)
+        )
+
+    def test_typed_constraints_do_not_depend_on_prose(self):
+        constraint = {
+            "loop_id": "t6b_falsification",
+            "subject": "studies/S",
+            "constraint": "human-readable only",
+            "constraint_kind": "carry_falsification",
+            "payload": {"falsification": "typed condition"},
+            "source_path": "studies/S/study-origin.json",
+            "source_sha256": "a" * 64,
+        }
+        result = self.agent.run(
+            IdeaRequest(
+                "稳定性", self._collapse_spans(), max_candidates=2, run_id="IDEA-CONS-4",
+                generation_constraints=[constraint],
+            )
+        )
+        self.assertTrue(all("typed condition" in c.falsification for c in result.candidates))
+        provenance = result.feedback_constraints_applied[0]
+        self.assertEqual(provenance["constraint_kind"], "carry_falsification")
+        self.assertEqual(provenance["effect"], "falsification_carried")
+
+    def test_typed_unknown_kind_is_not_guessed(self):
+        constraint = {
+            "loop_id": "mystery_loop",
+            "subject": "x",
+            "constraint": "revise or drop 'something'",
+            "constraint_kind": "",
+            "source_path": "x",
+            "source_sha256": "a" * 64,
+        }
+        result = self.agent.run(
+            IdeaRequest(
+                "稳定性", self._collapse_spans(), max_candidates=2, run_id="IDEA-CONS-5",
+                generation_constraints=[constraint],
+            )
+        )
+        self.assertEqual(result.feedback_constraints_applied, [])
+        self.assertFalse(
+            any(w.startswith("feedback_constraints_applied=") for w in result.warnings)
+        )
+
+    def test_t6b_constraint_carries_falsification(self):
+        condition = "effect reverses under doubled seeds"
+        constraint = {
+            "loop_id": "t6b_falsification",
+            "subject": "studies/S",
+            "constraint": "carry the executed falsification condition into new hypotheses: " + condition,
+            "source_path": "studies/S/study-origin.json",
+            "source_sha256": "a" * 64,
+        }
+        result = self.agent.run(
+            IdeaRequest(
+                "稳定性", self._collapse_spans(), max_candidates=2, run_id="IDEA-CONS-3",
+                generation_constraints=[constraint],
+            )
+        )
+        self.assertTrue(all(condition in c.falsification for c in result.candidates))
+        self.assertTrue(
+            any(p["effect"] == "falsification_carried" for p in result.feedback_constraints_applied)
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

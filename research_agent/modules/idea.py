@@ -18,6 +18,57 @@ from ..specs import ModuleSpec
 
 IdeaProposer = Callable[[Dict[str, Any]], Optional[List[Dict[str, Any]]]]
 
+_T6B_CARRY_PREFIX = "carry the executed falsification condition into new hypotheses: "
+
+
+def _belief_title(constraint: str) -> str:
+    marker = "revise or drop '"
+    start = constraint.find(marker)
+    if start < 0:
+        return ""
+    rest = constraint[start + len(marker):]
+    end = rest.find("'")
+    return rest[:end] if end >= 0 else ""
+
+
+def _constraint_kind(entry: Dict[str, Any]) -> str:
+    """Typed consumption: kind first, prose parsing only for legacy rows."""
+    kind = str(entry.get("constraint_kind") or "").strip()
+    if kind:
+        return kind
+    loop = str(entry.get("loop_id") or "")
+    text = str(entry.get("constraint") or "")
+    if loop == "homogeneity":
+        return "require_lens_diversity"
+    if loop == "belief_revision":
+        return "demote_candidate" if text.startswith("next generation: revise or drop") else "carry_forward"
+    if loop == "t6b_falsification":
+        return "carry_falsification" if text.startswith(_T6B_CARRY_PREFIX) else "require_falsification_binding"
+    return ""
+
+
+def _constraint_payload(entry: Dict[str, Any], kind: str) -> Dict[str, Any]:
+    payload = entry.get("payload") if isinstance(entry.get("payload"), dict) else {}
+    if kind == "demote_candidate" and not payload.get("title"):
+        return {"title": _belief_title(str(entry.get("constraint") or ""))}
+    if kind == "carry_falsification" and not payload.get("falsification"):
+        text = str(entry.get("constraint") or "")
+        if text.startswith(_T6B_CARRY_PREFIX):
+            return {"falsification": text[len(_T6B_CARRY_PREFIX):]}
+    return payload
+
+
+def _constraint_provenance(entry: Dict[str, Any], kind: str, effect: str) -> Dict[str, Any]:
+    return {
+        "loop_id": str(entry.get("loop_id") or ""),
+        "constraint_kind": kind,
+        "subject": str(entry.get("subject") or ""),
+        "source_path": str(entry.get("source_path") or ""),
+        "source_sha256": str(entry.get("source_sha256") or ""),
+        "constraint": str(entry.get("constraint") or ""),
+        "effect": effect,
+    }
+
 # Slots a falsifiable prediction must declare before it can be called testable.
 PREDICTION_SLOTS = (
     "variable", "direction", "condition", "profile", "dataset",
@@ -117,6 +168,7 @@ def load_idea_result(path: Any, run_id: str = "") -> IdeaResult:
         brief=brief,
         prior_art_report=list(payload.get("prior_art_report") or []),
         shortlist=None,
+        feedback_constraints_applied=list(payload.get("feedback_constraints_applied") or []),
     )
 
 
@@ -131,6 +183,7 @@ class IdeaRequest:
         Callable[[str, int], List[Dict[str, Any]]]
     ] = None
     gap_pack: Optional[Dict[str, Any]] = None
+    generation_constraints: Optional[List[Dict[str, Any]]] = None
 
 
 def _spread_spans(spans: List[Span], limit: int) -> List[Span]:
@@ -316,7 +369,7 @@ class IdeaAgent:
         )
 
     def _proposer_payload(self, request: IdeaRequest) -> Dict[str, Any]:
-        return {
+        payload = {
             "topic": request.topic,
             "language": request.language,
             "max_candidates": request.max_candidates,
@@ -330,6 +383,22 @@ class IdeaAgent:
                 for span in _spread_spans(request.spans, 24)
             ],
         }
+        constraints = []
+        for item in request.generation_constraints or []:
+            if not isinstance(item, dict) or not item.get("constraint"):
+                continue
+            entry = {
+                "loop_id": str(item.get("loop_id") or ""),
+                "constraint": str(item.get("constraint") or ""),
+            }
+            if item.get("constraint_kind"):
+                entry["constraint_kind"] = str(item.get("constraint_kind"))
+            if isinstance(item.get("payload"), dict):
+                entry["payload"] = item["payload"]
+            constraints.append(entry)
+        if constraints:
+            payload["generation_constraints"] = constraints
+        return payload
 
     def _model_cards(
         self, raw: List[Dict[str, Any]], request: IdeaRequest
@@ -573,7 +642,8 @@ class IdeaAgent:
         return report
 
     def _shortlist(
-        self, cards: List[IdeaCard], language: str
+        self, cards: List[IdeaCard], language: str,
+        demoted: Optional[Set[str]] = None,
     ) -> IdeaShortlist:
         prior_weight = {
             "live_search": 3,
@@ -581,9 +651,11 @@ class IdeaAgent:
             "s1_corpus": 1,
             "none": 0,
         }
+        demoted_ids = demoted or set()
 
-        def score(card: IdeaCard) -> Tuple[int, int, int, int, int]:
+        def score(card: IdeaCard) -> Tuple[int, int, int, int, int, int]:
             return (
+                0 if card.idea_id in demoted_ids else 1,
                 prior_weight.get(card.prior_art_scope, 0),
                 1 if card.contrast_refs else 0,
                 1 if card.evidence_count >= 2 else 0,
@@ -616,6 +688,9 @@ class IdeaAgent:
             }
             for rank, card in enumerate(ranked_cards, start=1)
         ]
+        if demoted_ids:
+            for entry, card in zip(ranked, ranked_cards):
+                entry["feedback_demoted"] = card.idea_id in demoted_ids
         if language == "en":
             criteria = [
                 "prior-art scope",
@@ -624,6 +699,8 @@ class IdeaAgent:
                 "cross-source support",
                 "kill criteria",
             ]
+            if demoted_ids:
+                criteria.insert(0, "feedback demotion (prior review verdicts)")
             boundary = (
                 "Advisory comparison only; no novelty score and no automatic G1 "
                 "selection. Human G1 must choose."
@@ -636,6 +713,8 @@ class IdeaAgent:
                 "跨来源支持",
                 "kill criteria",
             ]
+            if demoted_ids:
+                criteria.insert(0, "反馈降权（先前评审判定）")
             boundary = (
                 "仅作对比参考；不评分 novelty、不自动选短名单；G1 必须由人选择。"
             )
@@ -863,8 +942,11 @@ class IdeaAgent:
             return True
         return not self._SENTENCE_END_RE.search(body)
 
-    def _rule_cards(self, request: IdeaRequest) -> List[IdeaCard]:
+    def _rule_cards(
+        self, request: IdeaRequest, force_diversity: bool = False
+    ) -> Tuple[List[IdeaCard], bool]:
         cards: List[IdeaCard] = []
+        diversity_enforced = False
         topic_tokens = self._prior_tokens(request.topic)
         used_contrasts: Set[str] = set()
         used_contrast_sources: Set[str] = set()
@@ -889,6 +971,18 @@ class IdeaAgent:
             lens = self._lens_for_section(
                 representative.section or "", index
             )
+            if (
+                force_diversity
+                and cards
+                and len({card.lens for card in cards}) == 1
+                and lens == cards[0].lens
+            ):
+                # homogeneity feedback: the next generation must not collapse
+                # into a single lens; rotate this card to the next one
+                lens = self._LENSES[
+                    (self._LENSES.index(lens) + 1) % len(self._LENSES)
+                ]
+                diversity_enforced = True
             contrast = self._contrast_for_group(
                 group,
                 request.spans,
@@ -956,7 +1050,7 @@ class IdeaAgent:
                     contrast_note=contrast_excerpt or "",
                 )
             )
-        return cards
+        return cards, diversity_enforced
 
     def run(self, request: IdeaRequest) -> IdeaResult:
         if self.spec.status in ("revoked", "deprecated"):
@@ -998,8 +1092,79 @@ class IdeaAgent:
                     raise ModelRequiredError("idea model produced no valid candidates")
             elif self.strict_model:
                 raise ModelRequiredError("idea model returned no usable output")
+        parsed_constraints = []
+        for item in request.generation_constraints or []:
+            if not isinstance(item, dict) or not item.get("constraint"):
+                continue
+            kind = _constraint_kind(item)
+            if not kind:
+                continue
+            parsed_constraints.append((item, kind, _constraint_payload(item, kind)))
+        homogeneity = [p for p in parsed_constraints if p[1] == "require_lens_diversity"]
+        belief = [p for p in parsed_constraints if p[1] == "demote_candidate"]
+        t6b = [p for p in parsed_constraints if p[1] == "carry_falsification"]
+        pass_through = [
+            p for p in parsed_constraints
+            if p[1] in ("carry_forward", "require_falsification_binding")
+        ]
+        applied: List[Dict[str, Any]] = []
+        diversity_enforced = False
         if not candidates:
-            candidates = self._rule_cards(request)
+            candidates, diversity_enforced = self._rule_cards(
+                request, force_diversity=bool(homogeneity)
+            )
+        elif (
+            homogeneity
+            and len(candidates) > 1
+            and len({card.lens for card in candidates}) == 1
+        ):
+            last = candidates[-1]
+            last.lens = self._LENSES[
+                (self._LENSES.index(last.lens) + 1) % len(self._LENSES)
+            ]
+            diversity_enforced = True
+        for entry, kind, payload in homogeneity:
+            applied.append(
+                _constraint_provenance(
+                    entry,
+                    kind,
+                    "lens_diversity_enforced" if diversity_enforced else "no_change_needed",
+                )
+            )
+        demoted: Set[str] = set()
+        for entry, kind, payload in belief:
+            title = str(payload.get("title") or "")
+            matched = [
+                card.idea_id for card in candidates
+                if title and card.title[:120] == title
+            ]
+            demoted.update(matched)
+            provenance = _constraint_provenance(
+                entry, kind, "shortlist_demoted" if matched else "no_matching_candidate"
+            )
+            if matched:
+                provenance["idea_ids"] = matched
+            applied.append(provenance)
+        for entry, kind, payload in t6b:
+            condition = str(payload.get("falsification") or "")
+            if not condition:
+                continue
+            for card in candidates:
+                card.falsification += (
+                    " Carried executed-study falsification (feedback): " + condition
+                    if request.language == "en"
+                    else " 反馈携带的已执行否证条件：" + condition
+                )
+            applied.append(_constraint_provenance(entry, kind, "falsification_carried"))
+        for entry, kind, payload in pass_through:
+            applied.append(
+                _constraint_provenance(
+                    entry,
+                    kind,
+                    "no_change_needed" if kind == "carry_forward"
+                    else "not_applicable_to_generation",
+                )
+            )
         self._annotate_contrast(candidates, request)
         theme_index, theme_ids, gap_targets = self._gap_pack_index(request.gap_pack)
         bound = self._annotate_gap_relation(
@@ -1092,6 +1257,23 @@ class IdeaAgent:
             )
         )
 
+        if parsed_constraints:
+            warnings.append(
+                "feedback_constraints_applied=%d loops:%s | prior verdicts shaped this "
+                "generation; provenance in feedback_constraints_applied; G1 stays human"
+                % (
+                    len(applied),
+                    ",".join(
+                        sorted({str(item[0].get("loop_id") or "") for item in parsed_constraints})
+                    ),
+                )
+            )
+        if demoted:
+            warnings.append(
+                "feedback_belief_revision: demoted %d candidate(s) per prior review verdicts"
+                % len(demoted)
+            )
+
         if not request.spans:
             warnings.append("no span supplied; status=needs_evidence")
         if self.spec.status != "active":
@@ -1178,7 +1360,9 @@ class IdeaAgent:
 
         status = "candidates_need_human" if candidates else "needs_evidence"
         shortlist = (
-            self._shortlist(candidates, request.language) if candidates else None
+            self._shortlist(candidates, request.language, demoted=demoted or None)
+            if candidates
+            else None
         )
         if shortlist is not None:
             warnings.append(
@@ -1194,4 +1378,5 @@ class IdeaAgent:
             brief=brief,
             prior_art_report=prior_art_report,
             shortlist=shortlist,
+            feedback_constraints_applied=applied,
         )

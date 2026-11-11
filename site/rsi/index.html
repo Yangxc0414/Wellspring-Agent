@@ -331,6 +331,36 @@
       <p class="src">数据出处：<code>runtime_data/harness2/latest.json</code>（运行产物）· <code>runtime_data/harness2/story.json</code>（本页读取的投影）· <code>research_agent/rsi_harness2.py</code>（映射与校验）· <code>scripts/harness2_run.py</code>（3.12 运行桥）· <code>harness2-main/</code>（上游，Apache-2.0）。</p>
     </div>
   </section>
+
+  <section class="block" id="platform-loop" style="border-bottom:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">08 / PLATFORM CONTROL PLANE</p><h2>平台自身的自改进：判定先入总线，环再消费总线</h2></div>
+        <p>Harness² 进化 agent；平台用同一套纪律进化自己：判定入总线、环消费总线、准入默认拒绝、升级人签。一个总线 + 四个端口，逐项可开关、可测量。</p>
+      </div>
+      <div class="gov">
+        <div class="panel">
+          <h3>一个总线 + 四个端口（71 号设计文档）</h3>
+          <p class="sub">关闭全部环 = 与今日行为逐字节一致；任一环单独开 = 判定真实改变下一步动作。</p>
+          <ol class="seam-flow">
+            <li class="auto" data-n="1"><b>判定总线 · verdict-ledger 0.1.0</b><span>判定从单点生产者重算入账；快照漂移成一等行；消费者只读，缺失 fail-closed。research_status 的 capsule 摘要已改读时重算（快照只留历史与 runtime META）</span></li>
+            <li class="auto" data-n="2"><b>FeedbackPort · feedback 0.6.0</b><span>4/4 环改变下一步动作；约束类型化（constraint_kind + payload，文本仅供人读），旧账本消费边缘一次性推断；消费侧重算来源 sha256，stale 默认拒绝；idea.json 写 provenance</span></li>
+            <li class="auto" data-n="3"><b>MemoryWritePort · memory-port 0.1.0</b><span>四准入策略可插拔；严格度对照两两互异（4/4→2/4→1/4→0/4）；跨任务收益待多会话测量</span></li>
+            <li class="auto" data-n="4"><b>委托骨架 · waitpoints 0.2.0</b><span>事件 → 程序快层相关性检查（默认拒绝）→ 事件账本 → 下一次 run 消费并标 acted；无常驻进程</span></li>
+            <li class="auto" data-n="5"><b>ExecPort · exec-port 0.1.0</b><span>三执行面（inprocess 3.8 / bridge 3.12 / host_agent）已登记为可注册接缝，<code>exec faces</code> 只读投影；新面可注册、未知 kind 拒绝。「路由只经端口分派」仍是 roadmap，现有 dispatch 不变</span></li>
+          </ol>
+        </div>
+        <div class="panel">
+          <h3>对第一次看的人意味着什么</h3>
+          <p class="sub">自改进不是「模型自己改自己」。</p>
+          <div class="bound">
+            每次改进先变成<b>判定</b>（测没测过、退没退化、上游变没变），判定入总线，环把判定变成下一步动作，动作再被默认拒绝与人工门禁约束。平台能证明的是「接口通了、判定被消费、失效会传播」；<strong>不</strong>证明「能力涨了」——后者要 hidden 留出集与人签，与上一节同口径。
+          </div>
+          <p class="src">实测锚：tests/test_verdict_ledger · tests/test_feedback · tests/test_pipeline（FeedbackLoopWiringTest）· scripts/m1_feedback_sensitivity.py（verdict=supported）· scripts/m2_memory_strategies.py。逐项读数见 docs/fact-baseline.md。</p>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer class="sp-foot">Research Agent · 自进化接缝 · 执行在 Harness²，判据与台账在平台 · 门禁口径 G1 想法=S3 / G2 设计=S4 / S5b 结果人签=S5c / G5 闭包=S16；本页所有数字来自一次确定性运行的产物，不构成能力声明</footer>

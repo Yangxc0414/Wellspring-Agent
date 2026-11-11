@@ -19,7 +19,7 @@ def _run_dir(project: Path, run_id: str, capsule=None) -> Path:
 
 
 class NextActionsFallbackTest(unittest.TestCase):
-    def test_capsule_commands_survive_a_missing_task(self):
+    def test_capsule_commands_are_recomputed_not_echoed(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / "proj"
             init_project(project, "Fallback")
@@ -40,8 +40,16 @@ class NextActionsFallbackTest(unittest.TestCase):
                 },
             )
             actions = _next_actions(project, "RUN-CAPSULE")
-            self.assertEqual(actions[0]["gate"], "S5b")
-            self.assertIn("run claim", actions[0]["command"])
+            # read-time recompute: the run artifacts outrank the snapshot, so a
+            # claim command the artifacts do not support is not echoed back
+            self.assertTrue(actions)
+            self.assertTrue(any(item.get("command") for item in actions))
+            self.assertTrue(
+                all(
+                    "run claim" not in str(item.get("command") or "")
+                    for item in actions
+                )
+            )
             self.assertNotEqual(actions[0].get("kind"), "inspect")
 
     def test_no_capsule_still_falls_back_to_inspect(self):
@@ -54,9 +62,12 @@ class NextActionsFallbackTest(unittest.TestCase):
                 "RUN-NOARGS",
                 {"schema_version": "loop-capsule-0.1", "run_id": "RUN-NOARGS", "next_actions": []},
             )
-            for run_id in ("RUN-EMPTY", "RUN-NOARGS"):
-                actions = _next_actions(project, run_id)
-                self.assertEqual(actions[0]["kind"], "inspect", run_id)
+            empty_actions = _next_actions(project, "RUN-EMPTY")
+            self.assertEqual(empty_actions[0]["kind"], "inspect")
+            # a capsule without artifacts is recomputed from the (missing) artifacts:
+            # the fresh actions replace the empty snapshot rather than echoing it
+            recomputed = _next_actions(project, "RUN-NOARGS")
+            self.assertTrue(any(item.get("command") for item in recomputed))
 
 
 if __name__ == "__main__":

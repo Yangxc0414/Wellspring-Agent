@@ -35,6 +35,25 @@ class LoopCapsuleTest(unittest.TestCase):
                 node["study_design_blockers"], ["replication.partial_claim"]
             )
 
+    def test_feedback_constraint_provenance_is_visible_in_capsule(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "project" / "runs" / "RUN-1"
+            root.mkdir(parents=True)
+            _write(root / "idea.json", {
+                "status": "candidates_need_human",
+                "candidates": [{"idea_id": "IDEA-01", "title": "T"}],
+                "feedback_constraints_applied": [
+                    {"loop_id": "t6b_falsification", "effect": "falsification_carried"},
+                    {"loop_id": "homogeneity", "effect": "lens_diversity_enforced"},
+                ],
+            })
+            capsule = build_loop_capsule(root)
+            self.assertEqual(capsule["feedback"]["constraints_applied"], 2)
+            self.assertEqual(
+                capsule["feedback"]["loops"], ["homogeneity", "t6b_falsification"]
+            )
+            self.assertIn("falsification_carried", capsule["feedback"]["effects"])
+
     def test_a_decidable_study_surfaces_the_human_claim_gate(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / "project"

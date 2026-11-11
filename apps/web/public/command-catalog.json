@@ -1,9 +1,9 @@
 {
   "schema_version": "workspace-0.1",
-  "generated_at": "2026-11-11T00:44:09+00:00",
-  "count": 217,
+  "generated_at": "2026-11-11T08:06:56+00:00",
+  "count": 219,
   "curated": 51,
-  "derived": 166,
+  "derived": 168,
   "commands": [
     {
       "id": "study.baseline",
@@ -699,6 +699,15 @@
       "curated": false
     },
     {
+      "id": "exec.faces",
+      "group": "exec",
+      "label": "faces",
+      "syntax": "python -m research_agent exec faces",
+      "description": "usage: research_agent exec faces [-h]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
       "id": "experiment.consistency-registry",
       "group": "experiment",
       "label": "consistency registry",
@@ -1000,7 +1009,7 @@
       "group": "memory",
       "label": "compare",
       "syntax": "python -m research_agent memory ab.compare",
-      "description": "usage: research_agent memory ab compare [-h] --project PROJECT\n                                        [--output-dir OUTPUT_DIR]",
+      "description": "usage: research_agent memory ab compare [-h] --project PROJECT\n                                        [--output-dir OUTPUT_DIR]\n                                        [--sessions {single,multi}]",
       "safety": "catalog_only",
       "curated": false
     },
@@ -1018,7 +1027,7 @@
       "group": "memory",
       "label": "record",
       "syntax": "python -m research_agent memory ab.record",
-      "description": "usage: research_agent memory ab record [-h] --project PROJECT --run-id RUN_ID\n                                       --arm {with,without} --ideas-file\n                                       IDEAS_FILE --literature-file\n                                       LITERATURE_FILE",
+      "description": "usage: research_agent memory ab record [-h] --project PROJECT --run-id RUN_ID\n                                       --arm {with,without} --ideas-file\n                                       IDEAS_FILE --literature-file\n                                       LITERATURE_FILE\n                                       [--session-host-label SESSION_HOST_LABEL]\n                                       [--session-id SESSION_ID]",
       "safety": "catalog_only",
       "curated": false
     },
@@ -1793,6 +1802,15 @@
       "label": "status",
       "syntax": "python -m research_agent waitpoint status",
       "description": "usage: research_agent waitpoint status [-h] --id ID [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "waitpoint.triage",
+      "group": "waitpoint",
+      "label": "triage",
+      "syntax": "python -m research_agent waitpoint triage",
+      "description": "usage: research_agent waitpoint triage [-h] --project PROJECT --owner OWNER\n                                       [--scope SCOPE] [--root ROOT]",
       "safety": "catalog_only",
       "curated": false
     },

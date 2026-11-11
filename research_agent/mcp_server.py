@@ -3196,15 +3196,50 @@ def _loop_capsule_summary(target: Path) -> Dict[str, Any]:
     capsule = _read_json(target / "loop-capsule.json")
     if not isinstance(capsule, dict):
         return {}
-    # The capsule is a run-time snapshot: a delegated signature can land after it was
-    # written, so the snapshot may still say CLOSURE_UNSIGNED over an already-signed
-    # closure.  Re-derive that one verdict from the single-point producer (verdict
-    # ledger) and override the stale blocker — a host following blockers must never
-    # be pointed at re-signing a signed closure.
+    # The capsule is a run-time snapshot, and its decision fields (blockers /
+    # next_actions / node status) go stale the moment a delegated signature or
+    # claim lands after it was written.  Re-derive them from the run artifacts at
+    # read time; the snapshot keeps only history (what was true then) and the
+    # runtime-appended META fields that artifacts cannot reproduce.
+    snapshot_blockers = [str(item) for item in (capsule.get("blockers") or [])]
+    fresh = None
+    try:
+        from .loop_capsule import build_loop_capsule
+
+        fresh = build_loop_capsule(target)
+    except (OSError, ValueError):
+        fresh = None
+    source = fresh if isinstance(fresh, dict) else capsule
+    blockers = [str(item) for item in (source.get("blockers") or [])]
+    actions = [item for item in (source.get("next_actions") or []) if isinstance(item, dict)]
+    nodes = [item for item in (source.get("nodes") or []) if isinstance(item, dict)]
+    snapshot_meta = next(
+        (
+            item
+            for item in (capsule.get("nodes") or [])
+            if isinstance(item, dict) and item.get("id") == "META"
+        ),
+        {},
+    )
+    if snapshot_meta:
+        for node in nodes:
+            if node.get("id") != "META":
+                continue
+            for key in ("observation_id", "active_policy_id"):
+                if snapshot_meta.get(key):
+                    node[key] = snapshot_meta[key]
+            if node.get("observation_id") or node.get("active_policy_id"):
+                node["status"] = "partial"
     override = None
-    blockers = [str(item) for item in (capsule.get("blockers") or [])]
-    actions = [item for item in (capsule.get("next_actions") or []) if isinstance(item, dict)]
-    if "CLOSURE_UNSIGNED" in blockers:
+    removed = [item for item in snapshot_blockers if item not in blockers]
+    if "CLOSURE_UNSIGNED" in removed:
+        override = {
+            "snapshot": "CLOSURE_UNSIGNED",
+            "recomputed": "unknown",
+            "source": "read-time-recompute",
+            "source_path": "",
+            "source_sha256": "",
+        }
         try:
             from .loop_capsule import project_root_for_run
             from .verdict_ledger import collect
@@ -3217,31 +3252,18 @@ def _loop_capsule_summary(target: Path) -> Dict[str, Any]:
             (
                 item
                 for item in (ledger or {}).get("rows") or []
-                if item.get("kind") == "closure" and item.get("subject") == "runs/" + target.name
+                if item.get("kind") == "closure"
+                and item.get("subject") == "runs/" + target.name
             ),
             None,
         )
-        if row and row.get("status") == "signed":
-            override = {
-                "snapshot": "CLOSURE_UNSIGNED",
-                "recomputed": "signed",
-                "source": "verdict-ledger",
-                "source_path": row.get("source_path") or "",
-                "source_sha256": row.get("source_sha256") or "",
-            }
-            blockers = [item for item in blockers if item != "CLOSURE_UNSIGNED"]
-            actions = [
-                item
-                for item in actions
-                if "closure sign" not in str(item.get("command") or "")
-            ]
-    nodes = [
-        item for item in (capsule.get("nodes") or [])
-        if isinstance(item, dict)
-    ]
+        if row:
+            override["source_path"] = row.get("source_path") or ""
+            override["source_sha256"] = row.get("source_sha256") or ""
+            override["recomputed"] = str(row.get("status") or "unknown")
     return {
         "path": "loop-capsule.json",
-        "run_id": str(capsule.get("run_id") or ""),
+        "run_id": str(source.get("run_id") or capsule.get("run_id") or ""),
         "status": "blocked" if blockers else "ready_for_human_review",
         "nodes": {
             str(item.get("id")): str(item.get("status") or "")
@@ -3249,8 +3271,17 @@ def _loop_capsule_summary(target: Path) -> Dict[str, Any]:
         },
         "blockers": blockers,
         "verdict_override": override,
+        "recompute": (
+            {
+                "authoritative": "read-time",
+                "snapshot_blockers": snapshot_blockers,
+                "recomputed_blockers": blockers,
+            }
+            if fresh is not None
+            else None
+        ),
         "next_actions": actions[:8],
-        "boundary": str(capsule.get("boundary") or ""),
+        "boundary": str(source.get("boundary") or capsule.get("boundary") or ""),
     }
 
 
@@ -3290,6 +3321,34 @@ def _verdict_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
     return actions
 
 
+def _delegation_actions(project: Path) -> List[Dict[str, Any]]:
+    """Relevant external wakes the next run should consume (71-图③ 06 回指)."""
+    try:
+        from .waitpoints import pending_delegation_events
+
+        events = pending_delegation_events(project)
+    except (OSError, ValueError):
+        return []
+    actions: List[Dict[str, Any]] = []
+    for event in events[:4]:
+        actions.append(
+            {
+                "kind": "delegation_event",
+                "message": (
+                    "external job wake '%s' matched the declared scope (%s); the next "
+                    "pipeline run consumes it — review the result as data before "
+                    "continuing the delegation"
+                    % (event.get("label"), ", ".join(event.get("matched_terms") or []))
+                ),
+                "wake_id": event.get("wake_id"),
+                "waitpoint_id": event.get("waitpoint_id"),
+                "source": "delegation-events",
+                "data_is_untrusted": True,
+            }
+        )
+    return actions
+
+
 def _next_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
     target = run_dir(project, run_id)
     task = _read_task(target)
@@ -3312,8 +3371,9 @@ def _next_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
             if action
         ]
         verdict_actions = _verdict_actions(project, run_id)
-        if actions or study_actions or verdict_actions:
-            return actions + study_actions + verdict_actions
+        delegation_actions = _delegation_actions(project)
+        if actions or study_actions or verdict_actions or delegation_actions:
+            return actions + study_actions + verdict_actions + delegation_actions
         # A task-less run can still carry a capsule: pointing the human at the directory
         # would be weaker advice than the artifacts already support.
         capsule_actions = [
@@ -3322,7 +3382,7 @@ def _next_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
             if isinstance(action, dict) and action.get("command")
         ]
         if capsule_actions:
-            return capsule_actions + verdict_actions
+            return capsule_actions + verdict_actions + delegation_actions
         return [
             {
                 "kind": "inspect",
@@ -3550,6 +3610,7 @@ def _next_actions(project: Path, run_id: str) -> List[Dict[str, Any]]:
             }
         )
     actions.extend(_verdict_actions(project, run_id))
+    actions.extend(_delegation_actions(project))
     return actions
 
 

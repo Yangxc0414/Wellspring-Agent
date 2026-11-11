@@ -13,6 +13,7 @@ from pathlib import Path
 from research_agent.feedback import (
     FEEDBACK_SCHEMA,
     _gate_lineage_reverify,
+    generation_constraints,
     run_feedback,
 )
 from research_agent.lineage import LineageAgent, write_manifest
@@ -315,6 +316,110 @@ class M1HarnessTest(unittest.TestCase):
             self.assertGreater(result["metrics"]["contradictory_escalations"], 0)
             module.main(["--project", str(root), "--output-dir", str(out)])
             self.assertTrue((out / "result.json").is_file())
+
+
+class GenerationConstraintsTest(unittest.TestCase):
+    def _study(self, root: Path) -> Path:
+        study = root / "studies" / "STUDY-CONS"
+        _write(
+            study / "study-origin.json",
+            {"falsification": "effect reverses under doubled seeds", "idea_id": "IDEA-01"},
+        )
+        return study
+
+    def test_missing_ledger_is_empty_and_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            before = _snapshot(root)
+            payload = generation_constraints(root)
+            self.assertEqual(payload["constraints"], [])
+            self.assertEqual(payload["stale"], [])
+            self.assertEqual(_snapshot(root), before)
+
+    def test_fresh_constraint_passes_and_stale_is_denied(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            study = self._study(root)
+            run_feedback(root, loops=["t6b_falsification"])
+            fresh = generation_constraints(root)
+            self.assertEqual(len(fresh["constraints"]), 1)
+            self.assertEqual(fresh["stale"], [])
+            entry = fresh["constraints"][0]
+            self.assertEqual(entry["loop_id"], "t6b_falsification")
+            self.assertTrue(entry["source_sha256"])
+            _write(
+                study / "study-origin.json",
+                {"falsification": "changed condition", "idea_id": "IDEA-01"},
+            )
+            stale = generation_constraints(root)
+            self.assertEqual(stale["constraints"], [])
+            self.assertEqual(len(stale["stale"]), 1)
+            self.assertIn("changed", stale["stale"][0]["reason"])
+
+    def test_belief_constraint_invalidated_when_review_changes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            run = root / "runs" / "RUN-TEST-01"
+            _write(
+                run / "idea.json",
+                {"candidates": [{"idea_id": "IDEA-01", "title": "T", "lens": "mechanism", "source_count": 2}]},
+            )
+            _write(
+                run / "idea-review.json",
+                {"reviews": [{"idea_id": "IDEA-01", "recommendation": "revise", "reasons": ["single source"]}]},
+            )
+            run_feedback(root, loops=["belief_revision"])
+            fresh = generation_constraints(root)
+            self.assertEqual(len(fresh["constraints"]), 1)
+            _write(
+                run / "idea-review.json",
+                {"reviews": [{"idea_id": "IDEA-01", "recommendation": "approve", "reasons": []}]},
+            )
+            stale = generation_constraints(root)
+            self.assertEqual(stale["constraints"], [])
+            self.assertEqual(len(stale["stale"]), 1)
+
+    def test_typed_constraint_kind_and_payload_survive(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._study(root)
+            run_feedback(root, loops=["t6b_falsification"])
+            entry = generation_constraints(root)["constraints"][0]
+            self.assertEqual(entry["constraint_kind"], "carry_falsification")
+            self.assertEqual(
+                entry["payload"]["falsification"], "effect reverses under doubled seeds"
+            )
+            self.assertNotIn("legacy_inferred", entry)
+
+    def test_legacy_text_only_rows_are_inferred_at_the_consumer_edge(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._study(root)
+            run_feedback(root, loops=["t6b_falsification"])
+            ledger = json.loads((root / "feedback-ledger.json").read_text(encoding="utf-8"))
+            for row in ledger["rows"]:
+                row["proposal"].pop("constraint_kind", None)
+                row["proposal"].pop("payload", None)
+            _write(root / "feedback-ledger.json", ledger)
+            entry = generation_constraints(root)["constraints"][0]
+            self.assertEqual(entry["constraint_kind"], "carry_falsification")
+            self.assertEqual(
+                entry["payload"]["falsification"], "effect reverses under doubled seeds"
+            )
+            self.assertTrue(entry["legacy_inferred"])
+
+    def test_deterministic_and_gate_rejected_rows_excluded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._study(root)
+            run_feedback(root, loops=["t6b_falsification"])
+            first = json.dumps(generation_constraints(root), sort_keys=True)
+            second = json.dumps(generation_constraints(root), sort_keys=True)
+            self.assertEqual(first, second)
+            ledger = json.loads((root / "feedback-ledger.json").read_text(encoding="utf-8"))
+            ledger["rows"][0]["gate_decision"] = {"decision": "rejected", "reason": "test"}
+            _write(root / "feedback-ledger.json", ledger)
+            self.assertEqual(generation_constraints(root)["constraints"], [])
 
 
 if __name__ == "__main__":

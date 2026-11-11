@@ -2,7 +2,7 @@
 id: idea
 name: 假设收敛
 stage: S2–S3
-version: 0.24.1
+version: 0.26.0
 status: pilot
 owner: research-agent
 inputs:
@@ -100,6 +100,8 @@ invariants:
 - 可选 `critic_models`（`role -> ModelPort`，role ∈ novelty/evidence/feasibility）与 `panel`（`model_catalog.critic_panel()` 输出）：把每个角色绑定到独立供给；未绑定的角色回落到提案模型，并被 independence 记为 single_author；
 - `independence` 输出 `supplies`（role→provider/model/kind/host_label 指纹）、`distinct_supplies`、`distinct_providers`、`proposer_is_critic`、`reasons`、`kind` 与 `admission_eligible`；每条评审记录带 `supply`，事后可核对分数由谁给出；
 - 禁止：自动 novelty 结论、自动 G1、把候选写成结果 claim。
+- 可选输入 `generation_constraints`（v0.25.0 起；v0.26.0 类型化）：每行 `loop_id/subject/constraint_kind/payload/constraint/source_path/source_sha256`。S2 按 `constraint_kind` 分派——`require_lens_diversity` 在候选 lens 会塌缩时强制轮换出第二个 lens；`demote_candidate` 在 shortlist 对 `payload.title` 同名候选降权（ranked 带 `feedback_demoted`）；`carry_falsification` 把 `payload.falsification` 追加进候选 falsification；`carry_forward` / `require_falsification_binding` 不改候选，只记 provenance（`no_change_needed` / `not_applicable_to_generation`）。`constraint` 文本仅供人读；无 `constraint_kind` 的旧输入回退文本推断一次；未知 kind 不消费、不猜测。无约束时行为与升级前逐字节一致；约束不改门禁、不写 Claim/EA/gate、不自动 G1。
+- 输出：`IdeaResult.feedback_constraints_applied`（v0.25.0 起；v0.26.0 增 `constraint_kind`）：每条被消费约束的 `loop_id/constraint_kind/subject/source_path/source_sha256/constraint/effect`，使 idea.json 可追溯「哪条判定塑造了这批候选」；未消费时为空列表。模型 proposer payload 增 `generation_constraints` 键（含 kind/payload，仅当非空）。
 
 
 ## Current Implementation
@@ -122,6 +124,7 @@ invariants:
 - 可选 `research_agent/adapters/research_models.py::gateway_idea_proposer`：按设置中的 `idea` 模型绑定解析；test 模式无 key/绑定缺失时返回 `(None, note)`，不阻断规则模板；production 模式 strict 直接失败；
 - 模型输出逐候选校验：evidence_refs 必须解析到输入 span，缺否证条件/标题/假设的候选拒收；全部拒收时回退规则聚类并写 warning；
 - 模型调用不是证据来源，不产生 Span/Claim，也不改变 novelty_unverified 与 G1。
+- `research_agent/modules/idea.py`（v0.25.0）：消费 `generation_constraints`（feedback 0.4.0 消费侧的新鲜约束）；lens 多样性强制 / shortlist 降权 / 否证条件携带三种确定性 effect；`IdeaResult.feedback_constraints_applied` 写 provenance；pipeline（integration 0.50.0）负责把项目反馈账本接进 IdeaRequest。
 
 ## Boundaries
 
@@ -138,6 +141,8 @@ invariants:
 
 ## Changelog
 
+- 2026-11-11 · v0.26.0 · status=pilot · 消费侧改 kind-first：require_lens_diversity/demote_candidate/carry_falsification/carry_forward/require_falsification_binding 按类型分派，文本解析仅作旧输入回退；feedback_constraints_applied provenance 增 constraint_kind；未知 kind 不消费、不猜测。tests/test_idea 2 项。
+- 2026-11-11 · v0.25.0 · status=pilot · 反馈环回指消费：IdeaRequest.generation_constraints 消费 feedback 0.4.0 新鲜约束（homogeneity 强制 lens 多样性、belief_revision 对 revise-or-drop 候选 shortlist 降权、t6b 携带已执行否证条件进 falsification）；IdeaResult.feedback_constraints_applied 写 provenance（loop_id/subject/source sha256/effect），idea.json 可追溯哪条判定塑造了候选；无约束时逐字节不变；G1/Claim 边界不变。tests/test_idea 增消费侧断言。
 - 2026-11-07 · v0.24.1 · status=pilot · 模型/宿主供给面同步（patch）：0.24.0 让 IdeaCard 承载 prediction，但 IDEA_SYSTEM 仍要求模型只输出 5 个字段并禁止指标，导致真实 run 永远拿不到十槽位；且该提示词要求的是嵌套 prediction 对象，而 0.24.0 的 _model_cards 只读顶层扁平字段，二者不一致（上一轮测试用扁平 proposer 未暴露，本轮端到端测试抓到）。本 patch：IDEA_SYSTEM 声明十槽位、仅当研究对象确属已注册可执行档位时才填、不确定或不在册必须省略且禁止编造；_model_cards 优先读嵌套 prediction 并兼容旧扁平答案；新增 tests/test_idea_model_contract.py 4 例钉住提示词、gateway→IdeaCard→testable、宿主不给预测时 not_testable_here、档位外 cannot_test。host_model._validate 只检查 require_keys 不拒绝额外字段，故十槽位可穿过 WorkBuddy host-model 交接面。不改契约、不改门禁、不宣称质量提升。
 - 2026-11-06 · v0.24.0 · status=pilot · 结构化预测贯通（修复契约丢字段，不编造研究内容）：只读原型实测注入 proposer 给出 10/10 预测槽位（variable/direction/condition/profile/dataset/metric/controls/seeds/stopping_rule/criterion）后，_model_cards 只保留 title/hypothesis/falsification/evidence_refs/lens，IdeaCard 保留 0/10，testability 被硬编码 needs_metric；同时 30 篇真实语料下按 12 条判据只有 4/12 满足。根因收敛为 IdeaCard 契约不承载结构化预测，而非语料或提示词。Contract 新增：IdeaCard 带 prediction/prediction_status(testable|cannot_test|not_testable_here)/open_slots；判定为纯函数，以 executable.py 的 validate_plan 为唯一权威；规则路径只标 not_testable_here + 全列 open_slots、绝不编造变量；模型 proposer 路径原样保留十槽位；idea_structure 回执报状态分布。已存在的 ExperimentDesign 字段可承接下游。未改候选数、模板文案、门禁、Claim/EA/gate；G1 拒收 not_testable_here 属门禁语义变化，需人裁，本轮未做。新增 tests/test_idea.py 用例钉住不编造、不丢弃、档位外 cannot_test 与向后兼容。
 - 2026-11-06 · v0.23.0 · status=pilot · 候选内容质量的结构性修补（只改证据选择与披露，不动模板文案与门禁）：实测 30 篇真实 arXiv PDF + gap_pack 下，3 个候选共用同一个对照 span（LOCAL-ae40748989-S01-06）与同一篇对照来源，等于 30 篇语料只用上 4 篇；三个候选的 falsification / kill_criteria 唯一文本各 1/3（完全相同的万能模板句），testability 全 needs_metric、novelty 全 unverified；候选标题直接是论文题名或首页句子截断；S1 有 134/240 span 疑似题名/作者/地名等噪音，其中 2 条被当作证据引用。Contract 新增三条：同 run 内对照 span 不复用（最大化不同对照来源）、representative 优先可定位证据句（无句末标点的短行降权，不删改 S1 产物）、warnings 必带 idea_structure 结构回执（不同对照来源数、唯一否证/终止条件数、needs_metric 数，并声明模板帧不是研究假设）。明确结论：结构可追溯不等于内容是研究假设，hypothesis 仍缺变量/方向/可执行指标，需 L2 档位校验与 L4 留出集人工评分，本轮未做。新增 tests/test_idea.py 用例钉住对照去重、题名降权与回执。不改模板文案、候选数、门禁、Claim/EA/gate，不宣称质量提升。

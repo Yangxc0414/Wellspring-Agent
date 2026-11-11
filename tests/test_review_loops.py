@@ -7,7 +7,11 @@ from pathlib import Path
 from unittest import mock
 
 from research_agent.innovation_review import InnovationReviewError, run_innovation_review
-from research_agent.manuscript_review import ManuscriptReviewError, run_manuscript_review
+from research_agent.manuscript_review import (
+    ManuscriptReviewError,
+    review_progress,
+    run_manuscript_review,
+)
 from research_agent.manuscript_writer import generate_manuscript
 from tests.writing_support import RUN_ID, make_writing_project, write_draft
 
@@ -524,6 +528,58 @@ class ManuscriptReviewTest(unittest.TestCase):
         )
         self.assertFalse(accepted)
         self.assertIn("drops all", reason)
+
+    def test_review_progress_flags_same_concerns_rescored(self):
+        prev = {"must_fix": ["补充对照", "明确停止规则"]}
+        same = {"must_fix": ["明确停止规则", "补充对照"]}
+        changed = {"must_fix": ["补充对照"]}
+        self.assertFalse(review_progress(prev, same)["progress"])
+        self.assertEqual(review_progress(prev, same)["reason"], "no_progress_same_concerns")
+        self.assertTrue(review_progress(prev, changed)["progress"])
+        self.assertTrue(review_progress(None, same)["progress"])
+        self.assertTrue(review_progress(prev, {"must_fix": []})["progress"])
+
+    def test_same_concerns_rescored_stops_the_loop(self):
+        project = make_writing_project(self.root, with_run=False)
+        draft = write_draft(
+            self.root / "draft.md",
+            result_text="结果表明所提框架在多数设置下优于基线。",
+        )
+        original = draft.read_text(encoding="utf-8")
+        revised = original.replace(
+            "已有综述总结了学习曲线方法 [REF-01]。",
+            "已有综述总结了学习曲线方法，并补充分类轴 [REF-01]。",
+        )
+        model = _FakeModel(
+            [_manuscript_review(6.0), revised, _manuscript_review(6.5)]
+        )
+        result = run_manuscript_review(
+            project, RUN_ID, draft, rounds=3, threshold=8.0, model=model
+        )
+        self.assertEqual(result["stop_reason"], "no_progress_same_concerns")
+        self.assertEqual(result["rounds_completed"], 2)
+        self.assertEqual(result["accepted_revisions"], 1)
+        self.assertEqual(result["status"], "needs_more_work")
+
+    def test_no_op_revision_is_rejected(self):
+        project = make_writing_project(self.root, with_run=False)
+        draft = write_draft(
+            self.root / "draft.md",
+            result_text="结果表明所提框架在多数设置下优于基线。",
+        )
+        original = draft.read_text(encoding="utf-8")
+        model = _FakeModel([_manuscript_review(6.0), original])
+        result = run_manuscript_review(
+            project, RUN_ID, draft, rounds=2, threshold=8.0, model=model
+        )
+        self.assertEqual(result["accepted_revisions"], 0)
+        self.assertEqual(result["stop_reason"], "revision_rejected")
+        self.assertTrue(
+            any(
+                item.get("stage") == "revision" and item.get("reason") == "no_op_revision"
+                for item in result["iterations"]
+            )
+        )
 
     def test_requires_model(self):
         project = make_writing_project(self.root)

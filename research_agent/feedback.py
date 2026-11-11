@@ -12,7 +12,7 @@ the port writes nothing anywhere, so 关闭全部环 = 与今日行为逐字节�
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .storage import write_json_atomic
 
@@ -207,11 +207,15 @@ def _propose_t6b_falsification(observation: Dict[str, Any]) -> List[Dict[str, An
     falsification = str(observation.get("falsification") or "")
     if observation.get("state") == "falsification_bound":
         constraint = "carry the executed falsification condition into new hypotheses: " + falsification[:240]
+        constraint_kind = "carry_falsification"
+        payload = {"falsification": falsification[:240]}
     else:
         constraint = (
             "bind a falsification condition before the next study is executed "
             "(study-origin.falsification is empty for %s)" % observation.get("subject")
         )
+        constraint_kind = "require_falsification_binding"
+        payload = {}
     return [
         {
             "loop_id": "t6b_falsification",
@@ -219,6 +223,8 @@ def _propose_t6b_falsification(observation: Dict[str, Any]) -> List[Dict[str, An
             "read_only": True,
             "subject": str(observation.get("subject") or ""),
             "constraint": constraint,
+            "constraint_kind": constraint_kind,
+            "payload": payload,
             "human_action": "",
         }
     ]
@@ -278,6 +284,11 @@ def _observe_belief_revision(project: Path, limit: int = 50) -> List[Dict[str, A
             recommendation = str(review.get("recommendation") or cand.get("status") or "unknown")
             reasons = review.get("reasons") or []
             reasons_text = "; ".join(str(r) for r in reasons[:3])[:240]
+            # the verdict side of the constraint lives in the review when one
+            # exists; bind it as the primary source so a changed review
+            # invalidates the constraint, and keep the idea hash as an auxiliary
+            # binding because the constraint quotes the candidate title
+            primary = review_path if review_path.is_file() else idea_path
             observations.append(
                 {
                     "loop_id": "belief_revision",
@@ -286,8 +297,10 @@ def _observe_belief_revision(project: Path, limit: int = 50) -> List[Dict[str, A
                     "title": str(cand.get("title") or "")[:160],
                     "lens": str(cand.get("lens") or ""),
                     "reasons": reasons_text,
-                    "source_path": _rel(root, idea_path),
-                    "source_sha256": _sha256(idea_path),
+                    "source_path": _rel(root, primary),
+                    "source_sha256": _sha256(primary),
+                    "idea_source_path": _rel(root, idea_path),
+                    "idea_source_sha256": _sha256(idea_path),
                 }
             )
     return observations
@@ -302,8 +315,10 @@ def _propose_belief_revision(observation: Dict[str, Any]) -> List[Dict[str, Any]
             state,
             ("; reasons: " + str(observation.get("reasons"))) if observation.get("reasons") else "",
         )
+        constraint_kind = "demote_candidate"
     else:
         constraint = "carry forward '%s' (verdict %s); keep its evidence binding intact" % (title[:120], state)
+        constraint_kind = "carry_forward"
     return [
         {
             "loop_id": "belief_revision",
@@ -311,6 +326,8 @@ def _propose_belief_revision(observation: Dict[str, Any]) -> List[Dict[str, Any]
             "read_only": True,
             "subject": str(observation.get("subject") or ""),
             "constraint": constraint,
+            "constraint_kind": constraint_kind,
+            "payload": {"title": title[:120], "verdict": state},
             "human_action": "",
         }
     ]
@@ -396,6 +413,11 @@ def _propose_homogeneity(observation: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "two distinct lenses in the next generation"
                 % (float(observation.get("dominant_share") or 0) * 100, observation.get("dominant_lens"))
             ),
+            "constraint_kind": "require_lens_diversity",
+            "payload": {
+                "dominant_lens": str(observation.get("dominant_lens") or ""),
+                "dominant_share": float(observation.get("dominant_share") or 0),
+            },
             "human_action": "",
         }
     ]
@@ -461,6 +483,147 @@ def run_feedback(project: Path, loops: Optional[List[str]] = None, limit: int = 
 def read_ledger(path: Path) -> Dict[str, Any]:
     """Read a previously written feedback ledger."""
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+CONSTRAINT_SCHEMA = "generation-constraints-0.2"
+
+_T6B_CARRY_PREFIX = "carry the executed falsification condition into new hypotheses: "
+_BELIEF_DROP_PREFIX = "next generation: revise or drop '"
+
+# only kinds that actually change generation cross this edge; carry_forward and
+# require_falsification_binding remain ledger receipts (audit/human), not noise
+# in the generation provenance
+GENERATION_EFFECT_KINDS = frozenset(
+    ("require_lens_diversity", "demote_candidate", "carry_falsification")
+)
+
+_CONSTRAINT_BOUNDARY = (
+    "consumer-side read of the feedback ledger: generation_constraint rows are "
+    "consumed by typed constraint_kind/payload (text is human-readable only); "
+    "rows whose observation source no longer hashes to the recorded sha256 are "
+    "denied (default reject) and listed in stale; read-only, writes nothing"
+)
+
+
+def _generation_constraint_kind(
+    proposal: Dict[str, Any], loop_id: str, text: str
+) -> Tuple[str, bool]:
+    kind = str(proposal.get("constraint_kind") or "").strip()
+    if kind:
+        return kind, False
+    # legacy ledgers (pre-0.6.0) carry text only; infer the kind once, at the
+    # consumer edge, so the generation side never parses English prose
+    if loop_id == "t6b_falsification":
+        if text.startswith(_T6B_CARRY_PREFIX):
+            return "carry_falsification", True
+        return "require_falsification_binding", True
+    if loop_id == "belief_revision":
+        if text.startswith(_BELIEF_DROP_PREFIX):
+            return "demote_candidate", True
+        return "carry_forward", True
+    if loop_id == "homogeneity":
+        return "require_lens_diversity", True
+    return "", True
+
+
+def _legacy_constraint_payload(kind: str, text: str) -> Dict[str, Any]:
+    if kind == "carry_falsification" and text.startswith(_T6B_CARRY_PREFIX):
+        return {"falsification": text[len(_T6B_CARRY_PREFIX):]}
+    if kind == "demote_candidate" and text.startswith(_BELIEF_DROP_PREFIX):
+        rest = text[len(_BELIEF_DROP_PREFIX):]
+        end = rest.find("'")
+        return {"title": rest[:end] if end >= 0 else rest}
+    return {}
+
+
+def generation_constraints(project: Path) -> Dict[str, Any]:
+    """Fresh generation constraints for the next hypothesis generation.
+
+    The loops record constraints bound to the artifact they observed; this is
+    the read side of that seam (71-图① 回指).  A constraint whose source
+    artifact changed since the ledger row was written is stale: it is denied
+    and surfaced in ``stale`` instead of silently shaping a new hypothesis —
+    the same 上游变更→失效→回指复验 discipline the lineage loop applies to
+    closures, applied to generation.
+    """
+    root = Path(project).resolve()
+    result: Dict[str, Any] = {
+        "schema_version": CONSTRAINT_SCHEMA,
+        "constraints": [],
+        "stale": [],
+        "ledger_sha256": "",
+        "boundary": _CONSTRAINT_BOUNDARY,
+    }
+    ledger_path = root / "feedback-ledger.json"
+    if not ledger_path.is_file():
+        return result
+    try:
+        ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return result
+    if not isinstance(ledger, dict):
+        return result
+    result["ledger_sha256"] = _sha256(ledger_path)
+    seen = set()
+    for row in ledger.get("rows") or []:
+        if not isinstance(row, dict):
+            continue
+        proposal = row.get("proposal") or {}
+        observation = row.get("observation") or {}
+        if not isinstance(proposal, dict) or not isinstance(observation, dict):
+            continue
+        if proposal.get("kind") != "generation_constraint":
+            continue
+        if (row.get("gate_decision") or {}).get("decision") != "auto_allowed":
+            continue
+        constraint = str(proposal.get("constraint") or "")
+        source_path = str(observation.get("source_path") or "")
+        recorded = str(observation.get("source_sha256") or "")
+        if not constraint or not source_path or not recorded:
+            continue
+        key = (str(row.get("loop_id") or ""), str(observation.get("subject") or ""), constraint)
+        if key in seen:
+            continue
+        seen.add(key)
+        constraint_kind, legacy = _generation_constraint_kind(proposal, key[0], constraint)
+        if constraint_kind not in GENERATION_EFFECT_KINDS:
+            continue
+        payload = proposal.get("payload") if isinstance(proposal.get("payload"), dict) else {}
+        if legacy:
+            payload = _legacy_constraint_payload(constraint_kind, constraint) or payload
+        entry = {
+            "loop_id": key[0],
+            "subject": key[1],
+            "constraint": constraint,
+            "constraint_kind": constraint_kind,
+            "payload": payload,
+            "source_path": source_path,
+            "source_sha256": recorded,
+        }
+        if legacy:
+            entry["legacy_inferred"] = True
+        source = root / source_path
+        actual = _sha256(source) if source.is_file() else ""
+        if actual != recorded:
+            entry["reason"] = (
+                "source artifact changed or missing since the ledger row was recorded"
+            )
+            result["stale"].append(entry)
+            continue
+        aux_path = str(observation.get("idea_source_path") or "")
+        aux_recorded = str(observation.get("idea_source_sha256") or "")
+        if aux_path and aux_recorded:
+            aux = root / aux_path
+            if not aux.is_file() or _sha256(aux) != aux_recorded:
+                entry["reason"] = (
+                    "bound idea artifact changed or missing since the ledger row was recorded"
+                )
+                result["stale"].append(entry)
+                continue
+        result["constraints"].append(entry)
+    result["constraints"].sort(key=lambda item: (item["loop_id"], item["subject"], item["constraint"]))
+    result["stale"].sort(key=lambda item: (item["loop_id"], item["subject"], item["constraint"]))
+    return result
 
 
 ACTION_SCHEMA = "verdict-action-0.1"

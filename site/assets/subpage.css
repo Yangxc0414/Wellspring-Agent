@@ -37,6 +37,22 @@
 .lede b{color:#0b1220 !important}
 .primary-btn{background:#2563eb !important;background-image:none !important;color:#fff !important;border-color:#2563eb !important}
 .ghost-btn{background:#fff !important;color:#23406e !important;border-color:#dbe4f0 !important}
+/* innovation figure: give the module/provenance diagrams room and unified accent framing. */
+.stage-body svg{max-width:100%;height:auto}
+.figure-frame,.svg-frame,.proof-figure{border:1px solid #e5e9f0;border-radius:12px;background:#fff;padding:12px}
+/* innovation ACT03 figure: clean frame + room; ACT04 vision preview. */
+.figure-stage{border:1px solid #e5e9f0;border-radius:12px;background:#fff;padding:14px;margin:14px 0}
+.figure-stage img{width:100%;height:auto;display:block}
+.figure-stage figcaption{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:11px;color:#8a94a6}
+.vision-preview{border:1px dashed #bcd0f7;background:#f6f9ff;border-radius:12px;padding:14px;margin:16px 0}
+.vp-tag{display:inline-block;font-size:10.5px;font-weight:700;color:#1d4ed8;background:#eef2ff;border:1px solid #cddcfb;border-radius:999px;padding:3px 10px;margin-bottom:10px}
+.vp-body{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.vp-body svg{width:220px;max-width:100%;height:auto}
+.vp-chain{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11.5px;font-weight:600}
+.vp-chain span{border:1px solid #dbe4f0;background:#fff;color:#23406e;border-radius:7px;padding:4px 8px}
+.vp-chain i{color:#8a94a6;font-style:normal}
+.vp-chain em{background:#0f766e;color:#fff;border-radius:7px;padding:4px 10px;font-style:normal}
+.vision-preview small{display:block;margin-top:10px;font-size:11px;color:#5b6472;line-height:1.6}
 .sp-home{color:#2563eb;text-decoration:none;font-weight:700}
 .sp-home:hover{text-decoration:underline}
 .sp-chip{border:1px solid #e6d7b4;background:#fff8e7;color:#8a6d1f;padding:2px 10px;border-radius:999px;font-size:11px}

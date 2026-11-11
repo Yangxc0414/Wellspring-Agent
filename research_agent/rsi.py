@@ -101,6 +101,7 @@ class EvalEvidence:
     artifact_sha256: str = ""
     task_pack_sha256: str = ""
     evaluated_at: str = ""
+    code_fingerprint: str = ""
 
     def __post_init__(self) -> None:
         if self.split not in ("public", "hidden", "near_ood", "regression"):
@@ -109,6 +110,10 @@ class EvalEvidence:
             raise RSIPolicyError("unknown eval status: " + self.status)
         if self.status in ("passed", "failed") and not self.artifact_ref:
             raise RSIPolicyError("a completed eval needs an artifact_ref")
+        # Evidence binds the code version that produced it, so a verdict can never be
+        # silently reused against a different platform build (D9 verdict binding).
+        if not self.code_fingerprint:
+            self.code_fingerprint = build_fingerprint()
         for label, value in (
             ("artifact_sha256", self.artifact_sha256),
             ("task_pack_sha256", self.task_pack_sha256),

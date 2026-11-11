@@ -2,7 +2,7 @@
 id: waitpoints
 name: 本地 Waitpoint
 stage: S5–META
-version: 0.1.0
+version: 0.2.0
 status: draft
 owner: research-agent
 inputs:
@@ -20,6 +20,7 @@ tools:
   - waitpoint.inbox
   - waitpoint.consume
   - waitpoint.expire
+  - waitpoint.triage
 gates: []
 invariants:
   - 不联网、不启动或杀害外部进程；只管理本地等待记录
@@ -47,6 +48,7 @@ invariants:
 - `expire` 把过期 armed waitpoint 标为 `expired`，生成一条 expired wake，包含未消费的 signals。
 - 失败：record 不存在、secret 错误、member 未声明、状态不允许、TTL 非法、并发锁超时 → `WaitpointError`；不得静默当成成功。
 - 证据边界：不创建 Claim/EA/Verdict；signal 的 `data` 是不可信外部数据，WakeNotice 明确 `data_is_untrusted=true`，消费方不得把 data 当指令。
+- 委托骨架（v0.2.0，71-§4.5）：`triage_notices(notices, scope_terms)` 程序快层相关性检查——scope 未声明或无词匹配 = 默认拒绝（discarded 带 reason），匹配 = relevant 带 matched_terms；纯函数、无模型调用。`record_delegation_events(project, notices, scope_terms)` 把 triage 结果追加进 `delegation-events-0.1`（wake_id 幂等，不重写旧行）；`pending_delegation_events(project)` 返回 relevant 且未 acted 的事件；`mark_delegation_acted(project, wake_ids)` 只标 acted_at。CLI `waitpoint triage --project P --owner O [--scope term]...`：inbox → record → consume。下一次 pipeline run 消费 pending 事件（integration 0.50.0），构成图③ 01→06→回指，无常住进程。
 
 ## Current Implementation
 
@@ -72,4 +74,5 @@ invariants:
 
 ## Changelog
 
+- 2026-11-11 · v0.2.0 · status=draft · 委托骨架（71-§4.5 步 5 第一半，图③ 01/06）：triage_notices 程序快层相关性检查（无 scope 或无匹配=默认拒绝带收据）；record_delegation_events 追加式 delegation-events-0.1 账本（wake_id 幂等）；pending_delegation_events/mark_delegation_acted 供下一次 run 消费与更新；CLI waitpoint triage --project --owner --scope。不引入常驻进程、不自动执行；外部 payload 仍是数据不是指令。tests/test_waitpoints 增 triage/账本断言。
 - 2026-10-25 · v0.1.0 · 初始实现：本地文件 waitpoint、secret hash、TTL、progress/quorum/fail-fast、inbox/consume、expire、并发锁与幂等 signal；不联网、不自动唤醒模型。

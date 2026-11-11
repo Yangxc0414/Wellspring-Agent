@@ -15,13 +15,20 @@ from typing import Any, Dict, List, Optional
 from .executable import validate_plan
 from .storage import read_json, write_json_atomic
 
-MEMORY_AB_SCHEMA = "memory-ab-0.1"
+MEMORY_AB_SCHEMA = "memory-ab-0.2"
 MIN_PAIRS = 4
 
 MEMORY_AB_BOUNDARY = (
     "an A/B over ideas from one prompt differs by exactly one inserted block: it can say which arm "
     "scored better on the checks the runtime enforces, and it cannot establish that the memory caused "
     "a discovery; below %d paired ideas no direction is reported" % MIN_PAIRS
+)
+
+SINGLE_SESSION_BOUNDARY = (
+    "single-session mode: the same host session answered both arms, so this comparison can "
+    "demonstrate that the measurement pipeline runs and produce a paired read-out, but it cannot "
+    "rule out same-source bias — a memory-gain claim requires the multi-session mode with "
+    "distinct host sessions per arm"
 )
 
 METRICS = (
@@ -120,12 +127,21 @@ def score_arm(ideas: List[Dict[str, Any]], literature: Dict[str, Any]) -> Dict[s
     }
 
 
-def compare(with_arm: Dict[str, Any], without_arm: Dict[str, Any]) -> Dict[str, Any]:
+def compare(
+    with_arm: Dict[str, Any],
+    without_arm: Dict[str, Any],
+    *,
+    session_mode: str = "single",
+) -> Dict[str, Any]:
     """Paired read-out of the two arms, with the same refusal-to-interpret rule as the studies."""
+    if session_mode not in ("single", "multi"):
+        raise ValueError("unknown session mode: %s (use single or multi)" % session_mode)
     pairs = min(int(with_arm.get("n") or 0), int(without_arm.get("n") or 0))
     verdict: Dict[str, Any] = {
         "pairs": pairs,
         "underpowered": pairs < MIN_PAIRS,
+        "session_mode": session_mode,
+        "session_check": {"status": "single_session"},
         "rates": {
             "with_memory": with_arm.get("rates"),
             "without_memory": without_arm.get("rates"),
@@ -140,6 +156,33 @@ def compare(with_arm: Dict[str, Any], without_arm: Dict[str, Any]) -> Dict[str, 
         "per_idea_deltas": [],
         "sign_counts": {"better": 0, "worse": 0, "tie": 0},
     }
+    if session_mode == "multi":
+        with_label = str((with_arm.get("session") or {}).get("host_label") or "")
+        without_label = str((without_arm.get("session") or {}).get("host_label") or "")
+        if not with_label or not without_label:
+            verdict["session_check"] = {
+                "status": "blocked",
+                "reason": (
+                    "multi-session mode requires session metadata on both arms; record each arm "
+                    "with --session-host-label so same-source bias can be excluded"
+                ),
+            }
+        elif with_label == without_label:
+            verdict["session_check"] = {
+                "status": "blocked",
+                "reason": "both arms were answered by host session '%s'; multi-session mode requires distinct sessions" % with_label,
+            }
+        else:
+            verdict["session_check"] = {
+                "status": "ok",
+                "with_host_label": with_label,
+                "without_host_label": without_label,
+            }
+        if verdict["session_check"]["status"] == "blocked":
+            # fail-visible: a blocked session check refuses direction interpretation entirely
+            verdict["direction"] = ""
+            verdict["reading"] = "blocked: " + verdict["session_check"]["reason"]
+            return verdict
     for index in range(pairs):
         left = (with_arm.get("per_idea") or [])[index]
         right = (without_arm.get("per_idea") or [])[index]
@@ -174,6 +217,8 @@ def compare(with_arm: Dict[str, Any], without_arm: Dict[str, Any]) -> Dict[str, 
             "this is a difference on the runtime's own checks, not a discovery claim"
             % (better, pairs, worse)
         )
+    if session_mode == "single":
+        verdict["reading"] = verdict["reading"] + " | " + SINGLE_SESSION_BOUNDARY
     return verdict
 
 
@@ -182,18 +227,25 @@ def path_for(project: Path) -> Path:
 
 
 def record(project: Path, *, run_id: str, arm: str, ideas: List[Dict[str, Any]],
-           literature: Dict[str, Any], guidance: Optional[str] = None) -> Dict[str, Any]:
+           literature: Dict[str, Any], guidance: Optional[str] = None,
+           session: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     store = read_json(path_for(project)) or {"schema_version": MEMORY_AB_SCHEMA, "arms": {}}
     scored = score_arm(ideas, literature)
     scored["guidance_chars"] = len(guidance or "")
     scored["run_id"] = str(run_id)
+    if session:
+        scored["session"] = {
+            "session_id": str(session.get("session_id") or ""),
+            "host_label": str(session.get("host_label") or ""),
+        }
     store["arms"][str(arm)] = scored
+    store["schema_version"] = MEMORY_AB_SCHEMA
     store["boundary"] = MEMORY_AB_BOUNDARY
     write_json_atomic(path_for(project), store)
     return scored
 
 
-def analysis(project: Path) -> Dict[str, Any]:
+def analysis(project: Path, session_mode: str = "single") -> Dict[str, Any]:
     store = read_json(path_for(project)) or {}
     arms = store.get("arms") or {}
     if "with" not in arms or "without" not in arms:
@@ -208,6 +260,6 @@ def analysis(project: Path) -> Dict[str, Any]:
         "schema_version": MEMORY_AB_SCHEMA,
         "status": "compared",
         "arms_present": ["with", "without"],
-        "comparison": compare(arms["with"], arms["without"]),
+        "comparison": compare(arms["with"], arms["without"], session_mode=session_mode),
         "boundary": MEMORY_AB_BOUNDARY,
     }

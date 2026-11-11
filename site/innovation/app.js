@@ -198,6 +198,21 @@ function paperAct() {
       <div class="track-card"><span class="mono">PAPER TRACK</span><b>${esc(paper.profile?.venue_type || "论文契约")}</b><small>${esc(paper.profile?.citation_style || "GB/T 7714")} · ${(paper.sections || []).length} sections · 0 claims</small></div>
       <div class="track-card"><span class="mono">GRANT TRACK</span><b>${grant ? esc(grant.scheme.toUpperCase()) : "未生成"}</b><small>${grant ? `${(grant.modules || []).length} modules · ${(grant.compliance || []).length} compliance checks` : "用 --grant nsfc 生成基金骨架"}</small></div>
     </div>
+    <div class="vision-preview">
+      <span class="vp-tag">预期效果 · 演示愿景（非实测）</span>
+      <div class="vp-body">
+        <svg viewBox="0 0 220 120" role="img" aria-label="建成后结果节对照示意（非实测）">
+          <line x1="20" y1="98" x2="205" y2="98" stroke="#e4e9f2"/>
+          <rect x="45" y="74" width="40" height="24" rx="4" fill="#94a3b8"/>
+          <rect x="125" y="30" width="40" height="68" rx="4" fill="#2563eb"/>
+          <text x="65" y="112" text-anchor="middle" font-size="9" fill="#5b6472">基线</text>
+          <text x="145" y="112" text-anchor="middle" font-size="9" fill="#5b6472">本方法</text>
+          <text x="145" y="24" text-anchor="middle" font-size="9" fill="#2563eb" font-weight="700">+Δ 示意</text>
+        </svg>
+        <div class="vp-chain"><span>result claim</span><i>→</i><span>EA + 独立重跑</span><i>→</i><span>人签</span><i>→</i><em>PASS</em></div>
+      </div>
+      <small>建成后的结果节形态示意：数字须来自 EA 与人签。当前槽位仍 pending、G5 保持 blocked——愿景与现状分开标注。</small>
+    </div>
     <p class="source-note">数据来源：<code>modules.paper.slots</code> / <code>modules.grant</code>；槽状态为 scaffold，不含任何结果数字</p>`;
 }
 
@@ -258,17 +273,17 @@ function feedbackAct() {
     </div>
     <div class="fb-table">
       <div class="fb-row fb-head"><span>反馈类型</span><span>应有的行动（平台机制对应）</span><span>不消费的后果</span></div>
-      <div class="fb-row"><span class="fb-kind is-real">真实</span><span>行动按证据收敛：改查询预算、缩 gap<span class="fb-mech">→ guidance 队列在阶段边界生效</span></span><span>无——唯一该改变行动的一类</span></div>
-      <div class="fb-row"><span class="fb-kind is-shuffled">打乱</span><span>相关性检查拦下，不进流水线<span class="fb-mech">→ 两级过滤快层（程序门）</span></span><span>照单全收，拿噪声改动作</span></div>
-      <div class="fb-row"><span class="fb-kind is-stale">过时</span><span>stale 判定拦截，先复验再行动<span class="fb-mech">→ 失效传播点名受影响结论</span></span><span>拿过期结论推进，产出作废稿件</span></div>
-      <div class="fb-row"><span class="fb-kind is-noisy">含噪</span><span>降权，先测一轮再准入<span class="fb-mech">→ 学习证据准入：先测后用</span></span><span>噪声进下一轮，方向被带偏</span></div>
-      <div class="fb-row"><span class="fb-kind is-conflict">矛盾</span><span>触发信念修订：改 / 保留不确定 / 再激活<span class="fb-mech">→ 策略④ · 交接协议记「谁提—谁评—谁消费—谁复验」</span></span><span>择优采信一边，另一边被丢弃</span></div>
+      <div class="fb-row"><span class="fb-kind is-real">真实</span><span>行动按证据收敛：改查询预算、缩 gap；判定表把 verdict 变成下一动作<span class="fb-mech">→ S1 覆盖回路 + verdict_action_table（已实测 behavior_changed=True）</span></span><span>无——唯一该改变行动的一类</span></div>
+      <div class="fb-row"><span class="fb-kind is-shuffled">打乱</span><span>相关性检查拦下，不进流水线<span class="fb-mech">→ waitpoint triage 快层：无 scope / 无匹配 = 默认拒绝带收据</span></span><span>照单全收，拿噪声改动作</span></div>
+      <div class="fb-row"><span class="fb-kind is-stale">过时</span><span>stale 判定拦截，先复验再行动<span class="fb-mech">→ 消费侧重算来源 sha256，过期约束默认拒绝 + lineage 失效传播</span></span><span>拿过期结论推进，产出作废稿件</span></div>
+      <div class="fb-row"><span class="fb-kind is-noisy">含噪</span><span>降权，先测一轮再准入<span class="fb-mech">→ memory-port 四准入策略：重放后存 / 独立验证后存</span></span><span>噪声进下一轮，方向被带偏</span></div>
+      <div class="fb-row"><span class="fb-kind is-conflict">矛盾</span><span>触发信念修订：改 / 保留不确定 / 再激活；同 subject 矛盾升级人工<span class="fb-mech">→ belief_revision 环降权 + escalate_conflict，不猜赢家</span></span><span>择优采信一边，另一边被丢弃</span></div>
     </div>
     <div class="gate-proof">
       <div class="gate-banner"><span>Q2 · 可失败的验收</span><b>反馈敏感性与真实信息价值一致 → 切口不成立</b><small>M1 的证伪条件：随机反馈与真实反馈若不改变行动差异，「让判定改变行动」不成立，回炉重述。</small></div>
-      <div class="tamper-note"><b>平台侧对应物</b>guidance 队列、gate_stops、lineage 失效传播、交接协议字段——机制在，五类对照实验未跑；本幕为设计投影，非实验结果。</div>
+      <div class="tamper-note"><b>平台侧对应物（2026-11-11 实测）</b>M1 五类对照 verdict=supported：real 1.0 自复现 / 退化类均值 0.333 / 矛盾 5/5 升级人工；4/4 反馈环接入下一步动作（默认关、逐环开）：T6b 否证携带、信念修订降权、同质化换轴、溯源失效锁导出；idea.json 写约束 provenance。外部 7.5% 读数为研究动机，非本平台结果。</div>
     </div>
-    <p class="source-note">读数来源：PerturbTrace（1110 策略论证 §01/§05 已核对原文）；五类对照的行动映射为本平台设计，SIM 标注 · 无真实 run</p>`;
+    <p class="source-note">读数来源：PerturbTrace（1110 策略论证 §01/§05 已核对原文）；平台侧读数为 scripts/m1_feedback_sensitivity.py 与 tests/test_pipeline 实测锚 · SIM 标注 · 无真实 run</p>`;
 }
 
 const RENDERERS = [specAct, evidenceAct, figureAct, paperAct, boundaryAct, validityAct, feedbackAct];

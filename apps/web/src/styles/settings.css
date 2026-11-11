@@ -3946,3 +3946,47 @@
     grid-template-columns: minmax(0, 1fr) auto auto;
   }
 }
+
+/* FeedbackModeSettings: 反馈测量模式选择（73- 号设计文档 §2.2） */
+.feedback-mode-options {
+  display: grid;
+  gap: 8px;
+}
+
+.feedback-mode-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #d7dce3);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.feedback-mode-option.is-active {
+  border-color: #1d4ed8;
+  background: rgba(29, 78, 216, 0.05);
+}
+
+.feedback-mode-option input {
+  margin-top: 3px;
+}
+
+.feedback-mode-option span {
+  display: grid;
+  gap: 3px;
+}
+
+.feedback-mode-option small {
+  color: #5b6472;
+}
+
+.feedback-mode-option .feedback-mode-caveat {
+  color: #9a3412;
+}
+
+.feedback-mode-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #5f6d80;
+}

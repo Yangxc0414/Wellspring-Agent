@@ -533,6 +533,57 @@ class PipelineRunner:
             ],
             "themes": list((synthesis_matrix or {}).get("themes") or []),
         }
+        project_root = None
+        if self.run_output_dir is not None:
+            from .loop_capsule import project_root_for_run
+
+            project_root = project_root_for_run(self.run_output_dir.parent)
+        feedback_constraints: List[Dict[str, Any]] = []
+        if project_root is not None:
+            from .feedback import generation_constraints
+            from .waitpoints import mark_delegation_acted, pending_delegation_events
+
+            feedback_payload = generation_constraints(project_root)
+            feedback_constraints = feedback_payload.get("constraints") or []
+            stale_constraints = feedback_payload.get("stale") or []
+            if feedback_constraints or stale_constraints:
+                self._emit(
+                    "feedback_constraints", "idea",
+                    "%d fresh generation constraint(s); %d stale denied"
+                    % (len(feedback_constraints), len(stale_constraints)),
+                    {
+                        "applied": len(feedback_constraints),
+                        "stale_denied": len(stale_constraints),
+                        "loops": sorted(
+                            {
+                                str(item.get("loop_id") or "")
+                                for item in feedback_constraints + stale_constraints
+                            }
+                        ),
+                        "ledger_sha256": feedback_payload.get("ledger_sha256") or "",
+                    },
+                )
+            for entry in stale_constraints:
+                warnings.append(
+                    "feedback_constraint_stale_denied: %s (%s)"
+                    % (entry.get("subject"), entry.get("reason"))
+                )
+            delegation = pending_delegation_events(project_root)
+            if delegation:
+                self._emit(
+                    "delegation_events", "idea",
+                    "%d relevant external wake(s) consumed by this run" % len(delegation),
+                    {"wake_ids": [str(event.get("wake_id")) for event in delegation]},
+                )
+                for event in delegation:
+                    warnings.append(
+                        "delegation_event_consumed: %s (%s) — external result is data; "
+                        "review before continuing the delegation"
+                        % (event.get("label"), ", ".join(event.get("matched_terms") or []))
+                    )
+                mark_delegation_acted(
+                    project_root, [str(event.get("wake_id")) for event in delegation]
+                )
         if request.idea_file:
             idea = load_idea_result(request.idea_file, run_id=run_id + "-idea")
             warnings.append(
@@ -549,6 +600,7 @@ class PipelineRunner:
                     language=request.language,
                     prior_art_searcher=_prior_art_search,
                     gap_pack=gap_pack,
+                    generation_constraints=feedback_constraints or None,
                 )
             )
         modules["idea"] = asdict(idea)

@@ -3333,6 +3333,24 @@ def _cmd_waitpoint_expire(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_waitpoint_triage(args: argparse.Namespace) -> int:
+    from .waitpoints import record_delegation_events
+
+    store = _waitpoint_store(args)
+    notices = store.inbox(args.owner)
+    result = record_delegation_events(Path(args.project), notices, args.scope)
+    store.consume(args.owner)
+    _print_json(result)
+    return 0
+
+
+def _cmd_exec_faces(args: argparse.Namespace) -> int:
+    from .execport.exec_port import describe
+
+    _print_json(describe())
+    return 0
+
+
 def _cmd_workspace_export(args: argparse.Namespace) -> int:
     _print_json(export_workspace_snapshots(Path(args.output_dir)))
     return 0
@@ -3686,10 +3704,14 @@ def _cmd_memory_ab(args: argparse.Namespace) -> int:
             arm=args.arm,
             ideas=ideas,
             literature=literature,
+            session={
+                "session_id": getattr(args, "session_id", "") or "",
+                "host_label": getattr(args, "session_host_label", "") or "",
+            },
         )
         _print_json({"status": "recorded", "arm": args.arm, "store": str(path_for(project)), **scored})
         return 0
-    result = analysis(project)
+    result = analysis(project, session_mode=getattr(args, "sessions", "") or "single")
     if result.get("status") == "compared" and args.output_dir:
         from .storage import write_json_atomic
 
@@ -4366,10 +4388,18 @@ def build_parser() -> argparse.ArgumentParser:
     ab_record.add_argument("--arm", required=True, choices=["with", "without"])
     ab_record.add_argument("--ideas-file", required=True)
     ab_record.add_argument("--literature-file", required=True)
+    ab_record.add_argument("--session-host-label", default="", help="host session label answering this arm (required for multi-session compare)")
+    ab_record.add_argument("--session-id", default="")
     ab_record.set_defaults(func=_cmd_memory_ab)
     ab_compare = ab_sub.add_parser("compare", help="paired read-out of the two recorded arms")
     ab_compare.add_argument("--project", required=True)
     ab_compare.add_argument("--output-dir", default="")
+    ab_compare.add_argument(
+        "--sessions",
+        default="single",
+        choices=["single", "multi"],
+        help="single: same host session answered both arms (traditional, cannot rule out same-source bias); multi: distinct host sessions per arm (enforced)",
+    )
     ab_compare.set_defaults(func=_cmd_memory_ab)
     ab_plan = ab_sub.add_parser("plan", help="print the two commands that make the arms")
     ab_plan.add_argument("--project", required=True)
@@ -6233,6 +6263,20 @@ def build_parser() -> argparse.ArgumentParser:
     waitpoint_expire = waitpoint_sub.add_parser("expire", help="expire due waitpoints and create expired wakes")
     waitpoint_expire.add_argument("--root", default=None)
     waitpoint_expire.set_defaults(func=_cmd_waitpoint_expire)
+    waitpoint_triage = waitpoint_sub.add_parser(
+        "triage",
+        help="relevance-check undelivered wakes against a declared scope; record delegation events (default reject)",
+    )
+    waitpoint_triage.add_argument("--project", required=True)
+    waitpoint_triage.add_argument("--owner", required=True)
+    waitpoint_triage.add_argument("--scope", action="append", default=None)
+    waitpoint_triage.add_argument("--root", default=None)
+    waitpoint_triage.set_defaults(func=_cmd_waitpoint_triage)
+
+    execp = sub.add_parser("exec", help="read-only execution-face pool (ExecPort)")
+    exec_sub = execp.add_subparsers(dest="exec_command", required=True)
+    exec_faces = exec_sub.add_parser("faces", help="describe the registered execution faces")
+    exec_faces.set_defaults(func=_cmd_exec_faces)
 
     research = sub.add_parser("research", help="run the fixture research queue")
     research_sub = research.add_subparsers(dest="research_command", required=True)
