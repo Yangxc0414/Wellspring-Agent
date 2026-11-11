@@ -241,6 +241,175 @@ register_loop(
 )
 
 
+def _observe_belief_revision(project: Path, limit: int = 50) -> List[Dict[str, Any]]:
+    """信念修订（图① 反馈环 C 的记录化第一步）。
+
+    Observation: idea.json candidates crossed with idea-review.json reviews
+    (recommendation + reasons).  The auto belief-revision mechanism is roadmap;
+    v1 records the per-idea constraint a future generation must carry.
+    """
+    from .storage import read_json as _read_json
+
+    root = Path(project).resolve()
+    observations: List[Dict[str, Any]] = []
+    for idea_path in sorted(root.glob("runs/*/idea.json"))[-max(1, min(int(limit), 200)):]:
+        run_dir = idea_path.parent
+        run_id = run_dir.name
+        try:
+            idea = _read_json(idea_path) or {}
+        except (OSError, ValueError):
+            idea = {}
+        candidates = [c for c in (idea.get("candidates") or []) if isinstance(c, dict)]
+        if not candidates:
+            continue
+        reviews: Dict[str, Dict[str, Any]] = {}
+        review_path = run_dir / "idea-review.json"
+        if review_path.is_file():
+            try:
+                review = _read_json(review_path) or {}
+                for item in review.get("reviews") or []:
+                    if isinstance(item, dict) and item.get("idea_id"):
+                        reviews[str(item["idea_id"])] = item
+            except (OSError, ValueError):
+                reviews = {}
+        for cand in candidates:
+            idea_id = str(cand.get("idea_id") or "")
+            review = reviews.get(idea_id) or {}
+            recommendation = str(review.get("recommendation") or cand.get("status") or "unknown")
+            reasons = review.get("reasons") or []
+            reasons_text = "; ".join(str(r) for r in reasons[:3])[:240]
+            observations.append(
+                {
+                    "loop_id": "belief_revision",
+                    "subject": "runs/%s/%s" % (run_id, idea_id or "candidate"),
+                    "state": recommendation,
+                    "title": str(cand.get("title") or "")[:160],
+                    "lens": str(cand.get("lens") or ""),
+                    "reasons": reasons_text,
+                    "source_path": _rel(root, idea_path),
+                    "source_sha256": _sha256(idea_path),
+                }
+            )
+    return observations
+
+
+def _propose_belief_revision(observation: Dict[str, Any]) -> List[Dict[str, Any]]:
+    state = str(observation.get("state") or "unknown")
+    title = str(observation.get("title") or "")
+    if state in ("revise", "needs_more_work", "rejected"):
+        constraint = "next generation: revise or drop '%s' — review verdict %s%s" % (
+            title[:120],
+            state,
+            ("; reasons: " + str(observation.get("reasons"))) if observation.get("reasons") else "",
+        )
+    else:
+        constraint = "carry forward '%s' (verdict %s); keep its evidence binding intact" % (title[:120], state)
+    return [
+        {
+            "loop_id": "belief_revision",
+            "kind": "generation_constraint",
+            "read_only": True,
+            "subject": str(observation.get("subject") or ""),
+            "constraint": constraint,
+            "human_action": "",
+        }
+    ]
+
+
+register_loop(
+    "belief_revision",
+    _observe_belief_revision,
+    _propose_belief_revision,
+    _gate_lineage_reverify,
+    _apply_t6b_falsification,
+)
+
+
+def _observe_homogeneity(project: Path, limit: int = 50) -> List[Dict[str, Any]]:
+    """同质化监测（图① 假设生成自环的记录化第一步）。
+
+    Observation: per idea.json, the lens distribution and single-source share of
+    the candidates.  Deterministic counts only; the injection of diversity
+    constraints into generation prompts is roadmap.
+    """
+    from .storage import read_json as _read_json
+
+    root = Path(project).resolve()
+    observations: List[Dict[str, Any]] = []
+    for idea_path in sorted(root.glob("runs/*/idea.json"))[-max(1, min(int(limit), 200)):]:
+        run_id = idea_path.parent.name
+        try:
+            idea = _read_json(idea_path) or {}
+        except (OSError, ValueError):
+            idea = {}
+        candidates = [c for c in (idea.get("candidates") or []) if isinstance(c, dict)]
+        if not candidates:
+            continue
+        total = len(candidates)
+        lens_counts: Dict[str, int] = {}
+        single_source = 0
+        for cand in candidates:
+            lens = str(cand.get("lens") or "unlabeled")
+            lens_counts[lens] = lens_counts.get(lens, 0) + 1
+            try:
+                if int(cand.get("source_count") or 0) <= 1:
+                    single_source += 1
+            except (TypeError, ValueError):
+                pass
+        dominant_lens = max(lens_counts, key=lambda k: lens_counts[k])
+        dominant_share = round(lens_counts[dominant_lens] / total, 4)
+        if total < 3:
+            state = "insufficient_data"
+        elif dominant_share >= 0.67:
+            state = "homogeneous"
+        else:
+            state = "diverse"
+        observations.append(
+            {
+                "loop_id": "homogeneity",
+                "subject": "runs/%s" % run_id,
+                "state": state,
+                "candidates": total,
+                "dominant_lens": dominant_lens,
+                "dominant_share": dominant_share,
+                "lens_counts": lens_counts,
+                "single_source_share": round(single_source / total, 4),
+                "source_path": _rel(root, idea_path),
+                "source_sha256": _sha256(idea_path),
+            }
+        )
+    return observations
+
+
+def _propose_homogeneity(observation: Dict[str, Any]) -> List[Dict[str, Any]]:
+    state = str(observation.get("state") or "")
+    if state != "homogeneous":
+        return []  # diverse/insufficient_data carry no constraint
+    return [
+        {
+            "loop_id": "homogeneity",
+            "kind": "generation_constraint",
+            "read_only": True,
+            "subject": str(observation.get("subject") or ""),
+            "constraint": (
+                "inject diversity: %.0f%% of candidates share lens '%s'; require at least "
+                "two distinct lenses in the next generation"
+                % (float(observation.get("dominant_share") or 0) * 100, observation.get("dominant_lens"))
+            ),
+            "human_action": "",
+        }
+    ]
+
+
+register_loop(
+    "homogeneity",
+    _observe_homogeneity,
+    _propose_homogeneity,
+    _gate_lineage_reverify,
+    _apply_t6b_falsification,
+)
+
+
 def run_feedback(project: Path, loops: Optional[List[str]] = None, limit: int = 50) -> Dict[str, Any]:
     """Run the explicitly enabled loops; with none enabled, write nothing anywhere."""
     root = Path(project).resolve()

@@ -91,6 +91,59 @@ class MandateStatusTest(unittest.TestCase):
             self.assertIn("does not create evidence", result["boundary"])
             self.assertTrue(result["stages"]["context"]["runs"][0]["capsule_sha256"])
 
+    def test_stale_closure_blocker_is_suppressed_by_verdict_bus(self):
+        # verdict-ledger 0.2.0 roadmap 项：capsule 快照说 CLOSURE_UNSIGNED，但总线
+        # （closure_profiles 判定）说已签——mandate 以总线为准，抑制 stale blocker、
+        # 过滤 stale 重签 plan，并留 suppression 审计行（fail-visible，不静默）。
+        with tempfile.TemporaryDirectory() as tmp:
+            project = _project(Path(tmp))
+            _capsule(
+                project,
+                "RUN-A",
+                ["CLOSURE_UNSIGNED"],
+                [
+                    {
+                        "owner": "human",
+                        "gate": "G5",
+                        "command": 'python -m research_agent closure sign --report x --human-reason "..."',
+                    }
+                ],
+            )
+            run = project / "runs" / "RUN-A"
+            (run / "run").mkdir(parents=True, exist_ok=True)
+            (run / "run" / "run-capsule.json").write_text(
+                json.dumps({"schema_version": "run-capsule-0.1", "run_id": "RUN-A", "status": "completed"}),
+                encoding="utf-8",
+            )
+            (run / "closure").mkdir(parents=True, exist_ok=True)
+            (run / "closure" / "closure-report.json").write_text(
+                json.dumps({"report_id": "CR", "status": "ready", "closure_profile": "canonical_run"}),
+                encoding="utf-8",
+            )
+            (run / "closure-signature").mkdir(parents=True, exist_ok=True)
+            (run / "closure-signature" / "signature.json").write_text(
+                json.dumps({"signature_id": "SIG", "human_reason": "[delegated:autopilot] policy ok"}),
+                encoding="utf-8",
+            )
+            (run / "claim").mkdir(parents=True, exist_ok=True)
+            (run / "claim" / "claim.json").write_text(
+                json.dumps({"claim_id": "CLM", "status": "approved"}),
+                encoding="utf-8",
+            )
+            status = build_mandate_status(project, max_runs=5)
+            triggers = status["stages"]["trigger"]
+            suppressed = [t for t in triggers if t.get("kind") == "stale_snapshot_suppressed"]
+            self.assertEqual(len(suppressed), 1)
+            self.assertEqual(suppressed[0]["recomputed"], "signed")
+            self.assertEqual(suppressed[0]["authority"], "verdict-ledger")
+            self.assertTrue(suppressed[0]["source_sha256"])
+            self.assertNotIn(
+                "CLOSURE_UNSIGNED",
+                [t.get("code") for t in triggers if t.get("kind") == "blocker" and t.get("run_id") == "RUN-A"],
+            )
+            plan_commands = [p.get("command") for p in status["stages"]["plan"]]
+            self.assertFalse(any("closure sign" in str(c) for c in plan_commands))
+
     def test_expired_policy_stops_the_mandate(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = _project(Path(tmp))

@@ -1,7 +1,7 @@
 {
   "schema_version": "orchestration-0.1",
   "action": "collaboration-plan",
-  "generated_at": "2026-11-10T23:00:37+00:00",
+  "generated_at": "2026-11-11T00:24:21+00:00",
   "topic": "",
   "source": "fixture",
   "topology": "fan-out → fan-in → sequential → human gate (+ advisory lane)",

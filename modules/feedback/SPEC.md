@@ -2,7 +2,7 @@
 id: feedback
 name: 反馈端口
 stage: S5–S16
-version: 0.2.0
+version: 0.3.0
 status: pilot
 owner: research-agent
 inputs:
@@ -58,5 +58,6 @@ invariants:
 
 ## Changelog
 
+- 2026-11-11 · v0.3.0 · status=pilot · 注册三环中的后两环：`belief_revision`（图① 反馈环 C 记录化第一步——idea.json candidates × idea-review.json reviews 的 recommendation/reasons，revise/needs_more_work → 「revise or drop」约束，approve → 「carry forward」，自动信念修订机制仍是 roadmap）；`homogeneity`（图① 自环记录化——lens 分布 + single-source 占比的确定性计数，total<3 诚实报 insufficient_data、dominant_share≥0.67 报 homogeneous 并给多样性约束，diverse 零 proposal）。真实 E2E 数据实证：belief_revision 4 行（全 revise）、homogeneity insufficient_data（2 候选不足 3，无 proposal 入账——账本记行动建议，不记观察日志）。tests/test_feedback 增 3 项，升 minor。
 - 2026-11-11 · v0.2.0 · status=pilot · 新增确定性决策表 `verdict_action_table(rows)`（71-§4.2 设计输入 3 的落点：verdict 行 → 每 subject 一个建议动作；同 subject 判定矛盾或不变量违例——closure signed 而 claim 未签——升级 `escalate_conflict` 交人工，不猜赢家；`snapshot_drift` → `verdict_bus_authoritative`）；`scripts/m1_feedback_sensitivity.py` 五类反馈（real/stale/shuffled/noisy/contradictory）判别力 harness，预注册判据下实测 E2E 项目 verdict=supported（real 1.0 / 退化均值 0.333 / 矛盾 5/5 升级）；**M1 第二半**：决策表接入 `research_next_actions`（kind=verdict_action，只带本 run 的 subject，绑 source sha256），端到端实测 RUN-E2E-02 `behavior_changed=True`（baseline=stale capsule 重签建议 → wired=verify_bundle/closure_check）；注册第二环 `t6b_falsification`（图① T6b 审计项 → 记录化 proposal：读 study-origin.json 的否证条件 × study claim 状态，stale/缺失都给出约束文本，自动注入生成提示词仍是 roadmap）。tests/test_feedback 16 项 + tests/test_verdict_ledger 13 项。升 minor。
 - 2026-11-11 · v0.1.0 · status=draft · 初始实现：注册表 + `lineage_reverify` 环（71-§5 步 2 的第一条环，图① 反馈环 B 的回指侧）；验收测试钉「关闭全部环 = 与今日行为逐字节一致」（默认零写入，投影不受模块存在影响）+ 环运行的确定性 + gate 对改动类 proposal 默认拒绝；tests/test_feedback 6 项。

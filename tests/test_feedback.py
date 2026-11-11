@@ -149,6 +149,74 @@ class FeedbackPortTest(unittest.TestCase):
             self.assertEqual(row["observation"]["state"], "no_falsification_bound")
             self.assertIn("bind a falsification condition", row["proposal"]["constraint"])
 
+    def test_belief_revision_loop_records_constraints_from_real_shapes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root)
+            run = root / "runs" / "RUN-TEST-01"
+            _write(
+                run / "idea.json",
+                {
+                    "candidates": [
+                        {"idea_id": "IDEA-01", "title": "[Mechanism] A", "lens": "mechanism", "status": "candidate", "source_count": 2},
+                        {"idea_id": "IDEA-02", "title": "[Mechanism] B", "lens": "mechanism", "status": "candidate", "source_count": 1},
+                    ]
+                },
+            )
+            _write(
+                run / "idea-review.json",
+                {
+                    "reviews": [
+                        {"idea_id": "IDEA-01", "recommendation": "revise", "reasons": ["single source"]},
+                        {"idea_id": "IDEA-02", "recommendation": "approve", "reasons": []},
+                    ]
+                },
+            )
+            ledger = run_feedback(root, loops=["belief_revision"])
+            rows = {r["observation"]["subject"]: r for r in ledger["rows"]}
+            self.assertIn("runs/RUN-TEST-01/IDEA-01", rows)
+            self.assertIn("runs/RUN-TEST-01/IDEA-02", rows)
+            self.assertIn("revise or drop", rows["runs/RUN-TEST-01/IDEA-01"]["proposal"]["constraint"])
+            self.assertIn("carry forward", rows["runs/RUN-TEST-01/IDEA-02"]["proposal"]["constraint"])
+
+    def test_homogeneity_loop_flags_dominant_lens(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root)
+            run = root / "runs" / "RUN-TEST-01"
+            _write(
+                run / "idea.json",
+                {
+                    "candidates": [
+                        {"idea_id": "IDEA-0%d" % i, "title": "C%d" % i, "lens": "mechanism", "source_count": 3}
+                        for i in (1, 2, 3)
+                    ]
+                },
+            )
+            ledger = run_feedback(root, loops=["homogeneity"])
+            self.assertEqual(len(ledger["rows"]), 1)
+            row = ledger["rows"][0]
+            self.assertEqual(row["observation"]["state"], "homogeneous")
+            self.assertIn("two distinct lenses", row["proposal"]["constraint"])
+
+    def test_homogeneity_diverse_candidates_carry_no_constraint(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _fabricate_run(root)
+            run = root / "runs" / "RUN-TEST-01"
+            _write(
+                run / "idea.json",
+                {
+                    "candidates": [
+                        {"idea_id": "IDEA-1", "title": "A", "lens": "mechanism", "source_count": 3},
+                        {"idea_id": "IDEA-2", "title": "B", "lens": "evaluation", "source_count": 3},
+                        {"idea_id": "IDEA-3", "title": "C", "lens": "transfer", "source_count": 3},
+                    ]
+                },
+            )
+            ledger = run_feedback(root, loops=["homogeneity"])
+            self.assertEqual(ledger["rows"], [])
+
     def test_gate_rejects_mutating_proposals(self):
         decision = _gate_lineage_reverify(
             {"kind": "rewrite_claim", "read_only": False, "subject": "runs/RUN-TEST-01"}

@@ -157,6 +157,21 @@ def build_mandate_status(
     blockers_all: List[str] = []
     invalid = 0
 
+    # 判定总线交叉核验（verdict-ledger 0.2.0 roadmap 项）：capsule 是签署前快照，
+    # autopilot 代签后其 CLOSURE_UNSIGNED 会变 stale。总线不重算门禁——它消费
+    # closure_profiles 已经记录的判定；冲突时以总线为准并留 suppression 审计行。
+    verdict_closure: Dict[str, Dict[str, Any]] = {}
+    try:
+        from .verdict_ledger import collect as _collect_verdicts
+
+        verdict_closure = {
+            str(row.get("subject") or ""): row
+            for row in (_collect_verdicts(project, limit=limit).get("rows") or [])
+            if row.get("kind") == "closure"
+        }
+    except (OSError, ValueError):
+        verdict_closure = {}
+
     for path in selected:
         run_id = path.parent.name
         try:
@@ -173,6 +188,20 @@ def build_mandate_status(
             action for action in capsule.get("next_actions") or []
             if isinstance(action, dict)
         ]
+        closure_row = verdict_closure.get("runs/" + run_id)
+        bus_signed = bool(closure_row) and closure_row.get("status") == "signed"
+        if bus_signed and "CLOSURE_UNSIGNED" in blockers:
+            blockers = [code for code in blockers if code != "CLOSURE_UNSIGNED"]
+            actions = [
+                action for action in actions
+                if "closure sign" not in str(action.get("command") or "")
+            ]
+            triggers.append({
+                "kind": "stale_snapshot_suppressed", "code": "CLOSURE_UNSIGNED",
+                "run_id": run_id, "source": _rel(path, project),
+                "authority": "verdict-ledger", "recomputed": "signed",
+                "source_sha256": str(closure_row.get("source_sha256") or ""),
+            })
         run_status = _clean(capsule.get("task_status") or capsule.get("flow_mode") or "", 80)
         runs.append({
             "run_id": run_id,
