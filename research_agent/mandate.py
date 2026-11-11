@@ -174,15 +174,31 @@ def build_mandate_status(
 
     for path in selected:
         run_id = path.parent.name
+        # 读时重算（与 research_status 对齐，第三轮证据链去脆弱化）：产物为准，
+        # 快照只作重算失败时的兜底。capsule 快照是签署前状态，代签/推进后全量
+        # blockers 都可能 stale——重算消掉整类漂移而不只是 CLOSURE_UNSIGNED。
+        capsule_source = "snapshot"
         try:
-            capsule = _load(path)
-        except ProjectError as exc:
-            invalid += 1
-            runs.append({"run_id": run_id, "capsule": _rel(path, project), "status": "invalid",
-                         "error": str(exc)})
-            triggers.append({"kind": "invalid_capsule", "code": "INVALID_RUN_CAPSULE",
-                             "run_id": run_id, "source": _rel(path, project)})
-            continue
+            from .loop_capsule import build_loop_capsule
+
+            capsule = build_loop_capsule(path.parent)
+            capsule_source = "recomputed"
+        except Exception as exc:
+            try:
+                capsule = _load(path) or {}
+            except ProjectError as load_exc:
+                invalid += 1
+                runs.append({"run_id": run_id, "capsule": _rel(path, project), "status": "invalid",
+                             "error": str(load_exc)})
+                triggers.append({"kind": "invalid_capsule", "code": "INVALID_RUN_CAPSULE",
+                                 "run_id": run_id, "source": _rel(path, project)})
+                continue
+            capsule_source = "snapshot_fallback"
+            triggers.append({
+                "kind": "recompute_failed", "code": "CAPSULE_RECOMPUTE_FAILED",
+                "run_id": run_id, "source": _rel(path, project),
+                "error": str(exc)[:160],
+            })
         blockers = [str(item) for item in capsule.get("blockers") or [] if str(item).strip()]
         actions = [
             action for action in capsule.get("next_actions") or []
@@ -191,6 +207,7 @@ def build_mandate_status(
         closure_row = verdict_closure.get("runs/" + run_id)
         bus_signed = bool(closure_row) and closure_row.get("status") == "signed"
         if bus_signed and "CLOSURE_UNSIGNED" in blockers:
+            # 兜底路径（重算失败落到快照时）的第二道保险：总线判定优先于快照
             blockers = [code for code in blockers if code != "CLOSURE_UNSIGNED"]
             actions = [
                 action for action in actions
@@ -207,6 +224,7 @@ def build_mandate_status(
             "run_id": run_id,
             "capsule": _rel(path, project),
             "capsule_sha256": _sha(path),
+            "capsule_source": capsule_source,
             "status": run_status,
             "route": _clean(capsule.get("route"), 120),
             "blockers": blockers,

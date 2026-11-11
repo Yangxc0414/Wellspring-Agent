@@ -2,7 +2,7 @@
 id: mandate
 name: 持续委托投影
 stage: META
-version: 0.2.0
+version: 0.3.0
 status: draft
 owner: research-agent
 inputs:
@@ -16,7 +16,7 @@ tools:
 gates: []
 invariants:
   - 只读投影：不创建 Claim/EA/Verdict，不签名、不批准、不执行、不写项目状态
-  - 触发来自已有 loop-capsule 的 blockers/next_actions，不重新计算门禁；capsule 快照与判定总线冲突时以总线为准并留 stale_snapshot_suppressed 审计行
+  - 触发来自 loop-capsule blockers/next_actions 的【读时重算】（build_loop_capsule 以产物为准），不重新计算门禁；重算失败回退快照并以判定总线交叉核验为第二道保险（stale_snapshot_suppressed 审计行）
   - 缺失 artifact 不是 pass；过期或撤销的委托必须停止
   - 委托授权只能由人写入；agent 不得创建、放宽或续期
   - 状态只能是 empty/active/partial/needs_human/stopped
@@ -74,6 +74,7 @@ invariants:
 
 ## Changelog
 
+- 2026-11-11 · v0.3.0 · status=draft · capsule 触发消费升级为【读时重算】（与 research_status 第三轮对齐）：每个 run 用 build_loop_capsule 从产物重算 blockers/next_actions（产物为准），快照只在重算失败时兜底——runs 行新增 capsule_source=recomputed/snapshot_fallback 溯源，失败显式触发 CAPSULE_RECOMPUTE_FAILED；总线交叉核验降为兜底路径的第二道保险；快照损坏不再产生 INVALID_RUN_CAPSULE（重算不读快照）。测试重写到新语义 11 项：快照伪造 blockers 不再直达触发、读时重算忽略 stale 快照、兜底路径显式化、「缺失 artifact 不是 pass」的直接体现。升 minor。
 - 2026-11-11 · v0.2.0 · status=draft · capsule 触发消费迁移到判定总线（verdict-ledger 0.2.0 roadmap 项）：capsule 是签署前快照，autopilot 代签后其 CLOSURE_UNSIGNED 变 stale——mandate 现在对每个 run 先查判定总线（closure_profiles 单点判定，非重算门禁：总线消费的是已记录判定），冲突时以总线为准：抑制 stale blocker、过滤 stale 重签 plan、追加 `stale_snapshot_suppressed` 审计触发（authority=verdict-ledger、recomputed、source_sha256 绑定，fail-visible 不静默）。不变量「不重新计算门禁」修订为「不重算门禁；capsule 快照与判定总线冲突时以总线为准并留审计行」。实测 E2E RUN-E2E-02：suppression 触发行 + plan 零 stale 重签 + RUN-E2E-01 诚实 blocker 保留；tests/test_mandate 新增迁移测试。输出新增触发种类，升 minor。
 - 2026-11-01 · v0.1.3 · status=draft · 修掉自己模块里的乐观偏差：--max-runs 截断窗口时不再报 active，新增 partial 状态与 MANDATE_SCOPE_TRUNCATED 触发；窗口内已有 blocker 时仍为 needs_human。实测两 run（A 干净、B 未签 claim）max_runs=1 由 active 变 partial。新增 2 项测试，共 10 项。
 - 2026-10-31 · v0.1.2 · 预算耗尽纳入投影：按 `autopilot/ledger.json` 中同一 policy_id 的

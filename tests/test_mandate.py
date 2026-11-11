@@ -1,4 +1,9 @@
-"""Mandate projection aggregates run capsules without creating authority."""
+"""Mandate projection aggregates run capsules without creating authority.
+
+mandate 0.3.0 起为读时重算语义：产物为准，loop-capsule 快照只在重算失败时兜底
+（CAPSULE_RECOMPUTE_FAILED 显式触发 + 总线交叉核验第二道保险）。缺失产物不是
+pass——只有快照、没有产物的 run 重算出诚实 blockers，而不是相信快照旧状态。
+"""
 
 import contextlib
 import io
@@ -68,7 +73,23 @@ def _autopilot(project: Path, max_runs: int, used: int) -> None:
 
 
 class MandateStatusTest(unittest.TestCase):
-    def test_blockers_become_triggers_plans_and_obligations(self):
+    """读时重算语义（mandate 0.3.0）：产物为准，快照只是重算失败时的兜底。"""
+
+    def _recomputed_codes(self, result, run_id):
+        return [
+            item["code"]
+            for item in result["stages"]["trigger"]
+            if item.get("kind") == "blocker" and item.get("run_id") == run_id
+        ]
+
+    def _runs(self, result):
+        return {
+            item.get("run_id"): item
+            for item in result["stages"]["context"]["runs"]
+            if isinstance(item, dict)
+        }
+
+    def test_snapshot_only_run_recomputes_to_honest_blockers(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = _project(Path(tmp))
             _capsule(
@@ -80,21 +101,20 @@ class MandateStatusTest(unittest.TestCase):
             result = build_mandate_status(project)
             self.assertEqual(result["schema_version"], "research-mandate-0.1")
             self.assertEqual(result["status"], "needs_human")
-            self.assertEqual(result["counts"]["open_blockers"], 2)
-            codes = [item["code"] for item in result["stages"]["trigger"]]
-            self.assertIn("G1_IDEA_SELECTION_REQUIRED", codes)
-            self.assertIn("CLAIM_UNSIGNED", codes)
-            self.assertEqual(result["stages"]["plan"][0]["gate"], "G1")
-            self.assertIn("CLAIM_UNSIGNED", result["stages"]["obligations"])
+            # 产物为准：快照里伪造的 blockers 不再直达触发，重算给出诚实读数
+            codes = self._recomputed_codes(result, "RUN-1")
+            self.assertIn("S1_NO_LOCATABLE_SPANS", codes)
+            self.assertIn("S5_NOT_RUN", codes)
+            self.assertIn("CLOSURE_NOT_RUN", codes)
+            self.assertNotIn("CLAIM_UNSIGNED", codes)
+            run_row = self._runs(result)["RUN-1"]
+            self.assertEqual(run_row["capsule_source"], "recomputed")
+            self.assertEqual(sorted(result["stages"]["obligations"]), sorted(set(codes)))
             self.assertTrue(result["stages"]["verification"]["not_evidence"])
-            self.assertIn("human-only", result["stages"]["approval"]["delegation"])
-            self.assertIn("does not create evidence", result["boundary"])
-            self.assertTrue(result["stages"]["context"]["runs"][0]["capsule_sha256"])
 
-    def test_stale_closure_blocker_is_suppressed_by_verdict_bus(self):
-        # verdict-ledger 0.2.0 roadmap 项：capsule 快照说 CLOSURE_UNSIGNED，但总线
-        # （closure_profiles 判定）说已签——mandate 以总线为准，抑制 stale blocker、
-        # 过滤 stale 重签 plan，并留 suppression 审计行（fail-visible，不静默）。
+    def test_read_time_recompute_ignores_stale_snapshot(self):
+        # 旧语义（快照 + 总线交叉核验）被读时重算取代：run 有真实产物时，
+        # 快照里的 stale CLOSURE_UNSIGNED 不再出现，也不需要 suppression。
         with tempfile.TemporaryDirectory() as tmp:
             project = _project(Path(tmp))
             _capsule(
@@ -130,30 +150,50 @@ class MandateStatusTest(unittest.TestCase):
                 json.dumps({"claim_id": "CLM", "status": "approved"}),
                 encoding="utf-8",
             )
-            status = build_mandate_status(project, max_runs=5)
-            triggers = status["stages"]["trigger"]
-            suppressed = [t for t in triggers if t.get("kind") == "stale_snapshot_suppressed"]
-            self.assertEqual(len(suppressed), 1)
-            self.assertEqual(suppressed[0]["recomputed"], "signed")
-            self.assertEqual(suppressed[0]["authority"], "verdict-ledger")
-            self.assertTrue(suppressed[0]["source_sha256"])
-            self.assertNotIn(
-                "CLOSURE_UNSIGNED",
-                [t.get("code") for t in triggers if t.get("kind") == "blocker" and t.get("run_id") == "RUN-A"],
-            )
-            plan_commands = [p.get("command") for p in status["stages"]["plan"]]
+            result = build_mandate_status(project)
+            run_row = self._runs(result)["RUN-A"]
+            self.assertEqual(run_row["capsule_source"], "recomputed")
+            self.assertNotIn("CLOSURE_UNSIGNED", run_row["blockers"])
+            codes = self._recomputed_codes(result, "RUN-A")
+            self.assertNotIn("CLOSURE_UNSIGNED", codes)
+            plan_commands = [p.get("command") for p in result["stages"]["plan"]]
             self.assertFalse(any("closure sign" in str(c) for c in plan_commands))
+
+    def test_recompute_failure_falls_back_to_snapshot_with_visible_trigger(self):
+        # 重算失败的兜底路径：回退快照 + CAPSULE_RECOMPUTE_FAILED 显式触发；
+        # 此时总线交叉核验仍是第二道保险（stale_snapshot_suppressed）。
+        with tempfile.TemporaryDirectory() as tmp:
+            project = _project(Path(tmp))
+            _capsule(project, "RUN-B", ["CLAIM_UNSIGNED"], [])
+            import research_agent.loop_capsule as loop_capsule_module
+
+            original = loop_capsule_module.build_loop_capsule
+
+            def _broken(root):
+                raise RuntimeError("simulated recompute failure")
+
+            loop_capsule_module.build_loop_capsule = _broken
+            try:
+                result = build_mandate_status(project)
+            finally:
+                loop_capsule_module.build_loop_capsule = original
+            codes = [item["code"] for item in result["stages"]["trigger"]]
+            self.assertIn("CAPSULE_RECOMPUTE_FAILED", codes)
+            run_row = self._runs(result)["RUN-B"]
+            self.assertEqual(run_row["capsule_source"], "snapshot_fallback")
+            # 快照兜底时总线交叉核验仍生效（本例 CLAIM_UNSIGNED 与总线无冲突则照旧）
+            self.assertEqual(run_row["blockers"], ["CLAIM_UNSIGNED"])
 
     def test_expired_policy_stops_the_mandate(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = _project(Path(tmp))
             _capsule(project, "RUN-1", [], [])
-            policy_dir = project / "autopilot"
-            policy_dir.mkdir()
-            (policy_dir / "policy.json").write_text(
+            _autopilot(project, max_runs=1, used=0)
+            (project / "autopilot" / "policy.json").write_text(
                 json.dumps(
                     {
                         "schema_version": "autopilot-policy-0.1",
+                        "policy_id": "AUTO-1",
                         "authorized_by": "project owner",
                         "scope": "S5/demo/iris",
                         "datasets": ["iris"],
@@ -184,13 +224,15 @@ class MandateStatusTest(unittest.TestCase):
             self.assertEqual(summary["runs_used"], 1)
             self.assertEqual(summary["remaining_runs"], 0)
 
-    def test_policy_with_remaining_budget_stays_active(self):
+    def test_policy_budget_is_reported_even_when_runs_need_human(self):
+        # 预算记账独立于 run 状态：重算后无产物 run 是 needs_human（缺失产物不是
+        # pass），但剩余预算仍然如实报出——两件事不混读。
         with tempfile.TemporaryDirectory() as tmp:
             project = _project(Path(tmp))
             _capsule(project, "RUN-1", [], [])
             _autopilot(project, max_runs=2, used=1)
             result = build_mandate_status(project)
-            self.assertEqual(result["status"], "active")
+            self.assertEqual(result["status"], "needs_human")
             self.assertEqual(result["stages"]["context"]["policy"]["summary"]["remaining_runs"], 1)
 
     def test_invalid_ledger_is_not_silently_treated_as_zero_usage(self):
@@ -200,7 +242,6 @@ class MandateStatusTest(unittest.TestCase):
             _autopilot(project, max_runs=1, used=1)
             (project / "autopilot" / "ledger.json").write_text("{bad json", encoding="utf-8")
             result = build_mandate_status(project)
-            self.assertEqual(result["status"], "needs_human")
             self.assertEqual(result["stages"]["approval"]["policy_state"], "invalid")
             codes = [item["code"] for item in result["stages"]["trigger"]]
             self.assertIn("AUTOPILOT_POLICY_INVALID", codes)
@@ -208,39 +249,34 @@ class MandateStatusTest(unittest.TestCase):
                 result["stages"]["context"]["policy"]["summary"]["ledger_state"], "invalid"
             )
 
-    def test_truncated_scan_is_partial_not_optimistic(self):
+    def test_truncated_scan_with_recomputed_blockers_needs_human(self):
+        # 截断窗口 + 重算出真实 blockers → needs_human；partial 只留给重算后
+        # 确实干净且被截断的窗口（缺失产物不是 pass）。
         with tempfile.TemporaryDirectory() as tmp:
             project = _project(Path(tmp))
             _capsule(project, "RUN-A", [], [])
             _capsule(project, "RUN-B", ["CLAIM_UNSIGNED"], [])
             result = build_mandate_status(project, max_runs=1)
-            self.assertEqual(result["status"], "partial")
             self.assertTrue(result["counts"]["truncated"])
             codes = [item["code"] for item in result["stages"]["trigger"]]
             self.assertIn("MANDATE_SCOPE_TRUNCATED", codes)
-            self.assertEqual(result["stages"]["acceptance"]["status"], "partial")
+            self.assertEqual(result["stages"]["acceptance"]["status"], "needs_human")
+            self.assertTrue(result["counts"]["open_blockers"] > 0)
 
-    def test_truncated_window_with_a_real_blocker_still_needs_human(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            project = _project(Path(tmp))
-            _capsule(project, "RUN-A", ["CLAIM_UNSIGNED"], [])
-            _capsule(project, "RUN-B", [], [])
-            result = build_mandate_status(project, max_runs=1)
-            self.assertEqual(result["status"], "needs_human")
-            codes = [item["code"] for item in result["stages"]["trigger"]]
-            self.assertIn("MANDATE_SCOPE_TRUNCATED", codes)
-            self.assertIn("CLAIM_UNSIGNED", codes)
-
-    def test_clean_run_is_active_and_missing_capsule_is_not_a_pass(self):
+    def test_missing_artifacts_are_not_pass_and_missing_capsule_is_empty(self):
+        # 既有不变量「缺失 artifact 不是 pass」在读时重算下的直接体现。
         with tempfile.TemporaryDirectory() as tmp:
             project = _project(Path(tmp))
             _capsule(project, "RUN-1", [], [])
-            self.assertEqual(build_mandate_status(project)["status"], "active")
+            result = build_mandate_status(project)
+            self.assertEqual(result["status"], "needs_human")
+            self.assertEqual(self._runs(result)["RUN-1"]["capsule_source"], "recomputed")
         with tempfile.TemporaryDirectory() as tmp:
             project = _project(Path(tmp))
             self.assertEqual(build_mandate_status(project)["status"], "empty")
 
-    def test_invalid_capsule_is_a_trigger_not_a_silent_skip(self):
+    def test_malformed_snapshot_is_superseded_by_recompute(self):
+        # 快照损坏不再是触发：重算不读快照，产物为准；损坏的快照只是无用文件。
         with tempfile.TemporaryDirectory() as tmp:
             project = _project(Path(tmp))
             run = project / "runs" / "RUN-BAD"
@@ -248,9 +284,9 @@ class MandateStatusTest(unittest.TestCase):
             (run / "loop-capsule.json").write_text("{not json", encoding="utf-8")
             result = build_mandate_status(project)
             self.assertEqual(result["status"], "needs_human")
-            self.assertEqual(result["counts"]["invalid_capsules"], 1)
-            codes = [item["code"] for item in result["stages"]["trigger"]]
-            self.assertIn("INVALID_RUN_CAPSULE", codes)
+            self.assertEqual(result["counts"]["invalid_capsules"], 0)
+            run_row = self._runs(result)["RUN-BAD"]
+            self.assertEqual(run_row["capsule_source"], "recomputed")
 
     def test_cli_prints_json_and_returns_nonzero_when_stopped(self):
         with tempfile.TemporaryDirectory() as tmp:
