@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="../assets/custom.css" />
   <link rel="stylesheet" href="./models.css" />
 <link rel="stylesheet" href="../assets/subpage.css" />
+<link rel="stylesheet" href="../assets/demo-legibility.css" />
+<script src="../assets/demo-legibility.js" defer></script>
 <style>
 .mg-matrix .mg-panel-head{align-items:flex-start}
 .matrix-wrap{overflow-x:auto;margin-top:10px}
@@ -36,7 +38,7 @@
 }
 </style>
 </head>
-<body class="models-page">
+<body class="models-page" data-dl-page="models">
 <div class="sp-top"><a class="sp-home" href="../">← 返回主页</a><span class="sp-chip">配置说明 · 需本地 runtime</span><nav class="sp-sib"><a href="../demo/">运行</a><a href="../innovation/">创新</a><a href="../app/">工作台</a><a href="../qoder/">接入</a><a href="../rsi/">自进化</a></nav></div>
 
   <a class="skip-link" href="#model-main">跳到内容</a>
@@ -59,9 +61,9 @@
         <p class="mg-lede">把模型接进来，但不把密钥交出去。OpenAI、Anthropic 与任意 OpenAI 兼容端点：密钥只从环境变量或本地 runtime 内存读取，不写仓库、不回传浏览器、不记录 prompt。</p>
       </div>
       <div class="mg-security">
-        <div><span>KEY SOURCE</span><b>ENV / SESSION</b><em>不落盘</em></div>
-        <div><span>TRANSPORT</span><b>HTTPS / LOCAL</b><em>拒绝公网明文</em></div>
-        <div><span>LOGGING</span><b>METADATA ONLY</b><em>不存 prompt</em></div>
+        <div><span>密钥来源</span><b>ENV / SESSION</b><em>不落盘</em></div>
+        <div><span>传输方式</span><b>HTTPS / LOCAL</b><em>拒绝公网明文</em></div>
+        <div><span>日志范围</span><b>METADATA ONLY</b><em>不存 prompt</em></div>
       </div>
     </section>
 
@@ -84,7 +86,7 @@
             </tbody>
           </table>
         </div>
-        <p class="matrix-foot">当前只有 <b>rsi</b> 是 WIRED（真实消费者）；其他模块标 CONFIG ONLY。接入 API 不等于 pipeline 已使用模型，也不绕过 claim / EA / gate。</p>
+        <p class="matrix-foot">当前只有 <b>rsi</b> 是「已接线」（有真实消费者）；其他模块只是「仅配置」（只登记了密钥 / 端点）。接入 API 不等于 pipeline 已使用模型，也不绕过 claim / EA / 人工门。</p>
       </section>
 
       <section class="mg-panel mg-providers">

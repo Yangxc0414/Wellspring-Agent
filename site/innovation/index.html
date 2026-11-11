@@ -12,8 +12,10 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M8 11l8-4 8 4v10l-8 4-8-4z' fill='none' stroke='white' stroke-width='1.8'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="../assets/subpage.css" />
+<link rel="stylesheet" href="../assets/demo-legibility.css" />
+<script src="../assets/demo-legibility.js" defer></script>
 </head>
-<body>
+<body data-dl-page="innovation">
 <div class="sp-top"><a class="sp-home" href="../">← 返回主页</a><span class="sp-chip">静态演示 · SIM / fixture · 人工门只在本地 CLI</span><nav class="sp-sib"><a href="../demo/">运行</a><a href="../innovation/">创新</a><a href="../app/">工作台</a><a href="../qoder/">接入</a><a href="../rsi/">自进化</a></nav></div>
 
 <a class="skip" href="#demo">跳到演示舞台</a>
@@ -181,7 +183,11 @@
         <div class="comparison-row"><b>ARIS / AutoResearchClaw</b><span>强在评审与技能演化</span><em>我们把审计放进模块契约与工作台</em></div>
         <div class="comparison-row"><b>AstraDraw</b><span>强在参考图→scene→SVG/PPTX</span><em>我们加 SVG 审计与证据边界</em></div>
       </div>
-      <p class="proof-note">边界：当前是 fixture + CC-BY 论文正文 probe 的纵切；没有真实检索 API、用户研究或论文效果。H1–H4 仍是待验证假设。受治理 RSI 控制面（StepLedger / pending / lease / MetaTracker）已实现；S1 compare 选中 MiniLM+budget3 并回灌 pipeline；S5 iris 选 seeds3、breast_cancer 选 seeds2，均被 run 消费并通过新协议 sealed 复核；pipeline 用 S5 lease 跑真实 run，产出 EA + claim draft，人签 claim 后才把 paper.result.primary 标为 bound_claim；ChemLab 真实反应数据做受控 baseline（Ridge R²0.193 vs mean −0.048），人签 claim + 数据图后绑定；protocol 冻结 + 数据图 + 4 条 DataCite 元数据后 closure 11/11 ready，人签 export manifest（submission=false）（协议验证，非新发现）。本地 Qwen2.5-0.5B 的 3-prompt 审计 1/3 eligible。**仍无可靠开放式 proposer、peer-review benchmark、真实研究实验，不宣称 RSI**；详见仓库内 <b>24- 工程反思</b> 与 <b>25- 受治理的 RSI</b>。</p>
+      <details class="dl-commands">
+        <summary>技术证据与边界（点击展开；这段含较多内部术语）</summary>
+        <p class="proof-note">边界：当前是 fixture + CC-BY 论文正文 probe 的纵切；没有真实检索 API、用户研究或论文效果。H1–H4 仍是待验证假设。受治理 RSI 控制面（StepLedger / pending / lease / MetaTracker）已实现；S1 compare 选中 MiniLM+budget3 并回灌 pipeline；S5 iris 选 seeds3、breast_cancer 选 seeds2，均被 run 消费并通过新协议 sealed 复核；pipeline 用 S5 lease 跑真实 run，产出 EA + claim draft，人签 claim 后才把 paper.result.primary 标为 bound_claim；ChemLab 真实反应数据做受控 baseline（Ridge R²0.193 vs mean −0.048），人签 claim + 数据图后绑定；protocol 冻结 + 数据图 + 4 条 DataCite 元数据后 closure 11/11 ready，人签 export manifest（submission=false）（协议验证，非新发现）。本地 Qwen2.5-0.5B 的 3-prompt 审计 1/3 eligible。**仍无可靠开放式 proposer、peer-review benchmark、真实研究实验，不宣称 RSI**；详见仓库内 <b>24- 工程反思</b> 与 <b>25- 受治理的 RSI</b>。</p>
+      </details>
+      <p class="proof-note">一句话：本页用固定样本演示「证据封存 → 人签 claim → 闭合检查」的链路；H1–H4 仍是待验证假设，页面明确不宣称已具备开放式自改进能力。</p>
     </section>
   </main>
 

@@ -10,6 +10,8 @@
 <link rel="stylesheet" href="../assets/base.css" />
 <link rel="stylesheet" href="../assets/theme.css" />
 <link rel="stylesheet" href="../assets/subpage.css" />
+<link rel="stylesheet" href="../assets/demo-legibility.css" />
+<script src="../assets/demo-legibility.js" defer></script>
 <style>
   :root{
     --ink:#0b1220; --body:#3d4756; --muted:#5f6d80; --line:#e3e9f2;
@@ -141,7 +143,7 @@
   }
 </style>
 </head>
-<body>
+<body data-dl-page="rsi">
 <div class="sp-top"><a class="sp-home" href="../">← 返回主页</a><span class="sp-chip">自进化接缝 · 真实运行产物</span><nav class="sp-sib"><a href="../demo/">运行</a><a href="../innovation/">创新</a><a href="../app/">工作台</a><a href="../qoder/">接入</a></nav></div>
 
 <header class="rsi-hero">
@@ -153,10 +155,10 @@
         <p class="lede">本页不是又一套自进化循环。平台把候选任务包交给 Harness² 的 Propose–Probe–Compose，收回的是一份<code>harness2-run-0.1</code> 产物：预算恒等式、被采纳的组件改动、经验条目与留出检查。平台只做三件事——提供数据基础、把产物映射成受治理的候选、在门下等人签字。</p>
       </div>
       <div class="tiles" id="hero-tiles">
-        <div class="tile"><span>RECURSION BUDGET</span><b>—</b><em>R = 4k · P = 3k</em></div>
-        <div class="tile"><span>ADOPTED EDITS</span><b>—</b><em>按组件去重</em></div>
-        <div class="tile"><span>HELD-OUT</span><b>—</b><em>提案者没见过</em></div>
-        <div class="tile"><span>CONFORMANCE</span><b>—</b><em>契约 / 预算 / 边界</em></div>
+        <div class="tile"><span>递归预算 R / P</span><b>—</b><em>R = 4k · P = 3k</em></div>
+        <div class="tile"><span>已采纳改动</span><b>—</b><em>按组件去重</em></div>
+        <div class="tile"><span>留出验证</span><b>—</b><em>提案者没见过</em></div>
+        <div class="tile"><span>契约一致性</span><b>—</b><em>契约 / 预算 / 边界</em></div>
       </div>
     </div>
   </div>
@@ -392,10 +394,10 @@
     var adopted = (story.adopted || []).length;
     var held = story.held_out || {};
     var tiles = [
-      ["RECURSION BUDGET", budget.R + " / " + budget.expected_R, "P " + budget.P + " / " + budget.expected_P, identity ? "ok" : "warn"],
-      ["ADOPTED EDITS", String(adopted), "去重后的组件", adopted ? "ok" : "warn"],
-      ["HELD-OUT", held.n ? held.passed + " / " + held.n : "—", held.n ? "base " + (held.base_passed || 0) + " / " + held.n : "无留出集", held.n && held.passed === held.n ? "ok" : "warn"],
-      ["CONFORMANCE", story.checklist_ok ? "PASS" : "FAIL", (story.checklist || []).length + " 项自检", story.checklist_ok ? "ok" : "warn"]
+      ["递归预算 R / P", budget.R + " / " + budget.expected_R, "P " + budget.P + " / " + budget.expected_P, identity ? "ok" : "warn"],
+      ["已采纳改动", String(adopted), "去重后的组件", adopted ? "ok" : "warn"],
+      ["留出验证", held.n ? held.passed + " / " + held.n : "—", held.n ? "base " + (held.base_passed || 0) + " / " + held.n : "无留出集", held.n && held.passed === held.n ? "ok" : "warn"],
+      ["契约一致性", story.checklist_ok ? "PASS" : "FAIL", (story.checklist || []).length + " 项自检", story.checklist_ok ? "ok" : "warn"]
     ];
     el("hero-tiles").innerHTML = tiles.map(function (t) {
       return '<div class="tile ' + t[3] + '"><span>' + esc(t[0]) + "</span><b>" + esc(t[1]) + "</b><em>" + esc(t[2]) + "</em></div>";

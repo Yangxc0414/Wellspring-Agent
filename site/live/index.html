@@ -12,8 +12,10 @@
   <link rel="stylesheet" href="../assets/custom.css" />
   <link rel="stylesheet" href="./live.css" />
 <link rel="stylesheet" href="../assets/subpage.css" />
+<link rel="stylesheet" href="../assets/demo-legibility.css" />
+<script src="../assets/demo-legibility.js" defer></script>
 </head>
-<body class="live-page">
+<body class="live-page" data-dl-page="live">
 <div class="sp-top"><a class="sp-home" href="../">← 返回主页</a><span class="sp-chip">配置说明 · 需本地 runtime</span><nav class="sp-sib"><a href="../demo/">运行</a><a href="../innovation/">创新</a><a href="../app/">工作台</a><a href="../qoder/">接入</a><a href="../rsi/">自进化</a></nav></div>
 
   <a class="skip-link" href="#live-main">跳到内容</a>
@@ -41,10 +43,10 @@
         </div>
         <p class="live-note">本地服务默认只监听 <code>127.0.0.1:8787</code>。Pages 不能运行 Python；请先启动 runtime，再打开本页。</p>
         <dl class="fact-grid" id="health-facts">
-          <div><dt>STATUS</dt><dd id="fact-status">未连接</dd></div>
-          <div><dt>QUEUE</dt><dd id="fact-queue">—</dd></div>
-          <div><dt>RSI</dt><dd id="fact-rsi">READ ONLY</dd></div>
-          <div><dt>SIGN</dt><dd>CLI / HUMAN</dd></div>
+          <div><dt>连接状态</dt><dd id="fact-status">未连接</dd></div>
+          <div><dt>队列</dt><dd id="fact-queue">—</dd></div>
+          <div><dt>自进化</dt><dd id="fact-rsi">只读</dd></div>
+          <div><dt>签署</dt><dd>仅 CLI 人签</dd></div>
         </dl>
         <p class="live-alert" id="health-alert" hidden></p>
       </section>

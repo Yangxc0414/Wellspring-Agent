@@ -1,0 +1,213 @@
+/* Shared legibility layer for the Pages demo subpages.
+   Presentation only: no page logic, state or data is touched by these rules. */
+.dl-guide {
+  box-sizing: border-box;
+  max-width: 1120px;
+  margin: 12px auto 16px;
+  padding: 11px 14px 12px;
+  border: 1px solid #cbd5e1;
+  border-left: 3px solid #4f46e5;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.dl-guide * { box-sizing: border-box; }
+
+.dl-guide-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.dl-guide-head b {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dl-tag,
+.dl-readonly {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 10px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.dl-readonly {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.dl-mode,
+.dl-summary {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 11.5px;
+  line-height: 1.7;
+}
+
+.dl-summary { color: #0f172a; }
+
+.dl-glossary {
+  margin-top: 8px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.dl-glossary > summary {
+  padding: 6px 10px;
+  color: #4338ca;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 600;
+  list-style-position: inside;
+}
+
+.dl-glossary > dl {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0;
+  padding: 4px 10px 10px;
+}
+
+.dl-glossary dt {
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dl-glossary dd {
+  margin: 0;
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.dl-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+}
+
+.dl-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dl-legend i {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.dl-legend i.is-ok { background: #059669; }
+.dl-legend i.is-warn { background: #d97706; }
+.dl-legend i.is-bad { background: #e11d48; }
+.dl-legend i.is-info { background: #4f46e5; }
+
+.dl-cli-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 2px;
+  padding: 5px 8px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 5px;
+  background: #f8fafc;
+  color: #475569;
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.dl-cli-note > span { flex: 1; min-width: 180px; }
+
+.dl-cli-copy {
+  flex: none;
+  padding: 2px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  color: #4338ca;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.dl-cli-copy:hover { border-color: #4f46e5; }
+
+/* Toast-only demo buttons must not look like real actions. */
+.dl-info-only {
+  border-style: dashed !important;
+  background: transparent !important;
+  color: #64748b !important;
+  box-shadow: none !important;
+  opacity: .9;
+}
+
+.dl-info-only::after {
+  content: " · 仅说明";
+  font-size: .8em;
+  opacity: .85;
+}
+
+.dl-commands {
+  margin: 10px 0;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #f8fafc;
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+}
+
+.dl-commands > summary {
+  cursor: pointer;
+  color: #4338ca;
+  font-weight: 600;
+}
+
+.dl-commands ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 4px 12px;
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.dl-commands li { color: #475569; line-height: 1.6; }
+.dl-commands code { color: #0f172a; font-weight: 600; }
+
+/* Some subpages use a CSS grid <main>; a full-width note must not become a grid cell. */
+main > .dl-guide,
+main > .dl-commands {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .dl-guide { margin: 8px; padding: 9px 10px; }
+  .dl-glossary > dl { grid-template-columns: minmax(0, 1fr); gap: 1px; }
+  .dl-glossary dd { margin-bottom: 5px; }
+}

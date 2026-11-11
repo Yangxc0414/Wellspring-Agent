@@ -11,8 +11,10 @@
   <link rel="stylesheet" href="../assets/base.css" />
   <link rel="stylesheet" href="../assets/theme.css" />
   <link rel="stylesheet" href="./agent.css" />
+<link rel="stylesheet" href="../assets/demo-legibility.css" />
+<script src="../assets/demo-legibility.js" defer></script>
 </head>
-<body class="agent-page">
+<body class="agent-page" data-dl-page="agent">
   <a class="ag-skip" href="#ag-thread">跳到会话</a>
 
   <header class="ag-top">
@@ -48,6 +50,32 @@
   </header>
 
   <main class="ag-shell">
+    <details id="dl-command-list" class="dl-commands">
+      <summary>可用指令清单（点击展开；在输入框输入 / 加指令名调用）</summary>
+      <ul>
+        <li><code>/research</code> 开始文献检索</li>
+        <li><code>/experiment</code> 生成实验设计草稿</li>
+        <li><code>/auto</code> 切换全自动模式</li>
+        <li><code>/start</code> 启动运行</li>
+        <li><code>/pause</code> 暂停</li>
+        <li><code>/resume</code> 继续</li>
+        <li><code>/step</code> 单步执行</li>
+        <li><code>/stop</code> 停止</li>
+        <li><code>/evidence</code> 查看证据链</li>
+        <li><code>/evolution</code> 查看自进化台账</li>
+        <li><code>/run</code> 打开运行面板</li>
+        <li><code>/freeze</code> 显示协议冻结命令（人工门）</li>
+        <li><code>/sign</code> 显示 claim 签署命令（人工门）</li>
+        <li><code>/approve</code> 批准候选 / 工具调用</li>
+        <li><code>/reject</code> 拒绝候选 / 工具调用</li>
+        <li><code>/rollback</code> 回退世代</li>
+        <li><code>/new</code> 新建任务</li>
+        <li><code>/export</code> 导出工作台状态</li>
+        <li><code>/reset</code> 重置为示例状态</li>
+        <li><code>/help</code> 展开本清单</li>
+      </ul>
+      <p>静态预览里标注「仅说明」或「（SIM）」的动作不会改动数据；真实签核与导出只在本地 CLI。</p>
+    </details>
     <aside class="ag-side" aria-label="项目与快捷操作">
       <button type="button" class="ag-new-task" id="new-task-btn"><span aria-hidden="true">＋</span><b>新的任务</b></button>
       <label class="ag-search">
@@ -121,7 +149,7 @@
             </div>
             <label class="ag-switch-row compact"><span><b>只读模式</b><small>优先禁止写操作；GitHub 支持只读端点/头</small></span><input type="checkbox" id="plugin-readonly" checked /></label>
             <div class="ag-plugin-actions">
-              <button type="button" class="ag-btn ag-btn-quiet" id="plugin-test">测试连接（SIM）</button>
+              <button type="button" class="ag-btn ag-btn-quiet" id="plugin-test">查看连接说明（演示）</button>
               <button type="submit" class="ag-btn">保存并启用</button>
             </div>
           </form>
@@ -196,9 +224,9 @@
     <aside class="ag-context" aria-label="运行上下文">
       <div class="ag-context-head">
         <div class="ag-context-tabs" role="tablist" aria-label="上下文视图">
-          <button type="button" class="ag-ctx-tab is-on" role="tab" aria-selected="true" data-context="run">RUN</button>
-          <button type="button" class="ag-ctx-tab" role="tab" aria-selected="false" data-context="evidence">EVIDENCE</button>
-          <button type="button" class="ag-ctx-tab" role="tab" aria-selected="false" data-context="evolution">EVOLUTION</button>
+          <button type="button" class="ag-ctx-tab is-on" role="tab" aria-selected="true" data-context="run">运行</button>
+          <button type="button" class="ag-ctx-tab" role="tab" aria-selected="false" data-context="evidence">证据</button>
+          <button type="button" class="ag-ctx-tab" role="tab" aria-selected="false" data-context="evolution">自进化</button>
         </div>
         <span class="ag-count" id="context-count">—</span>
       </div>

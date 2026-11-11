@@ -48,6 +48,32 @@ const landing = read("index.html");
 check(landing.includes("./app/"), "landing page does not link to ./app/");
 check(fs.existsSync(path.join(root, "app", "favicon.svg")), "missing app/favicon.svg");
 
+// Every hand-written demo page must carry the shared legibility layer: without it
+// the pages revert to unexplained ids, hashes and English abbreviations.
+const legibilityPages = [
+  ["index.html", "home"],
+  ["innovation/index.html", "innovation"],
+  ["rsi/index.html", "rsi"],
+  ["qoder/index.html", "qoder"],
+  ["models/index.html", "models"],
+  ["live/index.html", "live"],
+  ["agent/index.html", "agent"],
+  ["demo/index.html", "demo"]
+];
+check(fs.existsSync(path.join(root, "assets/demo-legibility.css")), "missing shared legibility CSS");
+check(fs.existsSync(path.join(root, "assets/demo-legibility.js")), "missing shared legibility JS");
+for (const [file, page] of legibilityPages) {
+  const html = read(file);
+  check(html.includes("demo-legibility.css"), `${file} missing shared legibility CSS`);
+  check(html.includes("demo-legibility.js"), `${file} missing shared legibility JS`);
+  check(html.includes(`data-dl-page="${page}"`), `${file} missing data-dl-page=${page}`);
+}
+const demoSource = path.join(root, "..", "demo", "index.html");
+check(
+  fs.existsSync(demoSource) && fs.readFileSync(demoSource, "utf8").includes("demo-legibility.js"),
+  "demo/index.html source missing shared legibility JS (build-site would overwrite the copy)"
+);
+
 if (failures.length) {
   console.error("site check failed:");
   for (const failure of failures) console.error(" - " + failure);
@@ -55,5 +81,5 @@ if (failures.length) {
 }
 
 console.log(
-  `site check ok: ${assetRefs.length} app assets, ${jsFiles.length} JS bundle(s), static mode confirmed`
+  `site check ok: ${assetRefs.length} app assets, ${jsFiles.length} JS bundle(s), static mode confirmed, ${legibilityPages.length} demo pages legible`
 );

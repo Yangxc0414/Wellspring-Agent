@@ -1929,7 +1929,14 @@ function runCommand(command) {
     "/new": () => openNewProject(),
     "/export": () => exportState(),
     "/reset": () => resetState(),
-    "/help": () => toast("指令：/research /experiment /auto /start /pause /resume /step /stop /evidence /evolution /run /freeze /sign /approve /reject /rollback /new /export /reset"),
+    "/help": () => {
+      var list = document.getElementById("dl-command-list");
+      if (list) {
+        list.open = true;
+        if (list.scrollIntoView) list.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      toast("已展开「可用指令」清单：每条都有中文说明，输入 / 加指令名即可调用");
+    },
     "/task": () => {
       if (arg) { $("#composer-input").value = arg; sendMessage(); }
     }
@@ -2146,12 +2153,7 @@ function bind() {
   $("#plugin-preset").addEventListener("change", syncPluginForm);
   $("#plugin-form").addEventListener("submit", addPlugin);
   $("#plugin-test").addEventListener("click", () => {
-    const button = $("#plugin-test");
-    button.textContent = "测试中…（SIM）";
-    setTimeout(() => {
-      button.textContent = "测试连接（SIM）";
-      toast("静态预览：端点已登记；真实连接需 runtime + OAuth/token");
-    }, 650);
+    toast("仅说明：这里只展示端点登记示例，不会发起真实连接；真实连接需本地 runtime + OAuth/token");
   });
   $("#tools-reset").addEventListener("click", () => { closeTools(); resetState(); });
   $("#pref-auto-expand").addEventListener("change", (event) => setPreference("autoExpandRunning", event.target.checked));
@@ -2276,7 +2278,7 @@ function runAction(action, arg) {
     case "show-run": return showContext("run");
     case "focus-composer": return focusComposer();
     case "toggle-auto": return project.auto.running ? (project.auto.paused ? resumeAuto() : pauseAuto()) : startAuto();
-    default: return toast("这个动作在静态预览中还没有接线。");
+    default: return toast("该动作在静态预览中不可用，不会改动数据；可用动作见页面底部「可用指令」清单。");
   }
 }
 
