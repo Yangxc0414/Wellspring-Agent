@@ -402,6 +402,14 @@ class ModelGateway:
             module=host_module,
             purpose=host_purpose,
         )
+        # ExecPort 路由分派（71-§5 步 5 收口）：host_agent 面的生成经端口门禁 + 溯源。
+        try:
+            from ..execport.exec_port import begin_dispatch, end_dispatch
+
+            _exec_ticket = begin_dispatch("host_agent", subject="%s/%s" % (host_module, host_purpose))
+        except Exception:
+            _exec_ticket = None
+            end_dispatch = None
         text = port.complete(
             messages, json_mode=bool(profile.json_mode if json_mode_override is None else json_mode_override)
         )
@@ -416,6 +424,8 @@ class ModelGateway:
             finish_reason="host_turn",
             json_mode_applied=False,
         )
+        if _exec_ticket and end_dispatch:
+            end_dispatch(_exec_ticket, "completed")
 
     def list_models(self, provider_id: str) -> List[str]:
         provider = self.store.provider(provider_id)

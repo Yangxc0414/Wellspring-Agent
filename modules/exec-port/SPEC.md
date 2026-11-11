@@ -2,8 +2,8 @@
 id: exec-port
 name: 执行面接缝
 stage: META
-version: 0.1.0
-status: draft
+version: 0.2.0
+status: pilot
 owner: research-agent
 inputs:
   - ExecFace
@@ -54,4 +54,5 @@ invariants:
 
 ## Changelog
 
+- 2026-11-12 · v0.2.0 · status=pilot · 路由分派接入（71-§5 步 5 收口）：`begin_dispatch(kind, subject)` 成为分派门禁——未注册/未知 kind 在此拒绝执行（ExecPortError），已注册面发 ticket 并记 provenance（`_DISPATCH_COUNTS` + 200 条环形日志）；`end_dispatch(ticket, status)` 标记 completed/failed_*；`describe()` 增 `dispatch_stats`。三个真实分派点接线：bridge=rsi_harness2.run_bridge（超时/启动失败标 failed_*，artifact 增 exec_face.completed）、inprocess=modules/run.py S5 协议执行（Execute 门禁 + 两返回点 end_dispatch）、host_agent=models/gateway.py 宿主 turn（port.complete 前后包络）。端口自身从不启动/调度进程；失败路径用 try/except 包络保证接缝永不阻断执行。tests/test_exec_port 增 DispatchTest 3 项。升 minor。
 - 2026-11-11 · v0.1.0 · status=draft · 初始接缝：预注册三执行面 + 只读投影 + `exec faces`；可注册新面、未知 kind 拒绝；不重构路由、不启动进程（71-§4.4 步 5 第一半）。

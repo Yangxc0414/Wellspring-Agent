@@ -18,13 +18,14 @@ process and never creates Claim/EA/gate/signature.
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List
 
-EXEC_PORT_SCHEMA = "exec-port-0.1"
+EXEC_PORT_SCHEMA = "exec-port-0.2"
 
 _BOUNDARY = (
-    "read-only description of the execution-face pool; registering a face records "
-    "its kind/interpreter/authorization only — it does not start, kill or schedule "
-    "processes, does not reroute existing dispatch, and creates no Claim/EA/gate/"
-    "signature; execution authorization and audit semantics are unchanged"
+    "execution-face pool with dispatch provenance: begin_dispatch gates routing "
+    "through a registered face (an unregistered kind refuses to execute) and "
+    "records provenance, but never starts, kills or schedules processes and "
+    "creates no Claim/EA/gate/signature; execution authorization and audit "
+    "semantics are unchanged"
 )
 
 
@@ -43,6 +44,9 @@ class ExecFace:
 
 
 _FACES: Dict[str, ExecFace] = {}
+_DISPATCH_LOG: List[Dict[str, Any]] = []
+_DISPATCH_COUNTS: Dict[str, int] = {}
+_DISPATCH_RING_LIMIT = 200
 
 
 def register_face(face: ExecFace) -> None:
@@ -70,7 +74,42 @@ def describe() -> Dict[str, Any]:
     return {
         "schema_version": EXEC_PORT_SCHEMA,
         "faces": [asdict(_FACES[kind]) for kind in sorted(_FACES)],
+        "dispatch_stats": dispatch_stats(),
         "boundary": _BOUNDARY,
+    }
+
+
+def begin_dispatch(kind: str, subject: str = "") -> Dict[str, Any]:
+    """Gate + provenance for one dispatch onto a registered face.
+
+    Routing through the port means an unregistered (or unknown) face refuses to
+    execute — the gate is the point.  The port itself never starts, kills or
+    schedules anything: callers still own the process/model lifecycle.
+    """
+    face = resolve(kind)
+    _DISPATCH_COUNTS[kind] = _DISPATCH_COUNTS.get(kind, 0) + 1
+    ticket = {
+        "face": kind,
+        "subject": str(subject or "")[:120],
+        "entry": face.entry,
+        "isolation": face.isolation,
+        "status": "dispatched",
+    }
+    _DISPATCH_LOG.append(ticket)
+    del _DISPATCH_LOG[:-_DISPATCH_RING_LIMIT]
+    return dict(ticket)
+
+
+def end_dispatch(ticket: Dict[str, Any], status: str = "completed") -> None:
+    """Mark a dispatched ticket finished (completed/failed)."""
+    if ticket:
+        ticket["status"] = str(status or "completed")[:40]
+
+
+def dispatch_stats() -> Dict[str, Any]:
+    return {
+        "counts": dict(sorted(_DISPATCH_COUNTS.items())),
+        "recent": [dict(ticket) for ticket in _DISPATCH_LOG[-20:]],
     }
 
 

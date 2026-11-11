@@ -55,5 +55,34 @@ class ExecPortTest(unittest.TestCase):
             exec_port._FACES.pop("conda-test", None)
 
 
+class DispatchTest(unittest.TestCase):
+    """路由分派（71-§5 步 5 收口）：分派经端口门禁 + 溯源，未注册面拒绝执行。"""
+
+    def test_begin_dispatch_gates_unknown_face(self):
+        from research_agent.execport.exec_port import ExecPortError, begin_dispatch
+
+        with self.assertRaises(ExecPortError):
+            begin_dispatch("docker-test", subject="x")
+
+    def test_begin_and_end_update_provenance(self):
+        from research_agent.execport import exec_port
+
+        before = exec_port._DISPATCH_COUNTS.get("bridge", 0)
+        ticket = exec_port.begin_dispatch("bridge", subject="m2-run")
+        self.assertEqual(ticket["face"], "bridge")
+        self.assertEqual(ticket["status"], "dispatched")
+        exec_port.end_dispatch(ticket, "completed")
+        self.assertEqual(ticket["status"], "completed")
+        self.assertEqual(exec_port._DISPATCH_COUNTS["bridge"], before + 1)
+
+    def test_describe_includes_dispatch_stats(self):
+        from research_agent.execport import exec_port
+
+        exec_port.begin_dispatch("inprocess", subject="pipeline-run")
+        payload = exec_port.describe()
+        self.assertIn("dispatch_stats", payload)
+        self.assertIn("inprocess", payload["dispatch_stats"]["counts"])
+
+
 if __name__ == "__main__":
     unittest.main()

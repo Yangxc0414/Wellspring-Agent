@@ -138,6 +138,25 @@ class RunAgent:
     def execute(self, request: RunRequest, output_dir: Path) -> Dict[str, Any]:
         if self.spec.status in ("revoked", "deprecated"):
             raise RunError("module spec status is %s; refusing to run" % self.spec.status)
+        # ExecPort 路由分派（71-§5 步 5 收口）：inprocess 面的 S5 协议执行经端口
+        # 门禁 + 溯源。端口只记录 provenance，不改变执行语义。
+        try:
+            from ..execport.exec_port import begin_dispatch, end_dispatch
+
+            _exec_ticket = begin_dispatch("inprocess", subject="%s/%s" % (request.dataset, request.model))
+        except Exception:
+            _exec_ticket = None
+            end_dispatch = None
+        try:
+            return self._execute_dispatched(request, output_dir, _exec_ticket, end_dispatch)
+        except Exception:
+            if _exec_ticket:
+                end_dispatch(_exec_ticket, "failed")
+            raise
+
+    def _execute_dispatched(self, request: RunRequest, output_dir: Path, _exec_ticket, end_dispatch) -> Dict[str, Any]:
+        if self.spec.status in ("revoked", "deprecated"):
+            raise RunError("module spec status is %s; refusing to run" % self.spec.status)
         if request.dataset not in ("iris", "breast_cancer", "chemlab"):
             raise RunError("only local iris/breast_cancer/chemlab protocol-validation datasets are supported")
         if request.split != "demo" and request.dataset != "chemlab":
@@ -151,7 +170,7 @@ class RunAgent:
                 raise RunError("chemlab supports ridge")
             if request.metric not in ("r2", "accuracy"):
                 raise RunError("chemlab supports r2")
-            return self._execute_chemlab(request, Path(output_dir))
+            return self._execute_chemlab(request, Path(output_dir), _exec_ticket, end_dispatch)
         if request.model != "logistic_regression":
             raise RunError("only logistic_regression is supported")
         if request.metric != "accuracy":
@@ -250,12 +269,14 @@ class RunAgent:
         )
         ea_path = output_dir / "ea.json"
         _write_json(ea_path, asdict(ea))
+        if _exec_ticket and end_dispatch:
+            end_dispatch(_exec_ticket, "completed")
         return {"capsule": asdict(capsule), "evidence": asdict(ea), "paths": {
             "capsule": str(capsule_path), "metrics": str(metrics_path), "ea": str(ea_path),
         }}
 
 
-    def _execute_chemlab(self, request: RunRequest, output_dir: Path) -> Dict[str, Any]:
+    def _execute_chemlab(self, request: RunRequest, output_dir: Path, _exec_ticket=None, end_dispatch=None) -> Dict[str, Any]:
         import numpy as np
         import pandas as pd
         import sklearn
@@ -373,6 +394,8 @@ class RunAgent:
         )
         ea_path = output_dir / "ea.json"
         _write_json(ea_path, asdict(ea))
+        if _exec_ticket and end_dispatch:
+            end_dispatch(_exec_ticket, "completed")
         return {"capsule": asdict(capsule), "evidence": asdict(ea), "paths": {
             "capsule": str(capsule_path), "metrics": str(metrics_path), "ea": str(ea_path),
         }}

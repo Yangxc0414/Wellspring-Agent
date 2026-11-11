@@ -330,6 +330,14 @@ def run_bridge(
     env = dict(os.environ)
     env["PYTHONIOENCODING"] = "utf-8"
     started = time.time()
+    # ExecPort 路由分派（71-§5 步 5 收口）：bridge 面的分派经端口门禁 + 溯源。
+    # 端口只记录 provenance，不启动/调度进程；未注册面会在此拒绝执行。
+    try:
+        from .execport.exec_port import begin_dispatch, end_dispatch
+
+        ticket = begin_dispatch("bridge", subject=str(output_dir.name))
+    except Exception:
+        ticket = None
     try:
         completed = subprocess.run(
             command,
@@ -340,8 +348,12 @@ def run_bridge(
             env=env,
         )
     except subprocess.TimeoutExpired:
+        if ticket:
+            end_dispatch(ticket, "failed_timeout")
         raise Harness2Error("Harness² bridge timed out after %ss" % timeout)
     except OSError as exc:
+        if ticket:
+            end_dispatch(ticket, "failed_start")
         raise Harness2Error("cannot start the bridge: %s" % exc)
 
     if not artifact_path.is_file():
@@ -363,6 +375,9 @@ def run_bridge(
     from .paths import build_fingerprint
 
     payload["platform_fingerprint"] = build_fingerprint()
+    if ticket:
+        end_dispatch(ticket, "completed")
+        payload["exec_face"] = {"kind": "bridge", "status": "completed"}
     write_json_atomic(artifact_path, payload)
     return payload
 
