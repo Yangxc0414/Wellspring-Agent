@@ -542,3 +542,306 @@
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+
+/* Readability layer: the snapshot is machine output, so the page has to explain
+   itself before it shows ids. Everything here is presentation only. */
+.lineage-guide {
+  margin: 0 0 10px;
+  padding: 11px 13px 12px;
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: 7px;
+  background: var(--surface-2);
+}
+
+.lineage-guide-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.lineage-guide-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.lineage-guide-head > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.lineage-guide-head b {
+  display: block;
+  color: var(--text);
+  font-size: calc(12px * var(--settings-font-scale));
+}
+
+.lineage-guide-head p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: calc(10.5px * var(--settings-font-scale));
+  line-height: 1.65;
+}
+
+.lineage-readonly {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--amber);
+  font-size: calc(9.5px * var(--settings-font-scale));
+  white-space: nowrap;
+}
+
+.lineage-guide-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lineage-guide-steps li {
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+}
+
+.lineage-guide-steps b {
+  display: block;
+  color: var(--text);
+  font-size: calc(10.5px * var(--settings-font-scale));
+}
+
+.lineage-guide-steps span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: calc(10px * var(--settings-font-scale));
+  line-height: 1.6;
+}
+
+.lineage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin: 0 0 10px;
+  padding: 7px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: calc(10px * var(--settings-font-scale));
+}
+
+.lineage-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lineage-legend b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lineage-legend i {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--teal);
+}
+
+.lineage-legend i.is-stale {
+  background: var(--coral);
+}
+
+.lineage-legend i.is-changed {
+  background: var(--accent);
+}
+
+.lineage-legend i.is-edge {
+  width: 14px;
+  height: 2px;
+  border-radius: 0;
+  background: var(--line-strong);
+}
+
+.lineage-stage-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 7px;
+  min-width: 0;
+  color: var(--text);
+}
+
+.lineage-stage-title b {
+  font-size: calc(11.5px * var(--settings-font-scale));
+  font-weight: 600;
+}
+
+.lineage-stage-title span {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: calc(9.5px * var(--settings-font-scale));
+}
+
+.lineage-stage-title small {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: calc(9.5px * var(--settings-font-scale));
+}
+
+.lineage-node-kind {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: calc(10px * var(--settings-font-scale));
+}
+
+.lineage-node-kind small {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: calc(8.5px * var(--settings-font-scale));
+  white-space: nowrap;
+}
+
+.lineage-block-intro {
+  display: grid;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.lineage-block-intro > span,
+.lineage-deps-head > span {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: calc(9.5px * var(--settings-font-scale));
+  letter-spacing: 0.04em;
+}
+
+.lineage-block-intro p {
+  margin: 0;
+  color: var(--text);
+  font-size: calc(11px * var(--settings-font-scale));
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.lineage-block-intro small {
+  color: var(--muted);
+  font-size: calc(9.5px * var(--settings-font-scale));
+  line-height: 1.55;
+}
+
+.lineage-deps-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 7px;
+}
+
+.lineage-deps-head small {
+  color: var(--muted);
+  font-size: calc(9.5px * var(--settings-font-scale));
+  line-height: 1.5;
+}
+
+.lineage-hash-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 4px 6px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.lineage-hash-copy:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.lineage-hash-copy code {
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  font-family: var(--mono);
+  font-size: calc(9.5px * var(--settings-font-scale));
+  overflow-wrap: anywhere;
+}
+
+.lineage-hash-copy > span {
+  flex: none;
+  font-size: calc(9.5px * var(--settings-font-scale));
+  white-space: nowrap;
+}
+
+.lineage-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 7px 9px;
+  border: 1px solid rgba(154, 107, 30, 0.24);
+  border-radius: 5px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: calc(9.5px * var(--settings-font-scale));
+  line-height: 1.6;
+}
+
+.lineage-warning svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.lineage-warning b {
+  font-weight: 600;
+}
+
+.lineage-action-list li span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lineage-action-list li b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+@media (max-width: 960px) {
+  .lineage-guide-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lineage-guide-head {
+    flex-wrap: wrap;
+  }
+}

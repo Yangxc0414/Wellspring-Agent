@@ -12,7 +12,7 @@
     "build:site": "vite build --mode static --outDir ../../site/app --emptyOutDir",
     "preview": "vite preview --host 127.0.0.1 --port 4173",
     "check": "npm run typecheck && npm run test:unit && npm run build",
-    "test:unit": "node --test --experimental-strip-types tests/runtimeLoop.test.ts tests/runtimeAuth.test.ts tests/rsiSemantics.test.ts tests/claimGate.test.ts",
+    "test:unit": "node --test --experimental-strip-types tests/runtimeLoop.test.ts tests/runtimeAuth.test.ts tests/rsiSemantics.test.ts tests/claimGate.test.ts tests/lineageLabels.test.ts",
     "test:ui": "playwright test"
   },
   "engines": {

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { lineageKind } from "../../domain/lineageLabels";
 
 export interface DagNode {
   id: string;
@@ -115,14 +116,18 @@ export function LineageDag({
               onClick={() => onSelect(node.id)}
             >
               <rect width={NODE_W} height={NODE_H} rx="5" />
-              <text x="7" y="15" className="lineage-dag-kind">{node.kind.toUpperCase()}</text>
+              <text x="7" y="15" className="lineage-dag-kind">{lineageKind(node.kind).zh}</text>
+              <text x={NODE_W - 7} y="15" textAnchor="end" className="lineage-dag-state">
+                {changed ? "变更" : stale ? "失效" : "通过"}
+              </text>
               <text x="7" y="30" className="lineage-dag-label">{node.label.slice(0, 18)}</text>
             </g>
           );
         })}
       </svg>
       <p className="lineage-dag-note">
-        {layout.edges.length} 条边 · 箭头从上游指向下游（变更影响传播方向）；点击节点查看详情，键盘与读屏请用下方阶段列表。
+        上方是依赖图：共 {groups.length} 个阶段、{layout.pos.size} 个产物、{layout.edges.length} 条边。
+        箭头从上游指向下游，也就是变更影响的传播方向；<b>点方块或下方卡片都能查看详情</b>。键盘与读屏请使用下方阶段列表。
       </p>
     </div>
   );

@@ -6050,3 +6050,29 @@ select.control {
   border-style: dashed;
   border-color: var(--amber);
 }
+
+/* Layered lineage DAG: Chinese kind names and a visible per-node verdict. */
+.lineage-dag-kind {
+  font-family: var(--sans);
+  font-size: 9px;
+  fill: var(--text);
+}
+
+.lineage-dag-state {
+  font-family: var(--sans);
+  font-size: 7.5px;
+  fill: var(--teal);
+}
+
+.lineage-dag-node.is-stale .lineage-dag-state {
+  fill: var(--coral);
+}
+
+.lineage-dag-node.is-changed .lineage-dag-state {
+  fill: var(--accent);
+}
+
+.lineage-dag-note b {
+  color: var(--text);
+  font-weight: 600;
+}
