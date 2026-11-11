@@ -63,3 +63,8 @@ apps/web/pw-*.mjs
 # The deliverable repo lives in its own directory with its own git history.
 /Wellspring-Agent/
 .verify/
+
+# Local-only third-party reference repos (LICENSING.md 清单；完整代码只在 Wellspring 维护)
+IdeaScientist-main/
+TTME-main/
+SciForge-OSS-master/
