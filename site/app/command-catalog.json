@@ -1,9 +1,9 @@
 {
   "schema_version": "workspace-0.1",
-  "generated_at": "2026-11-10T10:54:40+00:00",
-  "count": 213,
+  "generated_at": "2026-11-11T08:06:56+00:00",
+  "count": 219,
   "curated": 51,
-  "derived": 162,
+  "derived": 168,
   "commands": [
     {
       "id": "study.baseline",
@@ -699,6 +699,15 @@
       "curated": false
     },
     {
+      "id": "exec.faces",
+      "group": "exec",
+      "label": "faces",
+      "syntax": "python -m research_agent exec faces",
+      "description": "usage: research_agent exec faces [-h]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
       "id": "experiment.consistency-registry",
       "group": "experiment",
       "label": "consistency registry",
@@ -803,6 +812,24 @@
       "label": "sweep status",
       "syntax": "python -m research_agent experiment sweep-status",
       "description": "usage: research_agent experiment sweep-status [-h] --project PROJECT\n                                              --experiment-id EXPERIMENT_ID",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "feedback.list",
+      "group": "feedback",
+      "label": "list",
+      "syntax": "python -m research_agent feedback list",
+      "description": "usage: research_agent feedback list [-h]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "feedback.run",
+      "group": "feedback",
+      "label": "run",
+      "syntax": "python -m research_agent feedback run",
+      "description": "usage: research_agent feedback run [-h] --project PROJECT [--loops LOOPS]\n                                   [--limit LIMIT]",
       "safety": "catalog_only",
       "curated": false
     },
@@ -982,7 +1009,7 @@
       "group": "memory",
       "label": "compare",
       "syntax": "python -m research_agent memory ab.compare",
-      "description": "usage: research_agent memory ab compare [-h] --project PROJECT\n                                        [--output-dir OUTPUT_DIR]",
+      "description": "usage: research_agent memory ab compare [-h] --project PROJECT\n                                        [--output-dir OUTPUT_DIR]\n                                        [--sessions {single,multi}]",
       "safety": "catalog_only",
       "curated": false
     },
@@ -1000,7 +1027,7 @@
       "group": "memory",
       "label": "record",
       "syntax": "python -m research_agent memory ab.record",
-      "description": "usage: research_agent memory ab record [-h] --project PROJECT --run-id RUN_ID\n                                       --arm {with,without} --ideas-file\n                                       IDEAS_FILE --literature-file\n                                       LITERATURE_FILE",
+      "description": "usage: research_agent memory ab record [-h] --project PROJECT --run-id RUN_ID\n                                       --arm {with,without} --ideas-file\n                                       IDEAS_FILE --literature-file\n                                       LITERATURE_FILE\n                                       [--session-host-label SESSION_HOST_LABEL]\n                                       [--session-id SESSION_ID]",
       "safety": "catalog_only",
       "curated": false
     },
@@ -1009,7 +1036,7 @@
       "group": "memory",
       "label": "guidelines",
       "syntax": "python -m research_agent memory guidelines",
-      "description": "usage: research_agent memory guidelines [-h] --project PROJECT\n                                        [--propose-file PROPOSE_FILE]\n                                        [--step STEP]",
+      "description": "usage: research_agent memory guidelines [-h] --project PROJECT\n                                        [--propose-file PROPOSE_FILE]\n                                        [--step STEP] [--admission ADMISSION]",
       "safety": "catalog_only",
       "curated": false
     },
@@ -1725,6 +1752,24 @@
       "curated": false
     },
     {
+      "id": "verdicts.collect",
+      "group": "verdicts",
+      "label": "collect",
+      "syntax": "python -m research_agent verdicts collect",
+      "description": "usage: research_agent verdicts collect [-h] --project PROJECT\n                                       [--output OUTPUT] [--limit LIMIT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "verdicts.show",
+      "group": "verdicts",
+      "label": "show",
+      "syntax": "python -m research_agent verdicts show",
+      "description": "usage: research_agent verdicts show [-h] --ledger LEDGER",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
       "id": "waitpoint.consume",
       "group": "waitpoint",
       "label": "consume",
@@ -1757,6 +1802,15 @@
       "label": "status",
       "syntax": "python -m research_agent waitpoint status",
       "description": "usage: research_agent waitpoint status [-h] --id ID [--root ROOT]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "waitpoint.triage",
+      "group": "waitpoint",
+      "label": "triage",
+      "syntax": "python -m research_agent waitpoint triage",
+      "description": "usage: research_agent waitpoint triage [-h] --project PROJECT --owner OWNER\n                                       [--scope SCOPE] [--root ROOT]",
       "safety": "catalog_only",
       "curated": false
     },

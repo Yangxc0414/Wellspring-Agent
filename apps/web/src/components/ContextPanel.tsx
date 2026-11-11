@@ -5,6 +5,7 @@ import { writingCard } from "../domain/seed";
 import type { AutopilotSnapshot, AutoStage, Card, ClosureInventory, ContextTab, EvidenceItem, EvidencePackage, GateStatus, ProjectExperimentInventory, ProjectSummary, ResearchTask, RuntimeFlowMode, RuntimeSource, RuntimeTaskType } from "../domain/types";
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { claimSignCommand, closureSignCommand, experimentApproveCommands, protocolFreezeCommand } from "../domain/gateCommands";
+import { claimSignatureLabel } from "../domain/claimSignature";
 import { hypothesisConvergence, literatureCoverage } from "../domain/researchBrief";
 import { defaultRuntimeSource, runtimeRunState, runtimeSourceLabel } from "../domain/runtimeSnapshot";
 import type { ResearchCheck } from "../domain/researchBrief";
@@ -97,6 +98,7 @@ function StageDetailBody({ task, stage, index }: { task: ResearchTask; stage: Au
   const autoBusy = task.auto.running;
   const claim = task.evidence.find((item) => item.kind === "claim");
   const claimSigned = claim?.status === "signed";
+  const claimLabel = claimSignatureLabel(claim);
   const hypotheses = task.evidence.filter((item) => item.kind === "hypothesis");
   const g5 = task.gates.find((gate) => gate.id === "G5");
   const coverage = literatureCoverage(task);
@@ -282,24 +284,19 @@ function StageDetailBody({ task, stage, index }: { task: ResearchTask; stage: Au
     return (
       <div className="stage-detail">
         <code>{stage.cmd}</code>
-        <p>{claimSigned ? "claim 已由作者在 CLI 签署；签名进入不可回写证据层。" : "EA 已封存，但 claim 必须由作者/PI 在终端签核。"}</p>
+        <p>{claimLabel.detail}</p>
         <div className="stage-kv-grid">
-          <span>CLAIM<b>{claimSigned ? "已人工签署" : claim ? "待人工签署" : "NOT CREATED"}</b></span>
+          <span>CLAIM<b>{claimLabel.short}</b></span>
           <span>EA<b>{task.run?.ea ?? "NOT SEALED"}</b></span>
         </div>
         <div className="stage-detail-actions">
-          <StageAction primary onClick={() => setGateRevealed((open) => !open)} disabled={claimSigned}>
-            {gateRevealed ? "收起人签命令" : "claim 人签命令"}
+          <StageAction primary onClick={actions.signClaim}>
+            {claimLabel.state === "unsigned" || claimLabel.state === "missing"
+              ? "签署 claim · 人工门"
+              : "查看 claim 签署来源"}
           </StageAction>
           <StageAction onClick={() => actions.setContextTab("evidence")}>查看证据链</StageAction>
         </div>
-        {gateRevealed && (
-          <HumanGateCommand
-            title="Q0 / S5b · 待人工签署"
-            detail="网页上的按钮不产生签名；这里只给出终端里的人签命令与所需证据文件。"
-            commands={[claimSignCommand({ scope: claimSigned ? undefined : claim?.scope })]}
-          />
-        )}
       </div>
     );
   }
@@ -502,7 +499,9 @@ function RunContext({ task }: { task: ResearchTask }) {
     }
   }, [runtimeTaskType, runtimeDataset]);
   const autoExpand = useWorkspaceStore((state) => state.preferences.autoExpandRunning);
+  const claim = task.evidence.find((item) => item.kind === "claim");
   const claimSigned = task.evidence.some((item) => item.kind === "claim" && item.status === "signed");
+  const claimLabel = claimSignatureLabel(claim);
   const done = task.autoStages.filter((stage) => stage.status === "done").length;
   const skipped = task.autoStages.filter((stage) => stage.status === "skipped").length;
   const progress = runtimeBacked
@@ -870,6 +869,13 @@ function RunContext({ task }: { task: ResearchTask }) {
             当前是 runtime 任务：claim 必须在终端人工签署，浏览器不会代为签核。
           </p>
         )}
+        {pausedAtGate && !claimSigned && (
+          <div className="stage-detail-actions">
+            <StageAction primary onClick={actions.signClaim}>
+              打开 claim 人工门面板（命令 / 导入 / DEMO 预览）
+            </StageAction>
+          </div>
+        )}
       </section>
 
       {runtimeBacked ? (
@@ -973,13 +979,13 @@ function RunContext({ task }: { task: ResearchTask }) {
               <p className="context-empty">runtime 未返回 gate 记录；不能据此推断门禁已通过。</p>
             )}
             <div className="gate-row">
-              <span className={`gate-dot ${claimSigned ? "ok" : "warn"}`} />
+              <span className={`gate-dot ${claimLabel.demo ? "warn" : claimSigned ? "ok" : "warn"}`} />
               <span className="gate-name">
                 <b>CLAIM · human signature</b>
-                <small>runtime 只产出待审材料；claim 必须在终端由人签署。</small>
+                <small>{claimLabel.detail}</small>
               </span>
-              <span className={`badge ${claimSigned ? "ok" : "warn"}`}>
-                {claimSigned ? "signed" : "human only"}
+              <span className={`badge ${claimLabel.demo ? "warn" : claimSigned ? "ok" : "warn"}`}>
+                {claimLabel.badge}
               </span>
             </div>
           </div>
@@ -1002,13 +1008,13 @@ function RunContext({ task }: { task: ResearchTask }) {
               </div>
             ))}
             <div className="gate-row">
-              <span className={`gate-dot ${claimSigned ? "ok" : task.run ? "warn" : "idle"}`} />
+              <span className={`gate-dot ${claimLabel.demo ? "warn" : claimSigned ? "ok" : task.run ? "warn" : "idle"}`} />
               <span className="gate-name">
                 <b>CLAIM · human signature</b>
-                <small>{claimSigned ? "已由作者签署；证据来自本地 CLI，签名不可回写" : "系统不会自动生成或签署 claim"}</small>
+                <small>{claimLabel.detail}</small>
               </span>
-              <span className={`badge ${claimSigned ? "ok" : task.run ? "warn" : "idle"}`}>
-                {claimSigned ? "signed" : task.run ? "待人工签署" : "n/a"}
+              <span className={`badge ${claimLabel.demo ? "warn" : claimSigned ? "ok" : task.run ? "warn" : "idle"}`}>
+                {claimLabel.badge}
               </span>
             </div>
           </div>

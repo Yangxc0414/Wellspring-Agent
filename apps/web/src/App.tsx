@@ -36,6 +36,9 @@ const SkillsDrawer = lazy(() =>
 const WorkspaceFilesDialog = lazy(() =>
   import("./components/WorkspaceFilesDialog").then((module) => ({ default: module.WorkspaceFilesDialog }))
 );
+const ClaimGateDialog = lazy(() =>
+  import("./components/ClaimGateDialog").then((module) => ({ default: module.ClaimGateDialog }))
+);
 
 import { folderStorage } from "./adapters/folderStorage";
 import { usePreviewStore } from "./state/previewStore";
@@ -90,6 +93,10 @@ export default function App() {
       if (event.key === "Escape") {
         if (ui.permissionRequest) {
           actions.cancelPermission();
+          return;
+        }
+        if (ui.claimGateOpen) {
+          actions.closeClaimGate();
           return;
         }
         if (ui.paletteOpen || ui.modelOpen || ui.pluginsOpen || ui.skillsOpen || ui.newTaskOpen) {
@@ -208,6 +215,7 @@ export default function App() {
         {ui.skillsOpen && <SkillsDrawer />}
         {ui.filesOpen && <WorkspaceFilesDialog />}
         {ui.permissionRequest && <PermissionDialog />}
+        {ui.claimGateOpen && <ClaimGateDialog />}
         {ui.paletteOpen && <CommandPalette />}
       </Suspense>
       <Toast />

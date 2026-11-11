@@ -5928,3 +5928,125 @@ select.control {
 .closure-row small.is-bad {
   color: var(--coral);
 }
+
+/* Q0 / S5b claim human-gate panel: the three paths must stay visually distinct,
+   and the demo preview must never look like a passed signature. */
+.claim-gate-modal {
+  width: min(620px, calc(100vw - 28px));
+}
+
+.claim-gate-state,
+.claim-gate-block {
+  margin: 9px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.claim-gate-state {
+  margin-top: 4px;
+}
+
+.claim-gate-state-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.claim-gate-state-head b {
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+.claim-gate-badge {
+  padding: 2px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: calc(9px * var(--font-scale, 1));
+}
+
+.claim-gate-badge.is-demo {
+  border-color: var(--amber);
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.claim-gate-text,
+.claim-gate-meta,
+.claim-gate-detail,
+.claim-gate-block > p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.65;
+}
+
+.claim-gate-text {
+  color: var(--text);
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+.claim-gate-block > b {
+  display: block;
+  margin-bottom: 4px;
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+.claim-gate-block .human-gate-cmd {
+  margin: 6px 0;
+}
+
+.claim-gate-block.is-demo {
+  border-style: dashed;
+  border-color: var(--amber);
+  background: #fffbeb;
+}
+
+.claim-gate-block.is-demo > b {
+  color: #92400e;
+}
+
+.claim-gate-file {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: calc(10px * var(--font-scale, 1));
+}
+
+.claim-gate-file input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.claim-gate-file:focus-within {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.claim-gate-error {
+  margin: 7px 0 0;
+  color: var(--coral);
+  font-size: calc(10px * var(--font-scale, 1));
+}
+
+.claim-gate-ok {
+  margin: 7px 0 0;
+  color: var(--text);
+  font-size: calc(10px * var(--font-scale, 1));
+}
+
+.gate-card.is-demo {
+  border-style: dashed;
+  border-color: var(--amber);
+}

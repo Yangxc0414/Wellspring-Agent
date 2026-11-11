@@ -418,6 +418,12 @@ export interface EvidenceItem {
   scope: string;
   refs: string[];
   note?: string;
+  /**
+   * Where a "signed" claim state came from. A browser click must never be read as a
+   * human signature, so demo previews and imported CLI artifacts are labelled at the
+   * data level; absent means the legacy/CLI-backed state (read-only snapshot).
+   */
+  origin?: "cli" | "cli-import" | "demo";
 }
 
 export interface EvidencePackage {
@@ -873,6 +879,7 @@ export interface UIState {
   filesOpen: boolean;
   filesWorkspaceId: string;
   focusComposerTick: number;
+  claimGateOpen: boolean;
 }
 
 export interface PersistedWorkspace {

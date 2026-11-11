@@ -53,12 +53,12 @@ export function CommandPalette() {
       ...(hasEvidence && !hasProtocol ? [{ label: "送入实验设计", hint: "S2–S4", keywords: "假设 experiment design", icon: "branch" as IconName, run: actions.designExperiment }] : []),
       ...(hasProtocol && !protocolFrozen ? [{ label: "G2 人签冻结命令", hint: "CLI ONLY", keywords: "protocol freeze 冻结 g2 人工门 cli", icon: "lock" as IconName, run: actions.freezeProtocol }] : []),
       ...(protocolFrozen && !evaluated ? [{ label: "运行实验", hint: "S5", keywords: "run experiment seeds", icon: "play" as IconName, run: actions.runExperiment }] : []),
-      ...(unsignedClaim ? [{ label: "claim 人签命令", hint: "CLI ONLY", keywords: "claim sign 签核 人工门 cli", icon: "lock" as IconName, run: actions.signClaim }] : [])
+      ...(unsignedClaim ? [{ label: "签署 claim · 打开人工门", hint: "打开面板", keywords: "claim sign 签核 人工门 cli", icon: "lock" as IconName, run: actions.signClaim }] : [])
     ];
     const autoItems: PaletteItem[] = autoRunning
       ? [
           gateUnsigned
-            ? { label: "claim 人签命令", hint: "CLI ONLY", keywords: "claim sign 签核 人工门 cli", icon: "lock", run: actions.signClaim }
+            ? { label: "签署 claim · 打开人工门", hint: "打开面板", keywords: "claim sign 签核 人工门 cli", icon: "lock", run: actions.signClaim }
             : autoPaused
               ? { label: "继续全自动", hint: "RESUME", keywords: "auto continue resume 自动 继续", icon: "play", run: actions.resumeAuto }
               : { label: "暂停全自动", hint: "PAUSE", keywords: "auto pause 自动 暂停", icon: "pause", run: actions.pauseAuto },

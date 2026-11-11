@@ -13,7 +13,8 @@ import {
 } from "../adapters/runtimeApi";
 import { applyRuntimeSnapshot, defaultRuntimeSource, type RuntimeDemo } from "../domain/runtimeSnapshot";
 import { compactRuntimeLoop } from "../domain/runtimeLoop";
-import { claimSignCommand, CLI_ONLY_NOTE, protocolFreezeCommand } from "../domain/gateCommands";
+import { CLI_ONLY_NOTE, protocolFreezeCommand } from "../domain/gateCommands";
+import { claimSignatureLabel, type SignedClaimRecord } from "../domain/claimSignature";
 import { ACCESS_META, AUTO_STAGE_CATALOG, DEFAULT_PREFERENCES, builtinSkills, clampModel } from "../domain/catalog";
 import { DEFAULT_SHORTCUTS } from "../domain/shortcuts";
 import { hypothesisConvergence, literatureCoverage } from "../domain/researchBrief";
@@ -91,7 +92,8 @@ const defaultUI: UIState = {
   settingsOrigin: { kind: "welcome", taskId: "", label: "欢迎页" },
   filesOpen: false,
   filesWorkspaceId: "",
-  focusComposerTick: 0
+  focusComposerTick: 0,
+  claimGateOpen: false
 };
 
 export interface ToastState {
@@ -148,6 +150,10 @@ interface WorkspaceActions {
   freezeProtocol: () => void;
   runExperiment: () => void;
   signClaim: () => void;
+  closeClaimGate: () => void;
+  previewDemoClaim: () => void;
+  resetDemoClaim: () => void;
+  importSignedClaim: (record: SignedClaimRecord, scopeWarning?: string) => void;
   prepareWriting: () => void;
   submitEvaluation: () => void;
   runEvaluationAudit: () => void;
@@ -287,15 +293,17 @@ function runCard(): Card {
   };
 }
 
-function claimGateCard(status: GateStatus = "needs_human"): Card {
+function claimGateCard(status: GateStatus = "needs_human", claim?: EvidenceItem): Card {
+  const label = claimSignatureLabel(claim);
   return {
     type: "gate",
     gate: "S5 · CLAIM",
-    title: status === "pass" ? "claim 已由作者在 CLI 签署" : "人工门：claim 待人工签署",
-    reason:
-      status === "pass"
-        ? "签名来自本地 CLI 的证据文件；工作台只读取该状态，不会代为签署。"
-        : "EA 已封存，但 claim 必须由作者/PI 在终端签核；系统不会自动生成结论，也不会代为签署。",
+    title: status === "pass"
+      ? label.demo
+        ? "演示态预览 · claim 未真实签署"
+        : "claim 已签署（来源见证据面板）"
+      : "人工门：claim 待人工签署",
+    reason: label.detail,
     status
   };
 }
@@ -1389,7 +1397,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
             modelOpen: false,
             pluginsOpen: false,
             skillsOpen: false,
-            paletteOpen: false
+            paletteOpen: false,
+            claimGateOpen: false
           }
         }));
       },
@@ -2001,11 +2010,11 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
       signClaim: () => {
         const task = currentTask();
         if (!task) return;
-        const claim = task.evidence.find((item) => item.kind === "claim" && item.status === "unsigned");
-        if (!claim) {
-          notify("没有待签署的 claim；先生成 EA 与 claim draft");
-          return;
-        }
+        const claim = task.evidence.find(
+          (item) => item.kind === "claim" && (item.status !== "signed" || item.origin === "demo")
+        );
+        // Opening a real panel is the feedback a click owes the user. The old behavior only
+        // appended a chat message plus a 2.8s toast, which read as "nothing happened".
         mutateTask(task.id, (item) => ({
           ...item,
           auto: { ...item.auto, paused: true, gate: "claim", gateApproved: false },
@@ -2014,15 +2023,140 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
             ...item.messages,
             message(
               "agent",
-              "Q0 / S5b · claim 保持待人工签署。浏览器里的点击不产生签名；请在终端核对 EA 后执行：\n\n```bash\n" +
-                claimSignCommand({ scope: claim.scope }) +
-                "\n```\n\n" +
-                CLI_ONLY_NOTE,
-              claimGateCard("needs_human")
+              claim
+                ? "已打开 Q0 / S5b 人工门面板。浏览器不产生签名：面板里可以复制 CLI 人签命令、导入已签署的 claim.json，静态 demo 还能预览签署后的界面状态。\n\n" +
+                    claimSignatureLabel(claim).detail
+                : "已打开 Q0 / S5b 人工门面板。当前没有待签 claim；先运行 pipeline 生成 RunCapsule / EA 与 claim draft。",
+              claim ? claimGateCard("needs_human", claim) : undefined
             )
           ]
         }));
-        notify("claim 仍为待人工签署；已在会话中给出 CLI 命令");
+        set((state) => ({ ui: { ...state.ui, claimGateOpen: true, paletteOpen: false } }));
+      },
+      closeClaimGate: () => {
+        set((state) => ({ ui: { ...state.ui, claimGateOpen: false } }));
+      },
+      previewDemoClaim: () => {
+        if (!__STATIC_ONLY__) {
+          notify("演示态预览只在静态 demo 构建可用；产品工作台请导入 CLI 签署产物");
+          return;
+        }
+        const task = currentTask();
+        if (!task) return;
+        const claim = task.evidence.find((item) => item.kind === "claim" && item.status === "unsigned");
+        if (!claim) {
+          notify("没有待签署的 claim；先运行 pipeline 生成 EA 与 claim draft");
+          return;
+        }
+        mutateTask(task.id, (item) => ({
+          ...item,
+          evidence: item.evidence.map((entry) =>
+            entry.id === claim.id
+              ? {
+                  ...entry,
+                  status: "signed" as const,
+                  origin: "demo" as const,
+                  note: "演示态预览：浏览器未产生签名；未写入证据层，closure 与导出签名仍需 CLI 人签。"
+                }
+              : entry
+          ),
+          gates: gate(item.gates, "G5", "blocked", "演示态预览：claim 无真实签名，closure 与导出签名仍需 CLI 人签"),
+          messages: [
+            ...item.messages,
+            message(
+              "agent",
+              "**演示态预览 · 非真实签署**\n\n- claim 状态按演示流程推进，便于查看 S8–S16 的界面\n- 浏览器没有产生签名，也没有写入证据层\n- G5 / closure 仍为 blocked，导出签名仍需 `closure sign`\n\n> 数值与状态均为演示数据，不构成研究证据。",
+              claimGateCard("needs_human", { ...claim, status: "signed", origin: "demo" })
+            )
+          ]
+        }));
+        set((state) => ({
+          ui: { ...state.ui, claimGateOpen: false },
+          toast: { id: uid("toast"), text: "已进入演示态预览（未产生真实签名）" }
+        }));
+      },
+      resetDemoClaim: () => {
+        const task = currentTask();
+        if (!task) return;
+        const demo = task.evidence.find((item) => item.kind === "claim" && item.origin === "demo");
+        if (!demo) {
+          notify("当前没有演示态预览可撤销");
+          return;
+        }
+        mutateTask(task.id, (item) => ({
+          ...item,
+          evidence: item.evidence.map((entry) =>
+            entry.id === demo.id
+              ? {
+                  ...entry,
+                  status: "unsigned" as const,
+                  origin: undefined,
+                  note: "claim 只能由作者/PI 签署；当前为待签状态。"
+                }
+              : entry
+          ),
+          gates: gate(item.gates, "G5", "blocked", "claim 待人工签署；closure 未运行"),
+          messages: [
+            ...item.messages,
+            message(
+              "agent",
+              "已撤销演示态预览：claim 回到待人工签署，G5 保持 blocked。",
+              claimGateCard("needs_human", { ...demo, status: "unsigned", origin: undefined })
+            )
+          ]
+        }));
+        set((state) => ({
+          ui: { ...state.ui, claimGateOpen: false },
+          toast: { id: uid("toast"), text: "已撤销演示态预览；claim 回到待签" }
+        }));
+      },
+      importSignedClaim: (record, scopeWarning) => {
+        const task = currentTask();
+        if (!task) return;
+        const claim = task.evidence.find(
+          (item) => item.kind === "claim" && (item.status !== "signed" || item.origin === "demo")
+        );
+        if (!claim) {
+          notify("没有待回填的 claim；当前产物已处于已签状态");
+          return;
+        }
+        const note = [
+          `导入自 ${record.claimId} · status=${record.status}`,
+          `人签理由：${record.humanReason}`,
+          ...(scopeWarning ? [scopeWarning] : []),
+          ...(record.warnings.length ? [`产物警告：${record.warnings[0]}`] : [])
+        ].join("；");
+        mutateTask(task.id, (item) => ({
+          ...item,
+          evidence: item.evidence.map((entry) =>
+            entry.id === claim.id
+              ? {
+                  ...entry,
+                  status: "signed" as const,
+                  origin: "cli-import" as const,
+                  text: record.statement,
+                  scope: record.scope,
+                  refs: record.evidenceRefs.length ? record.evidenceRefs : entry.refs,
+                  note
+                }
+              : entry
+          ),
+          gates: gate(item.gates, "G5", "blocked", "已导入 CLI claim.json；closure 与导出签名仍需 CLI 人签"),
+          messages: [
+            ...item.messages,
+            message(
+              "agent",
+              "**已导入 CLI 签署产物**\n\n- 读取 `claim/claim.json`，未代签、未回写证据层\n- claim_id / statement / scope / human_reason 均已校验\n" +
+                (scopeWarning ? `- 注意：${scopeWarning}\n` : "") +
+                "\n> 后续 closure 与导出签名仍由本地 CLI 完成。",
+              claimGateCard("pass", { ...claim, status: "signed", origin: "cli-import" })
+            )
+          ]
+        }));
+        set((state) => ({
+          ui: { ...state.ui, claimGateOpen: false },
+          toast: { id: uid("toast"), text: "已导入 claim.json；工作台只读取，未代签" }
+        }));
       },
       prepareWriting: () => {
         const task = currentTask();

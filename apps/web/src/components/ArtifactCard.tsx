@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { Card } from "../domain/types";
 import { runtimeUrl } from "../adapters/runtimeApi";
-import { claimSignCommand, experimentApproveCommands, protocolFreezeCommand } from "../domain/gateCommands";
+import { experimentApproveCommands, protocolFreezeCommand } from "../domain/gateCommands";
+import { claimSignatureLabel } from "../domain/claimSignature";
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { usePreviewStore } from "../state/previewStore";
 import { HumanGateCommand } from "./HumanGateCommand";
@@ -192,7 +193,7 @@ export function ArtifactCard({ card }: { card: Card }) {
 
   if (card.type === "run") {
     const claim = task?.evidence.find((item) => item.kind === "claim");
-    const signed = task?.evidence.some((item) => item.kind === "claim" && item.status === "signed") ?? false;
+    const claimLabel = claimSignatureLabel(claim);
     const delta = card.mean - card.baseline;
     return (
       <article className="artifact">
@@ -219,55 +220,51 @@ export function ArtifactCard({ card }: { card: Card }) {
           <dt>EA</dt>
           <dd>{card.ea}</dd>
           <dt>Claim</dt>
-          <dd>{signed ? "已人工签署（证据来自 CLI）" : "待人工签署 · 停在人工门"}</dd>
+          <dd>{claimLabel.short}</dd>
         </dl>
         <p className="artifact-note">数值是演示数据，仅用于展示 EA → claim 的边界，不作为真实材料实验结论。</p>
         <Actions>
           <ActionButton onClick={() => actions.setContextTab("evidence")}>查看 EA</ActionButton>
-          <ActionButton variant="primary" onClick={() => setGateRevealed((open) => !open)} disabled={signed}>
-            {gateRevealed ? "收起人签命令" : "claim 人签命令"}
+          <ActionButton variant="primary" onClick={actions.signClaim}>
+            {claimLabel.state === "unsigned" || claimLabel.state === "missing"
+              ? "签署 claim · 人工门"
+              : "查看 claim 签署来源"}
           </ActionButton>
         </Actions>
-        {gateRevealed && (
-          <HumanGateCommand
-            title="Q0 / S5b · 待人工签署"
-            detail="RunCapsule 与 EA 已生成，claim 仍是待签状态；签署要在终端核对数值后完成。"
-            commands={[claimSignCommand({ scope: claim?.status === "signed" ? undefined : claim?.scope })]}
-          />
-        )}
       </article>
     );
   }
 
   if (card.type === "gate") {
     const claim = task?.evidence.find((item) => item.kind === "claim");
-    const signed = task?.evidence.some((item) => item.kind === "claim" && item.status === "signed") ?? false;
-    const passed = signed;
+    const claimLabel = claimSignatureLabel(claim);
+    const passed = claimLabel.state === "signed-cli" || claimLabel.state === "signed-import";
     return (
-      <article className={`artifact gate-card${passed ? " is-pass" : ""}`}>
-        <CardHead label={card.gate} meta={passed ? "已人工签署" : "待人工签署"} />
+      <article className={`artifact gate-card${passed ? " is-pass" : ""}${claimLabel.demo ? " is-demo" : ""}`}>
+        <CardHead label={card.gate} meta={claimLabel.badge} />
         <div className="gate-title">
           <span className="gate-icon">
             <Icon name={passed ? "check" : "lock"} size={16} />
           </span>
           <div>
-            <b>{passed ? "claim 已由作者在 CLI 签署" : card.title}</b>
-            <p>{passed ? card.reason : "系统不会代为签署；界面只显示终端命令。"}</p>
+            <b>
+              {claimLabel.demo
+                ? "演示态预览 · claim 未真实签署"
+                : passed
+                  ? "claim 已签署（来源见证据面板）"
+                  : card.title}
+            </b>
+            <p>{claimLabel.detail}</p>
           </div>
         </div>
         <Actions>
-          <ActionButton variant="primary" onClick={() => setGateRevealed((open) => !open)} disabled={passed}>
-            {gateRevealed ? "收起人签命令" : "显示人签命令"}
+          <ActionButton variant="primary" onClick={actions.signClaim}>
+            {claimLabel.state === "unsigned" || claimLabel.state === "missing"
+              ? "签署 claim · 人工门"
+              : "查看 claim 签署来源"}
           </ActionButton>
           <ActionButton onClick={() => actions.setContextTab("evidence")}>查看证据链</ActionButton>
         </Actions>
-        {gateRevealed && (
-          <HumanGateCommand
-            title={`${card.gate} · 待人工签署`}
-            detail={card.reason}
-            commands={[claimSignCommand({ scope: passed ? undefined : claim?.scope })]}
-          />
-        )}
       </article>
     );
   }

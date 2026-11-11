@@ -44,7 +44,7 @@ function suggestionsFor(task: ResearchTask): string[] {
     const signed = task.evidence.some((item) => item.kind === "claim" && item.status === "signed");
     if (task.evaluation.hiddenAccessCount > 0) return ["运行审阅包", "查看评估隔离", "查看证据链"];
     if (task.run && signed) return ["运行审阅包", "生成写作槽位", "查看证据链"];
-    if (task.run) return ["运行审阅包", "claim 人签命令", "查看证据链"];
+    if (task.run) return ["运行审阅包", "签署 claim · 人工门", "查看证据链"];
     if (task.protocolFrozen) return ["运行 3 seeds", "查看 EA", "查看证据链"];
     if (task.protocol) return ["G2 冻结命令", "查看证据链"];
     return ["送入实验设计", "查看证据链"];
@@ -153,6 +153,8 @@ export function Composer() {
       case "启动全自动":
         actions.startAuto();
         break;
+      case "签署 claim":
+      case "签署 claim · 人工门":
       case "claim 人签命令":
         actions.signClaim();
         break;

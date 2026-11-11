@@ -122,6 +122,32 @@ README 的四张策略投影图（`figures/01–04`）是设计投影，不是�
 - **顶层扁平债**：`research_agent/` 顶层 125 个 py（62173 行）、功能子域已自然聚簇（rsi_*/evolution_*、study_*/search_*、写作系、宿主系），但**不建议重组**——import 面 × 164 测试文件，收益低于风险。收敛点：**冻结顶层增长**——新能力优先进已有子包（runtime/ models/ orchestration/），顶层只允许能力模块主文件。
 - **总判断**：架构合理性是「测试钉出来的」（等价性/三态单点/护栏不变量/发布完整性均有锚）；真正的债只有三处且全部登记在案（cli 巨石、store 巨石、顶层扁平），均属「动到时顺带还」，现在强行动违反「一次只改一个模块」纪律且收益以美观为主——此处收敛，不再新增结构改造。
 
+## claim 人工门：demo 与产品双轨（2026-11-11）
+
+**触发**：Pages `/app/` 里点「签署 claim」没有可见反应。核实为两个叠在一起的问题：
+
+- **交互 bug（直接原因）**：`Composer.suggestionsFor()` 在 claim 门给出 chip「签署 claim」，但 `handleSuggestion` 的 switch 只有 `claim 人签命令`；该 chip 落入 `default` → `sendMessage("签署 claim")`，把操作当普通聊天发出，从未调用 `signClaim`。
+- **设计错位（根本原因）**：`signClaim` 本身只追加一条「仍待签」消息 + 2.8s toast，状态永不变。这对产品工作台（网页不代签）是正确的，但被 Pages 静态 demo 原样照搬——demo 是展示项目，卡在 S5b 就永远看不到 S8–S16 的界面。
+
+**调整**：用 `vite.config.ts` 已有的 `__STATIC_ONLY__` 做唯一分流点，不复制第二套前端。
+
+| 路径 | 静态 demo（Pages `/app/`） | 产品工作台（runtime） |
+| --- | --- | --- |
+| 复制 CLI 人签命令 | 有 | 有 |
+| 导入 `run claim` 产出的 `claim.json`（只读） | 有 | 有 |
+| 演示态预览签署后的界面 | **有，且仅此模式** | 编译期摇掉，不提供 |
+
+- 所有「签署 claim」入口统一打开 `ClaimGateDialog`（焦点陷阱 / Esc / 背景关闭），会话里同时留痕；不再是「点了没反应」。
+- 导入校验对齐 `research_agent/cli.py::_cmd_run_claim` 的真实产物字段：`claim_id / statement / scope / human_reason / status / evidence_refs / warnings`；**不要求 `signature`**（那是 `closure sign` 的职责，要求它会拒收所有真实产物）。scope 不一致只警告、不伪造匹配。
+- 演示态把 claim 标 `origin: "demo"`，`claimSignatureLabel()` 在证据面板 / gate 卡片 / 会话卡片统一输出「DEMO · 无真实签名」；G5 保持 `blocked`，可一键撤销回到待签。
+- **不变量未破**：浏览器不产生签名、不写证据层、不解锁 closure / 导出签名；数值仍是 fixture，负结果与失败判定保留。
+
+**验证**：`tsc --noEmit` 0 错、`npm run check`（18 单测，含新增 6 条 `claimGate.test.ts`）、`build` / `build:site` 均成功；产品 bundle 不含 DEMO 区块（tree-shaken），静态 bundle 含；Playwright 冒烟 4/4（点击弹面板 / 错误文件可见报错 / 演示态标记 / 可撤销 + 真实产物只读导入），无 page error。
+
+**纪律教训**：上一轮前端细节修复做在发布树侧，被 `470f61b` 的「上游 drift 同步」覆盖（新增 `hooks/ui.ts` 被当作构建残渣删除）。本轮所有源码改动落**外层源**，再跑外层 `build_release.py --prune` 同步，避免重演。
+
+**收敛**：claim 门现在「点得到、看得见、能推进、不冒充」。再往里加能力（网页代签、常驻委托）会破坏四条安全主张，不做。
+
 ---
 
 *迁出自 README「当前事实基线」；研究结论更新时在本文件同步，README 不再承载逐条历程。*
