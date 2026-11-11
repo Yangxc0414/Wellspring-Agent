@@ -2570,6 +2570,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
               runId: job.result?.run_id,
               jobDir: job.result?.job_dir,
               fixtureMode: job.result?.fixture_mode,
+              verdictBus: job.verdict_bus,
               route: job.result?.route,
               taskStatus: job.result?.status,
               flowMode: job.result?.flow_mode,

@@ -581,9 +581,22 @@ function RunContext({ task }: { task: ResearchTask }) {
               <span>FLOW <b>{runtimeCard?.flowMode ?? "review"}</b></span>
               <span>STAGE <b>{runtimeCard?.stage ?? "—"}</b></span>
             </div>
-            <p className="run-hint">
-              事件来自本地 runtime；claim、closure 与导出仍只能在终端人工完成。
-            </p>
+            {runtimeCard?.verdictBus?.closure ? (
+              <div className="run-numbers">
+                <span>
+                  CLOSURE <b>{runtimeCard.verdictBus.closure.status ?? "unknown"}</b>
+                  {runtimeCard.verdictBus.closure.delegated ? " · delegated" : ""}
+                </span>
+                <span>CLAIM <b>{runtimeCard.verdictBus.closure.has_signed_claim ? "signed" : "unsigned"}</b></span>
+              </div>
+            ) : null}
+            {runtimeCard?.verdictBus?.error ? (
+              <p className="run-hint">判定总线不可用：{runtimeCard.verdictBus.error}</p>
+            ) : (
+              <p className="run-hint">
+                闭包判定从产物重算（verdict-ledger 单点）；事件来自本地 runtime；claim、closure 与导出仍只能在终端人工完成。
+              </p>
+            )}
           </>
         ) : (
           <>

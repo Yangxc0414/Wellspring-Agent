@@ -94,6 +94,42 @@ def _claim_source(root: Path, run: Path) -> Path:
     return run / "claim" / "claim.json"
 
 
+def closure_verdict_for_run(run_dir: Path) -> Dict[str, Any]:
+    """Single-run closure verdict for consumers whose layout is one bare run dir
+    (runtime jobs), using the same sources as collect()'s canonical row.
+
+    Returns {status, delegated, has_signed_claim, source_path, source_sha256} —
+    the same fields the canonical closure row carries, computed per run dir so
+    the runtime payload can surface fresh verdicts without a project layout.
+    """
+    run = Path(run_dir)
+    closure_path = _closure_source(run)
+    closure = _read_json_safe(closure_path)
+    signature_path = run / "closure-signature" / "signature.json"
+    signature = _read_json_safe(signature_path)
+    status = str((closure or {}).get("status") or "missing")
+    if signature and status == "ready":
+        status = "signed"
+    claim_path = run / "claim" / "claim.json"
+    claim = _read_json_safe(claim_path)
+    claim_status = str((claim or {}).get("status") or "") in ("supported", "approved")
+    return {
+        "subject": "runs/" + run.name,
+        "status": status,
+        "delegated": str((signature or {}).get("human_reason") or "").startswith("[delegated:"),
+        "has_signed_claim": claim_status,
+        "source_path": closure_path.name and str(closure_path),
+        "source_sha256": _sha256(closure_path) if closure_path.is_file() else "",
+    }
+
+
+def _read_json_safe(path: Path):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
 def _capsule_blockers(capsule: Path) -> List[str]:
     if not capsule.is_file():
         return []

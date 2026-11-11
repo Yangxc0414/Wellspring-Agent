@@ -693,6 +693,18 @@ export type Card =
       events: number;
       runId?: string;
       fixtureMode?: boolean;
+      verdictBus?: {
+        closure: {
+          subject?: string;
+          status?: string;
+          delegated?: boolean;
+          has_signed_claim?: boolean;
+          source_path?: string;
+          source_sha256?: string;
+        } | null;
+        boundary?: string;
+        error?: string;
+      };
       source?: RuntimeSource;
       taskType?: RuntimeTaskType;
       dataset?: string;

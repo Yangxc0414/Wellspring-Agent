@@ -40,6 +40,18 @@ export interface RunJob {
   events_url?: string;
   stream_url?: string;
   artifacts_url?: string;
+  verdict_bus?: {
+    closure: {
+      subject?: string;
+      status?: string;
+      delegated?: boolean;
+      has_signed_claim?: boolean;
+      source_path?: string;
+      source_sha256?: string;
+    } | null;
+    boundary?: string;
+    error?: string;
+  };
   result?: {
     run_id?: string;
     task_id?: string;

@@ -927,9 +927,22 @@ def create_app(settings: Optional[RuntimeSettings] = None) -> FastAPI:
     @app.get("/api/runs/{job_id}")
     def get_run(job_id: str) -> Dict[str, Any]:
         try:
-            return manager.get(job_id).public()
+            payload = manager.get(job_id).public()
         except KeyError:
             raise HTTPException(status_code=404, detail="job not found")
+        # 判定总线到 workbench 的载荷增补（ContextPanel 数据流对接）：单 run 闭包
+        # 判定经 verdict-ledger 单点；失败不打断 run 状态本身。
+        try:
+            from ..verdict_ledger import closure_verdict_for_run
+
+            job = manager.get(job_id)
+            payload["verdict_bus"] = {
+                "closure": closure_verdict_for_run(job.output_dir),
+                "boundary": "closure verdict re-derived from artifacts (verdict-ledger); prompt-side only, never a gate",
+            }
+        except Exception:
+            payload["verdict_bus"] = {"closure": None, "error": "verdict bus unavailable"}
+        return payload
 
     @app.get("/api/runs/{job_id}/events")
     def get_events(job_id: str, after: int = Query(default=0, ge=0)) -> Dict[str, Any]:
