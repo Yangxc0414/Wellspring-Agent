@@ -22,7 +22,28 @@ function reconstructAbstract(index) {
   return pairs.sort((a, b) => a[0] - b[0]).map((pair) => pair[1]).join(" ").trim();
 }
 
+const RETRY_DELAYS_MS = [2000, 8000, 20000];
+
 async function fetchQuery(item) {
+  // OpenAlex 对匿名/数据中心来源限流（429）：mailto 进 polite pool + 退避重试。
+  let lastError = null;
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
+    if (attempt > 0) {
+      console.error("retry:", item.id, "attempt", attempt, "after", RETRY_DELAYS_MS[attempt - 1], "ms");
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt - 1]));
+    }
+    try {
+      return await fetchQueryOnce(item);
+    } catch (error) {
+      lastError = error;
+      const retryable = /HTTP 429|HTTP 5\d\d|timeout|fetch failed|network/i.test(error.message);
+      if (!retryable) throw error;
+    }
+  }
+  throw lastError;
+}
+
+async function fetchQueryOnce(item) {
   const filters = ["title_and_abstract.search:" + item.query, "type:article"];
   if (Number(item.from_year) > 0) filters.push("from_publication_date:" + Number(item.from_year) + "-01-01");
   const params = [
@@ -79,7 +100,15 @@ for (const item of queries) {
 }
 
 if (!results.length) {
-  console.error("no digest written: all queries failed");
+  // 全部查询失败（多为限流）：保留上一份 digest（页面标注 CACHED，数据本就不是
+  // 证据级），大声记录 stale 并以 0 退出——cron 的限流抖动不该让仓库长期挂红；
+  // 首次生成（无既有 digest）时仍然失败可见。
+  if (fs.existsSync(outputPath)) {
+    console.error("ALL queries failed (rate limited or network); keeping the previous digest (stale).");
+    console.error("Will retry on the next scheduled run; consider setting OPENALEX_MAILTO for the polite pool.");
+    process.exit(0);
+  }
+  console.error("no previous digest to keep and all queries failed");
   process.exit(1);
 }
 
