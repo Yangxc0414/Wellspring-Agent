@@ -134,7 +134,29 @@ def _read(path: Path) -> str:
         return ""
 
 
-def _walk_files(root: Path, suffixes: set[str]):
+_TOP_DIR_ENTRY = re.compile(r"^/?([A-Za-z0-9][A-Za-z0-9_.\-]*)/$")
+
+
+def _gitignored_top_dirs(gitignore_text: str):
+    """Top-level directories gitignored outright (``name/`` lines).
+
+    These trees never ship — CI runners do not even have them — so secret/path
+    findings inside them describe content no release contains. Scanning them
+    only produces blockers that cannot be fixed from this repository.
+    """
+    names = []
+    for line in gitignore_text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "*" in line:
+            continue
+        match = _TOP_DIR_ENTRY.match(line)
+        if match and match.group(1) not in names:
+            names.append(match.group(1))
+    return names
+
+
+def _walk_files(root: Path, suffixes: set[str], extra_skip_prefixes: tuple = ()):
+    normalized = tuple(p.rstrip("/") for p in extra_skip_prefixes)
     for dirpath, dirnames, filenames in os.walk(root):
         current = Path(dirpath)
         rel_dir = _rel(current, root) if current != root else ""
@@ -142,6 +164,8 @@ def _walk_files(root: Path, suffixes: set[str]):
         for name in dirnames:
             rel = (rel_dir + "/" + name).lstrip("/")
             if name in SKIP_DIRS or any(rel == p or rel.startswith(p + "/") for p in SKIP_PREFIXES):
+                continue
+            if any(rel == p or rel.startswith(p + "/") for p in normalized):
                 continue
             kept.append(name)
         dirnames[:] = kept
@@ -157,9 +181,9 @@ def _walk_files(root: Path, suffixes: set[str]):
             yield path
 
 
-def _scan_secrets(root: Path):
+def _scan_secrets(root: Path, extra_skip_prefixes: tuple = ()):
     findings = []
-    for path in _walk_files(root, TEXT_SUFFIXES):
+    for path in _walk_files(root, TEXT_SUFFIXES, extra_skip_prefixes):
         rel = _rel(path, root)
         if rel.startswith("tests/") or rel.startswith("apps/web/tests/"):
             continue
@@ -182,9 +206,9 @@ def _scan_secrets(root: Path):
 NESTED_PRODUCT_DIRS = ("Wellspring-Agent/",)
 
 
-def _scan_local_paths(root: Path):
+def _scan_local_paths(root: Path, extra_skip_prefixes: tuple = ()):
     findings = []
-    for path in _walk_files(root, CODE_SUFFIXES):
+    for path in _walk_files(root, CODE_SUFFIXES, extra_skip_prefixes):
         rel = _rel(path, root)
         if rel.startswith("tests/") or rel.startswith("apps/web/tests/"):
             continue
@@ -257,10 +281,19 @@ def check_release(root: Path, for_public_release: bool = False) -> dict:
         if path.exists():
             info.append({"kind": "local_only_tree", "path": name, "excluded_by": ".gitignore"})
 
-    secret_findings = _scan_secrets(root)
+    # gitignored top-level dirs (reference repos, caches) never ship; record them
+    # and keep the scanners out of their .venv/site-packages trees
+    ignored_top_dirs = _gitignored_top_dirs(gitignore)
+    present_ignored = [name for name in ignored_top_dirs if (root / name).is_dir()]
+    for name in present_ignored:
+        if name not in LOCAL_ONLY_DIRS:
+            info.append({"kind": "local_only_tree", "path": name, "excluded_by": ".gitignore"})
+    scan_skip = tuple(name + "/" for name in present_ignored)
+
+    secret_findings = _scan_secrets(root, scan_skip)
     blockers.extend(secret_findings)
 
-    path_findings = _scan_local_paths(root)
+    path_findings = _scan_local_paths(root, scan_skip)
     for finding in path_findings:
         if finding["severity"] == "blocker":
             blockers.append(finding)
