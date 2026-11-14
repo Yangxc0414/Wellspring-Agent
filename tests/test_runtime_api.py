@@ -222,6 +222,37 @@ class RuntimeApiTest(unittest.TestCase):
                 self.assertEqual(artifacts.status_code, 200)
                 self.assertGreaterEqual(len(artifacts.json()["artifacts"]), 1)
 
+    def test_exec_stats_is_read_only_telemetry(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            settings = default_settings()
+            settings.jobs_root = root / "jobs"
+            settings.workspace_memory_path = root / "workspace_memory.json"
+            settings.workspace_archive_root = root / "archive"
+            settings.literature_memory_path = root / "literature_memory.json"
+            settings.custom_agents_path = root / "custom_agents.json"
+            settings.evolution_policy_path = root / "evolution_policy.json"
+            settings.skill_registry_path = root / "skills.json"
+            settings.model_store_path = root / "model_gateway.json"
+            app = create_app(settings)
+            with TestClient(app) as client:
+                body = client.get("/api/exec/stats")
+                self.assertEqual(body.status_code, 200)
+                payload = body.json()
+                self.assertEqual(payload["schema_version"], "exec-port-0.2")
+                kinds = {face["kind"] for face in payload["faces"]}
+                self.assertEqual(
+                    kinds, {"bridge", "host_agent", "inprocess"},
+                    "three execution faces must be registered for the seam",
+                )
+                self.assertIn("counts", payload["dispatch_stats"])
+                self.assertIn("recent", payload["dispatch_stats"])
+                # 只读边界：不启动/不杀死/不调度进程，不产生门禁语义
+                self.assertIn("never", payload["boundary"].lower())
+                self.assertIn("no claim/ea/gate/signature", payload["boundary"].lower())
+                # POST 必须被拒绝——遥测端点不允许写路径
+                self.assertEqual(client.post("/api/exec/stats").status_code, 405)
+
 
 if __name__ == "__main__":
     unittest.main()

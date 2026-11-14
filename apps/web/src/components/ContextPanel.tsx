@@ -597,6 +597,24 @@ function RunContext({ task }: { task: ResearchTask }) {
                 </span>
               </div>
             ) : null}
+            {runtimeCard?.execStats?.counts && Object.keys(runtimeCard.execStats.counts).length ? (
+              <div className="run-numbers">
+                <span>
+                  EXEC{" "}
+                  <b>
+                    {Object.entries(runtimeCard.execStats.counts)
+                      .map(([kind, count]) => `${kind}×${count}`)
+                      .join(" · ")}
+                  </b>
+                </span>
+                <span>{runtimeCard.execStats.faces ?? 0} faces</span>
+              </div>
+            ) : null}
+            {runtimeCard?.execStats?.counts && Object.keys(runtimeCard.execStats.counts).length ? (
+              <p className="run-hint">
+                执行面接缝计数（ExecPort dispatch）：每次本地执行/桥接/宿主模型调度都经同一接缝计数放行——只读遥测，不含门禁语义。
+              </p>
+            ) : null}
             {runtimeCard?.verdictBus?.verdict_override ? (
               <p className="run-hint">
                 快照冲突已由判定总线裁定：快照说 {runtimeCard.verdictBus.verdict_override.snapshot}，

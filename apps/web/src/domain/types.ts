@@ -711,6 +711,11 @@ export type Card =
         boundary?: string;
         error?: string;
       };
+      execStats?: {
+        counts?: Record<string, number>;
+        faces?: number;
+        error?: string;
+      };
       source?: RuntimeSource;
       taskType?: RuntimeTaskType;
       dataset?: string;

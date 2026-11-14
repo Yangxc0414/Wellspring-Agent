@@ -903,6 +903,30 @@ export async function loadRunArtifacts(jobId: string): Promise<RunArtifact[]> {
   return body.artifacts;
 }
 
+export interface ExecFaceInfo {
+  kind?: string;
+  name?: string;
+  interpreter?: string;
+  entry?: string;
+  isolation?: string;
+  authorization?: string;
+}
+
+export interface ExecStats {
+  schema_version?: string;
+  faces?: ExecFaceInfo[];
+  dispatch_stats?: {
+    counts?: Record<string, number>;
+    recent?: Array<Record<string, unknown>>;
+  };
+  boundary?: string;
+}
+
+export async function loadExecStats(): Promise<ExecStats> {
+  return request<ExecStats>("/api/exec/stats", undefined, 8000);
+}
+
+
 export interface EvolutionObservation {
   observation_id?: string;
   topic?: string;

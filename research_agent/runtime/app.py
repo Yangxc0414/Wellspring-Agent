@@ -604,6 +604,17 @@ def create_app(settings: Optional[RuntimeSettings] = None) -> FastAPI:
     def model_calls() -> Dict[str, Any]:
         return {"calls": model_service.calls()}
 
+    @app.get("/api/exec/stats")
+    def exec_stats() -> Dict[str, Any]:
+        """Read-only execution-seam telemetry: registered faces + dispatch counts.
+
+        本地执行面接缝（ExecPort）的计数投影——只读，不含任何执行、签核或门禁语义；
+        执行本身仍只能通过 CLI 显式授权。
+        """
+        from ..execport.exec_port import describe
+
+        return describe()
+
     @app.get("/api/host-model/panel")
     def host_model_panel() -> Dict[str, Any]:
         """Read-only critic bench availability: which supplies exist and what is still missing."""

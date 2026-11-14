@@ -5,6 +5,7 @@ import {
   createRun,
   getRun,
   loadCustomAgents,
+  loadExecStats,
   loadRunArtifactJson,
   loadRunArtifacts,
   loadRunEvents,
@@ -2535,12 +2536,20 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
         };
         let lastSeq = 0;
         let pollErrors = 0;
+        let lastExecStats: { counts?: Record<string, number>; faces?: number } | undefined;
         const poll = async (jobId: string) => {
           try {
-            const [job, eventBody] = await Promise.all([
+            const [job, eventBody, execBody] = await Promise.all([
               getRun(jobId),
-              loadRunEvents(jobId, lastSeq).catch(() => null)
+              loadRunEvents(jobId, lastSeq).catch(() => null),
+              loadExecStats().catch(() => null)
             ]);
+            if (execBody?.dispatch_stats) {
+              lastExecStats = {
+                counts: execBody.dispatch_stats.counts,
+                faces: execBody.faces?.length
+              };
+            }
             const events = eventBody?.events ?? [];
             if (events.length) lastSeq = events[events.length - 1].seq;
             const last = events[events.length - 1];
@@ -2571,6 +2580,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
               jobDir: job.result?.job_dir,
               fixtureMode: job.result?.fixture_mode,
               verdictBus: job.verdict_bus,
+              execStats: lastExecStats,
               route: job.result?.route,
               taskStatus: job.result?.status,
               flowMode: job.result?.flow_mode,
