@@ -9,6 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ResearchRunnerTest(unittest.TestCase):
+    @unittest.skipIf(
+        not (Path(__file__).resolve().parents[1] / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_fixture_queue_emits_observations_and_artifacts(self):
         tasks = load_research_tasks(ROOT / "research_agent" / "rsi_fixtures" / "research_tasks.json")
         with tempfile.TemporaryDirectory() as tmp:
@@ -28,6 +32,10 @@ class ResearchRunnerTest(unittest.TestCase):
             self.assertIn("retrieval_cost", kinds)
 
 
+    @unittest.skipIf(
+        not (Path(__file__).resolve().parents[1] / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_research_to_rsi_cycle_is_explicitly_pending(self):
         tasks = load_research_tasks(ROOT / "research_agent" / "rsi_fixtures" / "research_tasks.json")
         with tempfile.TemporaryDirectory() as tmp:

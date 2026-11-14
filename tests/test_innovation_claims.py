@@ -11,7 +11,14 @@ verify = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(verify)
 
 
+_NO_SOURCE = unittest.skipIf(
+    not (ROOT / "research_agent" / "web" / "data" / "innovations.json").is_file(),
+    "research_agent/web/data is a local-only tree, not part of the release bundle",
+)
+
+
 class InnovationClaimsTest(unittest.TestCase):
+    @_NO_SOURCE
     def test_every_innovation_claim_binds_a_repository_check(self):
         data = json.loads(verify.SOURCE.read_text(encoding="utf-8"))
         self.assertTrue(data.get("pillars"))

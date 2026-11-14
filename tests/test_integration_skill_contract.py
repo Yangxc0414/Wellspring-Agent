@@ -21,6 +21,10 @@ TARGETS = (
 
 class IntegrationSkillContractTest(unittest.TestCase):
     def setUp(self):
+        if not CANONICAL.is_file():
+            self.skipTest(
+                "agent-tool skill copies (.qoder/.claude/.zcode) are local-only, not shipped"
+            )
         self.text = CANONICAL.read_text(encoding="utf-8")
 
     def test_every_client_copy_matches_the_canonical_file(self):

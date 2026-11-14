@@ -10,6 +10,7 @@ instead of being resumed silently.
 import json
 import logging
 import os
+import re
 import threading
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -52,6 +53,8 @@ from ..storage import write_json_atomic
 LOGGER = logging.getLogger(__name__)
 TERMINAL_STATUSES = ("completed", "failed")
 JOB_SCHEMA = "runtime-job/1"
+# drive-letter paths are machine-absolute everywhere, not just on Windows
+_WINDOWS_DRIVE = re.compile(r"^[A-Za-z]:[\\/]")
 
 
 class QueueLimitError(RuntimeError):
@@ -365,6 +368,11 @@ class JobManager:
         raw = str(value or "").strip()
         if not raw:
             return ""
+        if _WINDOWS_DRIVE.match(raw):
+            # a drive-letter path is machine-absolute on every platform; on POSIX it
+            # would otherwise silently resolve to a repo-relative name and produce a
+            # misleading "file not found" instead of a boundary rejection
+            raise ValueError("%s must stay inside the repository or runtime data" % label)
         path = Path(raw).resolve()
         roots = [Path(self.settings.repo_root).resolve(), Path(self.settings.jobs_root).resolve()]
         if not any(is_relative_to(path, root) for root in roots):
@@ -377,6 +385,8 @@ class JobManager:
         raw = str(value or "").strip()
         if not raw:
             return ""
+        if _WINDOWS_DRIVE.match(raw):
+            raise ValueError("%s must stay inside the repository or runtime data" % label)
         path = Path(raw).resolve()
         roots = [Path(self.settings.repo_root).resolve(), Path(self.settings.jobs_root).resolve()]
         if not any(is_relative_to(path, root) for root in roots):

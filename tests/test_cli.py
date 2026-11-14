@@ -247,6 +247,10 @@ class CliTest(unittest.TestCase):
                 "1.1.0",
             )
 
+    @unittest.skipIf(
+        not (ROOT / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_pipeline_writes_svg_and_demo(self):
         with tempfile.TemporaryDirectory() as tmp:
             run = subprocess.run(

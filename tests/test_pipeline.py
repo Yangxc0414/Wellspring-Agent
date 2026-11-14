@@ -274,6 +274,10 @@ class ModuleContractTest(unittest.TestCase):
         self.assertTrue(artifact.scene, "the scene contract must survive")
         self.assertIn("astradraw_renderer_missing", artifact.audit["errors"])
 
+    @unittest.skipIf(
+        not (Path(__file__).resolve().parents[1] / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_figure_renders_auditable_svg(self):
         nodes = [
             FigureNode("lit", "文献", "literature", 0),
@@ -588,6 +592,10 @@ class ModuleContractTest(unittest.TestCase):
             self.assertEqual(limitation["status"], "bound_scope")
             self.assertEqual(reused.modules["protocol"]["status"], "frozen")
 
+    @unittest.skipIf(
+        not (Path(__file__).resolve().parents[1] / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_pipeline_composes_modules_without_claims(self):
         result = PipelineRunner(self.store).run(
             PipelineRequest(

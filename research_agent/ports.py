@@ -1,6 +1,14 @@
 """对外部能力的端口；模块只依赖端口，不直接依赖网络/数据库。"""
 
-from typing import Any, Dict, List, Optional, Protocol, TYPE_CHECKING
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    TYPE_CHECKING,
+    runtime_checkable,
+)
 
 from .contracts import SourceHit, Span
 
@@ -8,6 +16,7 @@ if TYPE_CHECKING:  # avoid runtime circular import; annotations only
     from .rsi import Candidate, EvalEvidence
 
 
+@runtime_checkable
 class RetrieverPort(Protocol):
     fixture_mode: bool
 
@@ -32,6 +41,7 @@ class ModelPort(Protocol):
         ...
 
 
+@runtime_checkable
 class ProposerPort(Protocol):
     """自进化候选供给接缝。
 
@@ -45,6 +55,7 @@ class ProposerPort(Protocol):
         ...
 
 
+@runtime_checkable
 class EvaluatorPort(Protocol):
     """评测供给接缝：把候选在某个 split 上的表现变成可哈希复核的 EvalEvidence。
 

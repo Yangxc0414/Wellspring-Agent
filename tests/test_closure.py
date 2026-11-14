@@ -193,6 +193,10 @@ class ClosureTest(unittest.TestCase):
 
 
 class StaticClosureAuditTest(unittest.TestCase):
+    @unittest.skipIf(
+        not (Path(__file__).resolve().parents[1] / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_pipeline_bundle_is_structurally_consistent(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -214,6 +218,10 @@ class StaticClosureAuditTest(unittest.TestCase):
             self.assertEqual(checks["s4_design_grounding"]["status"], "pass")
             self.assertEqual(checks["paper_readable_draft"]["status"], "pass")
 
+    @unittest.skipIf(
+        not (Path(__file__).resolve().parents[1] / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_audit_fails_when_a_span_cites_an_unknown_source(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -269,6 +269,10 @@ class EmpiricalLoopTest(unittest.TestCase):
             stale["warnings"],
         )
 
+    @unittest.skipIf(
+        not (Path(__file__).resolve().parents[1] / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_method_schematic_is_bound_but_not_a_result(self):
         project = _prepare(self.root, signed=True)
         draft = write_draft(

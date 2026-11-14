@@ -2,7 +2,7 @@
 id: integration
 name: 通用 MCP 与项目目录
 stage: META
-version: 0.51.0
+version: 0.51.1
 status: pilot
 owner: research-agent
 inputs:
@@ -247,6 +247,7 @@ MCP 协议：
 5. 若工具名或参数变化，同步更新三端 `SKILL.md` 与 `integrations/README.md`。
 
 ## Changelog
+- 2026-11-15 · v0.51.1 · status=pilot · runtime 只读面跨平台加固：drive-letter 输入在 POSIX 上同样按机器绝对路径拒绝；inventory 端点将解析后的机器路径重写为 caller 相对形式
 - 2026-11-11 · v0.51.0 · status=pilot · 快照消费者读时重算：research_status/_loop_capsule_summary 不再信任 loop-capsule.json 的 blockers/next_actions/nodes 判定字段，改为 build_loop_capsule(target) 读时重算（artifact 为准）；快照只保留历史与 runtime META（observation_id/active_policy_id 覆盖回节点）；增只读 recompute 回执（snapshot_blockers vs recomputed_blockers）；CLOSURE_UNSIGNED 被移除时仍给 verdict_override（source=read-time-recompute、总线 sha256 绑定，无总线行时不冒充 signed）。tests/test_verdict_ledger ConsumerMigrationTest 与 tests/test_next_actions_fallback 改为钉读时重算语义（快照命令不再被当权威回显；无 artifact 的 run 由新鲜重算给出动作）。
 - 2026-11-11 · v0.50.2 · status=pilot · loop-capsule 增只读 feedback 投影（constraints_applied/loops/effects），从 idea.json 的 feedback_constraints_applied 派生——闭环是否消费了上一轮判定对宿主/工作台可见；additive，不改门禁/blockers/next_actions 语义。tests/test_loop_capsule 增断言。
 - 2026-11-11 · v0.50.1 · status=pilot · doc_interfaces 分类修复：lineage 纳入 RELATIVE_PREFIXES——lineage/lineage.json 是 run 相对产物目录（与 run/claim/closure 同类），feedback SPEC 的该引用在 HEAD 即未分类（存量红灯，非本轮引入）；tests/test_doc_interfaces 增 relative_artifact 断言。

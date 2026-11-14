@@ -18,7 +18,14 @@ SKILLS = (
 )
 
 
+_NO_SKILL_COPIES = unittest.skipIf(
+    not SKILLS[0].is_file(),
+    "agent-tool skill copies (.qoder/.claude/.zcode) are local-only, not shipped",
+)
+
+
 class IntegrationFilesTest(unittest.TestCase):
+    @_NO_SKILL_COPIES
     def test_platform_skill_copies_match_and_are_valid(self):
         texts = [path.read_text(encoding="utf-8") for path in SKILLS]
         self.assertEqual(len(set(texts)), 1)

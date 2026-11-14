@@ -126,6 +126,10 @@ class RuntimeAPITest(unittest.TestCase):
         self.assertIn("bookkeeping only", body["boundary"])
         self.assertIn("cannot run any command", body["boundary"])
 
+    @unittest.skipIf(
+        not (Path(__file__).resolve().parents[1] / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_health_validation_and_fixture_run(self):
         health = self.client.get("/api/health")
         self.assertEqual(health.status_code, 200)
@@ -354,6 +358,8 @@ class RuntimeAPITest(unittest.TestCase):
             root = Path(tmp)
             (root / "report.md").write_text("# ok\n", encoding="utf-8")
             (root / "raced.json").write_text("{}", encoding="utf-8")
+            # size must match the bytes on disk, which differ per platform newline
+            expected_size = len((root / "report.md").read_bytes())
             real_stat = Path.stat
             seen = {"count": 0}
 
@@ -372,7 +378,7 @@ class RuntimeAPITest(unittest.TestCase):
             with mock.patch.object(Path, "stat", flaky_stat):
                 items = JobManager.artifacts(None, job)
             self.assertEqual([item["path"] for item in items], ["report.md"])
-            self.assertEqual(items[0]["size"], 6)
+            self.assertEqual(items[0]["size"], expected_size)
 
     def test_runtime_can_execute_task_agent_route(self):
         created = self.client.post(

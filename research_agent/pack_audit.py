@@ -194,7 +194,7 @@ def coverage_input(path: Any):
             "files": files,
             "file_count": len(files),
             "considered": len(candidates),
-            "excluded_numeric_artifacts": numeric,
+            "excluded_numeric_artifacts": sorted(numeric),
             "data_files": data,
             "skipped_unsupported_suffix": skipped,
             "chars": len(text),

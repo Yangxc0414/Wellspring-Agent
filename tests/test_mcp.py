@@ -525,6 +525,10 @@ class MCPIntegrationTest(unittest.TestCase):
         self.assertTrue(result["isError"])
         self.assertIn("allow_network", result["structuredContent"]["error"])
 
+    @unittest.skipIf(
+        not (Path(__file__).resolve().parents[1] / "research_agent" / "vendor" / "astradraw").is_dir(),
+        "vendored astradraw (CC BY-NC) is not part of the release bundle",
+    )
     def test_figure_templates_and_render_are_project_bounded(self):
         responses = self._serve(
             [

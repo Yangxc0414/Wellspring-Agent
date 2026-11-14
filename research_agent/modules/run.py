@@ -293,8 +293,19 @@ class RunAgent:
         test = pd.read_csv(test_path)
 
         def bits(series):
-            encoded = series.astype(str).str.encode("ascii")
-            return np.stack([np.frombuffer(value, dtype=np.uint8) - 48 for value in encoded]).astype(np.float32)
+            # parse CSV independently of pandas/numpy version: trailing \r from a CRLF
+            # file must never leak into a fingerprint, and ragged widths must fail with
+            # a named row instead of an opaque numpy stack error
+            encoded = [str(value).strip().encode("ascii") for value in series]
+            widths = {}
+            for index, item in enumerate(encoded):
+                widths.setdefault(len(item), index)
+            if len(widths) > 1:
+                raise RunError(
+                    "chemlab fingerprint widths differ: %s (first offending row %d)"
+                    % (sorted(widths), min(index for _, index in sorted(widths.items())))
+                )
+            return np.stack([np.frombuffer(value, dtype=np.uint8) for value in encoded]).astype(np.float32) - 48.0
 
         x_train = np.concatenate([bits(train["B_Fingerprint"]), bits(train["C_Fingerprint"])], axis=1)
         x_test = np.concatenate([bits(test["B_Fingerprint"]), bits(test["C_Fingerprint"])], axis=1)

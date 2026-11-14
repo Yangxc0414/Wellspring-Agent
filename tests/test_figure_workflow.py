@@ -3,14 +3,26 @@ import tempfile
 import unittest
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+
 from research_agent.figure_workflow import (
     FigureWorkflowError,
     list_templates,
     render_template,
 )
 
+# the vendored AstraDraw scenes are third-party CC BY-NC content and the release
+# bundle intentionally ships without them: figure rendering is license-gated, so
+# these tests skip on release checkouts instead of failing
+_VENDOR_MISSING = not (ROOT / "research_agent" / "vendor" / "astradraw").is_dir()
+_skip_no_vendor = unittest.skipIf(
+    _VENDOR_MISSING,
+    "vendored astradraw (CC BY-NC) is not part of the release bundle",
+)
+
 
 class FigureWorkflowTest(unittest.TestCase):
+    @_skip_no_vendor
     def test_template_catalog_contains_vendored_astradraw_scenes(self):
         catalog = list_templates()
         ids = {item["id"] for item in catalog["templates"]}
@@ -20,6 +32,7 @@ class FigureWorkflowTest(unittest.TestCase):
         self.assertTrue(all(item["schematic"] for item in catalog["templates"]))
         self.assertIn("visual/layout priors", catalog["boundary"])
 
+    @_skip_no_vendor
     def test_render_template_writes_svg_png_audit_and_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / "figure"

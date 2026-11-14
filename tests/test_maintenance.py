@@ -13,6 +13,10 @@ CHANGED = REPO / "research_agent" / "web" / "data" / "closed-loop-changed"
 
 
 class MaintenanceTest(unittest.TestCase):
+    @unittest.skipIf(
+        not CLOSED.is_dir(),
+        "research_agent/web/data is a local-only tree, not part of the release bundle",
+    )
     def test_planned_data_change_blocks_reclosure(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -41,6 +45,10 @@ class MaintenanceTest(unittest.TestCase):
             self.assertFalse(result["signed"])
             self.assertFalse((root / "reclose" / "closure-report.json").exists())
 
+    @unittest.skipIf(
+        not CLOSED.is_dir(),
+        "research_agent/web/data is a local-only tree, not part of the release bundle",
+    )
     def test_recheck_only_reclosure_then_human_sign_and_publish(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

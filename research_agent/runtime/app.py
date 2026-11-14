@@ -62,6 +62,24 @@ WRITE_GUARD_BOUNDARY = (
 )
 
 
+def _redact_machine_paths(value, target, replacement: str):
+    """Rewrite a resolved machine path back to the caller-relative form.
+
+    The inventory endpoints serve payload shapes written by the modules, which carry
+    absolute ``project_dir`` values. Those are machine paths: they must not leak
+    through the read-only HTTP surface, so they are rewritten to the caller's
+    relative ``project_dir`` input at the serving layer.
+    """
+    needle = str(target)
+    if isinstance(value, str):
+        return value.replace(needle, replacement) if needle else value
+    if isinstance(value, list):
+        return [_redact_machine_paths(item, target, replacement) for item in value]
+    if isinstance(value, dict):
+        return {key: _redact_machine_paths(item, target, replacement) for key, item in value.items()}
+    return value
+
+
 def credential_problem(
     client_host: str, token: str, authorization: str
 ) -> Optional[Tuple[int, str]]:
@@ -500,9 +518,10 @@ def create_app(settings: Optional[RuntimeSettings] = None) -> FastAPI:
     ) -> Dict[str, Any]:
         target = _project_path(project_dir)
         try:
-            return list_project_experiments(target)
+            payload = list_project_experiments(target)
         except (ProjectError, OSError) as exc:
             raise HTTPException(status_code=400, detail=str(exc))
+        return _redact_machine_paths(payload, target, project_dir)
 
     @app.get("/api/project-closures")
     def project_closure_inventory(
@@ -513,9 +532,10 @@ def create_app(settings: Optional[RuntimeSettings] = None) -> FastAPI:
 
         target = _project_path(project_dir)
         try:
-            return detect_project_profiles(target)
+            payload = detect_project_profiles(target)
         except (ProjectError, OSError) as exc:
             raise HTTPException(status_code=400, detail=str(exc))
+        return _redact_machine_paths(payload, target, project_dir)
 
     @app.get("/api/autopilot-status")
     def autopilot_status_endpoint(

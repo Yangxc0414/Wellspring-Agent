@@ -197,6 +197,28 @@ class HostContractTest(unittest.TestCase):
         return host_contract(declared=declared, outbox=outbox or self.root / "handoff")
 
     def test_declaring_a_host_model_clears_the_model_block(self):
+        # hermetic model store: a host_agent-bound store suspends model stages; the
+        # machine-local store must never leak into this contract test
+        from unittest import mock
+
+        from research_agent.host_contract import MODEL_STAGES
+        from research_agent.models import GatewayStore
+        from research_agent.models.store import ModelProfile, ProviderConfig
+
+        store_path = self.root / "model-gateway.json"
+        store = GatewayStore(store_path)
+        store.upsert_provider(ProviderConfig(provider_id="hermetic-host", kind="host_agent"))
+        profile = store.upsert_profile(
+            ModelProfile(profile_id="hermetic-profile", provider_id="hermetic-host", model="host")
+        )
+        for module in set(MODEL_STAGES.values()):
+            store.set_binding(module, profile.profile_id)
+        store.save()
+        env_patch = mock.patch.dict(
+            os.environ, {"RESEARCH_AGENT_MODEL_STORE": str(store_path)}
+        )
+        env_patch.start()
+        self.addCleanup(env_patch.stop)
         without = self._contract(["can_call_tools", "can_write_files"])
         self.assertIn("model_stages_suspend_without_a_host_model", without["blocked"])
         with_model = self._contract(
