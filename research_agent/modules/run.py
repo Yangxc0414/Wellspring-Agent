@@ -289,8 +289,12 @@ class RunAgent:
             raise RunError("chemlab split must be demo or holdout")
         train_path = fixture / ("%s_train_Morgan_fingerprints.csv" % request.split)
         test_path = fixture / ("%s_test_Morgan_fingerprints.csv" % request.split)
-        train = pd.read_csv(train_path)
-        test = pd.read_csv(test_path)
+        # fingerprints are 512-char digit strings: newer pandas infers numeric columns
+        # aggressively and stringifying floats loses leading zeros (widths 486-512),
+        # so the fingerprint columns are pinned to str regardless of the pandas version
+        _fp_dtypes = {"B_Fingerprint": str, "C_Fingerprint": str, "Product_Fingerprint": str}
+        train = pd.read_csv(train_path, dtype=_fp_dtypes)
+        test = pd.read_csv(test_path, dtype=_fp_dtypes)
 
         def bits(series):
             # parse CSV independently of pandas/numpy version: trailing \r from a CRLF

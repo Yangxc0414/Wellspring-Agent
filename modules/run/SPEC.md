@@ -2,7 +2,7 @@
 id: run
 name: S5 执行与证据
 stage: S5
-version: 0.7.1
+version: 0.7.2
 status: draft
 owner: research-agent
 inputs:
@@ -94,6 +94,7 @@ invariants:
 
 ## Changelog
 
+- 2026-11-15 · v0.7.2 · status=draft · chemlab 根因修复：CI pandas 2.2+ 将 512 位数字指纹列推断为 float 丢前导零（宽度 486-512），fingerprint 列显式 dtype=str 钉住字符串解析
 - 2026-11-15 · v0.7.1 · status=draft · 跨平台健壮性：chemlab bits() 解析与 pandas/numpy 版本解耦（strip+均宽校验+带行号诊断），行为不变
 - 2026-10-30 · v0.7.0 · status=draft · 0.7.0（2026-10-30）：把闭环最后一公里从"人凭空写断言"变成"人确认一个可审计的提议"。实测严格模式跑到 G5 时，run/claim-draft.json 只给出 statement（"mean accuracy is 0.956 over seeds [17,18,19]"）与证据引用，assertions 为空——人签之前必须自己编 metric/comparator/value/tolerance，没有任何依据可抄。现在 draft 增加 assertion_proposal：取每种子指标的最差值作为下限（无需任何分布假设），附 basis(mean/min/max/seeds)、可复制的 assertion_argument（实测 metric=accuracy,value=0.9111,comparator=>=,tolerance=0.0）与边界声明"提议是给人的草稿，不是 claim，不可签核"。metric 从 capsule.metric_name 取（chemlab 取 delta_r2），没有逐种子值时返回 status=unavailable 而不是猜一个数。人仍要自己敲最终 --assertion，所以没有任何东西被自动变成可签署内容。tests.test_pipeline 22 项 OK（新增 AssertionProposalTest 两项：最差种子成下限且边界声明存在、无值时报 unavailable 不猜）。契约变化：claim 草稿新增一个只读字段。
 - 2026-10-28 · v0.6.2 · status=draft · run-contract 的 min_delta 不再恒为未评估：从 paired seed metrics 计算 `delta_<metric>`/`baseline_<metric>`；预注册阈值未达标为 blocker；无 baseline 标 `not_verifiable` 警告；不改变 EA/claim/人工门。

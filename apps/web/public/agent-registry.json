@@ -1,7 +1,7 @@
 {
   "schema_version": "workspace-0.1",
   "source": "modules/*/SPEC.md",
-  "generated_at": "2026-11-14T16:34:58+00:00",
+  "generated_at": "2026-11-14T17:06:00+00:00",
   "count": 30,
   "agents": [
     {
@@ -215,7 +215,7 @@
       "id": "run",
       "name": "S5 执行与证据",
       "stage": "S5",
-      "version": "0.7.1",
+      "version": "0.7.2",
       "status": "draft",
       "owner": "research-agent",
       "outputs": [
