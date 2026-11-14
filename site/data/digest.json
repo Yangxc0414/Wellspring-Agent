@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T05:17:00Z",
+  "generated_at": "2026-11-14T07:38:24.317Z",
   "source": "OpenAlex /works",
   "mode": "CACHED",
   "license": "OpenAlex metadata; respect source licenses and attribution",
@@ -9,7 +9,7 @@
       "label": "钙钛矿太阳能电池稳定性",
       "query": "perovskite solar cell stability",
       "from_year": 2020,
-      "total_hits": 17141,
+      "total_hits": 16789,
       "returned": 6,
       "works": [
         {
@@ -17,7 +17,7 @@
           "doi": "https://doi.org/10.1038/s41586-021-03406-5",
           "title": "Pseudo-halide anion engineering for α-FAPbI3 perovskite solar cells",
           "year": 2021,
-          "cited_by": 3074,
+          "cited_by": 3150,
           "venue": "Nature",
           "authors": [
             "Jaeki Jeong",
@@ -32,7 +32,7 @@
           "doi": "https://doi.org/10.1038/s41560-019-0529-5",
           "title": "Consensus statement for stability assessment and reporting for perovskite photovoltaics based on ISOS procedures",
           "year": 2020,
-          "cited_by": 1810,
+          "cited_by": 2008,
           "venue": "Nature Energy",
           "authors": [
             "Mark Khenkin",
@@ -40,14 +40,14 @@
             "Antonio Abate"
           ],
           "open_access": true,
-          "abstract": ""
+          "abstract": "Abstract Improving the long-term stability of perovskite solar cells is critical to the deployment of this technology. Despite the great emphasis laid on stability-related investigations, publications lack consistency in experimental procedures and parameters reported. It is therefore challenging to reproduce and compare results and thereby develop a deep understanding of degradation mechanisms. Here, we report a consensus between researchers in the field on procedures for testing perovskite solar cell stability, which are based on the International Summit on Organic Photovoltaic Stability (IS"
         },
         {
           "openalex_id": "https://openalex.org/W3088739094",
           "doi": "https://doi.org/10.1126/science.abb7167",
           "title": "Stable perovskite solar cells with efficiency exceeding 24.8% and 0.3-V voltage loss",
           "year": 2020,
-          "cited_by": 1518,
+          "cited_by": 1534,
           "venue": "Science",
           "authors": [
             "Mingyu Jeong",
@@ -55,14 +55,14 @@
             "Eun Min Go"
           ],
           "open_access": false,
-          "abstract": ""
+          "abstract": "Further improvement and stabilization of perovskite solar cell (PSC) performance are essential to achieve the commercial viability of next-generation photovoltaics. Considering the benefits of fluorination to conjugated materials for energy levels, hydrophobicity, and noncovalent interactions, two fluorinated isomeric analogs of the well-known hole-transporting material (HTM) Spiro-OMeTAD are developed and used as HTMs in PSCs. The structure-property relationship induced by constitutional isomerism is investigated through experimental, atomistic, and theoretical analyses, and the fabricated PS"
         },
         {
           "openalex_id": "https://openalex.org/W4288425348",
           "doi": "https://doi.org/10.1126/science.abp8873",
           "title": "Inactive (PbI 2 ) 2 RbCl stabilizes perovskite films for efficient solar cells",
           "year": 2022,
-          "cited_by": 1449,
+          "cited_by": 1459,
           "venue": "Science",
           "authors": [
             "Yang Zhao",
@@ -70,14 +70,14 @@
             "Zihan Qu"
           ],
           "open_access": false,
-          "abstract": ""
+          "abstract": "In halide perovskite solar cells the formation of secondary-phase excess lead iodide (PbI 2 ) has some positive effects on power conversion efficiency (PCE) but can be detrimental to device stability and lead to large hysteresis effects in voltage sweeps. We converted PbI 2 into an inactive (PbI 2 ) 2 RbCl compound by RbCl doping, which effectively stabilizes the perovskite phase. We obtained a certified PCE of 25.6% for FAPbI 3 (FA, formamidinium) perovskite solar cells on the basis of this strategy. Devices retained 96% of their original PCE values after 1000 hours of shelf storage and 80% a"
         },
         {
           "openalex_id": "https://openalex.org/W4394728226",
           "doi": "https://doi.org/10.1126/science.adm9474",
           "title": "Improved charge extraction in inverted perovskite solar cells with dual-site-binding ligands",
           "year": 2024,
-          "cited_by": 1398,
+          "cited_by": 1453,
           "venue": "Science",
           "authors": [
             "Hao Chen",
@@ -85,14 +85,14 @@
             "Jian Xu"
           ],
           "open_access": true,
-          "abstract": ""
+          "abstract": "Inverted (pin) perovskite solar cells (PSCs) afford improved operating stability in comparison to their nip counterparts but have lagged in power conversion efficiency (PCE). The energetic losses responsible for this PCE deficit in pin PSCs occur primarily at the interfaces between the perovskite and the charge-transport layers. Additive and surface treatments that use passivating ligands usually bind to a single active binding site: This dense packing of electrically resistive passivants perpendicular to the surface may limit the fill factor in pin PSCs. We identified ligands that bind two ne"
         },
         {
           "openalex_id": "https://openalex.org/W4206188804",
           "doi": "https://doi.org/10.1126/science.abh1885",
           "title": "Conformal quantum dot–SnO 2 layers as electron transporters for efficient perovskite solar cells",
           "year": 2022,
-          "cited_by": 1354,
+          "cited_by": 1359,
           "venue": "Science",
           "authors": [
             "Minjin Kim",
@@ -100,7 +100,7 @@
             "Haizhou Lu"
           ],
           "open_access": true,
-          "abstract": ""
+          "abstract": "Improvements to perovskite solar cells (PSCs) have focused on increasing their power conversion efficiency (PCE) and operational stability and maintaining high performance upon scale-up to module sizes. We report that replacing the commonly used mesoporous–titanium dioxide electron transport layer (ETL) with a thin layer of polyacrylic acid–stabilized tin(IV) oxide quantum dots (paa-QD-SnO 2 ) on the compact–titanium dioxide enhanced light capture and largely suppressed nonradiative recombination at the ETL–perovskite interface. The use of paa-QD-SnO 2 as electron-selective contact enabled PSC"
         }
       ]
     },
@@ -109,7 +109,7 @@
       "label": "固态电池界面",
       "query": "solid-state battery interface",
       "from_year": 2020,
-      "total_hits": 7014,
+      "total_hits": 6878,
       "returned": 4,
       "works": [
         {
@@ -117,7 +117,7 @@
           "doi": "https://doi.org/10.1002/aenm.202203307",
           "title": "Lithium Batteries and the Solid Electrolyte Interphase (SEI)—Progress and Outlook",
           "year": 2023,
-          "cited_by": 837,
+          "cited_by": 884,
           "venue": "Advanced Energy Materials",
           "authors": [
             "Henry Adenusi",
@@ -125,44 +125,14 @@
             "Stefano Passerini"
           ],
           "open_access": true,
-          "abstract": ""
-        },
-        {
-          "openalex_id": "https://openalex.org/W3003014070",
-          "doi": "https://doi.org/10.1002/advs.201903088",
-          "title": "Progress and Perspective of Ceramic/Polymer Composite Solid Electrolytes for Lithium Batteries",
-          "year": 2020,
-          "cited_by": 825,
-          "venue": "Advanced Science",
-          "authors": [
-            "Li Song",
-            "Shiqi Zhang",
-            "Lu Shen"
-          ],
-          "open_access": true,
-          "abstract": ""
-        },
-        {
-          "openalex_id": "https://openalex.org/W3053356149",
-          "doi": "https://doi.org/10.1002/adma.202000751",
-          "title": "Lithium/Sulfide All‐Solid‐State Batteries using Sulfide Electrolytes",
-          "year": 2020,
-          "cited_by": 811,
-          "venue": "Advanced Materials",
-          "authors": [
-            "Jinghua Wu",
-            "Sufu Liu",
-            "Fudong Han"
-          ],
-          "open_access": false,
-          "abstract": ""
+          "abstract": "Abstract Interfacial dynamics within chemical systems such as electron and ion transport processes have relevance in the rational optimization of electrochemical energy storage materials and devices. Evolving the understanding of fundamental electrochemistry at interfaces would also help in the understanding of relevant phenomena in biological, microbial, pharmaceutical, electronic, and photonic systems. In lithium‐ion batteries, the electrochemical instability of the electrolyte and its ensuing reactive decomposition proceeds at the anode surface within the Helmholtz double layer resulting in"
         },
         {
           "openalex_id": "https://openalex.org/W3105248494",
           "doi": "https://doi.org/10.1002/aenm.202002689",
           "title": "Solid‐State Li–Metal Batteries: Challenges and Horizons of Oxide and Sulfide Solid Electrolytes and Their Interfaces",
           "year": 2020,
-          "cited_by": 810,
+          "cited_by": 832,
           "venue": "Advanced Energy Materials",
           "authors": [
             "Kun Joong Kim",
@@ -170,11 +140,39 @@
             "Masaki Wadaguchi"
           ],
           "open_access": false,
+          "abstract": "Abstract The introduction of new, safe, and reliable solid‐electrolyte chemistries and technologies can potentially overcome the challenges facing their liquid counterparts while widening the breadth of possible applications. Through tech‐historic evolution and rationally analyzing the transition from liquid‐based Li‐ion batteries (LIBs) to all‐solid‐state Li‐metal batteries (ASSLBs), a roadmap for the development of a successful oxide and sulfide‐based ASSLB focusing on interfacial challenges is introduced, while accounting for five parameters: energy density, power density, longterm stabilit"
+        },
+        {
+          "openalex_id": "https://openalex.org/W3161037511",
+          "doi": "https://doi.org/10.1038/s41586-021-03486-3",
+          "title": "A dynamic stability design strategy for lithium metal solid state batteries",
+          "year": 2021,
+          "cited_by": 777,
+          "venue": "Nature",
+          "authors": [
+            "Luhan Ye",
+            "Xin Li"
+          ],
+          "open_access": false,
+          "abstract": ""
+        },
+        {
+          "openalex_id": "https://openalex.org/W4206988986",
+          "doi": "https://doi.org/10.1016/j.ensm.2022.01.042",
+          "title": "Recent progress and future perspective on practical silicon anode-based lithium ion batteries",
+          "year": 2022,
+          "cited_by": 754,
+          "venue": "Energy storage materials",
+          "authors": [
+            "Lin Ning Sun",
+            "Yanxiu Liu",
+            "Rong Shao"
+          ],
+          "open_access": false,
           "abstract": ""
         }
       ]
     }
   ],
-  "errors": [],
-  "note": "manual snapshot built from OpenAlex on 2026-10-23; refresh-digest.yml will replace it on schedule"
+  "errors": []
 }
