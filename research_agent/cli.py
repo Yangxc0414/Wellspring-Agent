@@ -3697,7 +3697,9 @@ def _cmd_memory_ab(args: argparse.Namespace) -> int:
             Path(args.literature_file).expanduser().read_text(encoding="utf-8")
         )
         if isinstance(ideas, dict):
-            ideas = ideas.get("selected_ideas") or ideas.get("final_ideas") or ideas.get("ideas") or []
+            from .memory_ab import normalize_ideas_file
+
+            ideas = normalize_ideas_file(ideas)
         scored = record(
             project,
             run_id=args.run_id,

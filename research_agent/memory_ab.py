@@ -31,6 +31,40 @@ SINGLE_SESSION_BOUNDARY = (
     "distinct host sessions per arm"
 )
 
+
+def normalize_ideas_file(payload: Any) -> List[Dict[str, Any]]:
+    """Extract idea dicts from any accepted file format.
+
+    Accepted shapes:
+    - bare array of idea dicts
+    - {"ideas": [...], ...}           (proposal output)
+    - {"selected_ideas": [...], ...}  (idea module output)
+    - {"final_ideas": [...], ...}     (idea module output)
+    - {"candidates": [...], ...}      (idea.json from the idea module)
+    - {"reviews": [...], ...}         (innovation-review.json: extract ranked ideas from iterations)
+
+    This is the glue between the review protocol and memory-ab scoring: the
+    innovation review stores scored reviews but not the full idea objects, while
+    memory_ab needs the idea objects to score. Normalizing here means callers
+    don't have to know which module wrote the file.
+    """
+    if isinstance(payload, list):
+        return [item for item in payload if isinstance(item, dict)]
+    if not isinstance(payload, dict):
+        return []
+    for key in ("selected_ideas", "final_ideas", "ideas", "candidates"):
+        items = payload.get(key)
+        if isinstance(items, list) and items:
+            return [item for item in items if isinstance(item, dict)]
+    # innovation-review.json: extract ideas from the last iteration's ranking
+    iterations = payload.get("iterations")
+    if isinstance(iterations, list) and iterations:
+        last = iterations[-1]
+        ranking = last.get("ranking") if isinstance(last, dict) else None
+        if isinstance(ranking, list) and ranking:
+            return [item for item in ranking if isinstance(item, dict)]
+    return []
+
 METRICS = (
     "grounded_rate",
     "falsifiable_rate",
