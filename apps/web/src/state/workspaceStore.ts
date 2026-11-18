@@ -26,6 +26,7 @@ import {
   createConversationTask,
   createSeedWorkspace,
   createTask as buildTask,
+  seedEseStudy,
   planCard,
   writingCard
 } from "../domain/seed";
@@ -64,7 +65,30 @@ import type {
 } from "../domain/types";
 import { clockTime, formatBytes, isoDateOffset, isoNow, uid } from "../domain/utils";
 
-const initialSnapshot = staticAdapter.load() ?? createSeedWorkspace();
+const ESE_REPLAY_TASK_ID = "ese-ms-20261118-03";
+
+/**
+ * Add the ESE replay to an already-persisted workspace once. The replay is a
+ * static record of a real study, not user work, so an explicit delete (which
+ * lands in archivedTaskIds) must win over this migration.
+ */
+function ensureSeedEseTask(snapshot: PersistedWorkspace): PersistedWorkspace {
+  if (snapshot.tasks.some((task) => task.id === ESE_REPLAY_TASK_ID)) return snapshot;
+  if ((snapshot.archivedTaskIds ?? []).includes(ESE_REPLAY_TASK_ID)) return snapshot;
+  const next: PersistedWorkspace = {
+    ...snapshot,
+    tasks: [seedEseStudy(), ...snapshot.tasks]
+  };
+  try {
+    staticAdapter.save(next);
+  } catch {
+    /* quota / private mode: the in-memory snapshot still shows the replay */
+  }
+  return next;
+}
+
+const loadedSnapshot = staticAdapter.load();
+const initialSnapshot = loadedSnapshot ? ensureSeedEseTask(loadedSnapshot) : createSeedWorkspace();
 
 const defaultUI: UIState = {
   contextTab: "run",

@@ -451,6 +451,112 @@ function seedThesisTask(
   };
 }
 
+export function seedEseStudy(): ResearchTask {
+  return {
+    id: "ese-ms-20261118-03",
+    name: "ESE：缺陷修复更常触碰测试？",
+    goal: "在 click / requests / httpx 上检验缺陷修复提交是否更常触碰测试，并检查差异能否经分层后成立。",
+    domain: "经验软件工程",
+    mode: "research",
+    access: "ask",
+    status: "blocked",
+    workspaceId: "thesis",
+    createdAt: "2026-11-18",
+    updatedAt: "2026-11-18T22:50:00",
+    stage: 5,
+    completedStages: [0, 1, 2, 3, 4],
+    harness: { version: "v1", budget: 6, label: "incumbent · broad-first" },
+    model: defaultModelSettings(),
+    ...seedUsage([]),
+    guidance: [],
+    plugins: ["github"],
+    toolCalls: [],
+    budget: { used: 3, total: 30 },
+    gates: [
+      { id: "Q0", status: "pass", reason: "3 个仓库 HEAD 已固定；协议先于数据冻结" },
+      { id: "G1", status: "needs_human", reason: "四条 RQ 已收敛为一条可检验断言" },
+      { id: "G2", status: "needs_human", reason: "分层与置换计划已冻结，等待人工确认" },
+      { id: "S5", status: "pass", reason: "run-capsule completed · EA immutable" },
+      { id: "G5", status: "blocked", reason: "claim / closure / signature 尚未人签" }
+    ],
+    coverage: { sources: 3, spans: 0, gaps: 1, abstractOnly: 0 },
+    evidence: [],
+    protocol: null,
+    protocolFrozen: true,
+    run: null,
+    evaluation: emptyEvaluation(),
+    evolution: { status: "idle", candidate: null, lease: "", history: [] },
+    auto: { running: false, paused: false, index: 0, cycle: 0, gate: "", gateApproved: false },
+    autoStages: freshStages().map((stage, index) => (index <= 4 ? { ...stage, status: "done" } : stage)),
+    messages: [
+      system(
+        "STATIC REPLAY · 回放一次真实 ESE 研究（ESE-MS-20261118-03）。数字来自 runtime_data 产物；claim / closure / signature 仍未人签。",
+        "22:41:02"
+      ),
+      user(
+        "研究一个问题：Python 项目里，缺陷修复提交是不是比功能提交更常触碰测试？这个差异经项目分层后还成立吗？",
+        "22:41:10"
+      ),
+      agent(
+        "先把它拆成四个可检验的子问题，并在跑数之前把协议冻结。",
+        {
+          type: "plan",
+          queries: [
+            "RQ1 触碰 .py 的提交里，有多大比例同时触碰测试？",
+            "RQ2 缺陷修复提交与其它提交的比例是否不同？",
+            "RQ3 按每仓库中位日期切分，早晚是否不同？",
+            "RQ4 按项目 / 提交规模 / 生产代码共变分层后，差异是否仍在？"
+          ],
+          scope: "click / requests / httpx · 本地 clone · path+message 启发式标签",
+          budget: "3 repos · 5132 commits · 置换 1000 次（固定种子）",
+          note: "协议先于数据冻结；标签是启发式，不是人工标注。"
+        },
+        "22:41:26"
+      ),
+      agent(
+        "执行完成：3 个仓库、5132 个提交。",
+        {
+          type: "sources",
+          items: [
+            { title: "click", meta: "1328 commits · 0.4428 [0.4163, 0.4696]", status: "ok" },
+            { title: "requests", meta: "2824 commits · 0.2691 [0.2531, 0.2858]", status: "ok" },
+            { title: "httpx", meta: "980 commits · 0.5878 [0.5567, 0.6182]", status: "ok" }
+          ],
+          note: "三个仓库都是成熟开源项目；这是便利样本，不是概率抽样。"
+        },
+        "22:43:05"
+      ),
+      agent(
+        "**合并读数**\n\n- 触碰测试：1924 / 5132 = **0.3749**，95% CI [0.3618, 0.3882]\n- 缺陷修复：352 / 851 = 0.4136；其它：1572 / 4281 = 0.3672\n- 差 **+0.0464**，置换检验双侧 p = **0.015**\n- 时间切分：早期 0.3091 → 晚期 0.4410，差 +0.1319（p = 0.001）\n\n> 合并样本上差异为正。是否每个项目都成立，要分层才知道。",
+        undefined,
+        "22:43:20"
+      ),
+      user("分层之后呢？我担心是某个项目把总体拉高了。", "22:44:01"),
+      agent(
+        "**分层结果：差异不是每个项目都成立**\n\n- click：0.4375 vs 0.4442 → **-0.0067（方向反转）**\n- httpx：0.6264 vs 0.5838 → +0.0426\n- requests：0.3581 vs 0.2513 → +0.1068\n- 提交规模 >5：0.5909 vs 0.6700 → -0.0791\n\n所以能写的只有：“在三仓库合并样本上高 0.046，但 click 内方向反转，因此不适用于单项目。” 不能写“缺陷修复提交更常改测试”。",
+        undefined,
+        "22:44:18"
+      ),
+      user("这条现在能签吗？", "22:45:02"),
+      agent(
+        "还不能。证据链五段只完成了前两段：\n\n- RunCapsule ✓ completed（metric=test_cochange_rate，seeds=[42]）\n- EA ✓ immutable（EA-65d32e114229，source=ese-exec）\n- Claim · 待人工\n- Closure · 待执行\n- Signature · 待人工\n\n后三步都是人签步骤，agent 不代签。",
+        {
+          type: "gate",
+          gate: "G5",
+          title: "结论待人工签署",
+          reason: "capsule 与 EA 已完成；claim / closure / signature 需要人执行 CLI",
+          status: "blocked"
+        },
+        "22:45:20"
+      ),
+      system(
+        "等待人工：run claim --evidence-source ese-exec → closure ese-check → closure ese-sign。签完后页面的证据链会自动变为 SIGNED。",
+        "22:45:30"
+      )
+    ]
+  };
+}
+
 export function createSeedWorkspace(): PersistedWorkspace {
   return {
     version: 1,
@@ -463,6 +569,7 @@ export function createSeedWorkspace(): PersistedWorkspace {
     memory: [],
     archivedTaskIds: [],
     tasks: [
+      seedEseStudy(),
       seedPerovskite(),
       seedArchives(),
       seedThesisTask("evidence-writing", "证据驱动科研写作系统", "把 claim 与 span 的绑定做成可审计的写作工作流。", "2026-10-23T16:40:00", "writing"),
