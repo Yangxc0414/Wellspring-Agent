@@ -88,7 +88,7 @@ def build(run_dir, project_dir, run_id, review_dir):
     gates = demo.get("gates") or []
     hits = literature.get("hits") or []
     plan = literature.get("query_plan") or {}
-    candidates = (ideas.get("candidates") or [])[:5]
+    candidates = (ideas.get("candidates") or [])[:8]
     themes = (synthesis.get("themes") or [])[:6]
     draft = (paper.get("draft") or [])[:3]
     final_ideas = (innovation.get("final_ideas") or [])[:4]
@@ -339,7 +339,7 @@ a{{color:#2563eb}} code{{font-size:11.5px}}
 <h2>10. 门禁与签名边界</h2>
 <p>{gates}</p>
 <div class="boundary">本页只回放一次真实运行：G1/G2/G3/S5b/G5 仍待人签；没有 Claim/EA/签名；创新评审与手稿评审是模型辅助的过程信号，不是同行评审；accepted 不等于通过，ready_for_human_review 不等于可投稿。产物路径来自本机 runtime_data，不入发布包。</div>
-<p><a href="../">← 回放摘要</a> · <a href="../../">首页</a> · <a href="../frontier/">24 篇前沿语料版本</a> · 设计记录：design/111、design/122</p>
+<p><a href="../">← 回放摘要</a> · <a href="../../">首页</a> · <a href="../run/">主版本来龙去脉</a> · <a href="../run-frontier/">24 篇版本来龙去脉</a> · <a href="../frontier/">24 篇前沿语料回放</a> · 设计记录：design/111、design/122、design/123</p>
 </main>
 <script src="../../assets/demo-legibility.js"></script>
 </body></html>""".format(

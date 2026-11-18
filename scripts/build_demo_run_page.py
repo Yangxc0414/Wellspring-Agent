@@ -115,7 +115,7 @@ def build(run_dir, project_run_dir, review_dir):
     }
 
 
-def render(data):
+def render(data, footer_links):
     rows = "".join(
         '<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>'.format(
             html.escape(item["label"]), html.escape(item["status"]), item["warnings"]
@@ -177,7 +177,7 @@ a{{color:#2563eb}}
 
   <h2>6. 边界</h2>
   <p class="boundary">本页回放一次本地真实运行（模型调用经本地网关）。门禁 G1/G2/G3/G5 仍待人签；没有 Claim/EA/签名；accepted 不等于通过，ready_for_human_review 不等于可投稿。工作台只保留一个入口：<a href="../app/">/app/</a>（构建产物），真实执行需本地 runtime。</p>
-  <p><a href="../">← 返回首页</a> · <a href="../index.html#ese-run">最近一次真实运行面板</a> · <a href="run/">完整来龙去脉（逐阶段产物与门禁）→</a> · <a href="frontier/">24 篇前沿语料 / 6 候选版本 →</a> · 设计记录：design/111、design/117</p>
+  <p>{footer_links}</p>
 </main>
 <script src="../assets/demo-legibility.js"></script>
 </body>
@@ -205,6 +205,7 @@ a{{color:#2563eb}}
         audit_citations=html.escape(str(data["audit"]["citations"])),
         audit_han=html.escape(str(data["audit"]["han"])),
         audit_submission=html.escape(str(data["audit"]["submission_ready"])),
+        footer_links=footer_links,
     )
 
 
@@ -218,7 +219,19 @@ def main(argv=None):
     data = build(args.run_dir, args.project_run_dir, args.review_dir)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render(data), encoding="utf-8")
+    if out.parent.name == "demo":
+        footer_links = (
+            '<a href="../">← 返回首页</a> · <a href="../index.html#ese-run">最近一次真实运行面板</a> · '
+            '<a href="run/">主版本来龙去脉 →</a> · <a href="run-frontier/">24 篇版本来龙去脉 →</a> · '
+            '<a href="frontier/">24 篇前沿语料 / 6 候选回放 →</a> · 设计记录：design/111、design/117'
+        )
+    else:
+        footer_links = (
+            '<a href="../">← 返回首页</a> · <a href="../index.html#ese-run">最近一次真实运行面板</a> · '
+            '<a href="../run/">主版本来龙去脉 →</a> · <a href="../run-frontier/">24 篇版本来龙去脉 →</a> · '
+            '<a href="../">主版本回放 →</a> · 设计记录：design/111、design/117'
+        )
+    out.write_text(render(data, footer_links), encoding="utf-8")
     print("demo page: {0} (run {1}, {2} candidates, {3} sources)".format(
         out, data["run_id"], len(data["candidates"]), data["sources"]))
     return 0

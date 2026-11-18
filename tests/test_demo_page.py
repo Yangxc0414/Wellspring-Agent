@@ -40,6 +40,23 @@ class DemoPagesTest(unittest.TestCase):
         replay = (ROOT / "demo" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="run/"', replay)
 
+    def test_frontier_chain_page_shows_breadth_variant(self):
+        page = (ROOT / "demo" / "run-frontier" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('data-dl-page="demo"', page)
+        self.assertIn("24 sources", page)
+        self.assertIn("6 条", page)
+        self.assertIn("not_run", page)
+        self.assertIn("../run-frontier/", page)
+        main = (ROOT / "demo" / "run" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("../run-frontier/", main)
+        frontier_replay = (ROOT / "demo" / "frontier" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("run-frontier/", frontier_replay)
+
+    def test_frontier_chain_copy_matches(self):
+        source = (ROOT / "demo" / "run-frontier" / "index.html").read_text(encoding="utf-8")
+        copied = (ROOT / "site" / "demo" / "run-frontier" / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(source, copied)
+
     def test_chain_copy_matches(self):
         source = (ROOT / "demo" / "run" / "index.html").read_text(encoding="utf-8")
         copied = (ROOT / "site" / "demo" / "run" / "index.html").read_text(encoding="utf-8")
