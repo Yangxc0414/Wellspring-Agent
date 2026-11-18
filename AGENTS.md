@@ -273,7 +273,7 @@ python -m unittest discover -s tests -v
 - [ ] 目标模块测试通过，未破坏其他模块；
 - [ ] 输出仍遵守 `fixture_mode` / `span-only` / no-claim 边界；
 - [ ] 没有新增未使用依赖；
-- [ ] 跑过 `python scripts/repo_hygiene.py`：站点生成副本与源一致、无浏览器/模型缓存目录、工作流路径筛选没有指向不存在的文件；
+- [ ] 跑过 `python scripts/docs_audit.py`（设计档案编号唯一、索引链接有效、计数一致）与 `python scripts/repo_hygiene.py`：站点生成副本与源一致、无浏览器/模型缓存目录、工作流路径筛选没有指向不存在的文件；
 - [ ] 改动文件清单与规格 changelog 能对上。
 
 ## 7. 不要做
