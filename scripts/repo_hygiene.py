@@ -74,6 +74,25 @@ SKIP_DIRS = {
 }
 
 
+def _text_digest(path):
+    """Digest a text file with line endings normalised.
+
+    The copies are byte copies at build time, but a git checkout may materialise one side
+    with CRLF and the other with LF, which used to read as real drift on Linux CI. Comparing
+    normalised text keeps the check about content, not about checkout conversion.
+    """
+    try:
+        with open(str(path), "rb") as handle:
+            data = handle.read()
+    except OSError:
+        return None
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        return hashlib.sha256(data).hexdigest()
+    return hashlib.sha256(text.replace(chr(13) + chr(10), chr(10)).encode("utf-8")).hexdigest()
+
+
 def _sha256(path):
     with open(path, "rb") as handle:
         return hashlib.sha256(handle.read()).hexdigest()
@@ -123,7 +142,9 @@ def check_site_copies(root):
             continue
         if source == "README.md" and _release_owned(root, source):
             continue
-        if _sha256(source_path) != _sha256(target_path):
+        left = _text_digest(source_path)
+        right = _text_digest(target_path)
+        if left is None or right is None or left != right:
             blockers.append({"kind": "site_copy_drift", "path": target, "source": source})
     return blockers
 
