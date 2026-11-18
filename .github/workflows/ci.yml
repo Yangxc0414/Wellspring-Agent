@@ -89,11 +89,18 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
         run: |
-          if [ -d tests ]; then
-            python -m unittest discover -s tests -v
-          else
+          if [ ! -d tests ]; then
             echo "tests/ not present (frontend-only public repo)."
+            exit 0
           fi
+          # The full suite needs local-only data that this repository intentionally does not
+          # ship (download corpora, astradraw vendor). Skipping is honest; a red advisory job
+          # on every push teaches people to ignore CI.
+          if [ ! -d research_agent/web/data ] && [ ! -d research_agent/vendor/astradraw ]; then
+            echo "Full suite needs local-only research data; skipping advisory run."
+            exit 0
+          fi
+          python -m unittest discover -s tests -v
 
   web:
     runs-on: ubuntu-latest
