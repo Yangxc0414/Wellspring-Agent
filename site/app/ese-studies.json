@@ -1,0 +1,822 @@
+{
+  "schema": "runtime-ese-studies-0.1",
+  "count": 8,
+  "studies": [
+    {
+      "study_id": "ESE-MS-20261118-03",
+      "directory": "ese-ms-20261118-03",
+      "method": "repository-mining",
+      "questions": [
+        "RQ1: among commits that touch Python source, what fraction also touch tests?",
+        "RQ2: is that fraction different for bug-fix commits than for other commits?",
+        "RQ3: does the fraction differ between earlier and later history (per-repo median date split)?",
+        "RQ4: does the bug-fix difference survive stratification by project, commit size and production-file co-change?"
+      ],
+      "protocol_sha256": "254d1d10ea4931ae9c2420f5bc0207eb3dbeb7f61adff32377947e1cb47f5be4",
+      "repos": [
+        {
+          "repo": "click",
+          "head": "08b803cf32ceb2ae6a772c62d5da42757a897d44",
+          "commits": 1328,
+          "test_cochange": 588,
+          "rate": 0.4428,
+          "ci": [
+            0.4163,
+            0.4696
+          ]
+        },
+        {
+          "repo": "requests",
+          "head": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+          "commits": 2824,
+          "test_cochange": 760,
+          "rate": 0.2691,
+          "ci": [
+            0.2531,
+            0.2858
+          ]
+        },
+        {
+          "repo": "httpx",
+          "head": "7cff5f79bc78649bbcd3fd9aa7a74c86e0f63016",
+          "commits": 980,
+          "test_cochange": 576,
+          "rate": 0.5878,
+          "ci": [
+            0.5567,
+            0.6182
+          ]
+        }
+      ],
+      "pooled": {
+        "commits": 5132,
+        "test_cochange": 1924,
+        "rate": 0.3749,
+        "ci": [
+          0.3618,
+          0.3882
+        ],
+        "bugfix": {
+          "hits": 352,
+          "total": 851,
+          "rate": 0.4136
+        },
+        "non_bugfix": {
+          "hits": 1572,
+          "total": 4281,
+          "rate": 0.3672
+        },
+        "difference": 0.0464,
+        "permutation": {
+          "n": 1000,
+          "seed": 42,
+          "p_value_two_sided": 0.015
+        }
+      },
+      "strata": [
+        {
+          "factor": "project",
+          "value": "click",
+          "bug": {
+            "hits": 126,
+            "total": 288,
+            "rate": 0.4375
+          },
+          "other": {
+            "hits": 462,
+            "total": 1040,
+            "rate": 0.4442
+          },
+          "difference": -0.0067,
+          "degenerate": false
+        },
+        {
+          "factor": "project",
+          "value": "httpx",
+          "bug": {
+            "hits": 57,
+            "total": 91,
+            "rate": 0.6264
+          },
+          "other": {
+            "hits": 519,
+            "total": 889,
+            "rate": 0.5838
+          },
+          "difference": 0.0426,
+          "degenerate": false
+        },
+        {
+          "factor": "project",
+          "value": "requests",
+          "bug": {
+            "hits": 169,
+            "total": 472,
+            "rate": 0.3581
+          },
+          "other": {
+            "hits": 591,
+            "total": 2352,
+            "rate": 0.2513
+          },
+          "difference": 0.1068,
+          "degenerate": false
+        },
+        {
+          "factor": "commit_size_bucket",
+          "value": "1-2",
+          "bug": {
+            "hits": 219,
+            "total": 677,
+            "rate": 0.3235
+          },
+          "other": {
+            "hits": 768,
+            "total": 3039,
+            "rate": 0.2527
+          },
+          "difference": 0.0708,
+          "degenerate": false
+        },
+        {
+          "factor": "commit_size_bucket",
+          "value": "3-5",
+          "bug": {
+            "hits": 120,
+            "total": 152,
+            "rate": 0.7895
+          },
+          "other": {
+            "hits": 534,
+            "total": 839,
+            "rate": 0.6365
+          },
+          "difference": 0.153,
+          "degenerate": false
+        },
+        {
+          "factor": "commit_size_bucket",
+          "value": ">5",
+          "bug": {
+            "hits": 13,
+            "total": 22,
+            "rate": 0.5909
+          },
+          "other": {
+            "hits": 270,
+            "total": 403,
+            "rate": 0.67
+          },
+          "difference": -0.0791,
+          "degenerate": false
+        },
+        {
+          "factor": "production_cochange",
+          "value": "no",
+          "bug": {
+            "hits": 102,
+            "total": 102,
+            "rate": 1.0
+          },
+          "other": {
+            "hits": 547,
+            "total": 547,
+            "rate": 1.0
+          },
+          "difference": 0.0,
+          "degenerate": true
+        },
+        {
+          "factor": "production_cochange",
+          "value": "yes",
+          "bug": {
+            "hits": 250,
+            "total": 749,
+            "rate": 0.3338
+          },
+          "other": {
+            "hits": 1025,
+            "total": 3734,
+            "rate": 0.2745
+          },
+          "difference": 0.0593,
+          "degenerate": false
+        }
+      ],
+      "time_split": {
+        "policy": "per-repo median commit date",
+        "early": {
+          "hits": 795,
+          "total": 2572,
+          "rate": 0.3091,
+          "ci": [
+            0.2915,
+            0.3272
+          ]
+        },
+        "late": {
+          "hits": 1129,
+          "total": 2560,
+          "rate": 0.441,
+          "ci": [
+            0.4219,
+            0.4603
+          ]
+        },
+        "difference": 0.1319,
+        "permutation": {
+          "n": 1000,
+          "seed": 43,
+          "p_value_two_sided": 0.001
+        }
+      },
+      "boundary": "exploratory repository-mining result; test/bug labels are path and message heuristics; no Claim/EA/signature, no gate decision",
+      "chain": [
+        {
+          "name": "RunCapsule",
+          "ok": true,
+          "detail": "run_id=ESE-MS-20261118-03 · status=completed · metric=test_cochange_rate · seeds=[42]",
+          "path": "run/run-capsule.json"
+        },
+        {
+          "name": "EA（证据制品）",
+          "ok": true,
+          "detail": "artifact_id=EA-65d32e114229 · source=ese-exec · immutable=True · sha256=41149c82a3ed…",
+          "path": "run/ea.json"
+        },
+        {
+          "name": "Claim（人签断言）",
+          "ok": false,
+          "detail": "待人工执行：run claim --evidence-source ese-exec（见下方命令）",
+          "path": "claim/claim.json"
+        },
+        {
+          "name": "Closure（结构闭合）",
+          "ok": false,
+          "detail": "待执行：closure ese-check（见下方命令）",
+          "path": "closure/closure-report.json"
+        },
+        {
+          "name": "Signature（人签）",
+          "ok": false,
+          "detail": "待人工执行：closure ese-sign（见下方命令）",
+          "path": "signature/signature.json"
+        }
+      ],
+      "state": "EXPLORATORY · AWAITING HUMAN SIGNATURE"
+    },
+    {
+      "study_id": "ESE-MS-20261118-02",
+      "directory": "ese-ms-20261118-02",
+      "method": "repository-mining",
+      "questions": [
+        "RQ1: among commits that touch Python source, what fraction also touch tests?",
+        "RQ2: is that fraction different for bug-fix commits than for other commits?",
+        "RQ3: does the fraction differ between earlier and later history (per-repo median date split)?"
+      ],
+      "protocol_sha256": "1a228d38e3d225fae4d51f80d817516c69ce5b30bc6fe3a567ae6a9c4561435a",
+      "repos": [
+        {
+          "repo": "click",
+          "head": "08b803cf32ceb2ae6a772c62d5da42757a897d44",
+          "commits": 1328,
+          "test_cochange": 588,
+          "rate": 0.4428,
+          "ci": [
+            0.4163,
+            0.4696
+          ]
+        },
+        {
+          "repo": "requests",
+          "head": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+          "commits": 2824,
+          "test_cochange": 760,
+          "rate": 0.2691,
+          "ci": [
+            0.2531,
+            0.2858
+          ]
+        },
+        {
+          "repo": "httpx",
+          "head": "7cff5f79bc78649bbcd3fd9aa7a74c86e0f63016",
+          "commits": 980,
+          "test_cochange": 576,
+          "rate": 0.5878,
+          "ci": [
+            0.5567,
+            0.6182
+          ]
+        }
+      ],
+      "pooled": {
+        "commits": 5132,
+        "test_cochange": 1924,
+        "rate": 0.3749,
+        "ci": [
+          0.3618,
+          0.3882
+        ],
+        "bugfix": {
+          "hits": 352,
+          "total": 851,
+          "rate": 0.4136
+        },
+        "non_bugfix": {
+          "hits": 1572,
+          "total": 4281,
+          "rate": 0.3672
+        },
+        "difference": 0.0464,
+        "permutation": {
+          "n": 1000,
+          "seed": 42,
+          "p_value_two_sided": 0.015
+        }
+      },
+      "strata": [],
+      "time_split": {
+        "policy": "per-repo median commit date",
+        "early": {
+          "hits": 795,
+          "total": 2572,
+          "rate": 0.3091,
+          "ci": [
+            0.2915,
+            0.3272
+          ]
+        },
+        "late": {
+          "hits": 1129,
+          "total": 2560,
+          "rate": 0.441,
+          "ci": [
+            0.4219,
+            0.4603
+          ]
+        },
+        "difference": 0.1319,
+        "permutation": {
+          "n": 1000,
+          "seed": 43,
+          "p_value_two_sided": 0.001
+        }
+      },
+      "boundary": "exploratory repository-mining result; test/bug labels are path and message heuristics; no Claim/EA/signature, no gate decision",
+      "chain": [
+        {
+          "name": "RunCapsule",
+          "ok": false,
+          "detail": "缺失：run/run-capsule.json",
+          "path": "run/run-capsule.json"
+        },
+        {
+          "name": "EA（证据制品）",
+          "ok": false,
+          "detail": "缺失：run/ea.json",
+          "path": "run/ea.json"
+        },
+        {
+          "name": "Claim（人签断言）",
+          "ok": false,
+          "detail": "待人工执行：run claim --evidence-source ese-exec（见下方命令）",
+          "path": "claim/claim.json"
+        },
+        {
+          "name": "Closure（结构闭合）",
+          "ok": false,
+          "detail": "待执行：closure ese-check（见下方命令）",
+          "path": "closure/closure-report.json"
+        },
+        {
+          "name": "Signature（人签）",
+          "ok": false,
+          "detail": "待人工执行：closure ese-sign（见下方命令）",
+          "path": "signature/signature.json"
+        }
+      ],
+      "state": "EXPLORATORY · AWAITING HUMAN SIGNATURE"
+    },
+    {
+      "study_id": "ESE-MS-20261118-01",
+      "directory": "ese-ms-20261118-01",
+      "method": "repository-mining",
+      "questions": [
+        "RQ1: among commits that touch Python source, what fraction also touch tests?",
+        "RQ2: is that fraction different for bug-fix commits than for other commits?"
+      ],
+      "protocol_sha256": "7e27e69419d05c92370fd1368dc3d1cac4458a02833c380b56bfc877db4d12d3",
+      "repos": [
+        {
+          "repo": "click",
+          "head": "08b803cf32ceb2ae6a772c62d5da42757a897d44",
+          "commits": 1328,
+          "test_cochange": 588,
+          "rate": 0.4428,
+          "ci": [
+            0.4163,
+            0.4696
+          ]
+        },
+        {
+          "repo": "requests",
+          "head": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+          "commits": 2824,
+          "test_cochange": 760,
+          "rate": 0.2691,
+          "ci": [
+            0.2531,
+            0.2858
+          ]
+        },
+        {
+          "repo": "httpx",
+          "head": "7cff5f79bc78649bbcd3fd9aa7a74c86e0f63016",
+          "commits": 980,
+          "test_cochange": 576,
+          "rate": 0.5878,
+          "ci": [
+            0.5567,
+            0.6182
+          ]
+        }
+      ],
+      "pooled": {
+        "commits": 5132,
+        "test_cochange": 1924,
+        "rate": 0.3749,
+        "ci": [
+          0.3618,
+          0.3882
+        ],
+        "bugfix": {
+          "hits": 352,
+          "total": 851,
+          "rate": 0.4136
+        },
+        "non_bugfix": {
+          "hits": 1572,
+          "total": 4281,
+          "rate": 0.3672
+        },
+        "difference": 0.0464,
+        "permutation": {
+          "n": 2000,
+          "seed": 42,
+          "p_value_two_sided": 0.0145
+        }
+      },
+      "strata": [],
+      "time_split": {},
+      "boundary": "exploratory repository-mining result; test/bug labels are path and message heuristics; no Claim/EA/signature, no gate decision",
+      "chain": [
+        {
+          "name": "RunCapsule",
+          "ok": false,
+          "detail": "缺失：run/run-capsule.json",
+          "path": "run/run-capsule.json"
+        },
+        {
+          "name": "EA（证据制品）",
+          "ok": false,
+          "detail": "缺失：run/ea.json",
+          "path": "run/ea.json"
+        },
+        {
+          "name": "Claim（人签断言）",
+          "ok": false,
+          "detail": "待人工执行：run claim --evidence-source ese-exec（见下方命令）",
+          "path": "claim/claim.json"
+        },
+        {
+          "name": "Closure（结构闭合）",
+          "ok": false,
+          "detail": "待执行：closure ese-check（见下方命令）",
+          "path": "closure/closure-report.json"
+        },
+        {
+          "name": "Signature（人签）",
+          "ok": false,
+          "detail": "待人工执行：closure ese-sign（见下方命令）",
+          "path": "signature/signature.json"
+        }
+      ],
+      "state": "EXPLORATORY · AWAITING HUMAN SIGNATURE"
+    },
+    {
+      "study_id": "ESE-EX-20261118",
+      "directory": "ese-explore-20261118",
+      "method": "repository-mining",
+      "questions": [
+        "RQ1: Difference in the proportion of commits that modify at least one test file between bug-fix and non-bug-fix commits. across the sampled repositories?",
+        "RQ2: does it differ between bug-fix commits and other commits?",
+        "RQ3: does it differ between earlier and later history?"
+      ],
+      "protocol_sha256": "30cd4a832550307b2dca54d423a319670f428cf567c30e4b722989b4c5756012",
+      "repos": [
+        {
+          "repo": "click",
+          "head": "08b803cf32ceb2ae6a772c62d5da42757a897d44",
+          "commits": 1328,
+          "test_cochange": 588,
+          "rate": 0.4428,
+          "ci": [
+            0.4163,
+            0.4696
+          ]
+        },
+        {
+          "repo": "requests",
+          "head": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+          "commits": 2824,
+          "test_cochange": 760,
+          "rate": 0.2691,
+          "ci": [
+            0.2531,
+            0.2858
+          ]
+        },
+        {
+          "repo": "httpx",
+          "head": "7cff5f79bc78649bbcd3fd9aa7a74c86e0f63016",
+          "commits": 980,
+          "test_cochange": 576,
+          "rate": 0.5878,
+          "ci": [
+            0.5567,
+            0.6182
+          ]
+        }
+      ],
+      "pooled": {
+        "commits": 5132,
+        "test_cochange": 1924,
+        "rate": 0.3749,
+        "ci": [
+          0.3618,
+          0.3882
+        ],
+        "bugfix": {
+          "hits": 352,
+          "total": 851,
+          "rate": 0.4136
+        },
+        "non_bugfix": {
+          "hits": 1572,
+          "total": 4281,
+          "rate": 0.3672
+        },
+        "difference": 0.0464,
+        "permutation": {
+          "n": 1000,
+          "seed": 42,
+          "p_value_two_sided": 0.015
+        }
+      },
+      "strata": [],
+      "time_split": {
+        "policy": "per-repo median commit date",
+        "early": {
+          "hits": 795,
+          "total": 2572,
+          "rate": 0.3091,
+          "ci": [
+            0.2915,
+            0.3272
+          ]
+        },
+        "late": {
+          "hits": 1129,
+          "total": 2560,
+          "rate": 0.441,
+          "ci": [
+            0.4219,
+            0.4603
+          ]
+        },
+        "difference": 0.1319,
+        "permutation": {
+          "n": 1000,
+          "seed": 43,
+          "p_value_two_sided": 0.001
+        }
+      },
+      "boundary": "exploratory repository-mining result; test/bug labels are path and message heuristics; no Claim/EA/signature, no gate decision",
+      "chain": [
+        {
+          "name": "RunCapsule",
+          "ok": false,
+          "detail": "缺失：run/run-capsule.json",
+          "path": "run/run-capsule.json"
+        },
+        {
+          "name": "EA（证据制品）",
+          "ok": false,
+          "detail": "缺失：run/ea.json",
+          "path": "run/ea.json"
+        },
+        {
+          "name": "Claim（人签断言）",
+          "ok": false,
+          "detail": "待人工执行：run claim --evidence-source ese-exec（见下方命令）",
+          "path": "claim/claim.json"
+        },
+        {
+          "name": "Closure（结构闭合）",
+          "ok": false,
+          "detail": "待执行：closure ese-check（见下方命令）",
+          "path": "closure/closure-report.json"
+        },
+        {
+          "name": "Signature（人签）",
+          "ok": false,
+          "detail": "待人工执行：closure ese-sign（见下方命令）",
+          "path": "signature/signature.json"
+        }
+      ],
+      "state": "EXPLORATORY · AWAITING HUMAN SIGNATURE"
+    },
+    {
+      "study_id": "m2-memory",
+      "directory": "m2-memory",
+      "method": "",
+      "questions": [],
+      "protocol_sha256": "",
+      "repos": [],
+      "pooled": {},
+      "strata": [],
+      "time_split": {},
+      "boundary": "measures the admission decision sets only; downstream cross-task benefit needs multi-session / multi-supply answering (fact-baseline 边界) and is out of scope here",
+      "chain": [
+        {
+          "name": "RunCapsule",
+          "ok": false,
+          "detail": "缺失：run/run-capsule.json",
+          "path": "run/run-capsule.json"
+        },
+        {
+          "name": "EA（证据制品）",
+          "ok": false,
+          "detail": "缺失：run/ea.json",
+          "path": "run/ea.json"
+        },
+        {
+          "name": "Claim（人签断言）",
+          "ok": false,
+          "detail": "待人工执行：run claim --evidence-source ese-exec（见下方命令）",
+          "path": "claim/claim.json"
+        },
+        {
+          "name": "Closure（结构闭合）",
+          "ok": false,
+          "detail": "待执行：closure ese-check（见下方命令）",
+          "path": "closure/closure-report.json"
+        },
+        {
+          "name": "Signature（人签）",
+          "ok": false,
+          "detail": "待人工执行：closure ese-sign（见下方命令）",
+          "path": "signature/signature.json"
+        }
+      ],
+      "state": "EXPLORATORY · AWAITING HUMAN SIGNATURE"
+    },
+    {
+      "study_id": "m2-e2e",
+      "directory": "m2-e2e",
+      "method": "",
+      "questions": [],
+      "protocol_sha256": "",
+      "repos": [],
+      "pooled": {},
+      "strata": [],
+      "time_split": {},
+      "boundary": "measures the admission decision sets only; downstream cross-task benefit needs multi-session / multi-supply answering (fact-baseline 边界) and is out of scope here",
+      "chain": [
+        {
+          "name": "RunCapsule",
+          "ok": false,
+          "detail": "缺失：run/run-capsule.json",
+          "path": "run/run-capsule.json"
+        },
+        {
+          "name": "EA（证据制品）",
+          "ok": false,
+          "detail": "缺失：run/ea.json",
+          "path": "run/ea.json"
+        },
+        {
+          "name": "Claim（人签断言）",
+          "ok": false,
+          "detail": "待人工执行：run claim --evidence-source ese-exec（见下方命令）",
+          "path": "claim/claim.json"
+        },
+        {
+          "name": "Closure（结构闭合）",
+          "ok": false,
+          "detail": "待执行：closure ese-check（见下方命令）",
+          "path": "closure/closure-report.json"
+        },
+        {
+          "name": "Signature（人签）",
+          "ok": false,
+          "detail": "待人工执行：closure ese-sign（见下方命令）",
+          "path": "signature/signature.json"
+        }
+      ],
+      "state": "EXPLORATORY · AWAITING HUMAN SIGNATURE"
+    },
+    {
+      "study_id": "m1-multi",
+      "directory": "m1-multi",
+      "method": "",
+      "questions": [],
+      "protocol_sha256": "",
+      "repos": [],
+      "pooled": {},
+      "strata": [],
+      "time_split": {},
+      "boundary": "多 run 统计测量：对真实消费者 research_next_actions 的 baseline/wired 对照；无 stale baseline 的 run 不进入 flip 分母（它们本来就没有错误建议可翻）",
+      "chain": [
+        {
+          "name": "RunCapsule",
+          "ok": false,
+          "detail": "缺失：run/run-capsule.json",
+          "path": "run/run-capsule.json"
+        },
+        {
+          "name": "EA（证据制品）",
+          "ok": false,
+          "detail": "缺失：run/ea.json",
+          "path": "run/ea.json"
+        },
+        {
+          "name": "Claim（人签断言）",
+          "ok": false,
+          "detail": "待人工执行：run claim --evidence-source ese-exec（见下方命令）",
+          "path": "claim/claim.json"
+        },
+        {
+          "name": "Closure（结构闭合）",
+          "ok": false,
+          "detail": "待执行：closure ese-check（见下方命令）",
+          "path": "closure/closure-report.json"
+        },
+        {
+          "name": "Signature（人签）",
+          "ok": false,
+          "detail": "待人工执行：closure ese-sign（见下方命令）",
+          "path": "signature/signature.json"
+        }
+      ],
+      "state": "EXPLORATORY · AWAITING HUMAN SIGNATURE"
+    },
+    {
+      "study_id": "m1-feedback",
+      "directory": "m1-feedback",
+      "method": "",
+      "questions": [],
+      "protocol_sha256": "",
+      "repos": [],
+      "pooled": {},
+      "strata": [],
+      "time_split": {},
+      "boundary": "one project snapshot; measures the discriminative power of the seam's decision table, not end-to-end behavior change — the action table is not yet wired into next_actions consumers (verdict-ledger SPEC roadmap)",
+      "chain": [
+        {
+          "name": "RunCapsule",
+          "ok": false,
+          "detail": "缺失：run/run-capsule.json",
+          "path": "run/run-capsule.json"
+        },
+        {
+          "name": "EA（证据制品）",
+          "ok": false,
+          "detail": "缺失：run/ea.json",
+          "path": "run/ea.json"
+        },
+        {
+          "name": "Claim（人签断言）",
+          "ok": false,
+          "detail": "待人工执行：run claim --evidence-source ese-exec（见下方命令）",
+          "path": "claim/claim.json"
+        },
+        {
+          "name": "Closure（结构闭合）",
+          "ok": false,
+          "detail": "待执行：closure ese-check（见下方命令）",
+          "path": "closure/closure-report.json"
+        },
+        {
+          "name": "Signature（人签）",
+          "ok": false,
+          "detail": "待人工执行：closure ese-sign（见下方命令）",
+          "path": "signature/signature.json"
+        }
+      ],
+      "state": "EXPLORATORY · AWAITING HUMAN SIGNATURE"
+    }
+  ],
+  "boundary": "read-only local projection of ESE studies; chain state reflects files on disk; no Claim/EA/signature is created or changed here"
+}

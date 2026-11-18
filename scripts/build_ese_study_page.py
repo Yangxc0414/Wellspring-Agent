@@ -166,11 +166,16 @@ def _chain(study_dir, result):
     return steps, state, badge_class
 
 
+# Public alias: the workbench JSON builder reuses the same chain state, so the
+# demo page and the app panel cannot disagree about which step is done.
+chain_state = _chain
+
+
 def build(study_dir):
     result = _read(study_dir / "result.json")
     if not result:
         raise SystemExit("result.json not found under " + str(study_dir))
-    steps, state, badge_class = _chain(study_dir, result)
+    steps, state, badge_class = chain_state(study_dir, result)
 
     pooled = result.get("pooled") or {}
     bugfix = pooled.get("bugfix") or {}
