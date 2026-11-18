@@ -2682,6 +2682,33 @@
   color: var(--coral);
 }
 
+/* Seeded demo sessions show a role label as a small badge for demos. */
+.task-row[data-demo="1"] .task-row-time {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-family: var(--sans);
+  font-size: calc(9.5px * var(--font-scale, 1));
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  background: var(--surface-2);
+}
+.task-row[data-demo-tone="demo"] .task-row-time {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.task-row[data-demo-tone="pending"] .task-row-time {
+  color: var(--coral);
+  border-color: var(--coral);
+  background: var(--coral-dim);
+}
+.task-row[data-demo="1"] .task-row-title {
+  color: var(--muted);
+}
+
 .task-delete {
   top: 50%;
   right: 2px;

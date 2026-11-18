@@ -2,6 +2,7 @@ import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { APP_VERSION } from "../domain/catalog";
+import { DEMO_LABELS } from "../domain/seed";
 import { siteHref } from "../domain/links";
 import { formatShortcutLabel } from "../domain/shortcuts";
 import type { ResearchTask } from "../domain/types";
@@ -124,18 +125,29 @@ export function Sidebar() {
 
   const taskStatus = (task: ResearchTask) => {
     if (task.auto.running) return task.auto.paused ? "暂停" : "运行中";
+    // Seeded demo sessions carry a role label so a viewer can tell them apart at a glance.
+    const demo = DEMO_LABELS[task.id];
+    if (demo) return demo.label;
     if (task.status === "blocked") return "待签";
     return relativeTime(task.updatedAt);
   };
 
   const renderTask = (task: ResearchTask) => {
     const selected = !welcomeOpen && selectedTaskId === task.id;
+    const demo = DEMO_LABELS[task.id];
+    const statusTitle = demo
+      ? `${task.name}\n\n${demo.hint}`
+      : task.status === "blocked"
+        ? "待签：证据已齐，等待人工签署断言；签名只在本地 CLI 产生"
+        : undefined;
     return (
       <div className="task-row-wrap" key={task.id}>
         <button
           type="button"
           className={`task-row${selected ? " is-selected" : ""}`}
           data-status={task.status}
+          data-demo={demo ? "1" : undefined}
+          data-demo-tone={demo?.tone}
           data-auto={task.auto.running ? (task.auto.paused ? "paused" : "running") : "idle"}
           onClick={() => actions.selectTask(task.id)}
           aria-current={selected ? "page" : undefined}
@@ -143,7 +155,7 @@ export function Sidebar() {
         >
           <span className="task-dot" aria-hidden="true" />
           <span className="task-row-title">{task.name}</span>
-          <span className="task-row-time" title={task.status === "blocked" ? "待签：证据已齐，等待人工签署断言；签名只在本地 CLI 产生" : undefined}>{taskStatus(task)}</span>
+          <span className="task-row-time" title={statusTitle}>{taskStatus(task)}</span>
         </button>
         <button
           type="button"
