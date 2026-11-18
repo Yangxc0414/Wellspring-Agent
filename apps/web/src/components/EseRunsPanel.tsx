@@ -16,7 +16,29 @@ type Snapshot = {
   boundary?: string;
 };
 
+type EseHistoryEntry = {
+  id: string;
+  date?: string;
+  stage?: string;
+  title?: string;
+  question?: string;
+  method?: string;
+  data?: string;
+  finding?: string;
+  caveat?: string;
+  artifact?: string;
+  link?: string;
+};
+
+type HistorySnapshot = {
+  schema?: string;
+  count?: number;
+  entries?: EseHistoryEntry[];
+  boundary?: string;
+};
+
 type LoadState = { source: "runtime" | "static" | "none"; runs: EseRun[]; error?: string };
+type HistoryState = { source: "static" | "none"; entries: EseHistoryEntry[]; boundary?: string };
 
 async function load(): Promise<LoadState> {
   try {
@@ -40,17 +62,34 @@ async function load(): Promise<LoadState> {
   return { source: "none", runs: [], error: "no /api/ese/runs and no /ese-runs.json" };
 }
 
+async function loadHistory(): Promise<HistoryState> {
+  try {
+    const response = await fetch("/ese-history.json", { headers: { Accept: "application/json" } });
+    if (response.ok) {
+      const payload = (await response.json()) as HistorySnapshot;
+      return { source: "static", entries: payload.entries ?? [], boundary: payload.boundary };
+    }
+  } catch {
+    /* nothing bundled */
+  }
+  return { source: "none", entries: [] };
+}
+
 function number(value: number | null | undefined, digits = 3): string {
   return typeof value === "number" && Number.isFinite(value) ? value.toFixed(digits) : "—";
 }
 
 export function EseRunsPanel() {
   const [state, setState] = useState<LoadState>({ source: "none", runs: [] });
+  const [history, setHistory] = useState<HistoryState>({ source: "none", entries: [] });
 
   useEffect(() => {
     let cancelled = false;
     load().then((next) => {
       if (!cancelled) setState(next);
+    });
+    loadHistory().then((next) => {
+      if (!cancelled) setHistory(next);
     });
     return () => {
       cancelled = true;
@@ -61,7 +100,43 @@ export function EseRunsPanel() {
     <div className="context-stack">
       <section className="context-section">
         <div className="context-section-head">
-          <span>ESE RUNS</span>
+          <span>ESE 工作历史</span>
+          <span>{history.entries.length > 0 ? `${history.entries.length} 条` : "NO DATA"}</span>
+        </div>
+        {history.entries.length === 0 ? (
+          <p className="context-note">
+            没有找到 <code>ese-history.json</code>。历史是策展视图，数字需与
+            <code>runtime_data</code> 原产物一致，由 <code>scripts/build_web_ese_history.py</code> 守护。
+          </p>
+        ) : (
+          <ol className="ese-history">
+            {history.entries.map((entry) => (
+              <li key={entry.id} className="ese-history-entry">
+                <div className="ese-history-meta">
+                  <span>{entry.date ?? "—"}</span>
+                  <span>{entry.stage ?? "—"}</span>
+                  <code>{entry.id}</code>
+                </div>
+                <div className="ese-history-title">{entry.title ?? entry.id}</div>
+                {entry.question ? <p className="ese-history-question">{entry.question}</p> : null}
+                {entry.finding ? <p className="ese-history-finding">{entry.finding}</p> : null}
+                {entry.caveat ? <p className="ese-history-caveat">边界：{entry.caveat}</p> : null}
+                <div className="ese-history-foot">
+                  <span>{entry.method ?? ""}{entry.data ? ` · ${entry.data}` : ""}</span>
+                  {entry.link ? <a href={entry.link}>来龙去脉 →</a> : null}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+        <p className="context-note">
+          策展历史：数字与原产物逐条核对；只读，不创建 Claim/EA/签名，不改变 gate 判定。
+        </p>
+      </section>
+
+      <section className="context-section">
+        <div className="context-section-head">
+          <span>ESE RUNTIME SNAPSHOT</span>
           <span>{state.source === "runtime" ? "LOCAL RUNTIME" : state.source === "static" ? "STATIC SNAPSHOT" : "NO DATA"}</span>
         </div>
         {state.runs.length === 0 ? (

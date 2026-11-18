@@ -1,0 +1,114 @@
+{
+  "schema": "runtime-ese-history-0.1",
+  "count": 5,
+  "entries": [
+    {
+      "id": "ESE-EX-20261118",
+      "date": "2026-11-18",
+      "stage": "探索性",
+      "title": "缺陷修复提交是否更常触碰测试",
+      "question": "Do bug-fix commits in Python projects touch tests more often than feature commits, and does the difference survive project stratification?",
+      "method": "repository-mining",
+      "data": "click 1328 / requests 2824 / httpx 980，共 5132 commits",
+      "finding": "测试共变率 0.375，95% CI [0.362, 0.388]；缺陷修复比其它提交高 +0.046（置换检验 p=0.015）",
+      "caveat": "“缺陷修复”与“触碰测试”都是路径与消息启发式标签；探索性结果，未签 Claim",
+      "verify": {
+        "kind": "result",
+        "path": "runtime_data/ese-explore-20261118/result.json",
+        "expect": {
+          "commits": 5132,
+          "rate": 0.3749,
+          "bugfix_difference": 0.0464
+        }
+      },
+      "artifact": "runtime_data/ese-explore-20261118/result.md",
+      "link": "../demo/run/"
+    },
+    {
+      "id": "ESE-MS-20261118-03",
+      "date": "2026-11-18",
+      "stage": "分层复现",
+      "title": "总体差异经项目分层后还剩多少",
+      "question": "同一问题，按项目、提交规模、是否改动生产代码分层，并做时间切分，差异是否仍然成立？",
+      "method": "repository-mining + Mantel-Haenszel 分层",
+      "data": "同上 5132 commits；按 project / commit_size_bucket / production_cochange 分层",
+      "finding": "分层校正后差异 0.0681；时间切分早期 0.309 对晚期 0.441（+0.132，p=0.001）",
+      "caveat": "click 单项目方向反转为 -0.007，说明总体效应不能直接外推到每个项目；仍是探索性",
+      "verify": {
+        "kind": "result",
+        "path": "runtime_data/ese-ms-20261118-03/result.json",
+        "expect": {
+          "commits": 5132,
+          "rate": 0.3749,
+          "adjusted_difference": 0.0681
+        }
+      },
+      "artifact": "runtime_data/ese-ms-20261118-03/result.md",
+      "link": "../demo/run/"
+    },
+    {
+      "id": "ESE-PIPE-BENCH-20261118",
+      "date": "2026-11-18",
+      "stage": "换题",
+      "title": "flaky test 检测器能否跨数据集泛化",
+      "question": "Do code-based flaky-test detectors generalize across datasets and ecosystems?",
+      "method": "benchmark-evaluation 设计",
+      "data": "8 篇全文来源，6198 个 span，coverage=saturated",
+      "finding": "走完 S1→S4 与写作契约，停在 G1/G2 人工门；G3/G5 因无 EA/Closure 而关闭",
+      "caveat": "本次只到设计与候选，没有执行实验，也没有可签结论",
+      "verify": {
+        "kind": "demo",
+        "path": "runtime_data/ese-pipeline-bench-20261118/demo.json",
+        "expect": {
+          "q0_sources": 8,
+          "q0_spans": 6198
+        }
+      },
+      "artifact": "runtime_data/ese-pipeline-bench-20261118/demo.json",
+      "link": "../demo/run/"
+    },
+    {
+      "id": "ESE-FULLRUN-20261118",
+      "date": "2026-11-18",
+      "stage": "完整链",
+      "title": "从文献证据到写作包的完整纵切",
+      "question": "同一 bug-fix 问题，完整走 S1→写作→评审→审计，看链路能否闭合",
+      "method": "pipeline（real corpus，8 篇全文）",
+      "data": "8 篇全文、6198 span、coverage=saturated",
+      "finding": "产出综合、候选、设计、图、稿件、写作包、创新评审与审计；停在 G1/G2 needs_human",
+      "caveat": "G3/G5 blocked（无 EA/Closure）；模型评审不等于同行评审；无 Claim/EA/签名",
+      "verify": {
+        "kind": "demo",
+        "path": "runtime_data/ese-fullrun-20261118/demo.json",
+        "expect": {
+          "q0_sources": 8,
+          "q0_spans": 6198
+        }
+      },
+      "artifact": "runtime_data/ese-fullrun-20261118/demo.json",
+      "link": "../demo/run/"
+    },
+    {
+      "id": "ESE-FRONTIER-20261118",
+      "date": "2026-11-18",
+      "stage": "前沿版",
+      "title": "扩到 24 篇全文后的前沿候选",
+      "question": "把语料扩到 24 篇，候选与设计是否变化，链路是否仍然停在同一个人工门",
+      "method": "pipeline（frontier corpus，24 篇全文）",
+      "data": "24 篇全文、15045 span、coverage=saturated",
+      "finding": "Q0 覆盖显著扩大，候选增至 6 条；仍停在 G1/G2 needs_human",
+      "caveat": "只跑到候选/设计，没有写作包与评审；页面见 frontier 来龙去脉页",
+      "verify": {
+        "kind": "demo",
+        "path": "runtime_data/ese-frontier-20261118/demo.json",
+        "expect": {
+          "q0_sources": 24,
+          "q0_spans": 15045
+        }
+      },
+      "artifact": "runtime_data/ese-frontier-20261118/demo.json",
+      "link": "../demo/run-frontier/"
+    }
+  ],
+  "boundary": "策展的历史视图：数字由 scripts/build_web_ese_history.py 与 runtime_data 原产物核对；只读，不创建 Claim/EA/签名，不改变任何 gate 判定"
+}
