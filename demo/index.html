@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>研究运行回放 · 输入 → 输出（真实运行）</title>
+<meta name="description" content="一次真实 ESE 运行的输入与阶段产物：文献、候选、设计、稿件、评审与审计；不是工作台，不含 SIM 控制台。" />
+<link rel="stylesheet" href="../assets/demo-legibility.css" />
+<style>
+body{margin:0;padding:32px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.7;color:#1f2937;background:#f8fafc}
+main{max-width:980px;margin:0 auto;background:#fff;border:1px solid #e5e9f0;border-radius:14px;padding:28px}
+h1{font-size:24px;margin:0 0 4px}h2{font-size:16px;margin:26px 0 8px;color:#111827}
+.meta{color:#5b6472;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+td,th{border-bottom:1px solid #e5e9f0;padding:6px 8px;text-align:left;vertical-align:top}
+th{color:#5b6472;font-weight:600}
+.badge{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:#eef2ff;color:#2563eb;margin-right:6px}
+.boundary{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:13px}
+a{color:#2563eb}
+</style>
+</head>
+<body>
+<main data-dl-page="demo" data-demo-run="PIPE-20261118T120549Z-f36858">
+  <span class="badge">REAL RUN · 非 SIM</span><span class="badge">只读</span>
+  <h1>研究运行回放：输入 → 产物</h1>
+  <p class="meta">run: PIPE-20261118T120549Z-f36858 · fixture_mode: false · 真实工作台在 <a href="../app/">/app/</a>，本页是这份运行的只读回放。</p>
+
+  <h2>1. 输入</h2>
+  <p>研究问题：Do bug-fix commits in Python projects touch tests more often than feature commits, and does the difference survive project stratification?</p>
+  <p>文献语料：8 篇全文来源、6198 个 span（pdf 解析，摘要不进入证据）。</p>
+
+  <h2>2. 阶段 → 产物</h2>
+  <table><thead><tr><th>阶段</th><th>状态</th><th>warning 数</th></tr></thead><tbody><tr><td>S1 文献 / 全证据</td><td>ok</td><td>3</td></tr><tr><td>S1b 跨来源综合</td><td>synthesized</td><td>0</td></tr><tr><td>S2-S3 假设</td><td>candidates_need_human</td><td>12</td></tr><tr><td>S4 设计与协议</td><td>needs_human</td><td>8</td></tr><tr><td>S6 图</td><td>schematic_ready</td><td>0</td></tr><tr><td>S8-S12 稿件</td><td>needs_evidence</td><td>6</td></tr></tbody></table>
+  <p>门禁：Q0=pass · G1=needs_human · G2=needs_human · G3=blocked · G5=blocked</p>
+
+  <h2>3. S2-S3 候选（前 3 条）</h2>
+  <table><thead><tr><th>候选</th><th>lens</th><th>证据引用数</th></tr></thead><tbody><tr><td>Regression-test coupling of bug-fix commits in Python projects</td><td>mechanism</td><td>2</td></tr><tr><td>Project stratification boundary for test-touch differences</td><td>boundary</td><td>3</td></tr><tr><td>Separating flaky-test edits from regression-test edits</td><td>measurement</td><td>3</td></tr></tbody></table>
+
+  <h2>4. S4 设计</h2>
+  <p>状态：needs_human · primary_metric：Difference in the proportion of commits touching at least one test file between bug-fix and feature commits, estimated overall and within project strata. · warnings：8</p>
+
+  <h2>5. S8-S12 输出</h2>
+  <p>稿件：needs_evidence · writer_mode：model · sections：8</p>
+  <p>手稿评审：needs_more_work · rounds：1 · accepted：True</p>
+  <p>成稿审计：ready_for_human_review · citations：73 · 汉字：9401 · submission_ready：False</p>
+
+  <h2>6. 边界</h2>
+  <p class="boundary">本页回放一次本地真实运行（模型调用经本地网关）。门禁 G1/G2/G3/G5 仍待人签；没有 Claim/EA/签名；accepted 不等于通过，ready_for_human_review 不等于可投稿。工作台只保留一个入口：<a href="../app/">/app/</a>（构建产物），真实执行需本地 runtime。</p>
+  <p><a href="../">← 返回首页</a> · <a href="../index.html#ese-run">最近一次真实运行面板</a> · <a href="frontier/">24 篇前沿语料 / 6 候选版本 →</a> · 设计记录：design/111、design/117</p>
+</main>
+<script src="../assets/demo-legibility.js"></script>
+</body>
+</html>

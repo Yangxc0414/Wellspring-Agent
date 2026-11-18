@@ -86,16 +86,42 @@ def _walk(root, skip):
             yield os.path.join(dirpath, name)
 
 
+def _release_owned(root, relative):
+    """A release bundle may own a file that is a copy source in the source repository.
+
+    README.md is release-owned in Wellspring-Agent while site/docs/README.md is a copy of the
+    source README; the bundle's own hygiene check must not report that intentional difference
+    as drift. The manifest marks release-owned files explicitly, so read it instead of hard-coding.
+    """
+    manifest = os.path.join(root, "MANIFEST.txt")
+    if not os.path.isfile(manifest):
+        return False
+    with open(manifest, "r", encoding="utf-8", errors="ignore") as handle:
+        text = handle.read()
+    marker = "# release-owned files and media"
+    if marker not in text:
+        return False
+    for line in text.split(marker, 1)[1].splitlines():
+        row = line.strip()
+        if row and row.split(chr(9))[0].strip() == relative:
+            return True
+    return False
+
+
 def check_site_copies(root):
     blockers = []
     for source, target in SITE_COPIES:
         source_path = os.path.join(root, source)
         target_path = os.path.join(root, target)
         if not os.path.isfile(source_path):
+            if _release_owned(root, source):
+                continue
             blockers.append({"kind": "site_source_missing", "path": source})
             continue
         if not os.path.isfile(target_path):
             blockers.append({"kind": "site_copy_missing", "path": target, "source": source})
+            continue
+        if source == "README.md" and _release_owned(root, source):
             continue
         if _sha256(source_path) != _sha256(target_path):
             blockers.append({"kind": "site_copy_drift", "path": target, "source": source})

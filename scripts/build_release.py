@@ -46,6 +46,7 @@ SYNC_DIRS = (
     "scripts",
     "integrations",
     "site",
+    "demo",
     "apps/web/src",
     "apps/web/public",
     "apps/web/tests",
