@@ -59,7 +59,8 @@ const legibilityPages = [
   ["live/index.html", "live"],
   ["agent/index.html", "agent"],
   ["demo/index.html", "demo"],
-  ["demo/frontier/index.html", "demo"]
+  ["demo/frontier/index.html", "demo"],
+  ["demo/run/index.html", "demo"]
 ];
 check(fs.existsSync(path.join(root, "assets/demo-legibility.css")), "missing shared legibility CSS");
 check(fs.existsSync(path.join(root, "assets/demo-legibility.js")), "missing shared legibility JS");
@@ -75,9 +76,14 @@ check(
   "demo/index.html source missing shared legibility JS (build-site would overwrite the copy)"
 );
 const frontierSource = path.join(root, "..", "demo", "frontier", "index.html");
+const chainSource = path.join(root, "..", "demo", "run", "index.html");
 check(
   fs.existsSync(frontierSource) && fs.readFileSync(frontierSource, "utf8").includes("demo-legibility.js"),
   "demo/frontier/index.html source missing shared legibility JS"
+);
+check(
+  fs.existsSync(chainSource) && fs.readFileSync(chainSource, "utf8").includes("demo-legibility.js"),
+  "demo/run/index.html source missing shared legibility JS"
 );
 
 if (failures.length) {

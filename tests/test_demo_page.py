@@ -28,6 +28,23 @@ class DemoPagesTest(unittest.TestCase):
         main = (ROOT / "demo" / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="frontier/"', main)
 
+    def test_chain_page_shows_end_to_end_provenance(self):
+        page = (ROOT / "demo" / "run" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('data-dl-page="demo"', page)
+        self.assertIn("data-demo-chain=", page)
+        self.assertIn("来龙去脉", page)
+        self.assertIn("S1 文献证据", page)
+        self.assertIn("成稿审计", page)
+        self.assertIn("REAL RUN", page)
+        self.assertIn("../../assets/demo-legibility.css", page)
+        replay = (ROOT / "demo" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="run/"', replay)
+
+    def test_chain_copy_matches(self):
+        source = (ROOT / "demo" / "run" / "index.html").read_text(encoding="utf-8")
+        copied = (ROOT / "site" / "demo" / "run" / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(source, copied)
+
     def test_site_copy_matches_generated_tree(self):
         for relative in ("index.html", "frontier/index.html"):
             source = (ROOT / "demo" / relative).read_text(encoding="utf-8")
