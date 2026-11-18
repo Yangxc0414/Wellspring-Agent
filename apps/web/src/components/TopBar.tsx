@@ -108,10 +108,10 @@ export function TopBar() {
           }
         >
           {__STATIC_ONLY__
-            ? "静态演示 · RUNTIME 已禁用"
+            ? "STATIC SNAPSHOT · runtime 禁用"
             : apiConnected
-              ? "API · LOCAL"
-              : "演示数据 · 静态"}
+              ? "LOCAL RUNTIME · 已连接"
+              : "STATIC SNAPSHOT · 无 runtime"}
         </span>
         <button
           type="button"

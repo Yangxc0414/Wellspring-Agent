@@ -2480,12 +2480,12 @@ export function ContextPanel() {
         <span>
           {runtimeBacked
             ? `local runtime · ${runtimeCard?.route ?? runtimeCard?.taskType ?? "auto"}`
-            : `${profile.short} · ${profile.provider}`}
+            : `${profile.short} · ${profile.provider} · NO DATA`}
         </span>
         <span>
           {runtimeBacked
-            ? `RUNTIME · ${(task.runtime?.source ?? runtimeCard?.source ?? "fixture").toUpperCase()}`
-            : "演示数据 · 无 worker"}
+            ? `LOCAL RUNTIME · ${(task.runtime?.source ?? runtimeCard?.source ?? "fixture").toUpperCase()}`
+            : "STATIC SNAPSHOT · 无 runtime"}
         </span>
       </div>
     </aside>

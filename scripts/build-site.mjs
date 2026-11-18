@@ -13,12 +13,25 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+function copyTree(source, target) {
+  ensureDir(target);
+  for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
+    const from = path.join(source, entry.name);
+    const to = path.join(target, entry.name);
+    if (entry.isDirectory()) copyTree(from, to);
+    else fs.copyFileSync(from, to);
+  }
+}
+
 function copyDemo() {
   if (!fs.existsSync(demoSource)) {
     throw new Error("demo/index.html not found");
   }
+  // Copy the whole replay tree: index.html plus generated variants (e.g. frontier/).
+  // Copying only index.html left new replay pages out of the site and out of the release.
+  fs.rmSync(demoDir, { recursive: true, force: true });
   ensureDir(demoDir);
-  fs.copyFileSync(demoSource, path.join(demoDir, "index.html"));
+  copyTree(path.join(root, "demo"), demoDir);
   const hash = crypto.createHash("sha256").update(fs.readFileSync(demoSource)).digest("hex").slice(0, 16);
   return hash;
 }

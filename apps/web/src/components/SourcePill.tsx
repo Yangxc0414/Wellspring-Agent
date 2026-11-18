@@ -7,15 +7,15 @@
 export type SourceKind = "runtime" | "snapshot" | "local";
 
 const DEFAULT_LABELS: Record<SourceKind, string> = {
-  runtime: "LIVE RUNTIME",
-  snapshot: "SNAPSHOT",
+  runtime: "LOCAL RUNTIME",
+  snapshot: "STATIC SNAPSHOT",
   local: "LOCAL DRAFT"
 };
 
 export function SourcePill({
   source,
   labels,
-  emptyLabel = "STATIC"
+  emptyLabel = "NO DATA"
 }: {
   source: SourceKind | null;
   labels?: Partial<Record<SourceKind, string>>;

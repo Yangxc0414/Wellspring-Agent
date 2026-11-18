@@ -1,14 +1,14 @@
 {
   "schema_version": "workspace-0.1",
   "source": "modules/*/SPEC.md",
-  "generated_at": "2026-11-18T12:43:51+00:00",
+  "generated_at": "2026-11-18T13:03:52+00:00",
   "count": 32,
   "agents": [
     {
       "id": "literature",
       "name": "文献调研",
       "stage": "S1",
-      "version": "0.13.0",
+      "version": "0.14.0",
       "status": "pilot",
       "owner": "research-agent",
       "outputs": [
@@ -61,7 +61,7 @@
       "id": "idea",
       "name": "假设收敛",
       "stage": "S2–S3",
-      "version": "0.27.1",
+      "version": "0.27.2",
       "status": "pilot",
       "owner": "research-agent",
       "outputs": [
