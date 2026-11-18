@@ -6264,3 +6264,312 @@ select.control {
 .chain-guide-body p {
   margin: 6px 0 0;
 }
+
+/* ---- Full-flow front-end demo (FlowDemo.tsx) ---- */
+.flow-demo {
+  gap: 12px;
+}
+.flow-banner {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: linear-gradient(135deg, var(--accent-dim), var(--surface));
+}
+.flow-banner-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.flow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim-strong);
+}
+.flow-banner p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.flow-banner p b {
+  color: var(--coral);
+}
+.flow-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.flow-btn {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.flow-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.flow-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.flow-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.flow-btn.sign {
+  background: var(--teal-dim);
+  border-color: var(--teal);
+  color: var(--teal);
+  font-weight: 600;
+}
+.flow-state {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--amber);
+  background: var(--amber-dim);
+  border: 1px solid rgba(154, 107, 30, 0.25);
+  border-radius: 999px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+.flow-state.is-signed {
+  color: var(--teal);
+  background: var(--teal-dim);
+  border-color: var(--teal);
+}
+.flow-stages {
+  list-style: none;
+  margin: 0;
+  padding: 4px 12px 12px;
+}
+.flow-stage {
+  border-left: 2px solid var(--line-strong);
+  margin-left: 9px;
+  padding-left: 16px;
+  position: relative;
+}
+.flow-stage:last-child {
+  border-left-color: transparent;
+}
+.flow-stage.is-done {
+  border-left-color: var(--teal);
+}
+.flow-stage-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 7px 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--muted);
+}
+.flow-stage.is-done .flow-stage-head {
+  color: var(--text);
+}
+.flow-stage-mark {
+  position: absolute;
+  left: -11px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--faint);
+}
+.flow-stage.is-done .flow-stage-mark {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+.flow-stage.is-human:not(.is-done) .flow-stage-mark {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.flow-stage-id {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 40px;
+}
+.flow-stage-label {
+  font-weight: 600;
+}
+.flow-stage-gate,
+.flow-stage-human {
+  font-size: 10px;
+  border-radius: 999px;
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+.flow-stage-gate {
+  color: var(--coral);
+  background: var(--coral-dim);
+}
+.flow-stage-human {
+  color: var(--amber);
+  background: var(--amber-dim);
+}
+.flow-stage-body {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  margin: 0 0 8px;
+}
+.flow-stage-body p {
+  margin: 8px 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.flow-kv {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+.flow-kv span {
+  color: var(--faint);
+  min-width: 30px;
+}
+.flow-kv code {
+  font-family: var(--mono);
+  color: var(--accent-deep);
+  background: var(--accent-dim);
+  padding: 1px 6px;
+  border-radius: 4px;
+  word-break: break-word;
+}
+.flow-obligation {
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 7px;
+  font-size: 11px;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.flow-obligation span {
+  color: var(--faint);
+}
+.flow-obligation b {
+  color: var(--teal);
+  font-weight: 600;
+}
+.flow-chain {
+  display: flex;
+  gap: 5px;
+  padding: 10px 12px 0;
+}
+.flow-chain-node {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 7px 4px;
+  text-align: center;
+  color: var(--faint);
+}
+.flow-chain-node.is-lit {
+  border-color: var(--teal);
+  background: var(--teal-dim);
+  color: var(--teal);
+}
+.flow-chain-node.is-wait {
+  border-color: var(--amber);
+  background: var(--amber-dim);
+  color: var(--amber);
+}
+.flow-chain-node span,
+.flow-chain-node b,
+.flow-chain-node i {
+  display: block;
+  font-style: normal;
+}
+.flow-chain-node span {
+  font-size: 11px;
+  font-weight: 600;
+}
+.flow-chain-node b {
+  font-family: var(--mono);
+  font-size: 9px;
+  opacity: 0.8;
+}
+.flow-chain-node i {
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.flow-note {
+  margin: 9px 12px 12px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.flow-slots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  padding: 10px 12px 0;
+}
+.flow-slot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 6px 9px;
+  font-size: 11px;
+}
+.flow-slot span {
+  color: var(--muted);
+}
+.flow-slot b {
+  font-family: var(--mono);
+  font-size: 10px;
+}
+.flow-slot.is-bound {
+  border-color: var(--teal);
+  background: var(--teal-dim);
+}
+.flow-slot.is-bound b {
+  color: var(--teal);
+}
+.flow-slot.is-locked b {
+  color: var(--faint);
+}
+.flow-slot.is-author {
+  border-color: var(--violet);
+}
+.flow-slot.is-author b {
+  color: var(--violet);
+}
+.flow-boundary {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.flow-boundary b {
+  color: var(--coral);
+}

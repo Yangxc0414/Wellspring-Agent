@@ -114,7 +114,7 @@ const seededSnapshot = loadedSnapshot ? ensureSeedEseTask(loadedSnapshot) : crea
 const initialSnapshot = ensureSeedFullChainDemo(seededSnapshot);
 
 const defaultUI: UIState = {
-  contextTab: "run",
+  contextTab: "flow",
   search: "",
   expandedWorkspaces: {},
   sidebarOpen: false,

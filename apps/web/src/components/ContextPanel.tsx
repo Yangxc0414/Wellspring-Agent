@@ -17,8 +17,10 @@ import { GovernancePanel } from "./GovernancePanel";
 import { RsiStoryPanel } from "./RsiStoryPanel";
 import { HostModelPanel } from "./HostModelPanel";
 import { EseRunsPanel } from "./EseRunsPanel";
+import { FlowDemo } from "./FlowDemo";
 
 const TABS: Array<{ id: ContextTab; label: string }> = [
+  { id: "flow", label: "演示流程" },
   { id: "brief", label: "BRIEF" },
   { id: "run", label: "RUN" },
   { id: "evidence", label: "EVIDENCE" },
@@ -2478,6 +2480,7 @@ export function ContextPanel() {
       <div className="context-body">
         {/* key={task.id}: RunContext 等 tab 面板持有本地表单状态（runtimeSource/seeds/文件路径…），
             不加 key 时切换任务会沿用上一个任务的表单值，可能带着 A 任务的 seeds 去 run B 任务。 */}
+        {tab === "flow" && <FlowDemo />}
         {tab === "brief" && <BriefContext key={task.id} task={task} />}
         {tab === "run" && <RunContext key={task.id} task={task} />}
         {tab === "evidence" && <EvidenceContext key={task.id} task={task} />}
