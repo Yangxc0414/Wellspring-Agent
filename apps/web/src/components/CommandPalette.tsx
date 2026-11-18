@@ -22,6 +22,9 @@ export function CommandPalette() {
   const hasProtocol = Boolean(task?.protocol);
   const protocolFrozen = Boolean(task?.protocolFrozen);
   const unsignedClaim = Boolean(task?.evidence.some((item) => item.kind === "claim" && item.status === "unsigned"));
+  // The static demo's third path previews the post-signature UI; it is useful
+  // precisely on sessions that have no claim row yet. Expose the gate opener there.
+  const canOpenClaimGate = unsignedClaim || __STATIC_ONLY__;
   const evaluated = Boolean((task?.evaluation.hiddenAccessCount ?? 0) > 0);
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState(0);
@@ -53,7 +56,7 @@ export function CommandPalette() {
       ...(hasEvidence && !hasProtocol ? [{ label: "送入实验设计", hint: "S2–S4", keywords: "假设 experiment design", icon: "branch" as IconName, run: actions.designExperiment }] : []),
       ...(hasProtocol && !protocolFrozen ? [{ label: "G2 人签冻结命令", hint: "CLI ONLY", keywords: "protocol freeze 冻结 g2 人工门 cli", icon: "lock" as IconName, run: actions.freezeProtocol }] : []),
       ...(protocolFrozen && !evaluated ? [{ label: "运行实验", hint: "S5", keywords: "run experiment seeds", icon: "play" as IconName, run: actions.runExperiment }] : []),
-      ...(unsignedClaim ? [{ label: "签署 claim · 打开人工门", hint: "打开面板", keywords: "claim sign 签核 人工门 cli", icon: "lock" as IconName, run: actions.signClaim }] : [])
+      ...(canOpenClaimGate ? [{ label: "签署 claim · 打开人工门", hint: "打开面板", keywords: "claim sign 签核 人工门 cli", icon: "lock" as IconName, run: actions.signClaim }] : [])
     ];
     const autoItems: PaletteItem[] = autoRunning
       ? [

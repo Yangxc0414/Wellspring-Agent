@@ -2091,30 +2091,54 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
         }
         const task = currentTask();
         if (!task) return;
-        const claim = task.evidence.find((item) => item.kind === "claim" && item.status === "unsigned");
+        // The seeded demo sessions (full-chain, ESE, examples) carry only gap /
+        // hypothesis evidence — no claim row yet. The preview's whole purpose is
+        // to show what the post-signature UI looks like, so materialise a clearly
+        // labelled demo claim when one does not exist. It is origin="demo", never
+        // a signature, and G5 stays blocked.
+        let claim = task.evidence.find(
+          (item) => item.kind === "claim" && item.status === "unsigned" && item.origin !== "demo"
+        );
         if (!claim) {
-          notify("没有待签署的 claim；先运行 pipeline 生成 EA 与 claim draft");
-          return;
+          claim = {
+            id: uid("clm-demo"),
+            kind: "claim",
+            status: "unsigned",
+            text: "演示断言（无真实数值来源）：用于预览签署后的界面布局。",
+            scope: "S5/demo",
+            refs: []
+          };
         }
+        const targetClaim = claim;
         mutateTask(task.id, (item) => ({
           ...item,
-          evidence: item.evidence.map((entry) =>
-            entry.id === claim.id
-              ? {
-                  ...entry,
+          evidence: item.evidence.some((entry) => entry.id === targetClaim.id)
+            ? item.evidence.map((entry) =>
+                entry.id === targetClaim.id
+                  ? {
+                      ...entry,
+                      status: "signed" as const,
+                      origin: "demo" as const,
+                      note: "演示态预览：浏览器未产生签名；未写入证据层，closure 与导出签名仍需 CLI 人签。"
+                    }
+                  : entry
+              )
+            : [
+                ...item.evidence,
+                {
+                  ...targetClaim,
                   status: "signed" as const,
                   origin: "demo" as const,
                   note: "演示态预览：浏览器未产生签名；未写入证据层，closure 与导出签名仍需 CLI 人签。"
                 }
-              : entry
-          ),
+              ],
           gates: gate(item.gates, "G5", "blocked", "演示态预览：claim 无真实签名，closure 与导出签名仍需 CLI 人签"),
           messages: [
             ...item.messages,
             message(
               "agent",
               "**演示态预览 · 非真实签署**\n\n- claim 状态按演示流程推进，便于查看 S8–S16 的界面\n- 浏览器没有产生签名，也没有写入证据层\n- G5 / closure 仍为 blocked，导出签名仍需 `closure sign`\n\n> 数值与状态均为演示数据，不构成研究证据。",
-              claimGateCard("needs_human", { ...claim, status: "signed", origin: "demo" })
+              claimGateCard("needs_human", { ...targetClaim, status: "signed", origin: "demo" })
             )
           ]
         }));
@@ -2131,18 +2155,23 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
           notify("当前没有演示态预览可撤销");
           return;
         }
+        // A demo claim that the preview itself created has no seed counterpart;
+        // remove it on reset so we do not leave a fake unsigned claim behind.
+        const previewCreated = demo.id.startsWith("clm-demo-");
         mutateTask(task.id, (item) => ({
           ...item,
-          evidence: item.evidence.map((entry) =>
-            entry.id === demo.id
-              ? {
-                  ...entry,
-                  status: "unsigned" as const,
-                  origin: undefined,
-                  note: "claim 只能由作者/PI 签署；当前为待签状态。"
-                }
-              : entry
-          ),
+          evidence: previewCreated
+            ? item.evidence.filter((entry) => entry.id !== demo.id)
+            : item.evidence.map((entry) =>
+                entry.id === demo.id
+                  ? {
+                      ...entry,
+                      status: "unsigned" as const,
+                      origin: undefined,
+                      note: "claim 只能由作者/PI 签署；当前为待签状态。"
+                    }
+                  : entry
+              ),
           gates: gate(item.gates, "G5", "blocked", "claim 待人工签署；closure 未运行"),
           messages: [
             ...item.messages,

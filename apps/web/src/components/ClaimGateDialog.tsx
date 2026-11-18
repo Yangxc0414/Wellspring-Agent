@@ -59,7 +59,12 @@ export function ClaimGateDialog() {
 
   const claim = task?.evidence.find((item) => item.kind === "claim");
   const label = claimSignatureLabel(claim);
-  const pending = Boolean(claim && (claim.status !== "signed" || claim.origin === "demo"));
+  // In the static demo the preview may create a demo claim itself, so the button
+  // must be enabled even when the session has no claim row yet. In the product
+  // workbench there is no preview button at all (__STATIC_ONLY__ gate below).
+  const pending = __STATIC_ONLY__
+    ? label.state !== "signed-demo"
+    : Boolean(claim && (claim.status !== "signed" || claim.origin === "demo"));
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
