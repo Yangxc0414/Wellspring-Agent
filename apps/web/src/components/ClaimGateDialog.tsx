@@ -131,10 +131,24 @@ export function ClaimGateDialog() {
               <p className="claim-gate-meta">scope: {claim.scope} · refs: {claim.refs.join(", ") || "—"}</p>
             </>
           ) : (
-            <p className="claim-gate-text">还没有 claim draft。先运行 pipeline 生成 RunCapsule / EA，再回到这里。</p>
+            <p className="claim-gate-text">
+              {__STATIC_ONLY__
+                ? "这条是静态演示会话，没有真实 claim；用下方 DEMO 预览查看签署后的界面即可。"
+                : "还没有 claim draft。先运行 pipeline 生成 RunCapsule / EA，再回到这里。"}
+            </p>
           )}
           <p className="claim-gate-detail">{label.detail}</p>
         </div>
+
+        {__STATIC_ONLY__ && !claim && (
+          <section className="claim-gate-block is-demo is-first">
+            <b>③ 静态 demo：预览签署后的界面状态</b>
+            <p>这条会话没有真实 claim，不用去跑 pipeline。点下面的按钮，直接看 S8–S16 写作 / closure 在签署后是什么样——只推进浏览器状态，不产生签名、不写入证据层。</p>
+            <button type="button" className="solid-button" onClick={actions.previewDemoClaim}>
+              预览签署后的状态（DEMO）→
+            </button>
+          </section>
+        )}
 
         <section className="claim-gate-block">
           <b>① 真实签署（本地 CLI）</b>
@@ -159,7 +173,7 @@ export function ClaimGateDialog() {
           {imported && <p className="claim-gate-ok">已校验并导入 {imported}</p>}
         </section>
 
-        {__STATIC_ONLY__ && (
+        {__STATIC_ONLY__ && claim && (
           <section className="claim-gate-block is-demo">
             <b>③ 仅静态 demo：预览签署后的界面状态</b>
             <p>

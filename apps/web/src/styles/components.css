@@ -6008,6 +6008,16 @@ select.control {
   color: #92400e;
 }
 
+/* First-screen demo CTA: make the one actionable button unmissable. */
+.claim-gate-block.is-demo.is-first {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.claim-gate-block.is-demo.is-first > b {
+  color: var(--accent-deep);
+}
+
 .claim-gate-file {
   position: relative;
   display: inline-flex;

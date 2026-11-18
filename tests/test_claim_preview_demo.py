@@ -19,6 +19,9 @@ DIALOG = (ROOT / "apps" / "web" / "src" / "components" / "ClaimGateDialog.tsx").
 PALETTE = (ROOT / "apps" / "web" / "src" / "components" / "CommandPalette.tsx").read_text(
     encoding="utf-8"
 )
+CSS = (ROOT / "apps" / "web" / "src" / "styles" / "components.css").read_text(
+    encoding="utf-8"
+)
 
 
 class ClaimPreviewDemoTest(unittest.TestCase):
@@ -56,6 +59,23 @@ class ClaimPreviewDemoTest(unittest.TestCase):
         self.assertIn("const canOpenClaimGate = unsignedClaim || __STATIC_ONLY__", PALETTE)
         self.assertIn("...(canOpenClaimGate ?", PALETTE)
         self.assertIn("run: actions.signClaim", PALETTE)
+
+    def test_no_claim_message_leads_to_demo_preview_not_a_dead_end(self):
+        # The static-demo branch used to say "先运行 pipeline 生成 ...", which is
+        # a dead end in a replay session. It must point at the DEMO preview CTA.
+        self.assertIn("不用去跑 pipeline", STORE)
+        self.assertIn("预览签署后的状态（DEMO）", STORE)
+        # static branch is chosen before the old dead-end string; the product
+        # (non-static) branch may still legitimately say "run pipeline".
+        self.assertLess(
+            STORE.index("不用去跑 pipeline"),
+            STORE.index("当前没有待签 claim；先运行 pipeline 生成 RunCapsule"),
+        )
+
+    def test_demo_preview_cta_is_placed_at_the_top_of_the_panel(self):
+        self.assertIn('className="claim-gate-block is-demo is-first"', DIALOG)
+        self.assertIn("预览签署后的状态（DEMO）→", DIALOG)
+        self.assertIn(".claim-gate-block.is-demo.is-first", CSS)
 
 
 if __name__ == "__main__":

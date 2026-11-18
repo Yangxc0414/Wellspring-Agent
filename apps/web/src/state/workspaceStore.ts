@@ -2074,8 +2074,12 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
               claim
                 ? "已打开 Q0 / S5b 人工门面板。浏览器不产生签名：面板里可以复制 CLI 人签命令、导入已签署的 claim.json，静态 demo 还能预览签署后的界面状态。\n\n" +
                     claimSignatureLabel(claim).detail
-                : "已打开 Q0 / S5b 人工门面板。当前没有待签 claim；先运行 pipeline 生成 RunCapsule / EA 与 claim draft。",
-              claim ? claimGateCard("needs_human", claim) : undefined
+                : __STATIC_ONLY__
+                  ? "**人工门面板已打开。** 这条是静态演示会话，没有真实 claim——不用去跑 pipeline。\n\n" +
+                    "👉 在面板第 ③ 区点 **「预览签署后的状态（DEMO）」**，即可查看 S8–S16 写作 / closure 在签署后长什么样。\n\n" +
+                    "> 预览只推进浏览器状态，不产生签名、不写入证据层；想看完整九阶段，用左侧「演示流程」tab。"
+                  : "已打开 Q0 / S5b 人工门面板。当前没有待签 claim；先运行 pipeline 生成 RunCapsule / EA 与 claim draft。",
+              claim ? claimGateCard("needs_human", claim) : __STATIC_ONLY__ ? claimGateCard("needs_human") : undefined
             )
           ]
         }));
