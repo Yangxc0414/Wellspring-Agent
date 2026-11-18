@@ -64,7 +64,9 @@ async function load(): Promise<LoadState> {
 
 async function loadHistory(): Promise<HistoryState> {
   try {
-    const response = await fetch("/ese-history.json", { headers: { Accept: "application/json" } });
+    // The version query keeps GitHub Pages from serving the 404 it cached when this file
+    // first appeared. Bump it when the curated history changes shape.
+    const response = await fetch("/ese-history.json?v=1", { headers: { Accept: "application/json" } });
     if (response.ok) {
       const payload = (await response.json()) as HistorySnapshot;
       return { source: "static", entries: payload.entries ?? [], boundary: payload.boundary };
