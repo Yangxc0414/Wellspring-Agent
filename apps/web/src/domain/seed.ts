@@ -557,11 +557,199 @@ export function seedEseStudy(): ResearchTask {
   };
 }
 
+export function seedFullChainDemo(): ResearchTask {
+  return {
+    id: "full-chain-demo",
+    name: "完整闭环：从检索到自改进",
+    goal: "用一个材料科学案例完整演示 S1→META 闭环：文献检索、假设收敛、设计冻结、执行、判定、写作、闭包、人签与经验复用。",
+    domain: "材料科学",
+    mode: "research",
+    access: "ask",
+    status: "blocked",
+    workspaceId: "thesis",
+    createdAt: "2026-10-24",
+    updatedAt: "2026-10-24T10:09:42",
+    stage: 8,
+    completedStages: [0, 1, 2, 3, 4, 5, 6, 7],
+    harness: { version: "v1", budget: 6, label: "incumbent · broad-first" },
+    model: defaultModelSettings(),
+    ...seedUsage([
+      { offset: -6, models: { "gpt-5": [3800, 520, 1] } },
+      { offset: -3, models: { "claude-sonnet": [4100, 640, 1] } },
+      { offset: 0, models: { "gpt-5": [5600, 980, 1] } }
+    ]),
+    guidance: [],
+    plugins: ["github"],
+    toolCalls: [],
+    budget: { used: 6, total: 40 },
+    gates: [
+      { id: "Q0", status: "pass", reason: "12 spans / 2 gaps recorded" },
+      { id: "G1", status: "pass", reason: "H1 收敛；H2 作为竞争假设保留" },
+      { id: "G2", status: "pass", reason: "协议已冻结；3 seeds；主指标不可改写" },
+      { id: "S5", status: "pass", reason: "RUN-014 · EA-7c41 sealed" },
+      { id: "G5", status: "blocked", reason: "claim / closure / signature 待人签" }
+    ],
+    coverage: { sources: 4, spans: 12, gaps: 2, abstractOnly: 1 },
+    evidence: EVIDENCE.map((item) => ({ ...item, refs: [...item.refs] })),
+    protocol: { ...PROTOCOL },
+    protocolFrozen: true,
+    run: {
+      id: "RUN-014",
+      dataset: "perovskite-passivation",
+      seeds: 3,
+      metric: "R²（演示代理指标）",
+      mean: 0.164,
+      baseline: -0.048,
+      ea: "EA-7c41",
+      status: "completed"
+    },
+    evaluation: demoEvaluation(),
+    evolution: {
+      status: "proposed",
+      candidate: makeCandidate(),
+      lease: "未授予",
+      history: [
+        { at: "2026-10-24T10:25:00", text: "反思：transfer 任务 coverage 偏薄，gap 数连续两轮为 0。" },
+        { at: "2026-10-24T10:26:00", text: "提案：检索前追加 review 子查询；不训练权重，lease 待人授予。" }
+      ]
+    },
+    auto: { running: false, paused: false, index: 8, cycle: 0, gate: "claim", gateApproved: false },
+    autoStages: freshStages().map((stage, index) =>
+      index <= 7 ? { ...stage, status: "done" } : index === 8 ? { ...stage, status: "waiting" } : stage
+    ),
+    messages: [
+      system(
+        "STATIC REPLAY · 教学演示：完整走一遍从文献检索到结论签署与自改进的闭环。数值为演示案例，不调用模型、不执行真实实验、不产生真实签名；真实结果须经 CLI 人签。",
+        "10:00:00"
+      ),
+      user("从一份文献开始，完整演示一遍：系统怎么把问题变成可追溯的结论，再怎么把经验留下来。", "10:00:12"),
+      agent(
+        "第一步不是找答案，是把问题拆成可检索的子问题，并先写清楚「什么算证据」。摘要-only 只作线索。",
+        planCard(
+          ["perovskite interface passivation damp heat", "passivation layer defect density T80", "双分子钝化 湿热稳定性 配对对照"],
+          "2020–2026 · 中英双语 · 全文优先，摘要仅作 SourceHit",
+          "4 sources · 12 spans · span-only",
+          "没有全文不生成 span；coverage gap 单独登记。"
+        ),
+        "10:00:40"
+      ),
+      user("先查界面钝化与湿热稳定性的证据，重点看有没有配对定量对照。", "10:01:05"),
+      agent(
+        "**S1 检索完成** · 4 sources / 12 spans / 2 gaps\n\n- 3 条全文，1 条摘要-only（只登记为线索）\n- 湿热配对对照仍是空白\n\n> 检索产物是 SourceHit + span，不是结论。",
+        sourcesCard(),
+        "10:02:18"
+      ),
+      agent(
+        "### S2–S3：从 gap 到候选假设\n配对定量对照缺失，足以支撑一个可否证的假设，但还不够支撑 claim。\n\n> 候选不是 claim；G1 必须人工收敛。",
+        ideaCard(),
+        "10:02:44"
+      ),
+      user("G1：收敛到 H1（钝化层降低缺陷密度 → 延长 T80），H2 作为竞争假设保留。", "10:03:20"),
+      agent(
+        "**G1 已收敛** · H1 主假设 / H2 竞争假设。\n\n下一步冻结设计。这一步必须人来确认——预注册一旦定稿，主指标就不能改。",
+        {
+          type: "gate",
+          gate: "G1",
+          title: "候选假设已由人工收敛",
+          reason: "H1 主假设；H2 竞争假设；候选不写入 claim",
+          status: "pass"
+        },
+        "10:03:38"
+      ),
+      agent(
+        "### S4：设计冻结（预注册）\n协议先于数据：假设、基线、主指标、seeds、对照组都在这里定死。执行器之后只做提取与统计。",
+        {
+          type: "protocol",
+          hypothesis: PROTOCOL.hypothesis,
+          baseline: PROTOCOL.baseline,
+          metric: PROTOCOL.metric,
+          seeds: PROTOCOL.seeds,
+          controls: PROTOCOL.controls,
+          status: "G2 needs_human（本演示已确认）"
+        },
+        "10:04:02"
+      ),
+      user("G2：确认协议，按 3 seeds 跑。", "10:04:30"),
+      agent(
+        "**G2 已冻结** · 协议哈希绑定；执行器无权改主指标或协议。",
+        {
+          type: "gate",
+          gate: "G2",
+          title: "协议已冻结",
+          reason: "预注册完成；3 seeds；主指标 T80 不可改写",
+          status: "pass"
+        },
+        "10:04:48"
+      ),
+      agent(
+        "**S5a 执行完成** · RUN-014 / 3 seeds。\n\nR² 0.164（对照 −0.048）。这是演示代理指标；协议主指标 T80 需真实实验。数据与代码版本写入 capsule。",
+        {
+          type: "run",
+          id: "RUN-014",
+          dataset: "perovskite-passivation",
+          seeds: 3,
+          metric: "R²（演示代理指标）",
+          mean: 0.164,
+          baseline: -0.048,
+          status: "completed",
+          ea: "EA-7c41"
+        },
+        "10:05:55"
+      ),
+      agent(
+        "### S5b：证据判定\nverdict 是两态加一道 underpowered 守卫：区间跨零、样本不足时明确标注「too few to interpret a sign」，不把「没测出差异」写成「无效」。负结果如实保留。",
+        {
+          type: "gate",
+          gate: "S5b",
+          title: "判定已产出，断言待人签",
+          reason: "EA-7c41 sealed；verdict 可复核；claim 需人工 statement + human_reason",
+          status: "needs_human"
+        },
+        "10:06:20"
+      ),
+      user("写作阶段怎么保证不先填数？", "10:06:50"),
+      agent(
+        "**S8–S12 写作槽位**：Results / Figure / Abstract 全部 locked。\n\n槽位只接受已签 claim / EA / closure 引用；正文不会先于证据填数。",
+        writingCard({ protocolFrozen: true, claimSigned: false }),
+        "10:07:12"
+      ),
+      user("现在能签了吗？", "10:07:40"),
+      agent(
+        "还不能由我签。证据链五段：\n\n- 来源 ✓　片段 ✓　运行记录 ✓　证据制品 ✓\n- 断言 · 待人工\n\nclosure 只核对四件产物一致性；签名只能在本地 CLI 产生，网页不代签。",
+        {
+          type: "gate",
+          gate: "G5",
+          title: "结论待人签",
+          reason: "claim / closure / signature 由人在本地 CLI 执行",
+          status: "blocked"
+        },
+        "10:08:00"
+      ),
+      system(
+        "待人工：run claim → closure check → closure sign。签完 Results 槽位解锁、徽章变 SIGNED；未签时不宣称已闭合。",
+        "10:08:12"
+      ),
+      user("这一轮有什么经验能留下给下次用？", "10:08:40"),
+      agent(
+        "**META 自改进提案**：把「检索前追加 review 子查询」写进方法插件，不训练模型权重。\n\nlease 未授予前不生效；采纳决定由人做。",
+        { type: "evolution", candidate: makeCandidate() },
+        "10:09:05"
+      ),
+      agent(
+        "### 边界与反思\n- 版本迭代不改骨架（S1→META 固定）\n- 单题参数不上长为通用默认\n- 新版本不追认旧结果\n\n↑ 这三条保证「自改进」不会把一次性观察写成永远适用的规则。",
+        undefined,
+        "10:09:30"
+      ),
+      system("完整闭环演示结束。签名与经验采纳均由人在 CLI 完成，agent 只产出可复核的候选与证据。", "10:09:42")
+    ]
+  };
+}
+
 export function createSeedWorkspace(): PersistedWorkspace {
   return {
     version: 1,
-    selectedTaskId: "perovskite",
-    activeWorkspaceId: "materials",
+    selectedTaskId: "full-chain-demo",
+    activeWorkspaceId: "thesis",
     preferences: { ...DEFAULT_PREFERENCES, shortcuts: { ...DEFAULT_PREFERENCES.shortcuts } },
     workspaces: WORKSPACES,
     plugins: [seedGithubPlugin()],
@@ -569,6 +757,7 @@ export function createSeedWorkspace(): PersistedWorkspace {
     memory: [],
     archivedTaskIds: [],
     tasks: [
+      seedFullChainDemo(),
       seedEseStudy(),
       seedPerovskite(),
       seedArchives(),

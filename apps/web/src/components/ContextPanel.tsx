@@ -1774,11 +1774,11 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
     ["missing", "blocked", "not_run"].includes(item.status)
   ).length;
   const nodes = [
-    { label: "SOURCE HIT", value: `${task.coverage.sources} sources`, state: task.coverage.sources ? "ok" : "idle" },
-    { label: "SPAN", value: `${task.coverage.spans} located`, state: task.coverage.spans ? "ok" : "idle" },
-    { label: "CLAIM", value: claim ? (claim.status === "signed" ? "signed" : "unsigned") : "none", state: claim?.status === "signed" ? "ok" : claim ? "warn" : "idle" },
-    { label: "EA", value: task.run ? task.run.ea : "not sealed", state: task.run ? "ok" : "idle" },
-    { label: "CLOSURE", value: closure?.status === "pass" ? "pass" : task.run ? "locked" : "n/a", state: closure?.status === "pass" ? "ok" : task.run ? "warn" : "idle" }
+    { label: "来源", title: "SOURCE HIT：检索到的文献/仓库，只是线索，不是证据", value: `${task.coverage.sources} sources`, state: task.coverage.sources ? "ok" : "idle" },
+    { label: "片段", title: "SPAN：能指回原文的具体句子；摘要-only 不算证据", value: `${task.coverage.spans} located`, state: task.coverage.spans ? "ok" : "idle" },
+    { label: "断言", title: "CLAIM：一句可检验的话 + 数值断言；必须由人签署", value: claim ? (claim.status === "signed" ? "signed" : "unsigned") : "none", state: claim?.status === "signed" ? "ok" : claim ? "warn" : "idle" },
+    { label: "证据", title: "EA：结果文件被哈希钉住；改动会被发现", value: task.run ? task.run.ea : "not sealed", state: task.run ? "ok" : "idle" },
+    { label: "闭合", title: "CLOSURE：再核对四件产物一致；不一致就 blocked", value: closure?.status === "pass" ? "pass" : task.run ? "locked" : "n/a", state: closure?.status === "pass" ? "ok" : task.run ? "warn" : "idle" }
   ];
 
   const kindLabel: Record<EvidenceItem["kind"], string> = {
@@ -1798,12 +1798,26 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
         <div className="chain">
           {nodes.map((node, index) => (
             <div className={`chain-node ${node.state}`} key={node.label}>
-              <span>{node.label}</span>
+              <span title={node.title}>{node.label}</span>
               <b>{node.value}</b>
               {index < nodes.length - 1 && <i className="chain-link" />}
             </div>
           ))}
         </div>
+        <details className="chain-guide">
+          <summary>这五段是什么意思？什么时候需要人签？</summary>
+          <div className="chain-guide-body">
+            <p>证据链从可定位的来源走到人签的结论，五段各管一件事：</p>
+            <ul>
+              <li><b>来源</b>：检索到的文献或仓库，只是线索。</li>
+              <li><b>片段</b>：能指回原文的具体句子；摘要-only 不算证据。</li>
+              <li><b>运行记录</b>：这次实验的数据、代码、协议哈希与种子。</li>
+              <li><b>证据制品</b>：结果文件被哈希钉住，改动会被发现。</li>
+              <li><b>断言</b>：一句可检验的话 + 数值断言；必须由人签署。</li>
+            </ul>
+            <p><b>待签 = 证据齐了，但你还没确认。</b> 典型情况：运行完成、EA 已封装、断言能重算，但 statement 与 human_reason 还没由人定稿。签核只能在本地 CLI 完成，网页不会代签。</p>
+          </div>
+        </details>
         <div className="coverage-grid">
           <div><b>{task.coverage.spans}</b><span>SPANS</span></div>
           <div><b>{task.coverage.gaps}</b><span>GAPS</span></div>

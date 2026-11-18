@@ -27,6 +27,7 @@ import {
   createSeedWorkspace,
   createTask as buildTask,
   seedEseStudy,
+  seedFullChainDemo,
   planCard,
   writingCard
 } from "../domain/seed";
@@ -87,8 +88,30 @@ function ensureSeedEseTask(snapshot: PersistedWorkspace): PersistedWorkspace {
   return next;
 }
 
+const FULL_CHAIN_TASK_ID = "full-chain-demo";
+
+/**
+ * Add the full-chain teaching replay to an already-persisted workspace once.
+ * An explicit delete (archivedTaskIds) must win, same rule as the ESE replay.
+ */
+function ensureSeedFullChainDemo(snapshot: PersistedWorkspace): PersistedWorkspace {
+  if (snapshot.tasks.some((task) => task.id === FULL_CHAIN_TASK_ID)) return snapshot;
+  if ((snapshot.archivedTaskIds ?? []).includes(FULL_CHAIN_TASK_ID)) return snapshot;
+  const next: PersistedWorkspace = {
+    ...snapshot,
+    tasks: [seedFullChainDemo(), ...snapshot.tasks]
+  };
+  try {
+    staticAdapter.save(next);
+  } catch {
+    /* quota / private mode: keep the in-memory snapshot */
+  }
+  return next;
+}
+
 const loadedSnapshot = staticAdapter.load();
-const initialSnapshot = loadedSnapshot ? ensureSeedEseTask(loadedSnapshot) : createSeedWorkspace();
+const seededSnapshot = loadedSnapshot ? ensureSeedEseTask(loadedSnapshot) : createSeedWorkspace();
+const initialSnapshot = ensureSeedFullChainDemo(seededSnapshot);
 
 const defaultUI: UIState = {
   contextTab: "run",

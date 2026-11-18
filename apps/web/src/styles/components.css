@@ -6242,3 +6242,25 @@ select.control {
 .ese-negative {
   color: #b91c1c;
 }
+.chain-guide {
+  font-size: 11px;
+  margin-top: 8px;
+}
+.chain-guide summary {
+  color: #5b6472;
+  cursor: pointer;
+}
+.chain-guide-body {
+  color: #5b6472;
+  margin-top: 6px;
+}
+.chain-guide-body ul {
+  margin: 4px 0;
+  padding-left: 16px;
+}
+.chain-guide-body li {
+  margin: 2px 0;
+}
+.chain-guide-body p {
+  margin: 6px 0 0;
+}

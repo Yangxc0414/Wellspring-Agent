@@ -143,7 +143,7 @@ export function Sidebar() {
         >
           <span className="task-dot" aria-hidden="true" />
           <span className="task-row-title">{task.name}</span>
-          <span className="task-row-time">{taskStatus(task)}</span>
+          <span className="task-row-time" title={task.status === "blocked" ? "待签：证据已齐，等待人工签署断言；签名只在本地 CLI 产生" : undefined}>{taskStatus(task)}</span>
         </button>
         <button
           type="button"
