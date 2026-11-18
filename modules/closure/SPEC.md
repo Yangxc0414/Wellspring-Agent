@@ -2,7 +2,7 @@
 id: closure
 name: 闭合与导出
 stage: S13–S16
-version: 0.18.2
+version: 0.19.0
 status: draft
 owner: research-agent
 inputs:
@@ -62,6 +62,7 @@ invariants:
 - `closure publish` 读取一份 `submission=false` 的 export manifest，把 manifest 列出的证据文件、export manifest 自身和可选 signature 复制到新的不可变 bundle；逐文件重建 sha256、写 `bundle-manifest.json`，在 staging 完成 fsync 后原子 rename；目标已存在即失败，绝不覆盖。
 - `closure verify-bundle` 只读重算 bundle 中每个文件的大小与 sha256，返回 `clean/stale`；缺失、篡改或 manifest 自身不一致均为 `stale`。
 - `closure audit` 只做静态结构审计：检查核心产物存在、S1 span 能回到全文 hit、候选/设计引用能回到 span、G2 声称通过时必须有 frozen protocol、S5 capsule/EA 同 run_id、claim draft 未签且引用 EA、paper claim 槽位一致、schematic 图不得绑定为结果图、G5 声称通过必须有 closure；输出 `structurally_consistent_but_not_closed` / `structural_failure`，不重跑实验、不验证引用内容、不代替人签。
+- `closure ese-check` / `ese-sign`（profile `ese_study`）：只校验 ESE 研究的四件产物——RunCapsule `completed`、EA `immutable` 且 sha256 与 metrics 一致、Claim `supported` 且 `evidence_refs` 含该 EA、断言可由 capsule/metrics 重算。不要求 paper slot / bibliography card / result figure，因为它们不是 ESE 研究的产物；把这些补成假文件会比不闭合更糟。`ese-sign` 只接受 `closure_profile=ese_study` 且 `status=ready` 的报告，签署前重跑检查并比对 `checks`；签名与 export manifest schema 与 canonical 一致，manifest 标 `closure_profile=ese_study`，不自动投稿。
 - 只读盘点（`closure profiles` / `/api/project-closures`，schema `closure-profiles-0.4`）：`canonical_run` 每行给出 profile/run_id/status/has_ea/has_claim_draft/has_signed_claim/closure_status/support_panel_status/next，未签署时另带 `claim_draft`（status、statement、scope、assertion、reading、command、cwd、boundary）；`command` 为相对项目根的 `run claim` 命令，statement/human-reason 保持占位符；签署后 `claim_draft=null`。它只展示下一步，不签、不改、不判真伪。
 - `closure obligations` 维护 append-only 义务台账：`reconcile` 只新增/更新/标记复发；若未决项从新报告消失，状态变为 `unverified_disappearance`，不得自动 resolved。只有 `closure obligations resolve --id ... --reason ... --evidence <file>` 或 `waive --id ... --reason ...` 能关闭；`resolve` 记录证据文件 SHA-256，`waive` 明确标注人工豁免。`open/reopened/unverified_disappearance` 都使 summary 为 `blocked`。
 - 盘点把"能不能验证"放到每一行研究旁边（schema `closure-profiles-0.7`）：`search_study` 行新增只读 `integrity`（`state = derivable | non_derivable | incomplete`、`failures`、`missing`、`code_fingerprint = match | stale | absent`），来自 `study_integrity.package_integrity`——即"包内记录的哈希能否由盘上字节在当前哈希规则下重推"，与"跑它的那版代码是否还在"分属两根轴。盘点顶层新增 `study_integrity_layers`（本次窗口内的包），`replication.chain_layers` 透传全库存扫描的分层覆盖表（每个披露 artifact 各有 `all` 与 `derivable` 两个分母，见 search-study 0.54.0）。这一行不重跑、不改判定：`non_derivable` 不新增 blocker，也不解除任何既有 blocker，它只是让读者看见覆盖率里有多少包无法再验证。
@@ -95,6 +96,7 @@ invariants:
 4. 跑 `python -m unittest discover -s tests -v`。
 
 ## Changelog
+- 2026-11-18 · v0.19.0 · status=draft · 新增 `ese_study` profile 与 `closure ese-check` / `ese-sign`：ESE 研究只有 RunCapsule + EA + metrics + Claim，没有 canonical pipeline 的 paper slot / bibliography / result figure，塞进 `canonical_run` 只能造假文件或永远 blocked，因此单列一个 profile，只校验它真正拥有的四件产物。11 项检查（capsule_completed / ea_immutable / ea_run_matches_capsule / ea_sha256_matches_metrics / ea_source_declared / claim_supported / claim_evidence_refs_ea / claim_scope_matches_ea / claim_human_reason / claim_evidence_source_matches / claim_assertions_recomputed）。实测 ESE-MS-20261118-03 真实产物 11/11 pass、status=ready；篡改 metrics 或断言值即 blocked；`ese-sign` 拒绝 canonical 报告与过期报告。`canonical_run` 代码一字未动。
 - 2026-11-18 · v0.18.2 · status=draft · 内部去重：哈希与时间戳改由 storage.sha256_bytes/sha256_file/now_iso 提供，行为不变；无契约变化
 - 2026-11-11 · v0.18.1 · status=draft · 为 verdict-ledger 暴露只读别名 `claim_candidates(root, run)`：判定总线需要把 claim 判定行绑定到本模块实际读取的同一份 claim 文件，候选清单必须只有一处定义；`_claim_candidates` 行为一字未动，盘点输出不变。调用方 tests/test_verdict_ledger 钉绑定行为。最小改进，升 patch。
 - 2026-11-02 · v0.18.0 · status=draft · 盘点每行研究带上能不能再验证：schema closure-profiles-0.6 → 0.7，search_study 行新增只读 integrity（state = derivable | non_derivable | incomplete、failures、missing、code_fingerprint = match | stale | absent），盘点顶层新增 study_integrity_layers，replication 块透传全库存 chain_layers。实现来自 search-study 0.54.0 的 study_integrity 模块，代码指纹在一次盘点中只算一次再逐包比较。实测 runtime_data/gapbatch-20seeds 等 27 个项目 101 个包：96 derivable / 5 non_derivable，5 个不可验证包分别是 gapbatch-prefix-fix 的 breast_cancer/iris/wine（带 study.self_hash + evidence.binds_spec 两处不符，即计时字段进入内容哈希那个缺陷的产物）与 study-cli/STUDY-wine、study-demo/STUDY-iris（spec.binds_study 不符）。只读展示，人工门与判定集合一字未动。

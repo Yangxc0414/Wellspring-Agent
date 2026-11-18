@@ -2,7 +2,7 @@
 id: ese-exec
 name: ESE 研究执行器
 stage: S5
-version: 0.4.1
+version: 0.4.2
 status: pilot
 owner: research-agent
 inputs:
@@ -13,12 +13,15 @@ outputs:
   - ese-study-result
   - evidence-table
   - ese-exploration-note
+  - run-capsule
+  - evidence-artifact
+  - metrics-table
 tools:
   - ese_exec.run_study
   - ese_explore.run_exploration
 gates: []
 invariants:
-  - 只读分析；不创建 Claim/EA/Verdict/Signature，不做门禁决定
+  - 只读分析；可写 RunCapsule/EA/metrics 证据制品（`emit_run_artifacts`），但不创建 Claim/Verdict/Signature，不做门禁决定
   - 协议必须先于数据冻结；记录 protocol sha256 与每个仓库的 HEAD
   - 只挖掘本地 clone；联网 clone 是显式独立步骤
   - 标签只来自预注册的路径/提交消息规则，结果标为 exploratory
@@ -58,7 +61,7 @@ invariants:
 - 第 3 步：用 `ese_exec.run_study` 执行，得到区间与置换检验；
 - 第 4 步：写 `note.md`：文献依据、候选 idea、设计草稿、协议完整性、真实结果、反思与下一问。
 
-探索循环同样只读：不创建 Claim/EA/Verdict/Signature，不替代 G2/S5b。
+探索循环同样只读：不创建 Claim/Verdict/Signature；证据制品只由 `emit_run_artifacts` 显式触发，不替代 G2/S5b。
 
 ## 分层分析（0.3.0 新增）
 
@@ -90,6 +93,8 @@ invariants:
 3. 结果字段变化先改本 SPEC 的 Contract，再改代码与测试。
 
 ## Changelog
+
+- 2026-11-18 · v0.4.2 · status=pilot · 规格与实现对齐：v0.4.0 已新增 `emit_run_artifacts` 写 RunCapsule/EA/metrics，但 frontmatter 的 outputs 与 invariants 仍写"不创建 EA"，导致"规格说不可签、代码已产出可核验 EA"的读法歧义。现改为"可写证据制品、不创建 Claim/Verdict/Signature"，outputs 补 run-capsule/evidence-artifact/metrics-table；行为未变。可签路径见 run 0.8.0 的 `--evidence-source ese-exec` 与 closure 0.19.0 的 `ese_study` profile。
 
 - 2026-11-18 · v0.4.1 · status=pilot · metrics 增加 pooled 标识行（test_cochange_rate/bugfix_difference/adjusted_difference/time_split_difference），capsule metric_name 改为标识符，claim 数值断言可被 verify_claim_assertions 重算
 - 0.4.0（2026-11-18）：新增 S5 运行制品输出（run-capsule.json / ea.json / metrics.json / run-contract.json + check），把探索性结果封成 run-contract 可校验的一族；签名仍是人签 CLI 步骤。

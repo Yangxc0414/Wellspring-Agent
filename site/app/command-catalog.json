@@ -1,9 +1,9 @@
 {
   "schema_version": "workspace-0.1",
-  "generated_at": "2026-11-18T13:03:52+00:00",
-  "count": 224,
+  "generated_at": "2026-11-18T14:40:50+00:00",
+  "count": 226,
   "curated": 51,
-  "derived": 173,
+  "derived": 175,
   "commands": [
     {
       "id": "study.baseline",
@@ -587,6 +587,24 @@
       "label": "audit",
       "syntax": "python -m research_agent closure audit",
       "description": "usage: research_agent closure audit [-h] --bundle BUNDLE\n                                    [--output-dir OUTPUT_DIR]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.ese-check",
+      "group": "closure",
+      "label": "ese check",
+      "syntax": "python -m research_agent closure ese-check",
+      "description": "usage: research_agent closure ese-check [-h] --capsule CAPSULE --ea EA --claim\n                                        CLAIM --output-dir OUTPUT_DIR",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "closure.ese-sign",
+      "group": "closure",
+      "label": "ese sign",
+      "syntax": "python -m research_agent closure ese-sign",
+      "description": "usage: research_agent closure ese-sign [-h] --report REPORT --capsule CAPSULE\n                                       --ea EA --claim CLAIM --human-reason\n                                       HUMAN_REASON [--signer SIGNER]\n                                       [--signers-path SIGNERS_PATH]\n                                       --output-dir OUTPUT_DIR",
       "safety": "catalog_only",
       "curated": false
     },

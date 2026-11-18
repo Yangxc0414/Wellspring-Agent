@@ -52,6 +52,26 @@ class DemoPagesTest(unittest.TestCase):
         frontier_replay = (ROOT / "demo" / "frontier" / "index.html").read_text(encoding="utf-8")
         self.assertIn("run-frontier/", frontier_replay)
 
+    def test_ese_study_page_states_the_chain_honestly(self):
+        page = (ROOT / "demo" / "ese-ms-03" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('data-dl-page="demo"', page)
+        self.assertIn('data-demo-chain="ESE-MS-20261118-03"', page)
+        self.assertIn("demo-legibility.js", page)
+        self.assertIn("缺陷修复提交是否更常触碰测试", page)
+        self.assertIn("5132", page)
+        self.assertIn("-0.007", page)
+        self.assertIn("closure ese-check", page)
+        self.assertIn("closure ese-sign", page)
+        # The page must never claim a signature that the disk does not have.
+        signed = 'class="badge ok">SIGNED' in page
+        awaiting = "AWAITING HUMAN SIGNATURE" in page
+        self.assertTrue(signed or awaiting)
+
+    def test_ese_study_copy_matches(self):
+        source = (ROOT / "demo" / "ese-ms-03" / "index.html").read_text(encoding="utf-8")
+        copied = (ROOT / "site" / "demo" / "ese-ms-03" / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(source, copied)
+
     def test_frontier_chain_copy_matches(self):
         source = (ROOT / "demo" / "run-frontier" / "index.html").read_text(encoding="utf-8")
         copied = (ROOT / "site" / "demo" / "run-frontier" / "index.html").read_text(encoding="utf-8")

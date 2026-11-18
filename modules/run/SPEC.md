@@ -2,7 +2,7 @@
 id: run
 name: S5 执行与证据
 stage: S5
-version: 0.7.3
+version: 0.8.0
 status: draft
 owner: research-agent
 inputs:
@@ -51,6 +51,7 @@ invariants:
 - `split=demo|holdout` 仅用于 chemlab：`demo` 使用 418/22 原始划分，`holdout` 使用由训练池确定性派生的 376/42 划分；holdout 与 demo test 不重叠，只允许在租约后 confirmation 使用，禁止进入准入或候选选择；
 - 失败：数据/模型不可用或指标缺失 → `status=failed`，不写指标为 0，不生成 EA；
 - `run claim` 必须提供非空 `human_reason`，只能绑定已有 EA；claim 的 scope 必须与 EA 的 scope 完全一致，不能自动生成 Claim；
+- `run claim` 的 EA 来源默认只接受 `source=run`；外部执行器（如 `ese-exec`）必须用 `--evidence-source <name>` 显式放行。放行后 claim 的 `verification.evidence_source` 记录实际来源，warnings 标明"非 RunAgent.execute 来源"；不放行即拒绝签署，默认行为不变；
 - `ClaimRecord` 可带 `ClaimAssertion[]`：每条包含 metric / comparator / value / tolerance / observed / status / condition；`run claim` 在写入前从 metrics artifact 重算数值，任一 assertion 失败即拒绝签署；无 assertion 的 legacy claim 保留但显式警告“未重算”；
 - `run execute --use-lease` 必须解析 active S5 seed lease；无 lease/冲突时 fail closed，输出记录 `active_harness`；
 - `run-contract-check` 必须从 capsule 的逐 seed 指标计算 paired baseline delta（`delta_<metric>` 或 `baseline_<metric>`）；有预注册 `min_delta` 时必须与其比较，未达标为 blocker；无 baseline 时标 `not_verifiable`，不得写成通过；
@@ -93,6 +94,8 @@ invariants:
 4. 跑 `python -m unittest discover -s tests -v`。
 
 ## Changelog
+
+- 2026-11-18 · v0.8.0 · status=draft · 可签证据来源显式化：`run claim` 增加 `--evidence-source`（可重复），默认仍只接受 `source=run`；显式放行 `ese-exec` 后才接受该 EA，claim 的 `verification.evidence_source` 记录实际来源、warnings 标注非 `RunAgent.execute` 来源。动机：ese-exec v0.4.1 已把 results 封成 run-capsule + EA + metrics 并声明"claim 数值断言可被 verify_claim_assertions 重算"，但 `run claim` 的来源校验把 `source=ese-exec` 一律拒绝，规格与实现不一致。实测该 EA 的两条断言（test_cochange_rate 0.3749、adjusted_difference 0.0681）可由 capsule/metrics 重算通过；默认拒绝用例见 tests/test_ese_closure_chain.py。默认路径行为一字未变。
 
 - 2026-11-18 · v0.7.3 · status=draft · 内部去重：哈希与时间戳改由 storage 共享实现，行为不变；无契约变化
 - 2026-11-15 · v0.7.2 · status=draft · chemlab 根因修复：CI pandas 2.2+ 将 512 位数字指纹列推断为 float 丢前导零（宽度 486-512），fingerprint 列显式 dtype=str 钉住字符串解析

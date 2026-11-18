@@ -418,6 +418,7 @@ class RunAgent:
         scope: str,
         output_dir: Path,
         assertions: Optional[List[Dict[str, Any]]] = None,
+        evidence_sources: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         if not statement.strip():
             raise RunError("claim statement is required")
@@ -425,14 +426,21 @@ class RunAgent:
             raise RunError("human_reason is required; claims are never auto-created")
         if not scope.strip():
             raise RunError("claim scope is required")
+        allowed_sources = tuple(
+            item.strip() for item in (evidence_sources or ("run",)) if item and item.strip()
+        ) or ("run",)
         capsule = json.loads(Path(capsule_path).read_text(encoding="utf-8"))
         evidence = json.loads(Path(ea_path).read_text(encoding="utf-8"))
         if capsule.get("status") != "completed":
             raise RunError("only a completed run can support a claim")
         if evidence.get("run_id") != capsule.get("run_id"):
             raise RunError("EA run_id does not match capsule")
-        if not evidence.get("immutable") or evidence.get("source") != "run":
-            raise RunError("EA must be immutable and run-sourced")
+        evidence_source = str(evidence.get("source") or "")
+        if not evidence.get("immutable") or evidence_source not in allowed_sources:
+            raise RunError(
+                "EA must be immutable and from an allowed source (%s); got %r"
+                % (", ".join(allowed_sources), evidence_source)
+            )
         metrics_path = Path(evidence.get("path", ""))
         if not metrics_path.is_file() or sha256_file(metrics_path) != evidence.get("sha256"):
             raise RunError("EA sha256 does not match the metrics artifact")
@@ -466,6 +474,11 @@ class RunAgent:
             "claim scope %s covers one protocol-validation run" % expected_scope,
             "not a thesis result and not a peer-reviewed finding",
         ]
+        if evidence_source != "run":
+            warnings.append(
+                "evidence source %r was explicitly allowed at signing time; "
+                "this claim is not a RunAgent.execute run" % evidence_source
+            )
         if not verified:
             warnings.append(
                 "legacy claim has no structured assertions; numeric support was not re-verified"
@@ -504,6 +517,7 @@ class RunAgent:
                 "failed": len(failures),
                 "run_id": capsule.get("run_id"),
                 "ea_id": evidence.get("artifact_id"),
+                "evidence_source": evidence_source,
             },
         )
         output_dir = Path(output_dir)

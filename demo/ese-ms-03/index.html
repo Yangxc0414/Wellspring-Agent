@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ESE 研究闭环的来龙去脉 · ESE-MS-20261118-03</title>
+<meta name="description" content="一次真实经验软件工程研究的证据链：协议、数据、结果、分层与非结果，以及 capsule→EA→claim→closure→signature 的当前状态。本页由产物生成。" />
+<link rel="stylesheet" href="../../assets/demo-legibility.css" />
+<style>
+body{margin:0;padding:30px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.65;color:#1f2937;background:#f8fafc}
+main{max-width:1120px;margin:0 auto;background:#fff;border:1px solid #e5e9f0;border-radius:14px;padding:26px}
+h1{font-size:23px;margin:0 0 4px} h2{font-size:16px;margin:28px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
+td,th{border-bottom:1px solid #e5e9f0;padding:6px 8px;text-align:left;vertical-align:top}
+th{color:#5b6472;font-weight:600}
+.meta{color:#5b6472;font-size:12px}
+.badge{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:#eef2ff;color:#2563eb;margin-right:6px}
+.badge.warn{background:#fffbeb;color:#b45309}
+.badge.ok{background:#ecfdf5;color:#047857}
+.card{border:1px solid #e5e9f0;border-radius:10px;padding:10px 12px;margin:8px 0;background:#fbfcfe}
+pre{white-space:pre-wrap;word-break:break-word;font-size:12px;background:#f1f5f9;padding:8px;border-radius:8px;margin:6px 0}
+.boundary{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:13px}
+tr.done td:first-child{color:#047857;font-weight:600}
+tr.todo td:first-child{color:#b45309;font-weight:600}
+a{color:#2563eb} code{font-size:11.5px}
+</style></head>
+<body><main data-dl-page="demo" data-demo-chain="ESE-MS-20261118-03">
+<span class="badge">REAL ESE STUDY</span><span class="badge warn">EXPLORATORY · AWAITING HUMAN SIGNATURE</span><span class="badge">只读血缘页</span>
+<h1>缺陷修复提交是否更常触碰测试：一次 ESE 研究的来龙去脉</h1>
+<p class="meta">study: ESE-MS-20261118-03 · method: repository-mining · protocol sha256: <code>254d1d10ea49…</code> · 本页由 <code>scripts/build_ese_study_page.py</code> 从真实产物生成；状态按盘上文件判定，不预写完成。</p>
+
+<h2>0. 这条研究现在到哪一步</h2>
+<table><thead><tr><th>阶段</th><th>状态</th><th>实际读数 / 缺什么</th><th>产物</th></tr></thead>
+<tbody><tr class="done"><td>RunCapsule</td><td>已完成</td><td>run_id=ESE-MS-20261118-03 · status=completed · metric=test_cochange_rate · seeds=[42]</td><td><code>run/run-capsule.json</code></td></tr><tr class="done"><td>EA（证据制品）</td><td>已完成</td><td>artifact_id=EA-65d32e114229 · source=ese-exec · immutable=True · sha256=41149c82a3ed…</td><td><code>run/ea.json</code></td></tr><tr class="todo"><td>Claim（人签断言）</td><td>未完成</td><td>待人工执行：run claim --evidence-source ese-exec（见下方命令）</td><td><code>claim/claim.json</code></td></tr><tr class="todo"><td>Closure（结构闭合）</td><td>未完成</td><td>待执行：closure ese-check（见下方命令）</td><td><code>closure/closure-report.json</code></td></tr><tr class="todo"><td>Signature（人签）</td><td>未完成</td><td>待人工执行：closure ese-sign（见下方命令）</td><td><code>signature/signature.json</code></td></tr></tbody></table>
+<p class="meta">前两步（Capsule、EA）由执行器写出；后三步（Claim、Closure、Signature）都是人签步骤，agent 不代签。缺任何一步，页面就显示未完成，并给出下一步命令。</p>
+
+<h2>1. 研究问题与规格</h2>
+<div class="card"><b>研究问题</b>：RQ1: among commits that touch Python source, what fraction also touch tests?; RQ2: is that fraction different for bug-fix commits than for other commits?; RQ3: does the fraction differ between earlier and later history (per-repo median date split)?; RQ4: does the bug-fix difference survive stratification by project, commit size and production-file co-change?</div>
+<p class="meta">规格在数据之前冻结：抽样框、时间窗、去重策略、标签规则、统计计划都写在协议里，执行器只做提取与统计。协议哈希绑定在 capsule，改了协议就无法与这份结果对上。</p>
+<p class="meta">标签规则：单位＝至少触碰一个 <code>.py</code> 文件的提交；outcome＝同提交触碰 <code>tests/</code>、<code>test_*.py</code>、<code>*_test.py</code>；bug-fix＝提交标题匹配 fix/bug/issue/regression/hotfix/patch。全部是启发式，不是人工标注。</p>
+
+<h2>2. 数据与抽样</h2>
+<table><thead><tr><th>仓库</th><th>HEAD</th><th>提交数</th><th>触碰测试</th><th>比例</th><th>95% CI</th></tr></thead>
+<tbody><tr><td>click</td><td><code>08b803cf32ce…</code></td><td>1328</td><td>588</td><td>0.4428</td><td>[0.4163, 0.4696]</td></tr><tr><td>requests</td><td><code>3c7baaa05ab4…</code></td><td>2824</td><td>760</td><td>0.2691</td><td>[0.2531, 0.2858]</td></tr><tr><td>httpx</td><td><code>7cff5f79bc78…</code></td><td>980</td><td>576</td><td>0.5878</td><td>[0.5567, 0.6182]</td></tr></tbody></table>
+<p class="meta">这是便利抽样：三个成熟的 Python 开源库，不是概率样本。结论只能覆盖这三个仓库的合并样本，不能代表 Python 生态。</p>
+
+<h2>3. 结果</h2>
+<div class="card">
+<p><b>合并</b>：1924/5132 = <b>0.3749</b>，95% CI [0.3618, 0.3882]。</p>
+<p><b>缺陷修复</b>：352/851 = 0.4136；<b>其它提交</b>：1572/4281 = 0.3672；差 <b>0.0464</b>，置换检验（n=1000，固定种子）双侧 p = <b>0.015</b>。</p>
+<p><b>时间切分</b>（每仓库中位日期）：早期 0.3091 [0.2915, 0.3272]；晚期 0.4410 [0.4219, 0.4603]；差 0.1319，p = 0.001。</p>
+</div>
+
+<h3>分层：差异不是每个项目都成立</h3>
+<table><thead><tr><th>分层因子</th><th>取值</th><th>缺陷修复比例</th><th>其它比例</th><th>差</th></tr></thead>
+<tbody><tr><td>project</td><td>click</td><td>0.4375</td><td>0.4442</td><td>-0.0067</td></tr><tr><td>project</td><td>httpx</td><td>0.6264</td><td>0.5838</td><td>0.0426</td></tr><tr><td>project</td><td>requests</td><td>0.3581</td><td>0.2513</td><td>0.1068</td></tr><tr><td>commit_size_bucket</td><td>1-2</td><td>0.3235</td><td>0.2527</td><td>0.0708</td></tr><tr><td>commit_size_bucket</td><td>3-5</td><td>0.7895</td><td>0.6365</td><td>0.1530</td></tr><tr><td>commit_size_bucket</td><td>&gt;5</td><td>0.5909</td><td>0.6700</td><td>-0.0791</td></tr><tr><td>production_cochange</td><td>no</td><td>1.0000</td><td>1.0000</td><td>0.0000</td></tr><tr><td>production_cochange</td><td>yes</td><td>0.3338</td><td>0.2745</td><td>0.0593</td></tr></tbody></table>
+
+<h2>4. 怎么读（这是本页最重要的一节）</h2>
+<div class="card">
+<p><b>总体差异 +0.046 是真的，但它不是"每个项目都更常改测试"。</b>按项目分层后，click 的差是负的（约 -0.007）：在 click 里，缺陷修复提交触碰测试的比例反而略低。这是典型的聚合掩盖异质性——合并样本的差异由 requests 与 httpx 拉动。</p>
+<p>所以能写的句子只有："在三仓库合并样本上，缺陷修复提交触碰测试的比例比其它提交高 0.046（p=0.015）；该差异在 click 内方向反转，因此不适用于单项目。"不能写"缺陷修复提交更常改测试"这种无限定语。</p>
+<p>另外，<b>p=0.015 只说明"不太可能纯由随机波动产生"，不说明差异有实际意义</b>。0.046 的比例差是否值得改变实践，需要另一个人来决定，不是统计能回答的。</p>
+</div>
+
+<h2>5. 证据链：五件产物怎样互相约束</h2>
+<div class="card">
+<p><b>RunCapsule</b> 记录协议哈希、数据哈希（仓库 HEAD）、代码哈希、种子与逐种子指标；<b>EA</b> 绑定 metrics 文件的 sha256；<b>Claim</b> 引用 EA，并在写入前从 metrics 重算每条断言；<b>Closure</b> 重新核对四件产物的一致性；<b>Signature</b> 对 export manifest 签名，不自动投稿。</p>
+<p>任何一环被改动（改 metrics、改断言值、改 claim 的 scope），后续检查都会失败：hash 不匹配、断言重算不过、或报告与当前输入不一致。这不是"防篡改证明"，是完整性检测——MANIFEST 与产物同仓同机，有动机的重写可以同时改两者。</p>
+</div>
+
+<h2>6. 边界</h2>
+<div class="boundary">exploratory repository-mining result; test/bug labels are path and message heuristics; no Claim/EA/signature, no gate decision<br />
+补充：三个仓库都是成熟开源项目，不含工业闭源代码；提交标题的 bug-fix 判定会漏标与误标；时间切分用中位日期，不能排除"项目在晚期更成熟"这一混杂。以上都不是可以在正文里省略的脚注。</div>
+
+<h2>7. 复跑与下一步</h2>
+<pre># 1) 人签 claim（statement / human-reason 由人定稿）
+"D:/Program Files/Python38/python.exe" -m research_agent run claim \
+  --capsule runtime_data/ese-ms-20261118-03/run/run-capsule.json \
+  --ea runtime_data/ese-ms-20261118-03/run/ea.json \
+  --scope S5/ESE-MS-20261118-03 \
+  --assertion "metric=test_cochange_rate,value=0.3749,comparator=approx,tolerance=0.001" \
+  --assertion "metric=adjusted_difference,value=0.0681,comparator=approx,tolerance=0.001" \
+  --evidence-source ese-exec \
+  --output-dir runtime_data/ese-ms-20261118-03/claim
+
+# 2) 结构闭合（只读检查，不签）
+"D:/Program Files/Python38/python.exe" -m research_agent closure ese-check \
+  --capsule runtime_data/ese-ms-20261118-03/run/run-capsule.json \
+  --ea runtime_data/ese-ms-20261118-03/run/ea.json \
+  --claim runtime_data/ese-ms-20261118-03/claim/claim.json \
+  --output-dir runtime_data/ese-ms-20261118-03/closure
+
+# 3) 最终签名（人签）
+"D:/Program Files/Python38/python.exe" -m research_agent closure ese-sign \
+  --report runtime_data/ese-ms-20261118-03/closure/closure-report.json \
+  --capsule runtime_data/ese-ms-20261118-03/run/run-capsule.json \
+  --ea runtime_data/ese-ms-20261118-03/run/ea.json \
+  --claim runtime_data/ese-ms-20261118-03/claim/claim.json \
+  --human-reason "..." \
+  --output-dir runtime_data/ese-ms-20261118-03/signature
+
+# 4) 签完后重生成本页，状态会自动变成 SIGNED
+"D:/Program Files/Python38/python.exe" scripts/build_ese_study_page.py</pre>
+<p class="meta">返回：<a href="../">demo 回放首页</a> · <a href="../run/">主版本来龙去脉</a> · <a href="../../app/">工作台 ESE 面板</a></p>
+</main>
+<script src="../../assets/demo-legibility.js"></script>
+</body></html>

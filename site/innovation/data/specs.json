@@ -210,13 +210,16 @@
     "id": "ese-exec",
     "name": "ESE 研究执行器",
     "stage": "S5",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "status": "pilot",
     "owner": "research-agent",
     "outputs": [
       "ese-study-result",
       "evidence-table",
-      "ese-exploration-note"
+      "ese-exploration-note",
+      "run-capsule",
+      "evidence-artifact",
+      "metrics-table"
     ],
     "tools": [
       "ese_exec.run_study",
@@ -224,7 +227,7 @@
     ],
     "gates": [],
     "invariants": [
-      "只读分析；不创建 Claim/EA/Verdict/Signature，不做门禁决定",
+      "只读分析；可写 RunCapsule/EA/metrics 证据制品（`emit_run_artifacts`），但不创建 Claim/Verdict/Signature，不做门禁决定",
       "协议必须先于数据冻结；记录 protocol sha256 与每个仓库的 HEAD",
       "只挖掘本地 clone；联网 clone 是显式独立步骤",
       "标签只来自预注册的路径/提交消息规则，结果标为 exploratory"
@@ -235,7 +238,7 @@
     "id": "run",
     "name": "S5 执行与证据",
     "stage": "S5",
-    "version": "0.7.3",
+    "version": "0.8.0",
     "status": "draft",
     "owner": "research-agent",
     "outputs": [
@@ -635,7 +638,7 @@
     "id": "closure",
     "name": "闭合与导出",
     "stage": "S13–S16",
-    "version": "0.18.2",
+    "version": "0.19.0",
     "status": "draft",
     "owner": "research-agent",
     "outputs": [

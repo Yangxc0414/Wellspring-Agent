@@ -55,7 +55,7 @@ from .rsi_proposer import FrozenModelProposer
 from .modules.literature import LiteratureAgent, LiteratureRequest
 from .modules.run import RunAgent
 from .contracts import RunRequest
-from .closure import ClosureAgent, audit_pipeline_bundle
+from .closure import ClosureAgent, EseClosureAgent, audit_pipeline_bundle
 from .signers import SignerError, SignerStore
 from .task_agent import TaskAgent, TaskRequest
 from .skill_lab import SkillLab, SkillLabError
@@ -2329,6 +2329,7 @@ def _cmd_run_claim(args: argparse.Namespace) -> int:
         args.scope,
         Path(args.output_dir),
         assertions=_parse_claim_assertions(getattr(args, "assertion", None)),
+        evidence_sources=getattr(args, "evidence_source", None),
     )
     _print_json(result)
     return 0
@@ -2415,6 +2416,33 @@ def _cmd_closure_sign(args: argparse.Namespace) -> int:
     try:
         result = ClosureAgent().sign(
             Path(args.report), Path(args.demo), Path(args.claim),
+            args.human_reason, Path(args.output_dir),
+            signer_store=signer_store,
+            signer_id=signer_id,
+        )
+    except SignerError as exc:
+        raise SystemExit(str(exc))
+    _print_json(result)
+    return 0
+
+
+def _cmd_closure_ese_check(args: argparse.Namespace) -> int:
+    result = EseClosureAgent().check(
+        Path(args.capsule), Path(args.ea), Path(args.claim), Path(args.output_dir)
+    )
+    _print_json(result)
+    return 0
+
+
+def _cmd_closure_ese_sign(args: argparse.Namespace) -> int:
+    signer_store = None
+    signer_id = ""
+    if args.signer:
+        signer_store = SignerStore(Path(args.signers_path))
+        signer_id = args.signer
+    try:
+        result = EseClosureAgent().sign(
+            Path(args.report), Path(args.capsule), Path(args.ea), Path(args.claim),
             args.human_reason, Path(args.output_dir),
             signer_store=signer_store,
             signer_id=signer_id,
@@ -6018,6 +6046,26 @@ def build_parser() -> argparse.ArgumentParser:
     closure_sign.add_argument("--signers-path", default=str(DEFAULT_SIGNER_STORE_PATH))
     closure_sign.add_argument("--output-dir", default="research_agent/web/data/closure-signature")
     closure_sign.set_defaults(func=_cmd_closure_sign)
+    closure_ese_check = closure_sub.add_parser(
+        "ese-check", help="ESE study closure: capsule + EA + metrics + claim"
+    )
+    closure_ese_check.add_argument("--capsule", required=True)
+    closure_ese_check.add_argument("--ea", required=True)
+    closure_ese_check.add_argument("--claim", required=True)
+    closure_ese_check.add_argument("--output-dir", required=True)
+    closure_ese_check.set_defaults(func=_cmd_closure_ese_check)
+    closure_ese_sign = closure_sub.add_parser(
+        "ese-sign", help="sign an ESE study closure (human only)"
+    )
+    closure_ese_sign.add_argument("--report", required=True)
+    closure_ese_sign.add_argument("--capsule", required=True)
+    closure_ese_sign.add_argument("--ea", required=True)
+    closure_ese_sign.add_argument("--claim", required=True)
+    closure_ese_sign.add_argument("--human-reason", required=True)
+    closure_ese_sign.add_argument("--signer", default="", help="local signer id; otherwise legacy unsigned record")
+    closure_ese_sign.add_argument("--signers-path", default=str(DEFAULT_SIGNER_STORE_PATH))
+    closure_ese_sign.add_argument("--output-dir", required=True)
+    closure_ese_sign.set_defaults(func=_cmd_closure_ese_sign)
     closure_publish = closure_sub.add_parser("publish", help="seal signed evidence into an immutable bundle")
     closure_publish.add_argument("--manifest", required=True)
     closure_publish.add_argument("--signature", default=None)
@@ -6122,6 +6170,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--assertion",
         action="append",
         help="structured numeric assertion, e.g. metric=accuracy,value=0.95,comparator=>=,tolerance=0.01",
+    )
+    run_claim.add_argument(
+        "--evidence-source",
+        action="append",
+        default=None,
+        help="accepted EA source; default only 'run'. Repeatable (e.g. --evidence-source ese-exec).",
     )
     run_claim.add_argument("--output-dir", default="research_agent/web/data/run-claim")
     run_claim.set_defaults(func=_cmd_run_claim)

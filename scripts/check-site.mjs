@@ -61,7 +61,8 @@ const legibilityPages = [
   ["demo/index.html", "demo"],
   ["demo/frontier/index.html", "demo"],
   ["demo/run/index.html", "demo"],
-  ["demo/run-frontier/index.html", "demo"]
+  ["demo/run-frontier/index.html", "demo"],
+  ["demo/ese-ms-03/index.html", "demo"]
 ];
 check(fs.existsSync(path.join(root, "assets/demo-legibility.css")), "missing shared legibility CSS");
 check(fs.existsSync(path.join(root, "assets/demo-legibility.js")), "missing shared legibility JS");

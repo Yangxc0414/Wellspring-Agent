@@ -991,3 +991,238 @@ def _audit_report(
         _write_json(path, report)
         report["path"] = str(path)
     return report
+
+
+# --- ese_study closure profile ------------------------------------------------
+# An ESE study produces RunCapsule + EA + metrics + Claim, but not the canonical
+# pipeline's paper slots, bibliography card, or result figure. Forcing it into
+# canonical_run would either fake those artifacts or block every ESE study, so
+# this profile checks exactly the four artifacts it really has. It never creates
+# a claim and never signs by itself: both stay human CLI steps.
+
+ESE_CLOSURE_PROFILE = "ese_study"
+
+
+class EseClosureAgent:
+    module_id = "closure"
+
+    @staticmethod
+    def _load_object(path, label):
+        try:
+            value = json.loads(Path(path).read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise ClosureError("cannot read %s: %s" % (label, exc))
+        if not isinstance(value, dict):
+            raise ClosureError("%s must be a JSON object" % label)
+        return value
+
+    def check(
+        self,
+        capsule_path: Path,
+        ea_path: Path,
+        claim_path: Path,
+        output_dir: Path,
+    ) -> Dict[str, Any]:
+        capsule_path = Path(capsule_path)
+        ea_path = Path(ea_path)
+        claim_path = Path(claim_path)
+        capsule = self._load_object(capsule_path, "capsule")
+        evidence = self._load_object(ea_path, "ea")
+        claim = self._load_object(claim_path, "claim")
+
+        checks: List[ClosureCheck] = []
+
+        def add(name: str, ok: bool, detail: str) -> None:
+            checks.append(ClosureCheck(name, "pass" if ok else "fail", detail))
+
+        add(
+            "capsule_completed",
+            capsule.get("status") == "completed",
+            "status=%s" % capsule.get("status"),
+        )
+        add(
+            "ea_immutable",
+            bool(evidence.get("immutable")),
+            "immutable=%s" % evidence.get("immutable"),
+        )
+        add(
+            "ea_run_matches_capsule",
+            str(evidence.get("run_id") or "") == str(capsule.get("run_id") or ""),
+            "ea_run=%s capsule_run=%s"
+            % (evidence.get("run_id"), capsule.get("run_id")),
+        )
+        metrics_path = Path(str(evidence.get("path") or ""))
+        metrics_ok = metrics_path.is_file() and sha256_file(metrics_path) == evidence.get("sha256")
+        add("ea_sha256_matches_metrics", metrics_ok, "path=%s" % metrics_path)
+        add(
+            "ea_source_declared",
+            bool(str(evidence.get("source") or "").strip()),
+            "source=%s" % evidence.get("source"),
+        )
+        add(
+            "claim_supported",
+            claim.get("status") == "supported",
+            "status=%s" % claim.get("status"),
+        )
+        refs = [str(item) for item in (claim.get("evidence_refs") or [])]
+        add(
+            "claim_evidence_refs_ea",
+            str(evidence.get("artifact_id") or "") in refs,
+            "refs=%s" % ",".join(refs),
+        )
+        add(
+            "claim_scope_matches_ea",
+            str(claim.get("scope") or "") == str(evidence.get("scope") or ""),
+            "claim_scope=%s" % claim.get("scope"),
+        )
+        add(
+            "claim_human_reason",
+            bool(str(claim.get("human_reason") or "").strip()),
+            "human_reason present",
+        )
+
+        recorded_source = str((claim.get("verification") or {}).get("evidence_source") or "")
+        add(
+            "claim_evidence_source_matches",
+            (not recorded_source) or recorded_source == str(evidence.get("source") or ""),
+            "claim=%s ea=%s" % (recorded_source or "(legacy)", evidence.get("source")),
+        )
+
+        metrics: List[Dict[str, Any]] = []
+        if metrics_ok:
+            try:
+                raw = json.loads(metrics_path.read_text(encoding="utf-8"))
+                if isinstance(raw, list):
+                    metrics = raw
+            except (OSError, ValueError):
+                metrics = []
+        assertion_rows = claim.get("assertions") or []
+        verified = verify_claim_assertions(capsule, metrics, assertion_rows) if metrics else []
+        all_passed = bool(verified) and all(row["status"] == "pass" for row in verified)
+        add(
+            "claim_assertions_recomputed",
+            all_passed,
+            "checked=%d passed=%d"
+            % (len(verified), len([row for row in verified if row["status"] == "pass"])),
+        )
+
+        unresolved = [check.name for check in checks if check.status != "pass"]
+        artifact_refs: List[str] = []
+        for candidate in (capsule_path, ea_path, metrics_path, claim_path):
+            if candidate.is_file() and str(candidate) not in artifact_refs:
+                artifact_refs.append(str(candidate))
+
+        report = ClosureReport(
+            report_id="CLR-" + uuid.uuid4().hex[:10],
+            status="ready" if not unresolved else "blocked",
+            checks=checks,
+            unresolved=unresolved,
+            artifact_refs=artifact_refs,
+            created_at=now_iso(),
+            warnings=[
+                "ese_study profile: capsule + EA + metrics + claim only; "
+                "no paper slots, bibliography card, or result figure",
+                "closure is structural only; not peer review",
+                "no automatic submission; human sign required",
+            ],
+            closure_profile=ESE_CLOSURE_PROFILE,
+        )
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        path = output_dir / "closure-report.json"
+        _write_json(path, asdict(report))
+        return {"report": asdict(report), "path": str(path)}
+
+    def sign(
+        self,
+        report_path: Path,
+        capsule_path: Path,
+        ea_path: Path,
+        claim_path: Path,
+        human_reason: str,
+        output_dir: Path,
+        signer_store: Optional[SignerStore] = None,
+        signer_id: str = "",
+    ) -> Dict[str, Any]:
+        report = self._load_object(report_path, "closure report")
+        if report.get("closure_profile") != ESE_CLOSURE_PROFILE:
+            raise ClosureError(
+                "report profile is %r, expected %r"
+                % (report.get("closure_profile"), ESE_CLOSURE_PROFILE)
+            )
+        if report.get("status") != "ready":
+            raise ClosureError("closure report is not ready; export is blocked")
+        if not human_reason.strip():
+            raise ClosureError("human_reason is required for export")
+        # Recompute from the current inputs instead of trusting a stale report.
+        with tempfile.TemporaryDirectory(prefix="ra-ese-closure-sign-") as temp_dir:
+            fresh = self.check(capsule_path, ea_path, claim_path, Path(temp_dir))
+        fresh_report = fresh.get("report") or {}
+        if fresh_report.get("status") != "ready":
+            raise ClosureError("closure is no longer ready for the current inputs")
+        if report.get("checks") != fresh_report.get("checks"):
+            raise ClosureError(
+                "submitted report checks do not match current inputs; re-run closure ese-check"
+            )
+        artifact_paths: List[str] = []
+        for value in [
+            capsule_path,
+            ea_path,
+            claim_path,
+            report_path,
+            *fresh_report.get("artifact_refs", []),
+        ]:
+            path = Path(str(value)).resolve()
+            if path.is_file() and str(path) not in artifact_paths:
+                artifact_paths.append(str(path))
+        try:
+            files = {path: sha256_file(Path(path)) for path in artifact_paths}
+        except OSError as exc:
+            raise ClosureError("cannot hash a closure input: %s" % exc)
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        manifest = output_dir / "export-manifest.json"
+        _write_json(manifest, {
+            "report_id": report.get("report_id"),
+            "revalidated_report_id": fresh_report.get("report_id"),
+            "closure_profile": ESE_CLOSURE_PROFILE,
+            "closure_checks_sha256": hashlib.sha256(
+                json.dumps(fresh_report.get("checks"), ensure_ascii=False, sort_keys=True).encode("utf-8")
+            ).hexdigest(),
+            "files": files,
+            "submission": False,
+            "note": "signed ESE study manifest; closure was re-run immediately before signing; no auto-submission",
+            "revalidated_at": now_iso(),
+        })
+        if bool(signer_store) != bool((signer_id or "").strip()):
+            raise ClosureError("signer_store and signer_id must be provided together")
+        signed_payload = {
+            "schema_version": "closure-signature-0.2",
+            "report_id": str(report.get("report_id")),
+            "closure_profile": ESE_CLOSURE_PROFILE,
+            "export_manifest_sha256": sha256_file(manifest),
+            "human_reason": human_reason.strip(),
+            "submission": False,
+        }
+        signature_fields: Dict[str, Any] = {}
+        if signer_store is not None:
+            signature_fields = signer_store.sign(signer_id, signed_payload)
+        signature = SignatureRecord(
+            signature_id="SIG-" + uuid.uuid4().hex[:10],
+            report_id=str(report.get("report_id")),
+            human_reason=human_reason.strip(),
+            created_at=now_iso(),
+            artifact_refs=[str(capsule_path), str(ea_path), str(claim_path), str(report_path)],
+            export_manifest=str(manifest),
+            submission=False,
+            **signature_fields,
+        )
+        path = output_dir / "signature.json"
+        _write_json(path, asdict(signature))
+        return {
+            "signature": asdict(signature),
+            "path": str(path),
+            "manifest": str(manifest),
+            "signed_payload": signed_payload,
+            "scheme": signature.signature_scheme,
+        }
