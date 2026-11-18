@@ -58,12 +58,14 @@ function StageAction({
   children,
   onClick,
   disabled = false,
-  primary = false
+  primary = false,
+  title
 }: {
   children: ReactNode;
   onClick: () => void;
   disabled?: boolean;
   primary?: boolean;
+  title?: string;
 }) {
   return (
     <button
@@ -71,6 +73,7 @@ function StageAction({
       className={`stage-action${primary ? " primary" : ""}`}
       onClick={onClick}
       disabled={disabled}
+      title={title}
     >
       {children}
     </button>
@@ -276,6 +279,15 @@ function StageDetailBody({ task, stage, index }: { task: ResearchTask; stage: Au
           <StageAction
             onClick={actions.runExperiment}
             disabled={!task.protocolFrozen || autoBusy || task.evaluation.hiddenAccessCount > 0}
+            title={
+              !task.protocolFrozen
+                ? "G2 是人工门：协议须在终端冻结，网页不冻结。演示请用「全自动推进」或「完整闭环」会话。"
+                : autoBusy
+                  ? "全自动运行中，先暂停"
+                  : task.evaluation.hiddenAccessCount > 0
+                    ? "held-out 已消耗，不能重跑"
+                    : undefined
+            }
           >
             运行 3 seeds
           </StageAction>
@@ -2480,18 +2492,18 @@ export function ContextPanel() {
       <div className="context-body">
         {/* key={task.id}: RunContext 等 tab 面板持有本地表单状态（runtimeSource/seeds/文件路径…），
             不加 key 时切换任务会沿用上一个任务的表单值，可能带着 A 任务的 seeds 去 run B 任务。 */}
-        {tab === "flow" && <FlowDemo />}
+        {tab === "flow" && <FlowDemo key={task.id} />}
         {tab === "brief" && <BriefContext key={task.id} task={task} />}
         {tab === "run" && <RunContext key={task.id} task={task} />}
         {tab === "evidence" && <EvidenceContext key={task.id} task={task} />}
         {tab === "projects" && (
-          <div className="context-stack">
+          <div className="context-stack" key={task.id}>
             <ProjectExperimentInventoryPanel />
           </div>
         )}
         {tab === "evolution" && <EvolutionContext key={task.id} task={task} />}
         {tab === "eval" && <EvaluationContext key={task.id} task={task} />}
-        {tab === "ese" && <EseRunsPanel />}
+        {tab === "ese" && <EseRunsPanel key={task.id} />}
       </div>
       <div className="context-foot">
         <span>

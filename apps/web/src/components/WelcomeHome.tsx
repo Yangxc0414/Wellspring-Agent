@@ -231,7 +231,7 @@ export function WelcomeHome() {
               type="button"
               key={prompt.title}
               onClick={() => fillPrompt(prompt.text)}
-              title={prompt.hint}
+              title={`${prompt.hint} · 点击填入输入框，再按发送（不会自动执行）`}
             >
               <Icon name={prompt.icon} size={13} />
               <span>{prompt.title}</span>

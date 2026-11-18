@@ -2000,7 +2000,11 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
           return;
         }
         if (!task.protocolFrozen) {
-          notify("先冻结协议（G2），再运行；系统不会跳过门禁");
+          notify(
+            __STATIC_ONLY__
+              ? "协议未冻结（G2 是人工门，网页不冻结）。演示请用「全自动推进」走完 S4→S5，或切到左侧「完整闭环」会话——它已预置冻结协议与 EA。"
+              : "先冻结协议（G2），再运行；系统不会跳过门禁"
+          );
           return;
         }
         if (denyReadOnly(task, "运行实验")) return;

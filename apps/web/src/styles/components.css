@@ -4967,6 +4967,19 @@ select.control {
   font-size: calc(10px * var(--font-scale, 1));
 }
 
+.skills-drawer .skill-honesty-note {
+  margin-top: 6px;
+  padding: 7px 9px;
+  border-left: 3px solid var(--teal);
+  background: var(--teal-dim);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.skills-drawer .skill-honesty-note b {
+  color: var(--teal);
+}
+
 .skills-drawer .skill-list-title small,
 .skills-drawer .skill-list-foot > small {
   font-size: calc(10px * var(--font-scale, 1));

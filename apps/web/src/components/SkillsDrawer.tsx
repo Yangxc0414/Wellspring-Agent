@@ -228,6 +228,10 @@ export function SkillsDrawer() {
             Skill 是只读的检查与编排单元：可以读取当前任务状态、生成计划与边界检查，但不会调用外部工具、写 claim 或绕过人工门。
             调用方式：在输入框输入 <code>/{`<skill-id>`}</code>，或点击下方“调用”。也可以在对话里说“帮我创建一个技能……”或输入 <code>/skill-creator</code>，先生成草稿再确认保存。
           </p>
+          <p className="drawer-note skill-honesty-note">
+            <b>“加载 / 调用”在这里是什么意思？</b> 本工作台里点击“调用”会把该 skill 的<b>检查卡</b>插入会话、标注它参与本轮检查；<b>不会把 instructions 当作指令喂给模型执行</b>。
+            真正执行只读 skill（生成 brief / triage / review）要靠本地 CLI 或 runtime 的 <code>/api/skills/&#123;id&#125;/run</code>，那才是带版本与 usage 记录的真实运行。
+          </p>
 
           <div className="skill-toolbar">
             <label className="skill-search">
