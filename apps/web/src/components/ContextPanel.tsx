@@ -16,6 +16,7 @@ import { Icon } from "./Icon";
 import { GovernancePanel } from "./GovernancePanel";
 import { RsiStoryPanel } from "./RsiStoryPanel";
 import { HostModelPanel } from "./HostModelPanel";
+import { EseRunsPanel } from "./EseRunsPanel";
 
 const TABS: Array<{ id: ContextTab; label: string }> = [
   { id: "brief", label: "BRIEF" },
@@ -23,7 +24,8 @@ const TABS: Array<{ id: ContextTab; label: string }> = [
   { id: "evidence", label: "EVIDENCE" },
   { id: "projects", label: "PROJECTS" },
   { id: "evolution", label: "EVOLUTION" },
-  { id: "eval", label: "EVAL" }
+  { id: "eval", label: "EVAL" },
+  { id: "ese", label: "ESE 运行" }
 ];
 
 const GATE_NAMES: Record<string, string> = {
@@ -2472,6 +2474,7 @@ export function ContextPanel() {
         )}
         {tab === "evolution" && <EvolutionContext key={task.id} task={task} />}
         {tab === "eval" && <EvaluationContext key={task.id} task={task} />}
+        {tab === "ese" && <EseRunsPanel />}
       </div>
       <div className="context-foot">
         <span>

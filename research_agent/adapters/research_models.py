@@ -240,9 +240,11 @@ def default_model_for(
             if strict:
                 raise ModelRequiredError("%s deepseek model invalid: %s" % (module, exc))
             return None, "%s deepseek env model rejected: %s" % (module, exc)
+    detail = note.strip()
     message = (
-        "%s has no usable model: bind a gateway profile for it (a host_agent profile needs no "
-        "API key) or set DEEPSEEK_API_KEY" % module
+        "%s has no usable model%s: bind a gateway profile for it (a host_agent profile needs no "
+        "API key) or set DEEPSEEK_API_KEY"
+        % (module, (" (" + detail + ")") if detail else "")
     )
     if strict:
         raise ModelRequiredError(message)

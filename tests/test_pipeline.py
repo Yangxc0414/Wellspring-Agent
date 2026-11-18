@@ -228,6 +228,34 @@ class ModuleContractTest(unittest.TestCase):
         introduction = next(item for item in fallback.draft if item.section == "引言")
         self.assertNotIn("9999", introduction.text)
 
+    def test_silent_writer_failure_is_reported_not_hidden(self):
+        brief = LiteratureBrief(
+            coverage_score=0.5, saturation="partial", target_sources=2, target_full_text=1,
+            facets=[], sections=[], highlights=[], summary="1 source / 1 span",
+            source_briefs=[SourceBrief("S-1", "Fixture source", 2025, "Venue", True, 1, ["Results"], "excerpt")],
+            gaps=[],
+        )
+        span = Span("S-1-S01-01", "S-1", "Results", "fixture evidence sentence for writer.", 0, 20)
+        base = dict(
+            topic="fixture topic", language="zh", venue_type="zh_core_journal",
+            evidence_refs=[span.span_id], spans=[span], literature_brief=brief,
+            fixture_mode=True,
+        )
+
+        def empty_writer(_payload):
+            return None
+
+        paper = PaperAgent(self.specs["paper"], section_writer=empty_writer).run(PaperRequest(**base))
+        self.assertEqual(paper.writer_mode, "model_failed")
+        self.assertTrue(any("returned no usable draft" in item for item in paper.warnings))
+
+        def broken_writer(_payload):
+            raise ValueError("no JSON object")
+
+        paper2 = PaperAgent(self.specs["paper"], section_writer=broken_writer).run(PaperRequest(**base))
+        self.assertEqual(paper2.writer_mode, "model_failed")
+        self.assertTrue(any("section writer failed" in item for item in paper2.warnings))
+
     def test_grant_has_no_scientific_content_or_numbers(self):
         grant = GrantAgent(self.specs["grant"]).run(GrantRequest("topic", "nsfc", ["S-1"]))
         self.assertEqual(grant.status, "draft_needs_human")

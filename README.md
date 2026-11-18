@@ -152,7 +152,7 @@ python scripts/release_check.py --for-public-release
 - **搜索研究三态呈现**：每个比较标 `positive/negative/undecidable`，区间跨零即报"不可判定"，功效不足直接写"加种子或收窄主张"；复现计数 + 功效阶梯会推翻自己的旧结论。
 - **宿主作模型（零外部 key）**：生成步骤落可审计 `ModelTurn`，由 Qoder / Claude Code / Codex / Zcode 用自己的模型作答；按请求哈希绑定、形状校验、一次性消费。
 - **自进化双轨世代**：agent 树 SHA / platform 代码指纹（见上文），接缝实测 R=4k/P=3k。
-- **质量底座**：165 个测试文件 / 1377 用例；全量计数以 [`58-交付验收清单.md`](58-交付验收清单.md) §4b 为准。
+- **质量底座**：174 个测试文件 / 1500+ 用例（静态计数，全量以交付清单为准）；全量计数以 [`58-交付验收清单.md`](58-交付验收清单.md) §4b 为准。
 
 逐条实测读数、推翻与复现记录、度量口径详见 [`docs/fact-baseline.md`](docs/fact-baseline.md)。
 
@@ -175,7 +175,7 @@ Wellspring-Agent/
 ├── harness2-main/            ← 自进化执行引擎（Apache-2.0，Python 3.12）；scripts/harness2_run.py 为桥
 ├── site/                     ← app/（工作台构建产物）+ rsi/（自进化接缝与世代链）+ docs/（文档索引）+ 旧展示镜像
 ├── scripts/                  ← harness2_run / setup_mcp（9 家 host）/ doctor / release_check / build_release
-├── tests/                    ← 165 个测试文件（1377 用例）
+├── tests/                    ← 174 个测试文件（1500+ 用例）
 ├── plugin/                   ← MCP 清单模板（qoder / zcode / codex / workbuddy）+ SKILL.md
 ├── integrations/  deploy/    ← 框架接入（LangGraph / CrewAI / AutoGen / HTTP / SDK）与部署
 ├── runtime_data/             ← 本地运行产物（harness2 story、世代台账、研究包；敏感部分不入库）

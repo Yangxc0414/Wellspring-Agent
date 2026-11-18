@@ -1,0 +1,162 @@
+{
+  "schema": "ese-run-panel-0.1",
+  "run_id": "PIPE-20261118T120549Z-f36858",
+  "fixture_mode": false,
+  "status": "needs_human",
+  "stages": [
+    {
+      "stage": "literature",
+      "status": "ok",
+      "warnings": 3
+    },
+    {
+      "stage": "synthesis",
+      "status": "synthesized",
+      "warnings": 0
+    },
+    {
+      "stage": "idea",
+      "status": "candidates_need_human",
+      "warnings": 12
+    },
+    {
+      "stage": "experiment",
+      "status": "needs_human",
+      "warnings": 8
+    },
+    {
+      "stage": "figure",
+      "status": "schematic_ready",
+      "warnings": 0
+    },
+    {
+      "stage": "paper",
+      "status": "needs_evidence",
+      "warnings": 6
+    }
+  ],
+  "gates": [
+    {
+      "gate": "Q0",
+      "status": "pass",
+      "reason": "8 full-text source(s), 6198 span(s), coverage=saturated"
+    },
+    {
+      "gate": "G1",
+      "status": "needs_human",
+      "reason": "idea candidates require human convergence"
+    },
+    {
+      "gate": "G2",
+      "status": "needs_human",
+      "reason": "design is needs_human; G2 requires a human-frozen ProtocolCard"
+    },
+    {
+      "gate": "G3",
+      "status": "blocked",
+      "reason": "paper contract/figure are provisional"
+    },
+    {
+      "gate": "G5",
+      "status": "blocked",
+      "reason": "no EA/Closure; export is closed"
+    }
+  ],
+  "ese_method": {
+    "schema": "ese-pipeline-method-0.1",
+    "method": "repository-mining",
+    "stage": "S4",
+    "applicable": true,
+    "task": "时间切分必须先于建模；去重策略与标签来源写进预注册",
+    "protocol_fields": [
+      "sampling_frame",
+      "project_selection",
+      "time_window",
+      "time_split",
+      "dedup_policy",
+      "label_source",
+      "license_check",
+      "extraction_script"
+    ],
+    "status": "advisory_missing",
+    "missing": [
+      "sampling_frame",
+      "project_selection",
+      "time_window",
+      "time_split",
+      "dedup_policy",
+      "license_check",
+      "label_source",
+      "analysis.stratification",
+      "analysis.permutation"
+    ],
+    "findings": [
+      {
+        "check": "mining.sampling_frame",
+        "severity": "blocker",
+        "status": "missing",
+        "missing": [
+          "sampling_frame",
+          "project_selection"
+        ]
+      },
+      {
+        "check": "mining.time_split",
+        "severity": "blocker",
+        "status": "missing",
+        "missing": [
+          "time_window",
+          "time_split"
+        ]
+      },
+      {
+        "check": "mining.dedup",
+        "severity": "blocker",
+        "status": "missing",
+        "missing": [
+          "dedup_policy"
+        ]
+      },
+      {
+        "check": "mining.license",
+        "severity": "warn",
+        "status": "missing",
+        "missing": [
+          "license_check"
+        ]
+      },
+      {
+        "check": "mining.label_source",
+        "severity": "warn",
+        "status": "missing",
+        "missing": [
+          "label_source"
+        ]
+      },
+      {
+        "check": "mining.analysis",
+        "severity": "warn",
+        "status": "missing",
+        "missing": [
+          "analysis.stratification",
+          "analysis.permutation"
+        ]
+      }
+    ],
+    "boundary": "advisory only: method completeness is reported, not enforced; no gate reads it"
+  },
+  "downstream": {
+    "manuscript_review": {
+      "status": "needs_more_work",
+      "rounds_completed": 1,
+      "accepted": true
+    },
+    "final_audit": {
+      "status": "ready_for_human_review",
+      "citation_count": 73,
+      "han_character_count": 9401,
+      "submission_ready": false
+    }
+  },
+  "boundary": "static mirror of one real local run; gates need a human, no Claim/EA/signature is created by this panel"
+}

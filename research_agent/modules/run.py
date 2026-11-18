@@ -1,6 +1,5 @@
 """S5 local execution: frozen protocol -> RunCapsule -> EA -> human-gated Claim."""
 
-import hashlib
 import json
 import uuid
 from dataclasses import asdict
@@ -10,22 +9,17 @@ from typing import Any, Dict, List, Optional
 
 from ..contracts import ClaimAssertion, ClaimRecord, EvidenceArtifact, RunCapsule, RunRequest
 from ..specs import ModuleSpec
+from ..storage import now_iso, sha256_bytes, sha256_file
 
 
 class RunError(RuntimeError):
     pass
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def _sha256_bytes(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
 
 
-def _sha256_file(path: Path) -> str:
-    return _sha256_bytes(Path(path).read_bytes())
 
 
 def _bound_protocol_sha(request: RunRequest, recipe_sha: str) -> str:
@@ -191,8 +185,8 @@ class RunAgent:
             + np.asarray(data.target, dtype=np.int64).tobytes()
             + "|".join(str(name) for name in data.feature_names).encode("utf-8")
         )
-        dataset_sha = _sha256_bytes(dataset_bytes)
-        code_sha = _sha256_file(Path(__file__))
+        dataset_sha = sha256_bytes(dataset_bytes)
+        code_sha = sha256_file(Path(__file__))
         protocol_payload = json.dumps({
             "dataset": request.dataset,
             "model": request.model,
@@ -200,7 +194,7 @@ class RunAgent:
             "test_size": request.test_size,
             "metric": request.metric,
         }, sort_keys=True).encode("utf-8")
-        protocol_sha = _bound_protocol_sha(request, _sha256_bytes(protocol_payload))
+        protocol_sha = _bound_protocol_sha(request, sha256_bytes(protocol_payload))
         run_id = request.run_id or "RUN-%s-%s" % (
             datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"), uuid.uuid4().hex[:6]
         )
@@ -249,7 +243,7 @@ class RunAgent:
             },
             status="completed",
             artifacts={"metrics": str(metrics_path), "capsule": str(capsule_path)},
-            created_at=_now(),
+            created_at=now_iso(),
             warnings=[
                 "%s is a protocol-validation dataset; not thesis scientific evidence" % request.dataset,
                 "single dataset/model; no generalization or SOTA claim",
@@ -257,13 +251,13 @@ class RunAgent:
         )
         _write_json(capsule_path, asdict(capsule))
         ea = EvidenceArtifact(
-            artifact_id="EA-" + _sha256_bytes((run_id + _sha256_file(metrics_path)).encode("utf-8"))[:12],
+            artifact_id="EA-" + sha256_bytes((run_id + sha256_file(metrics_path)).encode("utf-8"))[:12],
             kind="metric",
             run_id=run_id,
             path=str(metrics_path),
-            sha256=_sha256_file(metrics_path),
+            sha256=sha256_file(metrics_path),
             source="run",
-            captured_at=_now(),
+            captured_at=now_iso(),
             immutable=True,
             scope=_dataset_scope(asdict(capsule)),
         )
@@ -316,14 +310,14 @@ class RunAgent:
         y_train = train.iloc[:, 3].to_numpy(dtype=np.float64)
         y_test = test.iloc[:, 3].to_numpy(dtype=np.float64)
 
-        dataset_sha = _sha256_bytes(
+        dataset_sha = sha256_bytes(
             train_path.read_bytes() + test_path.read_bytes()
             + "|".join(train.columns).encode("utf-8")
         )
-        code_sha = _sha256_file(Path(__file__))
+        code_sha = sha256_file(Path(__file__))
         validation_fraction = min(max(float(request.test_size), 0.05), 0.6)
         fit_fraction = 1.0 - validation_fraction
-        protocol_sha = _bound_protocol_sha(request, _sha256_bytes(json.dumps({
+        protocol_sha = _bound_protocol_sha(request, sha256_bytes(json.dumps({
             "dataset": "chemlab", "model": "ridge", "seeds": request.seeds,
             "split": request.split, "fit_fraction": round(fit_fraction, 6), "metric": "r2",
         }, sort_keys=True).encode("utf-8")))
@@ -388,7 +382,7 @@ class RunAgent:
             },
             status="completed",
             artifacts={"metrics": str(metrics_path), "capsule": str(capsule_path)},
-            created_at=_now(),
+            created_at=now_iso(),
             warnings=[
                 "ChemLab reaction-conversion data is real but only used for protocol validation",
                 "controlled comparison: Ridge vs mean baseline on Morgan fingerprints; baseline protocol only, not a novel scientific result",
@@ -397,13 +391,13 @@ class RunAgent:
         )
         _write_json(capsule_path, asdict(capsule))
         ea = EvidenceArtifact(
-            artifact_id="EA-" + _sha256_bytes((run_id + _sha256_file(metrics_path)).encode("utf-8"))[:12],
+            artifact_id="EA-" + sha256_bytes((run_id + sha256_file(metrics_path)).encode("utf-8"))[:12],
             kind="metric",
             run_id=run_id,
             path=str(metrics_path),
-            sha256=_sha256_file(metrics_path),
+            sha256=sha256_file(metrics_path),
             source="run",
-            captured_at=_now(),
+            captured_at=now_iso(),
             immutable=True,
             scope=_dataset_scope(asdict(capsule)),
         )
@@ -440,7 +434,7 @@ class RunAgent:
         if not evidence.get("immutable") or evidence.get("source") != "run":
             raise RunError("EA must be immutable and run-sourced")
         metrics_path = Path(evidence.get("path", ""))
-        if not metrics_path.is_file() or _sha256_file(metrics_path) != evidence.get("sha256"):
+        if not metrics_path.is_file() or sha256_file(metrics_path) != evidence.get("sha256"):
             raise RunError("EA sha256 does not match the metrics artifact")
         expected_scope = str(evidence.get("scope", ""))
         if scope.strip() != expected_scope:
@@ -487,7 +481,7 @@ class RunAgent:
             scope=scope.strip(),
             status="supported",
             human_reason=human_reason.strip(),
-            created_at=_now(),
+            created_at=now_iso(),
             warnings=warnings,
             claim_type=claim_type,
             assertions=[

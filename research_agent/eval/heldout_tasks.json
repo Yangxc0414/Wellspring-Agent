@@ -1,0 +1,120 @@
+{
+  "schema": "heldout-tasks-0.1",
+  "boundary": "held-out task cards are frozen before execution and never used to change the recipe they evaluate; rubric checks are deterministic and coarse (they measure conformance, not scientific quality).",
+  "rubric": {
+    "idea": [
+      {
+        "id": "idea.candidates",
+        "check": "candidate_count >= 3",
+        "weight": 1
+      },
+      {
+        "id": "idea.grounded",
+        "check": "every candidate has >=1 evidence_ref that resolves to a span in the same run",
+        "weight": 1
+      },
+      {
+        "id": "idea.falsifiable",
+        "check": "every candidate has a non-empty falsification",
+        "weight": 1
+      },
+      {
+        "id": "idea.lenses",
+        "check": "at least 2 distinct lenses",
+        "weight": 1
+      }
+    ],
+    "experiment": [
+      {
+        "id": "experiment.fields",
+        "check": "hypothesis/baseline/primary_metric/controls non-empty",
+        "weight": 1
+      },
+      {
+        "id": "experiment.metric_shape",
+        "check": "primary_metric is an identifier, not a sentence",
+        "weight": 1
+      },
+      {
+        "id": "experiment.budget",
+        "check": "budget contains a number with a unit (seeds/tasks/tokens/hours) and is not marked unspecified",
+        "weight": 1
+      },
+      {
+        "id": "experiment.controls",
+        "check": ">=2 controls",
+        "weight": 1
+      },
+      {
+        "id": "experiment.seeds",
+        "check": ">=3 seeds",
+        "weight": 1
+      },
+      {
+        "id": "experiment.stopping_rule",
+        "check": "stopping rule non-empty",
+        "weight": 1
+      }
+    ],
+    "paper": [
+      {
+        "id": "paper.sections",
+        "check": "all expected sections present",
+        "weight": 1
+      },
+      {
+        "id": "paper.draft",
+        "check": "every section has non-empty text",
+        "weight": 1
+      },
+      {
+        "id": "paper.results_pending",
+        "check": "results slot/draft stays pending (no invented numbers)",
+        "weight": 1
+      },
+      {
+        "id": "paper.citations",
+        "check": ">=4 distinct evidence-span citations in draft text",
+        "weight": 1
+      }
+    ]
+  },
+  "tasks": [
+    {
+      "task_id": "HO-20261118-A",
+      "topic": "Evidence-bound evaluation of LLM coding agents on repository-level tasks",
+      "language": "en",
+      "venue": "en_conference",
+      "intended_axes": [
+        "idea",
+        "experiment",
+        "paper"
+      ],
+      "frozen_at": "2026-11-18",
+      "note": "first held-out card; not used to author or tune the recipe that produces the run"
+    },
+    {
+      "task_id": "HO-20261118-B",
+      "topic": "Does typed memory of past failures change experiment design quality for LLM agents?",
+      "language": "en",
+      "venue": "en_conference",
+      "intended_axes": [
+        "idea",
+        "experiment"
+      ],
+      "frozen_at": "2026-11-18",
+      "note": "second card; not executed yet; kept for the multi-task comparison"
+    },
+    {
+      "task_id": "HO-20261118-C",
+      "topic": "Reproducibility of retrieval-augmented literature reviews under a fixed corpus",
+      "language": "zh",
+      "venue": "zh_core_journal",
+      "intended_axes": [
+        "paper"
+      ],
+      "frozen_at": "2026-11-18",
+      "note": "third card; not executed yet; the paper axis is scored by the same rubric"
+    }
+  ]
+}

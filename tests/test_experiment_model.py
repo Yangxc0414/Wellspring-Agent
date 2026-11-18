@@ -4,6 +4,50 @@ from research_agent.modules.experiment import ExperimentDesignAgent, ExperimentR
 from research_agent.specs import SpecStore
 
 
+class ExperimentShapeWarningTest(unittest.TestCase):
+    def setUp(self):
+        self.spec = SpecStore().load("experiment")
+
+    def test_sentence_metric_and_vague_budget_are_flagged(self):
+        def designer(_payload):
+            return {
+                "baseline": "plain LLM",
+                "primary_metric": "Comparative task performance of agent systems versus plain LLMs on benchmarks.",
+                "controls": ["same base model"],
+                "budget": "Not specified in the provided evidence; define a small-scale budget.",
+            }
+
+        agent = ExperimentDesignAgent(self.spec, designer=designer)
+        design = agent.run(
+            ExperimentRequest(
+                "q",
+                hypothesis="h",
+                seeds=3,
+                evidence=[{"ref": "S-1", "section": "Results", "text": "evidence"}],
+                language="en",
+            )
+        )
+        self.assertTrue(any("primary_metric is a description" in item for item in design.warnings))
+        self.assertTrue(any("budget does not state a measurable budget" in item for item in design.warnings))
+        self.assertEqual(design.status, "needs_human")
+
+    def test_metric_identifier_and_numeric_budget_are_not_flagged(self):
+        agent = ExperimentDesignAgent(self.spec)
+        design = agent.run(
+            ExperimentRequest(
+                "q",
+                hypothesis="h",
+                baseline="majority class",
+                primary_metric="accuracy",
+                controls=["majority class"],
+                seeds=3,
+                budget="3 seeds x 1 split",
+            )
+        )
+        self.assertFalse(any("primary_metric is a description" in item for item in design.warnings))
+        self.assertFalse(any("budget does not state" in item for item in design.warnings))
+
+
 class ExperimentModelDraftTest(unittest.TestCase):
     def setUp(self):
         self.spec = SpecStore().load("experiment")

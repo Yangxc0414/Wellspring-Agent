@@ -1,0 +1,954 @@
+{
+  "schema": "ese-method-registry-0.1",
+  "boundary": "方法注册表是数据不是门禁：它给出阶段×方法的任务卡、必填字段与检查项，检查结果只作 advisory，不改变任何 gate/claim/signature 语义。",
+  "stages": [
+    {
+      "id": "S0",
+      "name": "问题框定与路由"
+    },
+    {
+      "id": "S1",
+      "name": "多源检索与全文阅读"
+    },
+    {
+      "id": "S1b",
+      "name": "跨来源综合矩阵"
+    },
+    {
+      "id": "S2-S3",
+      "name": "缺口与创新评审"
+    },
+    {
+      "id": "S4",
+      "name": "实验/研究设计"
+    },
+    {
+      "id": "S5",
+      "name": "执行与证据"
+    },
+    {
+      "id": "S5b",
+      "name": "Claim 草稿与签核"
+    },
+    {
+      "id": "S6",
+      "name": "图表"
+    },
+    {
+      "id": "S8-S12",
+      "name": "写作与评审"
+    },
+    {
+      "id": "S13-S16",
+      "name": "闭包与签核"
+    }
+  ],
+  "methods": [
+    {
+      "id": "systematic-literature-review",
+      "name_zh": "系统文献综述（SLR）",
+      "name_en": "Systematic Literature Review",
+      "fit_stages": [
+        "S0",
+        "S1",
+        "S1b",
+        "S8-S12"
+      ],
+      "guidelines": [
+        {
+          "key": "kitchenham2007",
+          "citation": "Kitchenham & Charters (2007). Guidelines for Performing Systematic Literature Reviews in Software Engineering. EBSE Technical Report.",
+          "mandates": "研究问题、检索协议、检索式与数据库、纳入/排除标准、质量评估、数据抽取与综合"
+        },
+        {
+          "key": "wohlin2014",
+          "citation": "Wohlin (2014). Guidelines for Snowballing in Systematic Literature Studies and a Replication in Software Engineering. EASE.",
+          "mandates": "起始集（start set）的合理性、后向/前向滚雪球、与数据库检索的合并报告"
+        },
+        {
+          "key": "page2021",
+          "citation": "Page et al. (2021). The PRISMA 2020 statement. BMJ.",
+          "mandates": "识别/筛选/纳入的数量流与排除理由"
+        }
+      ],
+      "protocol_fields": [
+        "research_questions",
+        "search_strategy",
+        "databases",
+        "search_date",
+        "inclusion_criteria",
+        "exclusion_criteria",
+        "quality_assessment",
+        "data_extraction",
+        "synthesis_method"
+      ],
+      "threat_focus": [
+        "construct",
+        "external",
+        "reproducibility"
+      ],
+      "artifacts": [
+        "S1 文献台账",
+        "检索式与检索日期",
+        "纳入/排除清单",
+        "质量评估表",
+        "PRISMA 计数",
+        "综合矩阵"
+      ],
+      "cannot_support": [
+        "因果效应",
+        "新方法的性能",
+        "未发表工业实践的代表性"
+      ],
+      "checks": [
+        {
+          "id": "slr.protocol",
+          "severity": "blocker",
+          "requires": [
+            "research_questions",
+            "search_strategy",
+            "inclusion_criteria",
+            "exclusion_criteria"
+          ]
+        },
+        {
+          "id": "slr.reproducible_search",
+          "severity": "warn",
+          "requires": [
+            "databases",
+            "search_date"
+          ]
+        },
+        {
+          "id": "slr.quality",
+          "severity": "warn",
+          "requires": [
+            "quality_assessment"
+          ]
+        },
+        {
+          "id": "slr.screening_agreement",
+          "severity": "warn",
+          "requires": [
+            "screening_agreement"
+          ]
+        }
+      ],
+      "reporting_sections": [
+        "研究问题",
+        "协议与偏离",
+        "检索策略（数据库/检索式/日期）",
+        "纳入排除与筛选一致性",
+        "质量评估",
+        "数据抽取",
+        "综合与证据地图",
+        "效度威胁",
+        "复现入口"
+      ],
+      "stage_tasks": {
+        "S0": "把问题收成可检索的 RQ；声明综述类型（映射式/系统式）与更新策略",
+        "S1": "先写检索协议再检索；记录数据库、检索式、日期、命中数；滚雪球需给出 start set 依据",
+        "S1b": "按主题×来源建矩阵；标注一致点/张力/未使用来源；报告覆盖缺口",
+        "S8-S12": "按 PRISMA 与 Kitchenham 报告结构写；检索日期与计数必须可复现"
+      }
+    },
+    {
+      "id": "repository-mining",
+      "name_zh": "软件仓库挖掘",
+      "name_en": "Mining Software Repositories",
+      "fit_stages": [
+        "S1",
+        "S4",
+        "S5",
+        "S5b"
+      ],
+      "guidelines": [
+        {
+          "key": "kalliamvakou2014",
+          "citation": "Kalliamvakou et al. (2014). The Promises and Perils of Mining GitHub. MSR.",
+          "mandates": "项目筛选偏倚、镜像/复刻、活跃度与许可差异的显式披露"
+        },
+        {
+          "key": "bird2009",
+          "citation": "Bird et al. (2009). Fair and Balanced? Bias in Bug-Fix Datasets. ESEC/FSE.",
+          "mandates": "bug-fix 归属偏差、数据清洗与替代数据源核对"
+        },
+        {
+          "key": "hassan2009",
+          "citation": "Hassan (2009). The Road Ahead for Mining Software Repositories.",
+          "mandates": "研究问题与数据源的匹配、可复现的抽取管线"
+        }
+      ],
+      "protocol_fields": [
+        "sampling_frame",
+        "project_selection",
+        "time_window",
+        "time_split",
+        "dedup_policy",
+        "label_source",
+        "license_check",
+        "extraction_script"
+      ],
+      "threat_focus": [
+        "construct",
+        "internal",
+        "external"
+      ],
+      "artifacts": [
+        "抽样框与项目清单",
+        "时间切分说明",
+        "去重与标签来源",
+        "抽取脚本与快照哈希"
+      ],
+      "cannot_support": [
+        "因果机制",
+        "跨生态泛化",
+        "实时预测"
+      ],
+      "checks": [
+        {
+          "id": "mining.sampling_frame",
+          "severity": "blocker",
+          "requires": [
+            "sampling_frame",
+            "project_selection"
+          ]
+        },
+        {
+          "id": "mining.time_split",
+          "severity": "blocker",
+          "requires": [
+            "time_window",
+            "time_split"
+          ]
+        },
+        {
+          "id": "mining.dedup",
+          "severity": "blocker",
+          "requires": [
+            "dedup_policy"
+          ]
+        },
+        {
+          "id": "mining.license",
+          "severity": "warn",
+          "requires": [
+            "license_check"
+          ]
+        },
+        {
+          "id": "mining.label_source",
+          "severity": "warn",
+          "requires": [
+            "label_source"
+          ]
+        },
+        {
+          "id": "mining.analysis",
+          "severity": "warn",
+          "requires": [
+            "analysis.stratification",
+            "analysis.permutation"
+          ]
+        }
+      ],
+      "reporting_sections": [
+        "抽样框与筛选",
+        "时间窗与切分",
+        "去重与标签",
+        "许可与伦理",
+        "抽取管线与快照",
+        "效度威胁（尤其生态与时间漂移）"
+      ],
+      "stage_tasks": {
+        "S1": "确定抽样框（哪些项目、为何排除）；核对镜像仓库与复刻",
+        "S4": "时间切分必须先于建模；去重策略与标签来源写进预注册",
+        "S5": "记录抽取脚本、快照哈希与许可证；重复运行必须得到同一快照",
+        "S5b": "claim 的 scope 必须写清语言/生态/时间窗；不得外推为因果"
+      }
+    },
+    {
+      "id": "controlled-experiment",
+      "name_zh": "受控实验",
+      "name_en": "Controlled Experiment",
+      "fit_stages": [
+        "S2-S3",
+        "S4",
+        "S5",
+        "S5b",
+        "S8-S12"
+      ],
+      "guidelines": [
+        {
+          "key": "wohlin2012",
+          "citation": "Wohlin et al. (2012). Experimentation in Software Engineering. Springer.",
+          "mandates": "假设、因子与水平、随机化、区组、样本量与功效、分析计划"
+        },
+        {
+          "key": "kitchenham2002",
+          "citation": "Kitchenham et al. (2002). Preliminary Guidelines for Empirical Research in Software Engineering. IEEE TSE.",
+          "mandates": "研究设计、测量、分析与报告的最小规范"
+        },
+        {
+          "key": "jedlitschka2008",
+          "citation": "Jedlitschka et al. (2008). Reporting Experiments in Software Engineering.",
+          "mandates": "实验报告结构：背景/假设/设计/执行/分析/效度"
+        },
+        {
+          "key": "ralph2020",
+          "citation": "Ralph et al. (2020). Empirical Standards for Software Engineering Research.",
+          "mandates": "按方法给出最小报告要求与常见缺陷"
+        }
+      ],
+      "protocol_fields": [
+        "hypothesis",
+        "factors",
+        "levels",
+        "randomization",
+        "blocking",
+        "sample_size",
+        "power_analysis",
+        "primary_metric",
+        "analysis_plan",
+        "stopping_rule"
+      ],
+      "threat_focus": [
+        "internal",
+        "conclusion",
+        "construct"
+      ],
+      "artifacts": [
+        "预注册协议",
+        "随机化/分配记录",
+        "功效计算",
+        "分析脚本",
+        "原始数据与区组记录"
+      ],
+      "cannot_support": [
+        "大规模工业外推",
+        "长期效应",
+        "未操控变量的因果"
+      ],
+      "checks": [
+        {
+          "id": "experiment.hypothesis",
+          "severity": "blocker",
+          "requires": [
+            "hypothesis"
+          ]
+        },
+        {
+          "id": "experiment.design",
+          "severity": "blocker",
+          "requires": [
+            "factors",
+            "levels",
+            "primary_metric"
+          ]
+        },
+        {
+          "id": "experiment.power",
+          "severity": "blocker",
+          "requires": [
+            "sample_size",
+            "power_analysis"
+          ]
+        },
+        {
+          "id": "experiment.analysis_plan",
+          "severity": "blocker",
+          "requires": [
+            "analysis_plan",
+            "stopping_rule"
+          ]
+        },
+        {
+          "id": "experiment.randomization",
+          "severity": "warn",
+          "requires": [
+            "randomization"
+          ]
+        }
+      ],
+      "reporting_sections": [
+        "背景与假设",
+        "因子/水平/对象",
+        "随机化与区组",
+        "测量与工具",
+        "执行与偏离",
+        "分析（效应量+区间）",
+        "效度威胁",
+        "复现材料"
+      ],
+      "stage_tasks": {
+        "S2-S3": "把假设写成可操控的因子与水平；先做功效预判再承诺样本量",
+        "S4": "预注册：随机化、区组、主指标、分析计划、停止规则；设计冻结后才执行",
+        "S5": "执行记录分配与偏离；不得事后改主指标",
+        "S5b": "claim 只能来自预注册主比较；区间跨零即 undecidable",
+        "S8-S12": "按 Wohlin/Jedlitschka 结构报告，效度威胁单列"
+      }
+    },
+    {
+      "id": "quasi-experiment",
+      "name_zh": "准实验",
+      "name_en": "Quasi-Experiment",
+      "fit_stages": [
+        "S4",
+        "S5",
+        "S5b"
+      ],
+      "guidelines": [
+        {
+          "key": "shadish2002",
+          "citation": "Shadish, Cook & Campbell (2002). Experimental and Quasi-Experimental Designs for Generalized Causal Inference.",
+          "mandates": "识别策略与威胁：选择偏差、成熟、历史、回归到均值、attrition"
+        },
+        {
+          "key": "ralph2020",
+          "citation": "Ralph et al. (2020). Empirical Standards for Software Engineering Research.",
+          "mandates": "准实验的最小报告要求"
+        }
+      ],
+      "protocol_fields": [
+        "treatment",
+        "comparison_group",
+        "assignment_rule",
+        "confounders",
+        "identification_strategy",
+        "sensitivity_analysis",
+        "primary_metric"
+      ],
+      "threat_focus": [
+        "internal",
+        "external",
+        "conclusion"
+      ],
+      "artifacts": [
+        "分组规则",
+        "混杂清单",
+        "识别策略",
+        "敏感性分析"
+      ],
+      "cannot_support": [
+        "超出识别策略的因果主张",
+        "未观测混杂下的强因果"
+      ],
+      "checks": [
+        {
+          "id": "quasi.identification",
+          "severity": "blocker",
+          "requires": [
+            "identification_strategy"
+          ]
+        },
+        {
+          "id": "quasi.confounders",
+          "severity": "blocker",
+          "requires": [
+            "confounders"
+          ]
+        },
+        {
+          "id": "quasi.sensitivity",
+          "severity": "warn",
+          "requires": [
+            "sensitivity_analysis"
+          ]
+        }
+      ],
+      "reporting_sections": [
+        "处理与对照",
+        "分配机制",
+        "识别假设",
+        "混杂与敏感性",
+        "因果声称边界"
+      ],
+      "stage_tasks": {
+        "S4": "先写识别策略与识别假设，再选数据；混杂必须逐条列",
+        "S5": "记录处理暴露与时间；不得按结果挑对照组",
+        "S5b": "因果主张不得超出识别策略；写清不可识别的部分"
+      }
+    },
+    {
+      "id": "benchmark-evaluation",
+      "name_zh": "基准评测",
+      "name_en": "Benchmark Evaluation",
+      "fit_stages": [
+        "S4",
+        "S5",
+        "S5b",
+        "S8-S12"
+      ],
+      "guidelines": [
+        {
+          "key": "sim2003",
+          "citation": "Sim, Easterbrook & Holt (2003). Using Benchmarking to Advance Research: A Challenge to Software Engineering. ICSE.",
+          "mandates": "基准选择、可比性、预算与度量对齐"
+        },
+        {
+          "key": "ralph2020",
+          "citation": "Ralph et al. (2020). Empirical Standards for Software Engineering Research.",
+          "mandates": "基准评测的最小报告要求"
+        },
+        {
+          "key": "sainz2023",
+          "citation": "Sainz et al. (2023). NLP Evaluation in Trouble: On the Need to Measure LLM Data Contamination for Each Benchmark.",
+          "mandates": "数据污染检查与披露"
+        }
+      ],
+      "protocol_fields": [
+        "benchmark",
+        "benchmark_version",
+        "contamination_check",
+        "budget_matching",
+        "baselines",
+        "primary_metric",
+        "multiple_comparison_policy",
+        "saturation_note"
+      ],
+      "threat_focus": [
+        "construct",
+        "conclusion",
+        "external"
+      ],
+      "artifacts": [
+        "基准版本与哈希",
+        "污染检查记录",
+        "预算匹配说明",
+        "基线复现",
+        "饱和/headroom 分析"
+      ],
+      "cannot_support": [
+        "真实开发效率",
+        "未污染的一般能力",
+        "跨基准的无条件排名"
+      ],
+      "checks": [
+        {
+          "id": "benchmark.version",
+          "severity": "blocker",
+          "requires": [
+            "benchmark",
+            "benchmark_version"
+          ]
+        },
+        {
+          "id": "benchmark.contamination",
+          "severity": "blocker",
+          "requires": [
+            "contamination_check"
+          ]
+        },
+        {
+          "id": "benchmark.budget",
+          "severity": "warn",
+          "requires": [
+            "budget_matching"
+          ]
+        },
+        {
+          "id": "benchmark.baselines",
+          "severity": "blocker",
+          "requires": [
+            "baselines"
+          ]
+        },
+        {
+          "id": "benchmark.saturation",
+          "severity": "warn",
+          "requires": [
+            "saturation_note"
+          ]
+        }
+      ],
+      "reporting_sections": [
+        "基准与版本",
+        "污染检查",
+        "预算与算力",
+        "基线复现",
+        "多比较与饱和",
+        "可宣称边界"
+      ],
+      "stage_tasks": {
+        "S4": "先写污染检查与预算匹配；基线必须可复现",
+        "S5": "固定基准版本与哈希；记录算力与预算",
+        "S5b": "主张必须说明是「在该基准该预算下」，并报告 headroom",
+        "S8-S12": "报 headroom 归一化曲线；不得只报绝对分"
+      }
+    },
+    {
+      "id": "case-study",
+      "name_zh": "案例研究",
+      "name_en": "Case Study",
+      "fit_stages": [
+        "S0",
+        "S1",
+        "S4",
+        "S5",
+        "S8-S12"
+      ],
+      "guidelines": [
+        {
+          "key": "runeson2009",
+          "citation": "Runeson & Höst (2009). Guidelines for Conducting and Reporting Case Study Research in Software Engineering. EMSE.",
+          "mandates": "研究问题、案例选择、数据收集、分析、链式证据、报告结构"
+        },
+        {
+          "key": "yin2018",
+          "citation": "Yin (2018). Case Study Research and Applications: Design and Methods.",
+          "mandates": "单案例/多案例设计、证据三角、模式匹配、成员核查"
+        },
+        {
+          "key": "ralph2020",
+          "citation": "Ralph et al. (2020). Empirical Standards for Software Engineering Research.",
+          "mandates": "案例研究最小报告要求"
+        }
+      ],
+      "protocol_fields": [
+        "research_questions",
+        "case_selection",
+        "data_sources",
+        "chain_of_evidence",
+        "triangulation",
+        "member_checking",
+        "analysis_strategy",
+        "ethics"
+      ],
+      "threat_focus": [
+        "construct",
+        "external",
+        "reproducibility"
+      ],
+      "artifacts": [
+        "案例选择理由",
+        "访谈/文档/制品清单",
+        "编码本",
+        "链式证据",
+        "成员核查记录"
+      ],
+      "cannot_support": [
+        "统计泛化",
+        "因果效应量"
+      ],
+      "checks": [
+        {
+          "id": "case.questions",
+          "severity": "blocker",
+          "requires": [
+            "research_questions"
+          ]
+        },
+        {
+          "id": "case.selection",
+          "severity": "blocker",
+          "requires": [
+            "case_selection"
+          ]
+        },
+        {
+          "id": "case.triangulation",
+          "severity": "warn",
+          "requires": [
+            "triangulation"
+          ]
+        },
+        {
+          "id": "case.ethics",
+          "severity": "blocker",
+          "requires": [
+            "ethics"
+          ]
+        },
+        {
+          "id": "case.member_checking",
+          "severity": "warn",
+          "requires": [
+            "member_checking"
+          ]
+        }
+      ],
+      "reporting_sections": [
+        "案例与研究问题",
+        "案例选择",
+        "数据来源与收集",
+        "分析与编码",
+        "链式证据与三角",
+        "可迁移性（非统计泛化）",
+        "伦理与匿名"
+      ],
+      "stage_tasks": {
+        "S0": "先定案例边界与分析单位；说明为何是案例而不是实验",
+        "S1": "收集文档/制品/访谈；建立链式证据编号",
+        "S4": "写数据收集与分析协议；伦理与匿名先于采集",
+        "S5": "记录实际数据与编码过程；偏离要写",
+        "S8-S12": "按 Runeson & Höst 结构报告；只做可迁移性讨论，不做统计泛化"
+      }
+    },
+    {
+      "id": "survey",
+      "name_zh": "问卷与访谈调查",
+      "name_en": "Survey",
+      "fit_stages": [
+        "S0",
+        "S1",
+        "S5",
+        "S8-S12"
+      ],
+      "guidelines": [
+        {
+          "key": "kitchenham2008",
+          "citation": "Kitchenham & Pfleeger (2008). Personal Opinion Surveys. In Guide to Advanced Empirical Software Engineering.",
+          "mandates": "抽样、问卷设计、预试、响应率、偏差"
+        },
+        {
+          "key": "ralph2020",
+          "citation": "Ralph et al. (2020). Empirical Standards for Software Engineering Research.",
+          "mandates": "调查最小报告要求"
+        }
+      ],
+      "protocol_fields": [
+        "population",
+        "sampling_frame",
+        "sampling_method",
+        "instrument",
+        "pilot",
+        "response_rate_plan",
+        "consent",
+        "analysis_plan"
+      ],
+      "threat_focus": [
+        "external",
+        "construct",
+        "conclusion"
+      ],
+      "artifacts": [
+        "抽样框",
+        "问卷/访谈提纲",
+        "预试记录",
+        "响应率",
+        "知情同意"
+      ],
+      "cannot_support": [
+        "行为因果",
+        "未响应者代表性"
+      ],
+      "checks": [
+        {
+          "id": "survey.sampling",
+          "severity": "blocker",
+          "requires": [
+            "population",
+            "sampling_frame",
+            "sampling_method"
+          ]
+        },
+        {
+          "id": "survey.instrument",
+          "severity": "blocker",
+          "requires": [
+            "instrument"
+          ]
+        },
+        {
+          "id": "survey.pilot",
+          "severity": "warn",
+          "requires": [
+            "pilot"
+          ]
+        },
+        {
+          "id": "survey.consent",
+          "severity": "blocker",
+          "requires": [
+            "consent"
+          ]
+        }
+      ],
+      "reporting_sections": [
+        "总体与抽样",
+        "工具与预试",
+        "采集与响应率",
+        "偏差与未响应",
+        "伦理"
+      ],
+      "stage_tasks": {
+        "S0": "先写总体与抽样框；说明为何不用已有数据",
+        "S1": "工具设计后必须预试；知情同意与匿名方案先定",
+        "S5": "记录响应率、缺失与退出",
+        "S8-S12": "报告未响应偏差；不得把自报当行为"
+      }
+    },
+    {
+      "id": "design-science",
+      "name_zh": "设计科学（DSR）",
+      "name_en": "Design Science Research",
+      "fit_stages": [
+        "S0",
+        "S2-S3",
+        "S4",
+        "S8-S12"
+      ],
+      "guidelines": [
+        {
+          "key": "hevner2004",
+          "citation": "Hevner et al. (2004). Design Science in Information Systems Research. MIS Quarterly.",
+          "mandates": "制品、问题相关性、设计严谨性、评估、贡献"
+        },
+        {
+          "key": "wieringa2014",
+          "citation": "Wieringa (2014). Design Science Methodology for Information Systems and Software Engineering.",
+          "mandates": "工程循环、实证循环、设计问题与贡献类型"
+        },
+        {
+          "key": "johannesson2014",
+          "citation": "Johannesson & Perjons (2014). An Introduction to Design Science.",
+          "mandates": "问题→需求→设计→演示→评估的制品链"
+        }
+      ],
+      "protocol_fields": [
+        "design_problem",
+        "requirements",
+        "artifact",
+        "evaluation_strategy",
+        "contribution_type",
+        "stakeholders",
+        "boundary_conditions"
+      ],
+      "threat_focus": [
+        "construct",
+        "external",
+        "reproducibility"
+      ],
+      "artifacts": [
+        "问题与需求",
+        "制品与设计理由",
+        "演示/评估",
+        "贡献声明"
+      ],
+      "cannot_support": [
+        "未评估的效用声明",
+        "统计因果"
+      ],
+      "checks": [
+        {
+          "id": "dsr.problem",
+          "severity": "blocker",
+          "requires": [
+            "design_problem",
+            "requirements"
+          ]
+        },
+        {
+          "id": "dsr.evaluation",
+          "severity": "blocker",
+          "requires": [
+            "evaluation_strategy"
+          ]
+        },
+        {
+          "id": "dsr.contribution",
+          "severity": "warn",
+          "requires": [
+            "contribution_type"
+          ]
+        }
+      ],
+      "reporting_sections": [
+        "设计问题与需求",
+        "制品",
+        "设计理由",
+        "评估策略与结果",
+        "贡献与边界"
+      ],
+      "stage_tasks": {
+        "S0": "把工程问题写成设计问题；区分设计问题与实证问题",
+        "S2-S3": "制品的贡献类型先声明（改进/新方法/理论）",
+        "S4": "评估策略（人工/案例/基准）先于实现",
+        "S8-S12": "按 DSR 结构报告；效用声明必须有评估支撑"
+      }
+    },
+    {
+      "id": "action-research",
+      "name_zh": "行动研究",
+      "name_en": "Action Research",
+      "fit_stages": [
+        "S0",
+        "S4",
+        "S5",
+        "S8-S12"
+      ],
+      "guidelines": [
+        {
+          "key": "avison1999",
+          "citation": "Avison et al. (1999). Action Research. Communications of the ACM.",
+          "mandates": "研究者介入、循环（计划-行动-反思）、利益相关者参与"
+        },
+        {
+          "key": "ralph2020",
+          "citation": "Ralph et al. (2020). Empirical Standards for Software Engineering Research.",
+          "mandates": "行动研究最小报告要求"
+        }
+      ],
+      "protocol_fields": [
+        "intervention",
+        "stakeholders",
+        "cycles",
+        "reflection_record",
+        "researcher_role",
+        "ethics"
+      ],
+      "threat_focus": [
+        "internal",
+        "external",
+        "reproducibility"
+      ],
+      "artifacts": [
+        "介入计划",
+        "循环记录",
+        "反思日志",
+        "利益相关者反馈"
+      ],
+      "cannot_support": [
+        "无介入的因果归因",
+        "统计泛化"
+      ],
+      "checks": [
+        {
+          "id": "action.cycles",
+          "severity": "blocker",
+          "requires": [
+            "intervention",
+            "cycles"
+          ]
+        },
+        {
+          "id": "action.role",
+          "severity": "blocker",
+          "requires": [
+            "researcher_role"
+          ]
+        },
+        {
+          "id": "action.ethics",
+          "severity": "blocker",
+          "requires": [
+            "ethics"
+          ]
+        }
+      ],
+      "reporting_sections": [
+        "问题与情境",
+        "介入与循环",
+        "研究者角色",
+        "证据与反思",
+        "可迁移性"
+      ],
+      "stage_tasks": {
+        "S0": "声明研究者介入与利益相关者；区分行动研究与咨询",
+        "S4": "写循环计划与反思机制",
+        "S5": "每轮记录介入、观察、反思",
+        "S8-S12": "报告研究者角色与偏差；不做统计泛化"
+      }
+    }
+  ]
+}

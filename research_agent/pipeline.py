@@ -118,6 +118,7 @@ class PipelineRequest:
     grant_scheme: str = ""
     figure_style: str = "modern"
     max_sources: int = 6
+    max_candidates: int = 3
     primary_metric: str = ""
     controls: List[str] = field(default_factory=list)
     budget: str = ""
@@ -595,7 +596,7 @@ class PipelineRunner:
                 IdeaRequest(
                     topic=request.topic,
                     spans=literature.spans,
-                    max_candidates=3,
+                    max_candidates=max(1, min(int(request.max_candidates), 8)),
                     run_id=run_id + "-idea",
                     language=request.language,
                     prior_art_searcher=_prior_art_search,

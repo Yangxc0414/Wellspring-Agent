@@ -6,6 +6,7 @@ replacement of a JSON file. It is not a database and does not provide
 cross-process transactions.
 """
 
+import hashlib
 import json
 import os
 import time
@@ -20,6 +21,16 @@ class JsonStoreError(ValueError):
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def sha256_bytes(data: bytes) -> str:
+    """One hashing primitive: every store, closure and lineage node uses the same bytes."""
+    return hashlib.sha256(data).hexdigest()
+
+
+def sha256_file(path: Path) -> str:
+    path = Path(path)
+    return sha256_bytes(path.read_bytes())
 
 
 def read_json(path: Path) -> Optional[Any]:

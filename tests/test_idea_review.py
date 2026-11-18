@@ -39,6 +39,17 @@ class IdeaReviewTest(unittest.TestCase):
         self.assertEqual(item["dimensions"]["grounding"], "missing")
         self.assertTrue(any("evidence_ref" in reason for reason in item["reasons"]))
 
+    def test_ranking_and_gap_wording_counts_as_metric_signal(self):
+        # Real model drafts often express the comparison as "rankings" / "performance gaps"
+        # rather than the word "metric"; the lexical pre-review must not call that untestable.
+        candidate = card(
+            hypothesis="Reported gains reflect scaffold design rather than base-model capability.",
+            falsification="If controlled evaluations hold scaffold constant and the same model rankings and performance gaps persist, the hypothesis fails.",
+        )
+        review = build_idea_review(candidate, {"spans": spans()})
+        item = review["reviews"][0]
+        self.assertEqual(item["dimensions"]["testability"], "metric_signal")
+
     def test_restatement_and_single_source_need_revision(self):
         restated = card(
             hypothesis="Passivation improves humidity stability in the tested condition.",

@@ -6076,3 +6076,22 @@ select.control {
   color: var(--text);
   font-weight: 600;
 }
+
+
+.ese-runs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 8px 0;
+}
+.ese-runs-table th,
+.ese-runs-table td {
+  border-bottom: 1px solid #e5e9f0;
+  padding: 5px 6px;
+  text-align: left;
+  vertical-align: top;
+}
+.ese-runs-table th {
+  color: #5b6472;
+  font-weight: 600;
+}

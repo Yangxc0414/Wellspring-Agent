@@ -2,7 +2,7 @@
 id: manuscript
 name: 中文投稿工作稿与审计
 stage: S8–S12
-version: 0.9.4
+version: 0.9.5
 status: pilot
 owner: research-agent
 inputs:
@@ -98,6 +98,7 @@ invariants:
 
 ## Changelog
 
+- 2026-11-18 · v0.9.5 · status=pilot · 评审模型解析失败时带上网关绑定为何不可用的原因（例如缺 AUTODL_API_KEY），不再只报 requires DEEPSEEK_API_KEY
 - 2026-11-02 · v0.9.4 · status=pilot · v0.9.4 renders the keyword label separator in the paper's own language: an English-language draft now reads **Keywords:** while the Chinese draft keeps **关键词：**. The colon was the one constant left in a statement that already switched its label and its list separator by language, so English drafts carried full-width CJK punctuation. The first cut of this change dropped the closing bold markers and every generated draft lost its bold on that line; the manuscript test caught it, which is the same lesson as the session's other print-the-real-output rules. Detection lists were deliberately left alone: DESIGN_STATEMENT_MARKERS keeps both ASCII and full-width variants on purpose, because a Chinese-only list once let an English boundary sentence pass as an unsupported claim.
 - 2026-11-01 · v0.9.3 · status=pilot · Provenance adds the third sourcing outcome: a draft decimal rendered with MORE decimals than the artifact stores is reported in decimals_over_precision with a warning, because the paper then implies precision the evidence does not carry. Found on the metric-validity draft: the breast_cancer AUC interval lower bound is written as -0.033070 while study-design-metric-validity.json stores -0.03307. Sign is strict and matches inside the draft folder are rejected, so rounding never becomes self-citation.
 - 2026-11-01 · v0.9.2 · status=pilot · Provenance adds a rounding tier: a draft value whose literal differs from the artifact by rendering precision is reported as decimals_rounded_match with both forms, the source file and the digit counts, provided the match lies outside the draft own folder. Without it, -0.033070 in the metric-validity draft was flagged as existing only inside the paper folder, when study-design-metric-validity.json actually stores -0.03307 at five decimals. Sign is kept strict, self-copies are rejected as matches, and the warning still says the rendering precision is a human call.

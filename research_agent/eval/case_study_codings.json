@@ -1,0 +1,99 @@
+{
+  "schema": "case-study-codings-0.1",
+  "study_id": "CS-20261118-01",
+  "title": "Durable defects in an evidence-gated research agent: a case study",
+  "protocol": {
+    "method": "case-study",
+    "research_questions": [
+      "RQ1: what classes of durable defects occur in an evidence-gated research agent?",
+      "RQ2: which mechanism detected each defect?",
+      "RQ3: what did the repair look like (fix type + regression test)?"
+    ],
+    "case_selection": "all six durable failures recorded in research_agent/failures/atlas.json on 2026-11-18; operational failures excluded by construction",
+    "data_sources": [
+      "research_agent/failures/atlas.json",
+      "design/86",
+      "design/87",
+      "design/91",
+      "tests/"
+    ],
+    "chain_of_evidence": "each failure id maps to atlas evidence paths and the regression test or manual check that proved the repair",
+    "triangulation": "atlas record + design record + code/test diff at the same id",
+    "member_checking": "not performed (single author); declared as a threat",
+    "ethics": "internal engineering artifacts only; no human subjects, no personal data"
+  },
+  "coding_scheme": {
+    "detection_mechanism": [
+      "real_model_run",
+      "heldout_rubric",
+      "browser_check",
+      "contract_test"
+    ],
+    "fix_type": [
+      "code",
+      "code_and_test",
+      "config",
+      "docs"
+    ],
+    "regression_test": [
+      "yes",
+      "no"
+    ]
+  },
+  "cases": [
+    {
+      "failure_id": "FA-20261118-01",
+      "stage": "S1b",
+      "detection_mechanism": "real_model_run",
+      "fix_type": "code_and_test",
+      "regression_test": "yes",
+      "repair": "synthesis uses the shared gateway resolver; test_default_model_prefers_gateway_binding",
+      "notes": "the failure only appeared when a gateway-only configuration was exercised"
+    },
+    {
+      "failure_id": "FA-20261118-02",
+      "stage": "S8",
+      "detection_mechanism": "real_model_run",
+      "fix_type": "code_and_test",
+      "regression_test": "yes",
+      "repair": "writer failures become model_failed with a reason; silent fallback test added",
+      "notes": "artifact claimed deterministic while a model profile was resolved"
+    },
+    {
+      "failure_id": "FA-20261118-03",
+      "stage": "S4",
+      "detection_mechanism": "heldout_rubric",
+      "fix_type": "code_and_test",
+      "regression_test": "yes",
+      "repair": "metric/budget shape warnings; later R1 hardened memory pack",
+      "notes": "structural validation accepted non-empty sentences"
+    },
+    {
+      "failure_id": "FA-20261118-04",
+      "stage": "S2-S3",
+      "detection_mechanism": "real_model_run",
+      "fix_type": "code_and_test",
+      "regression_test": "yes",
+      "repair": "metric vocabulary extended; ranking/gap test",
+      "notes": "lexical pre-review false negative on comparison wording"
+    },
+    {
+      "failure_id": "FA-20261118-05",
+      "stage": "demo-UI",
+      "detection_mechanism": "browser_check",
+      "fix_type": "code",
+      "regression_test": "no",
+      "repair": "act label derives from ACTS.length; verified with Playwright",
+      "notes": "no automated regression test for rendered labels yet"
+    },
+    {
+      "failure_id": "FA-20261118-06",
+      "stage": "CLI",
+      "detection_mechanism": "real_model_run",
+      "fix_type": "code_and_test",
+      "regression_test": "yes",
+      "repair": "bare profile ids accepted when the gateway declares them; 5 tests",
+      "notes": "silent fallback with exit code 0"
+    }
+  ]
+}

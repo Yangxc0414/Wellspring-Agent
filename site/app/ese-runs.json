@@ -1,0 +1,115 @@
+{
+  "schema": "runtime-ese-runs-0.1",
+  "count": 8,
+  "runs": [
+    {
+      "study_id": "ESE-MS-20261118-03",
+      "directory": "ese-ms-20261118-03",
+      "commits": 5132,
+      "rate": 0.3749,
+      "ci": [
+        0.3618,
+        0.3882
+      ],
+      "adjusted_difference": 0.0681,
+      "bugfix_difference": 0.0464,
+      "capsule": "runtime_data\\ese-ms-20261118-03\\run\\run-capsule.json",
+      "capsule_sha256": "3d1b9b26ef8828b35ccff4159d6a18b5e4e3760c9d17b2add41c4be8eaebaf91",
+      "status": "completed"
+    },
+    {
+      "study_id": "ESE-EX-20261118",
+      "directory": "ese-explore-20261118",
+      "commits": 5132,
+      "rate": 0.3749,
+      "ci": [
+        0.3618,
+        0.3882
+      ],
+      "adjusted_difference": null,
+      "bugfix_difference": 0.0464,
+      "capsule": "",
+      "capsule_sha256": "",
+      "status": "no-capsule"
+    },
+    {
+      "study_id": "ESE-MS-20261118-02",
+      "directory": "ese-ms-20261118-02",
+      "commits": 5132,
+      "rate": 0.3749,
+      "ci": [
+        0.3618,
+        0.3882
+      ],
+      "adjusted_difference": null,
+      "bugfix_difference": 0.0464,
+      "capsule": "",
+      "capsule_sha256": "",
+      "status": "no-capsule"
+    },
+    {
+      "study_id": "ESE-MS-20261118-01",
+      "directory": "ese-ms-20261118-01",
+      "commits": 5132,
+      "rate": 0.3749,
+      "ci": [
+        0.3618,
+        0.3882
+      ],
+      "adjusted_difference": null,
+      "bugfix_difference": 0.0464,
+      "capsule": "",
+      "capsule_sha256": "",
+      "status": "no-capsule"
+    },
+    {
+      "study_id": "m2-e2e",
+      "directory": "m2-e2e",
+      "commits": null,
+      "rate": null,
+      "ci": null,
+      "adjusted_difference": null,
+      "bugfix_difference": null,
+      "capsule": "",
+      "capsule_sha256": "",
+      "status": "no-capsule"
+    },
+    {
+      "study_id": "m1-multi",
+      "directory": "m1-multi",
+      "commits": null,
+      "rate": null,
+      "ci": null,
+      "adjusted_difference": null,
+      "bugfix_difference": null,
+      "capsule": "",
+      "capsule_sha256": "",
+      "status": "no-capsule"
+    },
+    {
+      "study_id": "m2-memory",
+      "directory": "m2-memory",
+      "commits": null,
+      "rate": null,
+      "ci": null,
+      "adjusted_difference": null,
+      "bugfix_difference": null,
+      "capsule": "",
+      "capsule_sha256": "",
+      "status": "no-capsule"
+    },
+    {
+      "study_id": "m1-feedback",
+      "directory": "m1-feedback",
+      "commits": null,
+      "rate": null,
+      "ci": null,
+      "adjusted_difference": null,
+      "bugfix_difference": null,
+      "capsule": "",
+      "capsule_sha256": "",
+      "status": "no-capsule"
+    }
+  ],
+  "boundary": "read-only local view; exploratory repository-mining results; no Claim/EA/signature and no gate decision is produced or changed"
+}

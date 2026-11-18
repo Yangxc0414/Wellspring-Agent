@@ -198,6 +198,10 @@ python -m research_agent conference fetch \
 python -m research_agent writing pack --project research-project --run-id RUN-... --max-sources 16
 python -m research_agent literature synthesize --project research-project --run-id RUN-... --max-themes 7
 python -m research_agent innovation review --project research-project --run-id RUN-... --rounds 2
+# ESE 研究模式：真实 cs.SE 语料 + ESE 方法协议检查（advisory；只到 S4 设计）
+python scripts/fetch_se_corpus.py --topic "flaky test" --max-papers 8
+python -m research_agent pipeline run --topic "Which repository signals predict flaky test occurrence?"   --language en --venue en_conference --corpus-dir runtime_data/se-corpus/pdfs --max-sources 8   --idea-model deepseek-v41 --experiment-model deepseek-v41 --writer deepseek-v41   --ese-method repository-mining --output-dir runtime_data/ese-pipeline
+# 设计目录会多出 ese-method.json（缺失的协议字段），不需要再手写检查脚本
 # 一条命令带上研究臂：把设计映射成 search_factorial 计划并真的执行（--study-project 让它可被盘点）
 python -m research_agent pipeline run --topic "..." --language en --venue en_conference \
   --output-dir runtime_data/pipeline-study --study-dataset iris --study-seeds 8 --study-budget 60 \
@@ -366,6 +370,38 @@ python -m research_agent experiment figure --project <project> --experiment-id <
 本机 demo 结果：dummy accuracy 0.6082，logistic 0.8918 ± 0.0149（3 seeds）；`experiment-evidence.json` 已 verified，**Claim 尚未签核**，因此 closure 当前按预期 blocked。边界：不自动装依赖、不自动探索、不创建 EA/Claim；MCP 不执行训练或签核。详见 `runtime_data/experiment-codegen-demo/summary.md`。
 
 自动启动/多配置探索仍未实现；执行必须在用户环境、显式 opt-in 和 G2 之后。
+
+## 2f. 1 分钟：研究记忆图扫描（只读，无 key）
+
+把项目已有的产物（idea / experiment / claim / closure / 审计）读成一张类型化记忆图，并为 idea / experiment / paper 三个阶段生成带出处、带预算的上下文包：
+
+```bash
+python scripts/research_memory_scan.py --project runtime_data/e2e-closed-loop
+python scripts/research_memory_scan.py --project runtime_data/e2e-closed-loop --stage idea --json
+```
+
+产出在 `<project>/memory/`：`memory-graph.json`、`memory-pack-{idea,experiment,paper}.{json,md}`。
+
+- 每个节点带 `source` + `sha256`；源文件变了节点即 stale，stale/pending 不进入生成包但会在包里报数；
+- `failures` 与 `contradictions` 永不裁剪；
+- 只读：不写项目产物、不创建 Claim/EA、不改门禁；包是生成上下文，不是证据。
+
+设计与边界见 [design/83-研究记忆图谱与三轴自改进闭环.md](design/83-研究记忆图谱与三轴自改进闭环.md)。
+
+## 2g. 1 分钟：查"这个阶段该用哪种方法、方法要求什么"（只读）
+
+导师给的二维矩阵（研究阶段 × 研究方法）已经做成注册表：9 个 ESE 方法 × 10 个阶段，每条都带指导文献、必填协议字段、artifact、检查项与报告章节。
+
+```bash
+python -m research_agent method list                 # 有哪些方法
+python -m research_agent method show controlled-experiment
+python -m research_agent method matrix --stage S4    # S4 有哪些方法、各自任务
+python -m research_agent method card --stage S4 --method case-study
+python -m research_agent method check --method controlled-experiment \
+  --design runtime_data/e2e-closed-loop/runs/RUN-E2E-02/experiment.json
+```
+
+`method check` 只输出 **advisory** 报告（缺失字段逐条列出），不阻断 pipeline / claim / closure；接门禁需要单独评审。设计与边界见 [design/85](design/85-研究阶段×研究方法矩阵与ESE方法注册表.md)。
 
 ## 3. 1 分钟：AstraDraw 方法示意图
 

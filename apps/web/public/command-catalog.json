@@ -1,9 +1,9 @@
 {
   "schema_version": "workspace-0.1",
-  "generated_at": "2026-11-14T17:06:00+00:00",
-  "count": 219,
+  "generated_at": "2026-11-18T13:03:52+00:00",
+  "count": 224,
   "curated": 51,
-  "derived": 168,
+  "derived": 173,
   "commands": [
     {
       "id": "study.baseline",
@@ -1037,6 +1037,51 @@
       "label": "guidelines",
       "syntax": "python -m research_agent memory guidelines",
       "description": "usage: research_agent memory guidelines [-h] --project PROJECT\n                                        [--propose-file PROPOSE_FILE]\n                                        [--step STEP] [--admission ADMISSION]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "method.card",
+      "group": "method",
+      "label": "card",
+      "syntax": "python -m research_agent method card",
+      "description": "usage: research_agent method card [-h] --stage STAGE --method METHOD_ID",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "method.check",
+      "group": "method",
+      "label": "check",
+      "syntax": "python -m research_agent method check",
+      "description": "usage: research_agent method check [-h] --method METHOD_ID --design DESIGN",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "method.list",
+      "group": "method",
+      "label": "list",
+      "syntax": "python -m research_agent method list",
+      "description": "usage: research_agent method list [-h]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "method.matrix",
+      "group": "method",
+      "label": "matrix",
+      "syntax": "python -m research_agent method matrix",
+      "description": "usage: research_agent method matrix [-h] [--stage STAGE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "method.show",
+      "group": "method",
+      "label": "show",
+      "syntax": "python -m research_agent method show",
+      "description": "usage: research_agent method show [-h] method_id",
       "safety": "catalog_only",
       "curated": false
     },

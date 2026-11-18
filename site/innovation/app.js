@@ -55,6 +55,13 @@ const ACTS = [
     noteFact: "7.5%", noteFactLabel: "FULL FEEDBACK LOOP", tags: ["PerturbTrace", "Q2", "M1"]
   }
 ];
+// Narrative order: why the research is trustworthy and whether its verdicts are consumed
+// come first; the machinery that supports them comes after. ACTS keeps its authored order
+// (render functions reference it by index) while playback follows this list.
+const PLAY_ORDER = ["validity", "feedback", "spec", "evidence", "figure", "paper", "boundary"];
+const ACT_BY_KEY = {};
+ACTS.forEach((act) => { ACT_BY_KEY[act.key] = act; });
+const playAct = (index) => ACT_BY_KEY[PLAY_ORDER[index]] || ACTS[index];
 const CHECK_LABELS = {
   root: "root svg", size: "width / height / viewBox", ids_unique: "unique ids",
   text_count: "text nodes", role_img: "role=img", labelled: "aria-labelledby",
@@ -81,18 +88,18 @@ const specOf = (id) => state.specs.find((spec) => spec.id === id);
 const moduleMeta = (id) => MODULES[id] || { label: id, kind: id };
 
 function renderRail() {
-  $("act-rail").innerHTML = ACTS.map((act, index) => `<button type="button" class="act-btn ${state.act === index ? "is-on" : ""} ${index < state.act ? "is-done" : ""}" data-act="${index}" aria-current="${state.act === index ? "step" : "false"}">
+  $("act-rail").innerHTML = PLAY_ORDER.map((key, index) => { const act = ACT_BY_KEY[key]; return `<button type="button" class="act-btn ${state.act === index ? "is-on" : ""} ${index < state.act ? "is-done" : ""}" data-act="${index}" aria-current="${state.act === index ? "step" : "false"}">
     <span class="act-no">0${index + 1}</span>
     <span><b class="act-name">${esc(act.name)}</b><span class="act-sub">${esc(act.sub)}</span></span>
     <span class="act-mark" aria-hidden="true"></span>
-  </button>`).join("");
+  </button>`; }).join("");
   // on the horizontal mobile rail the active act can sit off-screen; keep it in view
   const on = $("act-rail").querySelector(".act-btn.is-on");
   if (on) on.scrollIntoView({ block: "nearest", inline: "nearest", behavior: REDUCED ? "auto" : "smooth" });
 }
 
 function noteFor(index) {
-  const act = ACTS[index];
+  const act = playAct(index);
   // 右侧数字必须与左侧画布同源：槽位 pending 数从 paper.slots 现算，避免硬编码 5 与 4 打架。
   let fact = act.noteFact;
   let label = act.noteFactLabel;
@@ -286,7 +293,7 @@ function feedbackAct() {
     <p class="source-note">读数来源：PerturbTrace（1110 策略论证 §01/§05 已核对原文）；平台侧读数为 scripts/m1_feedback_sensitivity.py 与 tests/test_pipeline 实测锚 · SIM 标注 · 无真实 run</p>`;
 }
 
-const RENDERERS = [specAct, evidenceAct, figureAct, paperAct, boundaryAct, validityAct, feedbackAct];
+const RENDERERS_BY_KEY = { spec: specAct, evidence: evidenceAct, figure: figureAct, paper: paperAct, boundary: boundaryAct, validity: validityAct, feedback: feedbackAct };
 
 function animateCounts(root) {
   root.querySelectorAll("[data-count]").forEach((el) => {
@@ -304,14 +311,16 @@ function animateCounts(root) {
 
 function renderAct(index, animate = true) {
   state.act = Math.max(0, Math.min(ACTS.length - 1, index));
-  const act = ACTS[state.act];
-  $("stage-act-label").textContent = `0${state.act + 1} / 06`;
+  const act = playAct(state.act);
+  $("stage-act-label").textContent = `${String(state.act + 1).padStart(2, "0")} / ${String(ACTS.length).padStart(2, "0")}`;
   $("stage-title").textContent = act.title;
   const canvas = $("act-canvas");
   if (!state.data) {
     canvas.innerHTML = `<div class="act-head"><p class="eyebrow">FIXTURE NOT LOADED</p><h2>先运行 fixture pipeline。</h2><p>从项目根目录运行 <code>python -m research_agent pipeline run ...</code>，再启动静态服务器。当前页面不会调用 API。</p></div>`;
   } else {
-    canvas.innerHTML = RENDERERS[state.act]();
+    canvas.innerHTML = RENDERERS_BY_KEY[act.key]();
+    const eyebrow = canvas.querySelector(".eyebrow");
+    if (eyebrow) eyebrow.textContent = `ACT ${String(state.act + 1).padStart(2, "0")} / ${act.sub}`;
     if (animate) {
       canvas.classList.remove("is-enter");
       void canvas.offsetWidth;
@@ -485,7 +494,7 @@ function fillFacts() {
   set("fact-tests", tests);
   const testEl = $("fact-tests");
   if (testEl && state.stats) testEl.title = `recorded verdict @ ${state.stats.source_fingerprint || "unknown"} · ${state.stats.finished_at || ""}`;
-  ACTS[0].noteFact = String(specs);
+  ACT_BY_KEY.spec.noteFact = String(specs);
 }
 
 // The hero board's connector curves used fixed viewBox coordinates while the nodes are placed in

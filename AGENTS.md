@@ -273,6 +273,7 @@ python -m unittest discover -s tests -v
 - [ ] 目标模块测试通过，未破坏其他模块；
 - [ ] 输出仍遵守 `fixture_mode` / `span-only` / no-claim 边界；
 - [ ] 没有新增未使用依赖；
+- [ ] 跑过 `python scripts/repo_hygiene.py`：站点生成副本与源一致、无浏览器/模型缓存目录、工作流路径筛选没有指向不存在的文件；
 - [ ] 改动文件清单与规格 changelog 能对上。
 
 ## 7. 不要做
@@ -321,6 +322,8 @@ python -m unittest discover -s tests -v
 | memory-port | META（记忆写入端口） | `research_agent/memory_port.py` | `modules/memory-port/SPEC.md` |
 | ccfa-audit | S4 | `research_agent/ccfa_audit.py` + `cli_design.py` | `modules/ccfa-audit/SPEC.md` |
 | exec-port | META（执行面接缝） | `research_agent/execport/exec_port.py` | `modules/exec-port/SPEC.md` |
+| method-registry | META（阶段×方法） | `research_agent/method_registry.py` + `modules/method-registry/registry.json` | `modules/method-registry/SPEC.md` |
+| ese-exec | S5（ESE 研究执行 + 探索循环） | `research_agent/ese_exec.py` + `research_agent/ese_explore.py` + `scripts/run_ese_study.py` + `scripts/ese_explore.py` | `modules/ese-exec/SPEC.md` |
 
 每个模块的测试在 `tests/`；完整纵切见 `research_agent/pipeline.py`。`research_agent/vendor/astradraw/` 是从本地完整复制的第三方绘图工作流，**不要改上游脚本**；需要适配时只改 `research_agent/adapters/astradraw_renderer.py` 与 `svg_audit.py`。
 

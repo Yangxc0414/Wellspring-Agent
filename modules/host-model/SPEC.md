@@ -2,7 +2,7 @@
 id: host-model
 name: 宿主模型交接
 stage: META
-version: 0.7.0
+version: 0.7.1
 status: pilot
 owner: research-agent
 inputs:
@@ -97,6 +97,7 @@ Agent（Qoder / Claude Code / Codex / Zcode）用它自己的模型完成，再�
 
 ## Changelog
 
+- 2026-11-18 · v0.7.1 · status=pilot · gateway 空内容错误带 finish_reason 与 token 预算提示：区分模型未给内容与 max_tokens 耗尽，便于调试写作与设计阶段
 - 2026-11-03 · v0.7.0 · status=pilot · 契约输出升 host-contract-0.3：face_coverage 增加 reverse 段（未到达表面分类计数、截断状态与边界），宿主一次协商即可读到"MCP 面够不到什么、哪些缺席还没写理由"。tests/test_handoff 的 schema pin 同步到 0.3，属预期升版。
 - 2026-11-03 · v0.6.0 · status=pilot · 契约输出升 host-contract-0.2：新增 face_coverage 字段，宿主做一次协商即可读到"哪个能力由哪一面服务"（faces 计数、已声明/未核验条目、未核验清单与边界），不再需要自行 import face_coverage；同时因为这里不导入 runtime，HTTP 目标显式标 http_targets_verified=false 并在 boundary 里说明未经校验，不装作查过。build.boundary 改为直接给出对照命令：与新起的 `python -m research_agent handoff contract` 比指纹，不同即说明常驻服务在跑旧代码必须重启——"调用成功"不等于"行为是当前代码"。矩阵构建失败时也如实返回 error 字段而不是省略该节。用例 3 个新增（契约含矩阵且如实标注未校验、boundary 含对照命令、include_http=True 时仍逐条校验 HTTP 声明）；tests/test_handoff 里的 schema pin 同步到 0.2（这是本次契约变更的预期升版，不是放宽断言）。
 - 2026-10-30 · v0.4.2 · status=pilot · 0.4.2（2026-10-30）：修掉协商里的一处误报：会调用工具的宿主不该因为 handoff 目录不可写而被判 no_writable_handoff_directory——它根本不走文件通道。实测 can_call_tools+can_serve_model 在 outbox 指向不可写路径时仍报该 blocker，与"平台宿主免 key 直接可用"的目标冲突。现在该 blocker 只在既不能调工具、也不能写文件时才出现；tests.test_handoff 同步补了正反两面（纯文件宿主必须报、工具宿主不得报）。无判定语义变化，升 patch。

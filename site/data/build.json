@@ -1,12 +1,17 @@
 {
-  "built_at": "2026-11-11T16:09:38.346Z",
-  "demo_sha256_16": "3f48def2da08bd61",
+  "built_at": "2026-11-18T13:07:00.838Z",
+  "demo_sha256_16": "d58ebbe4dfceeca8",
   "docs": [
-    "README.md"
+    "README.md",
+    "16-科研Skill生态调研.md",
+    "17-上层微服务架构.md",
+    "18-GitHub Pages部署与多智能体Skill设计.md",
+    "71-四图对照与解耦设计.md"
   ],
   "data_files": [
     "build.json",
     "digest.json",
+    "ese-run-summary.json",
     "evolution.json",
     "harness2.json",
     "queries.json"

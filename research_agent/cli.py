@@ -136,6 +136,134 @@ def _models_required() -> bool:
     return (os.environ.get("RESEARCH_AGENT_MODE") or "test").strip().lower() == "production"
 
 
+def _known_gateway_profiles() -> set:
+    """Profile ids declared in the gateway store; used to accept a bare --*-model id.
+
+    The CLI has three spellings for the same thing (auto / profile:<id> / <id>). Rather than
+    silently falling back to rules when a user passes the bare id, accept it when the store
+    actually declares it; the fallback note then only appears for genuinely unknown ids.
+    """
+    try:
+        from .models import GatewayStore
+
+        return set(GatewayStore(default_store_path()).profiles)
+    except Exception:
+        return set()
+
+
+def _wrap_with_experiment_repair(generator):
+    """One bounded shape-repair turn for model-drafted experiment fields.
+
+    The held-out rubric showed the same two failures in every arm: primary_metric written as
+    a sentence and budget written as prose. Re-calling with the explicit errors is a recipe
+    candidate (R2), not a gate: the repaired draft is still a draft that needs G2.
+    """
+
+    def wrapped(payload):
+        draft = generator(payload)
+        if not isinstance(draft, dict):
+            return draft
+        from .heldout_eval import _budget_ok, _metric_shape
+
+        problems = []
+        metric = str(draft.get("primary_metric") or "")
+        budget = str(draft.get("budget") or "")
+        if metric and not _metric_shape(metric):
+            problems.append(
+                "primary_metric must be a short identifier such as success_rate or accuracy; got: " + metric[:120]
+            )
+        if budget and not _budget_ok(budget):
+            problems.append(
+                "budget must state numbers (seeds x evaluations or a numeric cap); got: " + budget[:120]
+            )
+        if not problems:
+            return draft
+        merged = dict(payload or {})
+        merged["repair_errors"] = problems
+        merged["previous_draft"] = draft
+        print("experiment repair: " + "; ".join(problems), file=sys.stderr)
+        return generator(merged)
+
+    return wrapped
+
+
+def _load_memory_pack(path: str):
+    """Load a memory pack for read-only prompt injection (failures section preferred).
+
+    Accepts the JSON pack produced by scripts/research_memory_scan.py or a plain markdown
+    pack. The text is injected as memory_of_past_failures; nothing is written back and no
+    gate reads it.
+    """
+    target = Path(path)
+    if not target.is_file():
+        raise SystemExit("memory pack not found: " + path)
+    raw = target.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    text = ""
+    is_json = target.suffix.lower() == ".json"
+    if is_json:
+        from .storage import read_json
+
+        data = read_json(target) or {}
+        lines = []
+        for section in data.get("sections") or []:
+            if isinstance(section, dict) and section.get("name") == "failures":
+                lines.extend(str(item) for item in section.get("lines") or [])
+        text = "\n".join(lines)
+        if not text.strip():
+            raise SystemExit("memory pack has no failures section: " + path)
+    else:
+        text = raw.decode("utf-8", "replace")
+    text = text.strip()
+    if not text:
+        raise SystemExit("memory pack has no failures text: " + path)
+    return text[:8000], {"path": str(target), "sha256": digest, "chars": len(text[:8000])}
+
+
+def _wrap_with_memory(generator, memory_text: str):
+    """Return a wrapper that adds the memory pack to the payload the model sees."""
+
+    def wrapped(payload):
+        merged = dict(payload or {})
+        merged["memory_of_past_failures"] = memory_text
+        return generator(merged)
+
+    return wrapped
+
+
+def _ese_method_report(method_id, design):
+    """Advisory ESE-method completeness report for the S4 design of a pipeline run.
+
+    The generic design contract (hypothesis/baseline/metric/budget/controls) is method
+    agnostic. A chosen ESE method adds required protocol fields; this report says which are
+    still missing. It is written as an artifact and printed, never read by a gate.
+    """
+    from .method_registry import MethodRegistryError, check, task_card
+
+    try:
+        card = task_card("S4", method_id)
+        result = check(method_id, dict(design or {}))
+    except MethodRegistryError as exc:
+        raise SystemExit(str(exc))
+    missing = []
+    for finding in result.get("findings") or []:
+        for field in finding.get("missing") or []:
+            if field not in missing:
+                missing.append(field)
+    return {
+        "schema": "ese-pipeline-method-0.1",
+        "method": method_id,
+        "stage": "S4",
+        "applicable": card.get("applicable"),
+        "task": card.get("task"),
+        "protocol_fields": card.get("protocol_fields"),
+        "status": result.get("status"),
+        "missing": missing,
+        "findings": result.get("findings"),
+        "boundary": "advisory only: method completeness is reported, not enforced; no gate reads it",
+    }
+
+
 def _resolve_planner(spec: str):
     """Return (planner, note). Never raises unless production requires models."""
     from .adapters.glm_model import ModelConfigError, gateway_query_planner
@@ -164,6 +292,12 @@ def _resolve_planner(spec: str):
             store_path=default_store_path(),
             strict=strict,
         )
+    if spec in _known_gateway_profiles():
+        return gateway_query_planner(
+            profile_id=spec,
+            store_path=default_store_path(),
+            strict=strict,
+        )
     return None, "unknown planner '%s'; using rule-based queries" % spec
 
 
@@ -183,6 +317,12 @@ def _resolve_paper_writer(spec: str):
     if spec.startswith("profile:"):
         return gateway_paper_writer(
             profile_id=spec.split(":", 1)[1],
+            store_path=default_store_path(),
+            strict=strict,
+        )
+    if spec in _known_gateway_profiles():
+        return gateway_paper_writer(
+            profile_id=spec,
             store_path=default_store_path(),
             strict=strict,
         )
@@ -208,6 +348,12 @@ def _resolve_idea_proposer(spec: str):
             store_path=default_store_path(),
             strict=strict,
         )
+    if spec in _known_gateway_profiles():
+        return gateway_idea_proposer(
+            profile_id=spec,
+            store_path=default_store_path(),
+            strict=strict,
+        )
     return None, "unknown idea model '%s'; using rule-based candidates" % spec
 
 
@@ -227,6 +373,12 @@ def _resolve_experiment_designer(spec: str):
     if spec.startswith("profile:"):
         return gateway_experiment_designer(
             profile_id=spec.split(":", 1)[1],
+            store_path=default_store_path(),
+            strict=strict,
+        )
+    if spec in _known_gateway_profiles():
+        return gateway_experiment_designer(
+            profile_id=spec,
             store_path=default_store_path(),
             strict=strict,
         )
@@ -836,6 +988,7 @@ def _cmd_literature_synthesize(args: argparse.Namespace) -> int:
             args.run_id,
             max_themes=args.max_themes,
             output_dir=Path(args.output_dir) if args.output_dir else None,
+            profile_id=getattr(args, "profile", "") or None,
         )
     except (SynthesisError, OSError, ValueError) as exc:
         raise SystemExit(str(exc))
@@ -2537,9 +2690,34 @@ def _cmd_pipeline_run(args: argparse.Namespace) -> int:
     support_judge, support_note = _resolve_support_judge(
         getattr(args, "support_judge", "auto")
     )
-    for note in (writer_note, idea_note, experiment_note, support_note):
-        if note:
-            print(note, file=sys.stderr)
+    memory_pack = None
+    memory_text = ""
+    if getattr(args, "memory_pack", ""):
+        memory_text, memory_pack = _load_memory_pack(args.memory_pack)
+        if idea_proposer is not None:
+            idea_proposer = _wrap_with_memory(idea_proposer, memory_text)
+        if experiment_designer is not None:
+            experiment_designer = _wrap_with_memory(experiment_designer, memory_text)
+    if getattr(args, "experiment_repair", False) and experiment_designer is not None:
+        experiment_designer = _wrap_with_experiment_repair(experiment_designer)
+        print(
+            "memory pack: %d chars of durable failures injected into idea/experiment prompts"
+            % len(memory_text),
+            file=sys.stderr,
+        )
+    model_notes = {
+        key: value
+        for key, value in (
+            ("planner", planner_note),
+            ("writer", writer_note),
+            ("idea", idea_note),
+            ("experiment", experiment_note),
+            ("support_judge", support_note),
+        )
+        if value
+    }
+    for note in model_notes.values():
+        print(note, file=sys.stderr)
     runner = PipelineRunner(
         run_output_dir=out / "run",
         query_planner=planner,
@@ -2631,6 +2809,7 @@ def _cmd_pipeline_run(args: argparse.Namespace) -> int:
             grant_scheme=args.grant or "",
             figure_style=args.style,
             max_sources=max_sources,
+            max_candidates=int(getattr(args, "max_candidates", 3) or 3),
             primary_metric=args.primary_metric or "",
             controls=list(args.control or []),
             budget=args.budget or "",
@@ -2661,11 +2840,43 @@ def _cmd_pipeline_run(args: argparse.Namespace) -> int:
             adaptive_retrieval=bool(getattr(args, "adaptive_retrieval", False)),
         )
     )
+    ese_method_report = None
+    if getattr(args, "ese_method", ""):
+        experiment_module = result.modules.get("experiment") or {}
+        ese_method_report = _ese_method_report(args.ese_method, experiment_module)
+        method_path = Path(out) / "ese-method.json"
+        method_path.write_text(
+            json.dumps(ese_method_report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        print(
+            "ese method: %s | %s | missing: %s"
+            % (
+                ese_method_report["method"],
+                ese_method_report["status"],
+                ", ".join(ese_method_report["missing"]) or "(none)",
+            ),
+            file=sys.stderr,
+        )
     extra = {}
     if lease:
         extra["active_harness"] = lease
     if run_harness:
         extra["run_harness"] = run_harness
+    if model_notes:
+        # Which model produced each stage must be visible in the artifact, not only in the
+        # terminal: a run whose idea/design/paper came from rules and a run whose came from
+        # a model are not the same evidence.
+        extra["model_notes"] = model_notes
+    if memory_pack:
+        # Read-only provenance: which memory pack (and therefore which failures) this run saw.
+        extra["memory_pack"] = memory_pack
+    if getattr(args, "experiment_repair", False):
+        # Recipe provenance: the shape-repair loop is a candidate, not the default.
+        extra["experiment_repair"] = True
+    if ese_method_report is not None:
+        # ESE method provenance: which method the S4 design was checked against, and what it
+        # still misses. Advisory artifact, not a gate input.
+        extra["ese_method"] = ese_method_report
     write_pipeline_artifacts(
         result,
         out,
@@ -2684,6 +2895,10 @@ def _cmd_pipeline_run(args: argparse.Namespace) -> int:
         "output_dir": str(out),
         "figure": "data/figure.svg",
         "modules": {key: (value.get("status") if isinstance(value, dict) else None) for key, value in result.modules.items()},
+        "model_notes": model_notes,
+        "memory_pack": memory_pack,
+        "experiment_repair": bool(getattr(args, "experiment_repair", False)),
+        "ese_method": ese_method_report,
     })
     return 0
 
@@ -3348,6 +3563,67 @@ def _cmd_exec_faces(args: argparse.Namespace) -> int:
     from .execport.exec_port import describe
 
     _print_json(describe())
+    return 0
+
+
+def _cmd_method_list(args: argparse.Namespace) -> int:
+    from .method_registry import list_methods
+
+    _print_json({"schema": "ese-method-list-0.1", "methods": list_methods()})
+    return 0
+
+
+def _cmd_method_show(args: argparse.Namespace) -> int:
+    from .method_registry import MethodRegistryError, get_method
+
+    try:
+        _print_json(get_method(args.method_id))
+    except MethodRegistryError as exc:
+        print(str(exc))
+        return 2
+    return 0
+
+
+def _cmd_method_matrix(args: argparse.Namespace) -> int:
+    from .method_registry import MethodRegistryError, matrix
+
+    try:
+        _print_json(matrix(stage=args.stage))
+    except MethodRegistryError as exc:
+        print(str(exc))
+        return 2
+    return 0
+
+
+def _cmd_method_card(args: argparse.Namespace) -> int:
+    from .method_registry import MethodRegistryError, task_card
+
+    try:
+        _print_json(task_card(args.stage, args.method_id))
+    except MethodRegistryError as exc:
+        print(str(exc))
+        return 2
+    return 0
+
+
+def _cmd_method_check(args: argparse.Namespace) -> int:
+    from .method_registry import MethodRegistryError, check
+    from .storage import read_json
+
+    try:
+        payload = read_json(Path(args.design))
+    except Exception as exc:  # JsonStoreError or OSError
+        print("cannot read design: {0}".format(exc))
+        return 2
+    if payload is None:
+        print("design file not found: {0}".format(args.design))
+        return 2
+    try:
+        report = check(args.method_id, payload)
+    except MethodRegistryError as exc:
+        print(str(exc))
+        return 2
+    _print_json(report)
     return 0
 
 
@@ -4471,6 +4747,11 @@ def build_parser() -> argparse.ArgumentParser:
     synth_parser.add_argument("--project", required=True)
     synth_parser.add_argument("--run-id", required=True)
     synth_parser.add_argument("--max-themes", type=int, default=7)
+    synth_parser.add_argument(
+        "--profile",
+        default="",
+        help="gateway model profile id for synthesis (default: literature binding, then DEEPSEEK_API_KEY)",
+    )
     synth_parser.add_argument("--output-dir", default="")
     synth_parser.set_defaults(func=_cmd_literature_synthesize)
 
@@ -5597,6 +5878,7 @@ def build_parser() -> argparse.ArgumentParser:
     pipeline_run.add_argument("--grant", choices=["", "nsfc", "nssfc", "generic"], default="")
     pipeline_run.add_argument("--style", choices=["comic", "roman", "modern"], default="modern")
     pipeline_run.add_argument("--max-sources", type=int, default=6)
+    pipeline_run.add_argument("--max-candidates", type=int, default=3, help="S2-S3 候选上限（1-8）；文献更宽时可放大，仍由 G1 人签收敛")
     pipeline_run.add_argument(
         "--adaptive-retrieval",
         action="store_true",
@@ -5657,6 +5939,21 @@ def build_parser() -> argparse.ArgumentParser:
     pipeline_run.add_argument("--writer", default="auto", help="论文非结果章节写作：auto | off | profile:<id>；无 key 自动回退确定性草稿")
     pipeline_run.add_argument("--idea-model", default="auto", help="S2–S3 候选生成：auto | off | profile:<id>；按设置中的 idea 绑定")
     pipeline_run.add_argument("--experiment-model", default="auto", help="S4 设计草稿：auto | off | profile:<id>；按设置中的 experiment 绑定")
+    pipeline_run.add_argument(
+        "--ese-method",
+        default="",
+        help="S4 设计按哪个 ESE 方法检查协议完整性（advisory；写入 ese-method.json，不进任何门禁）",
+    )
+    pipeline_run.add_argument(
+        "--experiment-repair",
+        action="store_true",
+        help="S4 草稿形状不达标时带错误重写一次（recipe 候选，仍只是草稿，不替代 G2）",
+    )
+    pipeline_run.add_argument(
+        "--memory-pack",
+        default="",
+        help="只读注入 durable 失败记忆包（JSON 或 Markdown，来自 scripts/research_memory_scan.py）；不写回、不进任何门禁",
+    )
     pipeline_run.add_argument("--support-judge", default="auto", help="claim/引用支持审稿：auto | off | profile:<id>；按设置中的 judge 绑定")
     pipeline_run.add_argument("--corpus")
     pipeline_run.add_argument("--ledger")
@@ -6279,6 +6576,25 @@ def build_parser() -> argparse.ArgumentParser:
     exec_sub = execp.add_subparsers(dest="exec_command", required=True)
     exec_faces = exec_sub.add_parser("faces", help="describe the registered execution faces")
     exec_faces.set_defaults(func=_cmd_exec_faces)
+
+    methodp = sub.add_parser("method", help="read-only ESE method registry: stage x method task cards")
+    method_sub = methodp.add_subparsers(dest="method_command", required=True)
+    method_list = method_sub.add_parser("list", help="list registered methods")
+    method_list.set_defaults(func=_cmd_method_list)
+    method_show = method_sub.add_parser("show", help="show one method definition")
+    method_show.add_argument("method_id")
+    method_show.set_defaults(func=_cmd_method_show)
+    method_matrix = method_sub.add_parser("matrix", help="stage x method matrix")
+    method_matrix.add_argument("--stage", default=None)
+    method_matrix.set_defaults(func=_cmd_method_matrix)
+    method_card = method_sub.add_parser("card", help="task card for one stage+method")
+    method_card.add_argument("--stage", required=True)
+    method_card.add_argument("--method", dest="method_id", required=True)
+    method_card.set_defaults(func=_cmd_method_card)
+    method_check = method_sub.add_parser("check", help="advisory check of a design against one method")
+    method_check.add_argument("--method", dest="method_id", required=True)
+    method_check.add_argument("--design", required=True)
+    method_check.set_defaults(func=_cmd_method_check)
 
     research = sub.add_parser("research", help="run the fixture research queue")
     research_sub = research.add_subparsers(dest="research_command", required=True)

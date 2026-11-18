@@ -1,0 +1,61 @@
+{
+  "schema": "ese-study-protocol-0.1",
+  "study_id": "ESE-MS-20261118-03",
+  "method": "repository-mining",
+  "research_questions": [
+    "RQ1: among commits that touch Python source, what fraction also touch tests?",
+    "RQ2: is that fraction different for bug-fix commits than for other commits?",
+    "RQ3: does the fraction differ between earlier and later history (per-repo median date split)?",
+    "RQ4: does the bug-fix difference survive stratification by project, commit size and production-file co-change?"
+  ],
+  "sampling_frame": {
+    "repos": [
+      {
+        "name": "click",
+        "url": "https://github.com/pallets/click"
+      },
+      {
+        "name": "requests",
+        "url": "https://github.com/psf/requests"
+      },
+      {
+        "name": "httpx",
+        "url": "https://github.com/encode/httpx"
+      }
+    ]
+  },
+  "project_selection": "public Python projects with >=300 commits and a tests tree; chosen for ecosystem diversity (CLI library, HTTP client, modern async client); vendored forks excluded",
+  "time_window": {
+    "start": "2000-01-01",
+    "end": "2026-11-18"
+  },
+  "time_split": "per-repo median commit date; commits in the earlier half vs later half of each repo's history",
+  "dedup_policy": "merge commits excluded; one commit is one unit; no same-message dedup",
+  "label_source": {
+    "unit": "commit touching at least one .py file",
+    "outcome": "same commit also touches tests/ or test_*.py or *_test.py",
+    "bugfix": "commit subject matches fix/fixes/fixed/bug/issue/regression/hotfix/patch"
+  },
+  "license_check": {
+    "click": "BSD-3-Clause (LICENSE.txt)",
+    "requests": "Apache-2.0 (LICENSE)",
+    "httpx": "BSD-3-Clause (LICENSE.md)"
+  },
+  "extraction_script": "scripts/run_ese_study.py (research_agent/ese_exec.py)",
+  "analysis": {
+    "metric": "test co-change rate",
+    "unit": "commit",
+    "ci_level": 0.95,
+    "permutation": {
+      "n": 1000,
+      "seed": 42
+    },
+    "stratification": [
+      "project",
+      "commit_size_bucket",
+      "production_cochange"
+    ]
+  },
+  "frozen_at": "2026-11-18",
+  "boundary": "exploratory repository-mining study on three public Python projects; labels are path/message heuristics; no Claim/EA/signature; stratified estimate is Mantel-Haenszel adjusted"
+}

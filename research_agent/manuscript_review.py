@@ -56,10 +56,16 @@ def review_model() -> Any:
     """Prefer the gateway binding for the paper stage; a host_agent profile needs no key."""
     from .adapters.research_models import default_model_for
 
-    port, _note = default_model_for("paper", purpose="S8-S12 manuscript review")
+    port, note = default_model_for("paper", purpose="S8-S12 manuscript review")
     if port is not None:
         return port
-    return default_review_model()
+    try:
+        return default_review_model()
+    except ManuscriptReviewError as exc:
+        detail = str(note or "").strip()
+        if detail:
+            raise ManuscriptReviewError("%s (%s)" % (exc, detail))
+        raise
 
 
 def default_review_model() -> Any:

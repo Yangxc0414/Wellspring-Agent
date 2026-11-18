@@ -2,7 +2,7 @@
 id: idea
 name: 假设收敛
 stage: S2–S3
-version: 0.26.0
+version: 0.27.2
 status: pilot
 owner: research-agent
 inputs:
@@ -141,6 +141,10 @@ invariants:
 
 ## Changelog
 
+- 2026-11-18 · v0.27.2 · status=pilot · pipeline run 暴露 --max-candidates（1-8，默认 3）：候选上限随文献宽度可调，仍由 G1 人签收敛；idea 模块输入不变
+- 2026-11-18 · v0.27.1 · status=pilot · 创新评审双写 innovation-review.json 到 runs/<id> 与 --output-dir（_review_destinations 去重），manuscript draft 不再依赖手动拷贝
+- 2026-11-18 · v0.27.0 · status=pilot · 创新评审的实验计划校验按 profile 分流：只有 search_factorial 才用 search_lab 因子词汇校验；protocol_run/local_tabular_experiment 的设计变量（如项目/提交大小分层）不再被误判为不可执行，标 deferred_design
+- 2026-11-18 · v0.26.1 · status=pilot · 词法预审扩展：ranking/rank/gap/outperform/better than/worse than/effect size/benchmark 计入 metric signal，避免把带比较的否证条件误判为 needs_metric；不改变推荐语义
 - 2026-11-11 · v0.26.0 · status=pilot · 消费侧改 kind-first：require_lens_diversity/demote_candidate/carry_falsification/carry_forward/require_falsification_binding 按类型分派，文本解析仅作旧输入回退；feedback_constraints_applied provenance 增 constraint_kind；未知 kind 不消费、不猜测。tests/test_idea 2 项。
 - 2026-11-11 · v0.25.0 · status=pilot · 反馈环回指消费：IdeaRequest.generation_constraints 消费 feedback 0.4.0 新鲜约束（homogeneity 强制 lens 多样性、belief_revision 对 revise-or-drop 候选 shortlist 降权、t6b 携带已执行否证条件进 falsification）；IdeaResult.feedback_constraints_applied 写 provenance（loop_id/subject/source sha256/effect），idea.json 可追溯哪条判定塑造了候选；无约束时逐字节不变；G1/Claim 边界不变。tests/test_idea 增消费侧断言。
 - 2026-11-07 · v0.24.1 · status=pilot · 模型/宿主供给面同步（patch）：0.24.0 让 IdeaCard 承载 prediction，但 IDEA_SYSTEM 仍要求模型只输出 5 个字段并禁止指标，导致真实 run 永远拿不到十槽位；且该提示词要求的是嵌套 prediction 对象，而 0.24.0 的 _model_cards 只读顶层扁平字段，二者不一致（上一轮测试用扁平 proposer 未暴露，本轮端到端测试抓到）。本 patch：IDEA_SYSTEM 声明十槽位、仅当研究对象确属已注册可执行档位时才填、不确定或不在册必须省略且禁止编造；_model_cards 优先读嵌套 prediction 并兼容旧扁平答案；新增 tests/test_idea_model_contract.py 4 例钉住提示词、gateway→IdeaCard→testable、宿主不给预测时 not_testable_here、档位外 cannot_test。host_model._validate 只检查 require_keys 不拒绝额外字段，故十槽位可穿过 WorkBuddy host-model 交接面。不改契约、不改门禁、不宣称质量提升。

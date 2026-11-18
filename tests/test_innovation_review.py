@@ -1,4 +1,4 @@
-import json
+﻿import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -6,6 +6,65 @@ from unittest import mock
 
 from research_agent import innovation_review
 from tests.writing_support import RUN_ID, make_writing_project
+
+
+class ReviewDestinationTest(unittest.TestCase):
+    def test_output_dir_is_added_but_target_kept(self):
+        from research_agent.innovation_review import _review_destinations
+
+        target = Path('/tmp/project/runs/RUN-1')
+        destinations = _review_destinations(target, Path('/tmp/project/innovation'))
+        self.assertEqual(destinations, [target, Path('/tmp/project/innovation')])
+
+    def test_same_directory_is_not_duplicated(self):
+        from research_agent.innovation_review import _review_destinations
+
+        self.assertEqual(_review_destinations('/tmp/run', '/tmp/run'), [Path('/tmp/run')])
+
+    def test_no_output_dir_uses_target_only(self):
+        from research_agent.innovation_review import _review_destinations
+
+        self.assertEqual(_review_destinations('/tmp/run', None), [Path('/tmp/run')])
+
+
+class NonSearchPlanTest(unittest.TestCase):
+    def _idea(self, index):
+        return {
+            "title": "Idea %d" % index,
+            "problem": "p",
+            "mechanism": "m",
+            "novelty_claim": "n",
+            "falsification": "f",
+            "evidence_refs": ["R1", "R2"],
+            "risks": ["r"],
+            "experiment_plan": {
+                "profile": "local_tabular_experiment",
+                "dataset": "user-provided commit CSV",
+                "baseline": "b",
+                "metric": "mean_diff",
+                "stopping_rule": "s",
+                "design": {"project": ["a", "b"]},
+            },
+        }
+
+    def test_non_search_design_is_not_validated_against_search_factors(self):
+        from research_agent.innovation_review import _normalise_ideas
+
+        payload = {"ideas": [self._idea(1), self._idea(2), self._idea(3)]}
+        ideas = _normalise_ideas(payload, {"R1", "R2"}, {"R1": "S1", "R2": "S2"})
+        self.assertEqual(len(ideas), 3)
+        self.assertTrue(all(idea["executable"].get("deferred_design") for idea in ideas))
+
+    def test_search_profile_design_is_still_validated(self):
+        from research_agent.innovation_review import InnovationReviewError, _normalise_ideas
+
+        bad = self._idea(1)
+        bad["experiment_plan"]["profile"] = "search_factorial"
+        bad["experiment_plan"]["dataset"] = "iris"
+        bad["experiment_plan"]["metric"] = "accuracy"
+        payload = {"ideas": [bad, self._idea(2), self._idea(3)]}
+        with self.assertRaises(InnovationReviewError):
+            _normalise_ideas(payload, {"R1", "R2"}, {"R1": "S1", "R2": "S2"})
 
 
 class InnovationReviewTest(unittest.TestCase):

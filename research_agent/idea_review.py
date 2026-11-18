@@ -24,7 +24,8 @@ STOPWORDS = {
 TESTABILITY_RE = re.compile(
     r"(指标|度量|比较|差异|提升|降低|优于|劣于|相关|回归|分类|误差|"
     r"metric|measure|compare|difference|increase|decrease|improve|accuracy|"
-    r"t80|r2|precision|recall|auc|error|p\s*[<=>])",
+    r"t80|r2|precision|recall|auc|error|ranking|rank|gap|outperform|"
+    r"better than|worse than|effect size|benchmark|p\s*[<=>])",
     re.IGNORECASE,
 )
 LENSES = {"mechanism", "boundary", "measurement"}

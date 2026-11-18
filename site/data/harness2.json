@@ -1,43 +1,38 @@
 {
   "schema": "harness2-story-0.1",
-  "generated_at": "2026-11-10T16:42:30Z",
+  "generated_at": "2026-11-16T07:12:56Z",
   "available": true,
   "problems": [],
-  "platform_fingerprint": "7594c67a27762064",
+  "platform_fingerprint": "9a2ef1e804775fd4",
   "run": {
-    "adapter": "science",
-    "executor": "deterministic-science-fixture",
+    "adapter": "demo",
+    "executor": "deterministic-demo",
     "platform": "nt",
-    "k": 2,
+    "k": 1,
     "modes": [
       "agg",
       "seq"
     ],
-    "wall_s": 51.086,
-    "started_at": "2026-11-10T16:41:38Z",
-    "finished_at": "2026-11-10T16:42:30Z"
+    "wall_s": 2.183,
+    "started_at": "2026-11-16T07:12:54Z",
+    "finished_at": "2026-11-16T07:12:56Z"
   },
   "budget": {
-    "R": 48,
-    "expected_R": 48,
-    "P": 36,
-    "expected_P": 36,
+    "R": 16,
+    "expected_R": 16,
+    "P": 12,
+    "expected_P": 12,
     "usd": 0.0
   },
   "tasks": [
     {
-      "task_id": "claims-1",
-      "domain": "claim-audit",
+      "task_id": "ledger-1",
+      "domain": "accounting",
       "status": "ok"
     },
     {
-      "task_id": "claims-2",
-      "domain": "claim-audit",
-      "status": "ok"
-    },
-    {
-      "task_id": "claims-3",
-      "domain": "claim-audit",
+      "task_id": "ledger-2",
+      "domain": "accounting",
       "status": "ok"
     }
   ],
@@ -55,145 +50,101 @@
   },
   "adopted": [
     {
-      "task_id": "claims-1",
-      "mode": "agg",
-      "label": "agg2",
-      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
-      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
-      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
-      "changes": [
-        {
-          "path": "scripts/coverage.py",
-          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
-        }
-      ]
-    },
-    {
-      "task_id": "claims-1",
-      "mode": "seq",
-      "label": "c2",
-      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
-      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
-      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
-      "changes": [
-        {
-          "path": "scripts/coverage.py",
-          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
-        }
-      ]
-    },
-    {
-      "task_id": "claims-2",
+      "task_id": "ledger-1",
       "mode": "agg",
       "label": "agg1",
-      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
-      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
-      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "base_sha256": "e0335f8899f436fdaf3b51a915cc0ec0a77cc3ad9d4a885b9b8531d15a48a527",
+      "adopted_sha256": "5f5013181b12e8905a5b925bcd782659815046e1da732937a270738f9144ce62",
+      "notes": "Keep signed amounts: the base total omitted credits in the source ledger.",
+      "lesson": "Include both signs when summing in scripts/summarize.py.",
       "changes": [
         {
-          "path": "scripts/coverage.py",
-          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+          "path": "scripts/summarize.py",
+          "diff": "--- a/scripts/summarize.py\n+++ b/scripts/summarize.py\n@@ -5,4 +5,4 @@\n with open(sys.argv[1]) as source:\n     amounts = [Decimal(row['amount']) for row in csv.DictReader(source)]\n-total = sum((amount for amount in amounts if amount > 0), Decimal(0))\n+total = sum((amount for amount in amounts), Decimal(0))\n print(f'Total: {total:.2f}')\n"
         }
       ]
     },
     {
-      "task_id": "claims-2",
+      "task_id": "ledger-1",
       "mode": "seq",
-      "label": "c2",
-      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
-      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
-      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "label": "c1",
+      "base_sha256": "e0335f8899f436fdaf3b51a915cc0ec0a77cc3ad9d4a885b9b8531d15a48a527",
+      "adopted_sha256": "5f5013181b12e8905a5b925bcd782659815046e1da732937a270738f9144ce62",
+      "notes": "Keep signed amounts: the base total omitted credits in the source ledger.",
+      "lesson": "Include both signs when summing in scripts/summarize.py.",
       "changes": [
         {
-          "path": "scripts/coverage.py",
-          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+          "path": "scripts/summarize.py",
+          "diff": "--- a/scripts/summarize.py\n+++ b/scripts/summarize.py\n@@ -5,4 +5,4 @@\n with open(sys.argv[1]) as source:\n     amounts = [Decimal(row['amount']) for row in csv.DictReader(source)]\n-total = sum((amount for amount in amounts if amount > 0), Decimal(0))\n+total = sum((amount for amount in amounts), Decimal(0))\n print(f'Total: {total:.2f}')\n"
         }
       ]
     },
     {
-      "task_id": "claims-3",
+      "task_id": "ledger-2",
       "mode": "agg",
       "label": "agg1",
-      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
-      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
-      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "base_sha256": "e0335f8899f436fdaf3b51a915cc0ec0a77cc3ad9d4a885b9b8531d15a48a527",
+      "adopted_sha256": "5f5013181b12e8905a5b925bcd782659815046e1da732937a270738f9144ce62",
+      "notes": "Keep signed amounts: the base total omitted credits in the source ledger.",
+      "lesson": "Include both signs when summing in scripts/summarize.py.",
       "changes": [
         {
-          "path": "scripts/coverage.py",
-          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+          "path": "scripts/summarize.py",
+          "diff": "--- a/scripts/summarize.py\n+++ b/scripts/summarize.py\n@@ -5,4 +5,4 @@\n with open(sys.argv[1]) as source:\n     amounts = [Decimal(row['amount']) for row in csv.DictReader(source)]\n-total = sum((amount for amount in amounts if amount > 0), Decimal(0))\n+total = sum((amount for amount in amounts), Decimal(0))\n print(f'Total: {total:.2f}')\n"
         }
       ]
     },
     {
-      "task_id": "claims-3",
+      "task_id": "ledger-2",
       "mode": "seq",
-      "label": "c2",
-      "base_sha256": "69ccf9d4dea5d6084ed898b83e25323845e1ab7994f5fdc1addcbe5b03a03349",
-      "adopted_sha256": "5110f019e0d04705b7e4c41cfd8843479f8a8de73430ed7ba17fbf298449070b",
-      "notes": "The base script matched span ids in a global set, so a claim inherited another claim's span. Join on (claim_id, span_id) and check the offsets.",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
+      "label": "c1",
+      "base_sha256": "e0335f8899f436fdaf3b51a915cc0ec0a77cc3ad9d4a885b9b8531d15a48a527",
+      "adopted_sha256": "5f5013181b12e8905a5b925bcd782659815046e1da732937a270738f9144ce62",
+      "notes": "Keep signed amounts: the base total omitted credits in the source ledger.",
+      "lesson": "Include both signs when summing in scripts/summarize.py.",
       "changes": [
         {
-          "path": "scripts/coverage.py",
-          "diff": "--- a/scripts/coverage.py\n+++ b/scripts/coverage.py\n@@ -7,9 +7,16 @@\n spans = json.loads((root / \"spans.json\").read_text(encoding=\"utf-8\"))\n \n-known = {span[\"span_id\"] for span in spans}\n+index = {(span[\"claim_id\"], span[\"span_id\"]): span for span in spans}\n supported = 0\n+used = set()\n for claim in claims:\n-    if any(span_id in known for span_id in claim.get(\"span_ids\", [])):\n-        supported += 1\n+    for span_id in claim.get(\"span_ids\", []):\n+        span = index.get((claim[\"claim_id\"], span_id))\n+        if span is None:\n+            continue\n+        if 0 <= span[\"start\"] < span[\"end\"] <= len(span[\"quote\"]):\n+            supported += 1\n+            used.add((claim[\"claim_id\"], span_id))\n+            break\n \n answer = {\n@@ -17,5 +24,5 @@\n     \"total\": len(claims),\n     \"coverage\": round(supported / len(claims), 4),\n-    \"orphan_spans\": len(spans) - supported,\n+    \"orphan_spans\": len(index) - len(used),\n }\n print(json.dumps(answer, sort_keys=True))\n"
+          "path": "scripts/summarize.py",
+          "diff": "--- a/scripts/summarize.py\n+++ b/scripts/summarize.py\n@@ -5,4 +5,4 @@\n with open(sys.argv[1]) as source:\n     amounts = [Decimal(row['amount']) for row in csv.DictReader(source)]\n-total = sum((amount for amount in amounts if amount > 0), Decimal(0))\n+total = sum((amount for amount in amounts), Decimal(0))\n print(f'Total: {total:.2f}')\n"
         }
       ]
     }
   ],
   "lessons": [
     {
-      "task_id": "claims-1",
+      "task_id": "ledger-1",
       "mode": "agg",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
-      "evidence": "scripts/coverage.py contrast on claims-1",
+      "lesson": "Include both signs when summing in scripts/summarize.py.",
+      "evidence": "scripts/coverage.py contrast on ledger-1",
       "confidence": "high for the observed join contrast"
     },
     {
-      "task_id": "claims-1",
+      "task_id": "ledger-1",
       "mode": "seq",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
-      "evidence": "scripts/coverage.py contrast on claims-1",
+      "lesson": "Include both signs when summing in scripts/summarize.py.",
+      "evidence": "scripts/coverage.py contrast on ledger-1",
       "confidence": "high for the observed join contrast"
     },
     {
-      "task_id": "claims-2",
+      "task_id": "ledger-2",
       "mode": "agg",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
-      "evidence": "scripts/coverage.py contrast on claims-2",
+      "lesson": "Include both signs when summing in scripts/summarize.py.",
+      "evidence": "scripts/coverage.py contrast on ledger-2",
       "confidence": "high for the observed join contrast"
     },
     {
-      "task_id": "claims-2",
+      "task_id": "ledger-2",
       "mode": "seq",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
-      "evidence": "scripts/coverage.py contrast on claims-2",
-      "confidence": "high for the observed join contrast"
-    },
-    {
-      "task_id": "claims-3",
-      "mode": "agg",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
-      "evidence": "scripts/coverage.py contrast on claims-3",
-      "confidence": "high for the observed join contrast"
-    },
-    {
-      "task_id": "claims-3",
-      "mode": "seq",
-      "lesson": "Join claim and span on the pair, never on the span id alone; then require 0 <= start < end <= len(quote).",
-      "evidence": "scripts/coverage.py contrast on claims-3",
+      "lesson": "Include both signs when summing in scripts/summarize.py.",
+      "evidence": "scripts/coverage.py contrast on ledger-2",
       "confidence": "high for the observed join contrast"
     }
   ],
   "held_out": {
-    "n": 1,
-    "passed": 1,
+    "n": 0,
+    "passed": 0,
     "base_passed": 0,
-    "delta": 1
+    "delta": 0
   },
   "classification": {
     "simulation": true,
@@ -211,7 +162,7 @@
       "id": "budget",
       "label": "预算恒等式 R=4k、P=3k 成立",
       "ok": true,
-      "detail": "R=48/48 · P=36/36"
+      "detail": "R=16/16 · P=12/12"
     },
     {
       "id": "exit",
@@ -223,7 +174,7 @@
       "id": "tasks",
       "label": "全部任务完成",
       "ok": true,
-      "detail": "3/3 ok"
+      "detail": "2/2 ok"
     },
     {
       "id": "fallback",
@@ -235,13 +186,13 @@
       "id": "adopted",
       "label": "至少有一个被采纳的组件改动",
       "ok": true,
-      "detail": "6 adopted"
+      "detail": "4 adopted"
     },
     {
       "id": "lessons",
       "label": "经验条目都带观测证据",
       "ok": true,
-      "detail": "6/6 with evidence"
+      "detail": "4/4 with evidence"
     },
     {
       "id": "classification",

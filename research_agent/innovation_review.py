@@ -173,6 +173,21 @@ def _pack_context(pack: Dict[str, Any], max_chars: int = MAX_CONTEXT_CHARS) -> s
     return text[:max_chars]
 
 
+def _review_destinations(target, output_dir):
+    """Directories that must receive innovation-review.json.
+
+    manuscript draft reads runs/<id>/innovation-review.json, so an explicit --output-dir must
+    not become the only copy; write-through keeps both locations in sync.
+    """
+    target = Path(target)
+    destinations = [target]
+    if output_dir:
+        output_destination = Path(output_dir)
+        if output_destination != target:
+            destinations.append(output_destination)
+    return destinations
+
+
 def _idea_id(index: int) -> str:
     return "IDEA-%02d" % index
 
@@ -295,22 +310,36 @@ def _normalise_ideas(
         # 16-cell design). normalize_design is the runner's own rule, so this adds no second
         # vocabulary: the same coercion that accepts "on"/"off" for a boolean factor still applies.
         plan = idea["experiment_plan"] or {}
-        try:
-            from .search_lab import normalize_design
+        # search_lab factor vocabulary only constrains the search_factorial profile. Plans for
+        # other profiles (protocol_run, local_tabular_experiment) may declare analysis variables
+        # such as project/commit-size strata; validating them against SEARCH_FACTORS rejected
+        # every ESE idea and blocked innovation review -> manuscript draft.
+        if plan.get("profile") == "search_factorial":
+            try:
+                from .search_lab import normalize_design
 
-            cleaned = normalize_design(
-                plan.get("design") or None, float(plan.get("min_delta") or 0.005)
-            )
-            cells = 1
-            for values in cleaned.values():
-                cells *= len(values)
-            executable = dict(executable, cells=cells)
-        except ValueError as exc:
-            executable = dict(
-                executable,
-                ok=False,
-                reasons=list(executable.get("reasons") or []) + [str(exc)],
-            )
+                cleaned = normalize_design(
+                    plan.get("design") or None, float(plan.get("min_delta") or 0.005)
+                )
+                cells = 1
+                for values in cleaned.values():
+                    cells *= len(values)
+                executable = dict(executable, cells=cells)
+            except ValueError as exc:
+                executable = dict(
+                    executable,
+                    ok=False,
+                    reasons=list(executable.get("reasons") or []) + [str(exc)],
+                )
+        else:
+            executable = dict(executable, cells=0)
+            if plan.get("design"):
+                executable = dict(
+                    executable,
+                    deferred_design=True,
+                    reasons=list(executable.get("reasons") or [])
+                    + ["design is not search_factorial; factor vocabulary is not validated here"],
+                )
         idea["executable"] = executable
         refs = _ref_tokens(item.get("evidence_refs"))
         unknown = [ref for ref in refs if ref not in ref_ids]
@@ -965,9 +994,10 @@ def run_innovation_review(
             "No Claim/EA/gate/signature is created; human review remains required."
         ),
     }
+    destinations = _review_destinations(target, output_dir)
     destination = Path(output_dir) if output_dir else target
-    destination.mkdir(parents=True, exist_ok=True)
-    write_json_atomic(destination / "innovation-review.json", result)
+    for directory in destinations:
+        write_json_atomic(directory / "innovation-review.json", result)
     with open(str(destination / "innovation-iterations.jsonl"), "w", encoding="utf-8", newline="\n") as handle:
         for item in iterations:
             handle.write(json.dumps(item, ensure_ascii=False) + "\n")

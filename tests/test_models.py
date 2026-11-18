@@ -23,6 +23,7 @@ class _Handler(BaseHTTPRequestHandler):
     calls = []
     fail_status = 0
     fail_message = ""
+    empty_content = False
 
     def log_message(self, *args):
         return
@@ -60,6 +61,13 @@ class _Handler(BaseHTTPRequestHandler):
                 "error": {"message": type(self).fail_message}
             })
             return
+        if self.path.endswith("/chat/completions") and type(self).empty_content:
+            self._send(200, {
+                "id": "req-empty",
+                "choices": [{"message": {"content": ""}, "finish_reason": "length"}],
+                "usage": {"prompt_tokens": 5000, "completion_tokens": 1024, "total_tokens": 6024},
+            })
+            return
         if self.path.endswith("/chat/completions"):
             self._send(200, {
                 "id": "req-openai",
@@ -95,6 +103,7 @@ class ModelGatewayTest(unittest.TestCase):
         _Handler.calls = []
         _Handler.fail_status = 0
         _Handler.fail_message = ""
+        _Handler.empty_content = False
         self.tmp = tempfile.TemporaryDirectory()
         self.store = GatewayStore(Path(self.tmp.name) / "models.json")
         self.keys = SessionKeyStore()
@@ -140,6 +149,17 @@ class ModelGatewayTest(unittest.TestCase):
         self.assertEqual(body["response_format"], {"type": "json_object"})
         self.assertTrue(request["headers"]["authorization"].startswith("Bearer sk-test"))
         self.assertEqual(response.usage["prompt_tokens"], 11)
+
+    def test_empty_content_names_the_token_budget(self):
+        self._provider("openai_compatible")
+        self._profile(max_tokens=1024)
+        _Handler.empty_content = True
+        with self.assertRaises(ModelCallError) as context:
+            self.gateway.complete("p1", [{"role": "user", "content": "hi"}])
+        message = str(context.exception)
+        self.assertIn("finish_reason=length", message)
+        self.assertIn("completion_tokens=1024", message)
+        self.assertIn("raise the profile budget", message)
 
     def test_anthropic_thinking_budget_and_system(self):
         self._provider("anthropic")

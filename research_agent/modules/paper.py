@@ -972,6 +972,7 @@ class PaperAgent:
                 elif kind == "results":
                     item.text = results_prefix + item.text
         writer_mode = "deterministic"
+        writer_error = False
         if self.section_writer is not None:
             allowed_refs = citable_refs(request, profile.language)
             try:
@@ -982,7 +983,12 @@ class PaperAgent:
                 if isinstance(exc, ModelRequiredError):
                     raise
                 raw = None
-                warnings.append("section writer failed (%s); deterministic draft kept" % type(exc).__name__)
+                warnings.append(
+                    "section writer failed (%s: %s); deterministic draft kept"
+                    % (type(exc).__name__, str(exc)[:160])
+                )
+                writer_mode = "model_failed"
+                writer_error = True
             if isinstance(raw, dict):
                 accepted, rejected = _validate_writer_sections(request, raw, allowed_refs)
                 if accepted:
@@ -1003,6 +1009,10 @@ class PaperAgent:
                     writer_mode = "model_rejected"
             elif raw is not None:
                 warnings.append("section writer returned non-object; deterministic draft kept")
+                writer_mode = "model_failed"
+            elif not writer_error:
+                warnings.append("section writer returned no usable draft; deterministic draft kept")
+                writer_mode = "model_failed"
 
         if request.fixture_mode:
             warnings.append("fixture sources are synthetic; draft is a workflow demo, not citable evidence")

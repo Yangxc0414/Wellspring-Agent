@@ -2,7 +2,7 @@
 id: experiment
 name: 实验设计
 stage: S4
-version: 0.9.0
+version: 0.10.0
 status: pilot
 owner: research-agent
 inputs:
@@ -133,6 +133,8 @@ invariants:
 
 ## Changelog
 
+- 2026-11-18 · v0.10.0 · status=pilot · S4 设计可附带 ESE 方法完整性检查：pipeline --ese-method 生成 ese-method.json（advisory，不改变设计字段/状态/门禁）
+- 2026-11-18 · v0.9.1 · status=pilot · 设计草稿增加字段形状警告：primary_metric 若是句子而非指标标识、budget 无可测数字时各记一条 warning；不改变 status 与门禁
 - 2026-11-10 · v0.9.0 · status=pilot · 模块(3)实验执行从"仅生成包"升级为可执行用户指定本地命令（类 Codex）：新增 `research_agent/local_exec.py` 与 CLI `experiment local-init/local-approve/local-run/local-ingest`，落实 ARCHITECTURE §4 目标契约（command argv + env_prefix + cwd + expected_outputs + timeout）。治理不变：仅 CLI、需 approve+--allow-execute、不用 shell（argv 直跑，防注入）、env allowlist、不装依赖；approve 绑定 spec 哈希，批准后改 spec 即拒绝；记录 command/env_prefix/git commit/platform/stdout/stderr/产物哈希；local-ingest 校验哈希产 local-evidence（claim_eligible=false，需人签才成结果），失败/超时/缺产物保留 incomplete。MCP/HTTP 不暴露 local-run。新增 tests/test_local_exec.py。
 - 2026-11-01 · v0.8.2 · status=pilot · empirical 预检不再只回一句按顺序解决：每条 blocker 生成确切 CLI（literature run 取 run-context 的 goal、synthesize、innovation review、scaffold、ingest、claim），输出新增 blocker_actions 与 ordering；实验包不存在时记为 blocker 而不是抛异常。新增 tests/test_empirical_commands.py 2 项。
 - 2026-10-30 · v0.8.1 · status=pilot · 0.8.1（2026-10-30）：freeze_design/freeze 不再假设 seeds 是 int。pipeline 在部分路径把 seeds 写成实际种子列表，导致按文档命令 protocol freeze-design --design <run>/experiment.json 直接 TypeError 崩溃（严格模式的门后路径因此完全走不通）。改为统一调用 contracts.seed_count()：列表取长度、数字原样、字符串数字可接受、布尔与其它形状给出清晰错误。tests.test_pipeline 20 项 OK。

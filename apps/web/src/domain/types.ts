@@ -3,7 +3,7 @@ export type RuntimeSource = "fixture" | "real_corpus" | "local" | "openalex";
 export type RuntimeTaskType = "auto" | "literature_review" | "hypothesis_design" | "experiment_validation" | "full_research";
 export type RuntimeFlowMode = "review" | "strict";
 export type AccessMode = "read_only" | "ask" | "full";
-export type ContextTab = "brief" | "run" | "evidence" | "projects" | "evolution" | "eval";
+export type ContextTab = "brief" | "run" | "evidence" | "projects" | "evolution" | "eval" | "ese";
 export type SettingsSection =
   | "general"
   | "appearance"

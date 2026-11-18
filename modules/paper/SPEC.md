@@ -2,7 +2,7 @@
 id: paper
 name: 论文写作
 stage: S8–S12
-version: 0.6.0
+version: 0.6.1
 status: pilot
 owner: research-agent
 inputs:
@@ -73,6 +73,7 @@ PaperRequest 输入 topic/language/venue_type/spans/literature_brief/idea_candid
 
 ## Changelog
 
+- 2026-11-18 · v0.6.1 · status=pilot · 写作回退可见化：section writer 失败/无输出/非对象时 writer_mode=model_failed 并记录原因；适配器增加一次 JSON 修复重试；结果/方法仍保持确定性
 - 2026-10-30 · v0.6.0 · status=pilot · 论文的实验设计段现在可以来自真正的 pre-registered study design，而不是本地 run 设计：PaperRequest 新增 study_design/study_design_audit，_study_design_text 渲染问题/假设/claims-evidence/数据切分与泄漏/基线调参与算力/单变量消融/稳健性/计算/统计与功效/负结果/局限，status 随 CCF-A 审计；study design 存在时不再加“本地协议验证设计”前缀（本地 run 仍只在结果段标注协议验证）。实测 Qoder v7：setup 段是研究设计，正文无 StandardScaler，严格写作审计只剩 fixture。tests.test_pipeline 27 项 OK。输出契约新增两个可选输入，按规则升 minor。
 - 2026-10-30 · v0.5.2 · status=pilot · 论文不再把本地协议验证冒充研究设计：当 PaperRequest 带 run_summary 时，实验设计段前置“本地协议验证设计（不是本研究的科学设计）”说明，结果段前置“claim 来自本地协议验证 run，不是本研究科学结论”。原因是 Qoder 宿主评测里，一篇钙钛矿稿的实验设计段直接出现 iris 的 logistic regression/accuracy，结果段绑定 iris claim，读者会把它误读为研究结论。文字边界由 pipeline 的 run 模块显式传入，不改变槽位与哈希。tests.test_pipeline 25 项 OK（新增一项断言两段前缀）。只改输出文案，升 patch。
 - 2026-10-30 · v0.5.1 · status=pilot · 0.5.1（2026-10-30）：确定性草稿不再假设 design.seeds 是 int。设计工件在部分路径带的是种子列表，而草稿用 %d 格式化，导致 G2 之后直接 TypeError（复用冻结设计跑严格模式时必现）。改为调用 contracts.seed_count()，与 experiment/evidence_packages 共用同一实现。tests.test_pipeline 20 项 OK。

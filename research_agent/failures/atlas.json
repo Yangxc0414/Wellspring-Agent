@@ -1,0 +1,87 @@
+{
+  "schema": "failure-atlas-0.1",
+  "boundary": "durable failures only: operational failures (env/data/rate limit) belong in run logs. Each entry must be reproducible from its evidence; this atlas is memory, not a claim.",
+  "entries": [
+    {
+      "failure_id": "FA-20261118-01",
+      "kind": "design_flaw",
+      "scope": "S1b literature synthesis",
+      "observed": "literature synthesize failed with 'requires DEEPSEEK_API_KEY or an injected model port' while a gateway profile was configured and every other stage used it",
+      "diagnosis": "the synthesis stage constructed its own DeepSeek client instead of using the shared gateway resolver; two supply paths for one capability",
+      "retry_condition": "re-run only after grep shows no new generation stage reading provider env vars directly; regression test test_default_model_prefers_gateway_binding",
+      "evidence": [
+        "design/87-阶段级压力测试第二轮-S1b与评审链的网关断点.md §2",
+        "tests/test_literature_synthesis.py::DefaultSynthesisModelTest"
+      ],
+      "recorded_at": "2026-11-18"
+    },
+    {
+      "failure_id": "FA-20261118-02",
+      "kind": "design_flaw",
+      "scope": "S8 paper writing (section writer)",
+      "observed": "paper.json said writer_mode=deterministic while stderr showed a model profile was resolved; no warning was recorded",
+      "diagnosis": "a section writer returning None (model error or JSON failure) fell through to the deterministic draft without leaving a trace; failures must be visible in the artifact",
+      "retry_condition": "any new model-backed stage must record model_failed plus a reason; covered by tests/test_pipeline.py::test_silent_writer_failure_is_reported_not_hidden",
+      "evidence": [
+        "design/86-真实模型跑通各阶段后的反思.md §3 F5",
+        "research_agent/modules/paper.py",
+        "research_agent/adapters/paper_writer.py"
+      ],
+      "recorded_at": "2026-11-18"
+    },
+    {
+      "failure_id": "FA-20261118-03",
+      "kind": "design_flaw",
+      "scope": "S4 experiment design (model-drafted fields)",
+      "observed": "primary_metric was a full sentence and budget was 'Not specified…' yet design-audit reported design.required=pass",
+      "diagnosis": "structural validation checked non-emptiness only; a field can be filled and still be unexecutable by S5",
+      "retry_condition": "add shape checks whenever a new model-drafted field is introduced; currently metric/budget shape warnings (design/86 F3), promotion to a G2 blocker needs human confirmation",
+      "evidence": [
+        "design/86-真实模型跑通各阶段后的反思.md §2.3、§3 F3",
+        "research_agent/modules/experiment.py"
+      ],
+      "recorded_at": "2026-11-18"
+    },
+    {
+      "failure_id": "FA-20261118-04",
+      "kind": "design_flaw",
+      "scope": "S2-S3 idea lexical pre-review",
+      "observed": "a candidate whose falsification said 'the same model rankings and performance gaps persist' was labelled needs_metric",
+      "diagnosis": "the metric-signal vocabulary lacked comparison words (ranking/gap/outperform); the checker was right in spirit and wrong in vocabulary",
+      "retry_condition": "extend vocabulary with a test per new word; lexicon remains a pre-review, not a quality judgement",
+      "evidence": [
+        "design/86-真实模型跑通各阶段后的反思.md §3 F4",
+        "research_agent/idea_review.py",
+        "tests/test_idea_review.py"
+      ],
+      "recorded_at": "2026-11-18"
+    },
+    {
+      "failure_id": "FA-20261118-05",
+      "kind": "design_flaw",
+      "scope": "demo UI (derived counters)",
+      "observed": "innovation stage label kept showing 'X / 06' after the seven-act page was extended; the static HTML said 01/07 but JS overwrote it",
+      "diagnosis": "derived numbers (act count, totals) were hardcoded in two places; fixing the static copy did not fix the script",
+      "retry_condition": "every counter must derive from its data source (ACTS.length) and be verified in a real browser, not by reading the HTML",
+      "evidence": [
+        "design/91-演示主线前移-先问度量与判定.md §1",
+        "site/innovation/app.js"
+      ],
+      "recorded_at": "2026-11-18"
+    },
+    {
+      "failure_id": "FA-20261118-06",
+      "kind": "design_flaw",
+      "scope": "CLI model options (profile resolution)",
+      "observed": "--idea-model deepseek-v41 printed 'unknown idea model; using rule-based candidates' and exited 0",
+      "diagnosis": "three model options required a 'profile:' prefix while a bare id is the natural spelling; unknown ids degraded silently instead of failing or being accepted",
+      "retry_condition": "any new model option must accept a bare id when the gateway declares it and must surface the reason in the result, not only stderr; covered by tests/test_model_profile_resolution.py",
+      "evidence": [
+        "design/86-真实模型跑通各阶段后的反思.md §3 F1",
+        "research_agent/cli.py",
+        "tests/test_model_profile_resolution.py"
+      ],
+      "recorded_at": "2026-11-18"
+    }
+  ]
+}

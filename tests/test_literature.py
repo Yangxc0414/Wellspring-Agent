@@ -383,7 +383,7 @@ class EvidenceBreadthTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="breadth-test-") as directory:
             agent = self._local_corpus_agent(directory)
             result = agent.run(
-                LiteratureRequest(question="self-improving agent", max_sources=12, coverage_plan=True)
+                LiteratureRequest(question="self-improving agent", max_sources=7, coverage_plan=True)
             )
         markers = self._breadth(result)
         self.assertEqual(len(markers), 1)
@@ -392,6 +392,20 @@ class EvidenceBreadthTest(unittest.TestCase):
         self.assertIn("saturation:saturated", markers[0])
         self.assertNotIn("--corpus-dir", markers[0])
         self.assertEqual(q0_decision(result)["status"], "pass")
+
+    def test_request_larger_than_corpus_is_not_saturated(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory(prefix="breadth-gap-test-") as directory:
+            agent = self._local_corpus_agent(directory)
+            result = agent.run(
+                LiteratureRequest(question="self-improving agent", max_sources=12, coverage_plan=True)
+            )
+        markers = self._breadth(result)
+        self.assertIn("sources:7", markers[0])
+        self.assertIn("saturation:partial", markers[0])
+        self.assertIn("review_grade:no", markers[0])
+        self.assertIn("below_requested_sources:7/12", result.brief.gaps)
 
     def test_breadth_is_disclosure_only_and_q0_is_unchanged(self):
         from research_agent.flow import q0_decision

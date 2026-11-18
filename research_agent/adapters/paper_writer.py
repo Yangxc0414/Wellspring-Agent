@@ -8,7 +8,9 @@ gates and export remain deterministic and human-controlled.
 
 import json
 import re
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
+WRITER_REPAIR = "Return ONLY one JSON object with the requested section keys and no prose. Use [REF] markers already present in allowed_evidence; never invent numbers or refs."
 
 WRITER_SYSTEM = (
     "你是科研论文的写作助手，只能根据给定的证据片段写非结果章节。"
@@ -66,45 +68,80 @@ def gateway_paper_writer(
                 raise ModelRequiredError(note)
             return None, note
 
-        def write(payload: Dict[str, Any]) -> Optional[Dict[str, str]]:
-            from ..models import ModelRequiredError, ModelTurnPending
-
-            body = json.dumps(payload, ensure_ascii=False, indent=2)
-            try:
-                response = gateway.complete(
-                    profile,
-                    [
-                        {"role": "system", "content": WRITER_SYSTEM},
-                        {"role": "user", "content": body},
-                    ],
-                    json_mode_override=True,
-                    host_module="paper",
-                    host_purpose="S8 non-result sections",
-                )
-            except ModelTurnPending:
-                # Deferred host turn: surface it with its turn id, never keep a silent draft.
-                raise
-            except Exception as exc:
-                if strict:
-                    raise ModelRequiredError(
-                        "paper writer model failed: %s" % type(exc).__name__
-                    )
-                return None
-            match = _JSON_OBJECT_RE.search(response.text)
+        def _extract(text: str) -> Optional[Dict[str, Any]]:
+            match = _JSON_OBJECT_RE.search(text)
             if not match:
-                if strict:
-                    raise ModelRequiredError("paper writer returned no JSON object")
                 return None
             try:
                 value = json.loads(match.group(0))
             except ValueError:
-                if strict:
-                    raise ModelRequiredError("paper writer returned invalid JSON")
                 return None
-            if not isinstance(value, dict):
+            return value if isinstance(value, dict) else None
+
+        def _complete(messages: List[Dict[str, str]]):
+            return gateway.complete(
+                profile,
+                messages,
+                json_mode_override=True,
+                host_module="paper",
+                host_purpose="S8 non-result sections",
+            )
+
+        def write(payload: Dict[str, Any]) -> Optional[Dict[str, str]]:
+            from ..models import ModelRequiredError, ModelTurnPending
+
+            body = json.dumps(payload, ensure_ascii=False, indent=2)
+            messages = [
+                {"role": "system", "content": WRITER_SYSTEM},
+                {"role": "user", "content": body},
+            ]
+            try:
+                response = _complete(messages)
+            except ModelTurnPending:
+                # Deferred host turn: surface it with its turn id, never keep a silent draft.
+                raise
+            except Exception as exc:
+                from ..models.types import redact_text
+
+                message = "paper writer model failed: %s: %s" % (
+                    type(exc).__name__,
+                    redact_text(str(exc), key)[:200],
+                )
                 if strict:
-                    raise ModelRequiredError("paper writer returned a non-object")
-                return None
+                    raise ModelRequiredError(message)
+                raise ValueError(message)
+            value = _extract(response.text)
+            if value is None:
+                # One bounded repair turn: providers occasionally answer prose even when asked
+                # for JSON; a single schema repair is cheaper than silently keeping the
+                # deterministic draft and pretending a model wrote it.
+                repair = messages + [
+                    {"role": "assistant", "content": response.text[:4000]},
+                    {"role": "user", "content": WRITER_REPAIR},
+                ]
+                try:
+                    response = _complete(repair)
+                except ModelTurnPending:
+                    raise
+                except Exception as exc:
+                    from ..models.types import redact_text
+
+                    message = "paper writer repair failed: %s: %s" % (
+                        type(exc).__name__,
+                        redact_text(str(exc), key)[:200],
+                    )
+                    if strict:
+                        raise ModelRequiredError(message)
+                    raise ValueError(message)
+                value = _extract(response.text)
+            if value is None:
+                message = (
+                    "paper writer returned no JSON object after repair (finish_reason=%s)"
+                    % (response.finish_reason or "unknown")
+                )
+                if strict:
+                    raise ModelRequiredError(message)
+                raise ValueError(message)
             return {str(key): str(item) for key, item in value.items() if isinstance(item, str)}
 
         return write, "paper writer: %s profile %s (%s)" % (

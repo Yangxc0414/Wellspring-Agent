@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 
 from .contracts import ClosureCheck, ClosureReport, SignatureRecord
 from .signers import SIGNATURE_SCHEME, SignerStore
-from .storage import atomic_replace
+from .storage import atomic_replace, now_iso, sha256_bytes, sha256_file
 from .modules.run import verify_claim_assertions
 
 
@@ -22,16 +22,10 @@ class ClosureError(RuntimeError):
     pass
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def _sha256_bytes(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
 
 
-def _sha256_file(path: Path) -> str:
-    return _sha256_bytes(Path(path).read_bytes())
 
 
 def _write_json(path: Path, value: Any) -> None:
@@ -192,7 +186,7 @@ class ClosureAgent:
             "EA=%s refs=%s" % (evidence.get("artifact_id"), refs),
         )
         ea_path = Path(evidence.get("path", ""))
-        ea_ok = ea_path.is_file() and _sha256_file(ea_path) == evidence.get("sha256")
+        ea_ok = ea_path.is_file() and sha256_file(ea_path) == evidence.get("sha256")
         add("ea_hash", ea_ok, "path=%s" % ea_path)
         add(
             "run_capsule_artifact",
@@ -245,7 +239,7 @@ class ClosureAgent:
         )
 
         bibliography_entries = bibliography.get("entries") or []
-        bibliography_card_hash = _sha256_bytes(
+        bibliography_card_hash = sha256_bytes(
             json.dumps(bibliography_entries, sort_keys=True, ensure_ascii=False).encode("utf-8")
         )
         bibliography_ok = (
@@ -272,7 +266,7 @@ class ClosureAgent:
             add("bibliography_artifact", bibliography_file_ok, bibliography_file_detail)
 
         binding = modules.get("protocol_binding") or {}
-        capsule_sha = _sha256_file(capsule_path) if capsule_path.is_file() else ""
+        capsule_sha = sha256_file(capsule_path) if capsule_path.is_file() else ""
         binding_ok = bool(
             binding
             and binding.get("capsule_sha256") == capsule_sha
@@ -310,7 +304,7 @@ class ClosureAgent:
             figure_manifest.get("schematic") is False
             and figure_svg_path is not None
             and figure_svg_path.is_file()
-            and _sha256_file(figure_svg_path) == figure_manifest.get("svg_sha256")
+            and sha256_file(figure_svg_path) == figure_manifest.get("svg_sha256")
             and evidence.get("artifact_id") in (figure_manifest.get("evidence_refs") or [])
         )
         add("result_figure_provenance", figure_ok, "figure=%s" % figure_manifest.get("figure_id"))
@@ -345,7 +339,7 @@ class ClosureAgent:
             checks=checks,
             unresolved=unresolved,
             artifact_refs=artifact_refs,
-            created_at=_now(),
+            created_at=now_iso(),
             warnings=[
                 "closure is structural only; not peer review",
                 "all resolvable companion artifacts are hashed into the export; missing companion files block closure",
@@ -398,7 +392,7 @@ class ClosureAgent:
             if path.is_file() and str(path) not in artifact_paths:
                 artifact_paths.append(str(path))
         try:
-            files = {path: _sha256_file(Path(path)) for path in artifact_paths}
+            files = {path: sha256_file(Path(path)) for path in artifact_paths}
         except OSError as exc:
             raise ClosureError("cannot hash a closure input: %s" % exc)
         output_dir = Path(output_dir)
@@ -413,14 +407,14 @@ class ClosureAgent:
             "files": files,
             "submission": False,
             "note": "signed draft manifest; closure was re-run immediately before signing; no auto-submission",
-            "revalidated_at": _now(),
+            "revalidated_at": now_iso(),
         })
         if bool(signer_store) != bool((signer_id or "").strip()):
             raise ClosureError("signer_store and signer_id must be provided together")
         signed_payload = {
             "schema_version": "closure-signature-0.2",
             "report_id": str(report.get("report_id")),
-            "export_manifest_sha256": _sha256_file(manifest),
+            "export_manifest_sha256": sha256_file(manifest),
             "human_reason": human_reason.strip(),
             "submission": False,
         }
@@ -431,7 +425,7 @@ class ClosureAgent:
             signature_id="SIG-" + uuid.uuid4().hex[:10],
             report_id=str(report.get("report_id")),
             human_reason=human_reason.strip(),
-            created_at=_now(),
+            created_at=now_iso(),
             artifact_refs=[str(demo_path), str(claim_path), str(report_path)],
             export_manifest=str(manifest),
             submission=False,
@@ -498,7 +492,7 @@ class ClosureAgent:
                 signed_payload = {
                     "schema_version": "closure-signature-0.2",
                     "report_id": str(export.get("report_id")),
-                    "export_manifest_sha256": _sha256_file(manifest_path),
+                    "export_manifest_sha256": sha256_file(manifest_path),
                     "human_reason": str(signature_payload.get("human_reason") or ""),
                     "submission": False,
                 }
@@ -538,7 +532,7 @@ class ClosureAgent:
                 if not source.is_file():
                     raise ClosureError("evidence file not found: %s" % source)
                 raw = source.read_bytes()
-                actual = _sha256_bytes(raw)
+                actual = sha256_bytes(raw)
                 if actual != expected:
                     raise ClosureError("evidence changed since signature: %s" % source)
                 relative = "artifacts/%02d-%s" % (
@@ -554,7 +548,7 @@ class ClosureAgent:
                 })
 
             manifest_raw = manifest_path.read_bytes()
-            manifest_digest = _sha256_bytes(manifest_raw)
+            manifest_digest = sha256_bytes(manifest_raw)
             export_relative = "manifest/export-manifest.json"
             _write_bytes_durable(staging / export_relative, manifest_raw)
             file_entries.append({
@@ -573,7 +567,7 @@ class ClosureAgent:
                     "role": "signature",
                     "source_path": str(selected_signature.resolve()),
                     "bundle_path": signature_relative,
-                    "sha256": _sha256_bytes(signature_raw),
+                    "sha256": sha256_bytes(signature_raw),
                     "bytes": len(signature_raw),
                 })
 
@@ -581,7 +575,7 @@ class ClosureAgent:
             bundle_manifest = {
                 "schema_version": BUNDLE_SCHEMA,
                 "bundle_id": "BND-" + uuid.uuid4().hex[:12],
-                "created_at": _now(),
+                "created_at": now_iso(),
                 "status": "sealed",
                 "source_export_manifest": {
                     "source_path": str(manifest_path.resolve()),
@@ -621,7 +615,7 @@ class ClosureAgent:
                 "status": "sealed",
                 "bundle": str(final),
                 "manifest": str(manifest_out),
-                "manifest_sha256": _sha256_file(manifest_out),
+                "manifest_sha256": sha256_file(manifest_out),
                 "artifact_count": artifact_count,
                 "file_count": len(file_entries),
                 "signed": selected_signature is not None,
@@ -656,7 +650,7 @@ class ClosureAgent:
         if not root.is_dir() or not manifest_path.is_file():
             result["errors"].append("bundle-manifest.json is missing")
             return result
-        result["manifest_sha256"] = _sha256_file(manifest_path)
+        result["manifest_sha256"] = sha256_file(manifest_path)
         try:
             manifest = self._read_json_object(manifest_path, "bundle manifest")
         except ClosureError as exc:
@@ -703,7 +697,7 @@ class ClosureAgent:
                 result["checks"].append(check)
                 continue
             raw = target.read_bytes()
-            actual = _sha256_bytes(raw)
+            actual = sha256_bytes(raw)
             check["observed_sha256"] = actual
             check["observed_bytes"] = len(raw)
             if actual != expected:

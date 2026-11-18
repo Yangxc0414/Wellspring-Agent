@@ -49,24 +49,38 @@ def _parse_json(text: str) -> Any:
     raise SynthesisError("model did not return valid JSON")
 
 
-def default_synthesis_model() -> Any:
-    from .adapters.deepseek_model import DeepSeekModel, ModelConfigError
+def default_synthesis_model(profile_id: Optional[str] = None, store_path: Any = None) -> Any:
+    """Resolve a model for cross-source synthesis.
 
-    key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
-    if not key:
-        raise SynthesisError(
-            "literature synthesis requires DEEPSEEK_API_KEY or an injected model port"
-        )
+    Order matches every other generation stage: an explicit profile, then the gateway
+    binding for the literature module, then the legacy DEEPSEEK_API_KEY environment.
+    Before this, synthesis ignored the gateway entirely, so a user with a configured
+    provider could run S2-S8 on it but S1b failed with "requires DEEPSEEK_API_KEY".
+    """
+    from .adapters.research_models import default_model_for, model_for_profile
+    from .models import ModelRequiredError
+
     try:
-        return DeepSeekModel(
-            api_key=key,
-            model=os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
-            base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
-            timeout=240,
-            max_tokens=8192,
-        )
-    except ModelConfigError as exc:
+        if profile_id:
+            port, note = model_for_profile(
+                profile_id,
+                "literature",
+                purpose="S1b cross-source synthesis",
+                store_path=store_path,
+                strict=True,
+            )
+        else:
+            port, note = default_model_for(
+                "literature",
+                purpose="S1b cross-source synthesis",
+                store_path=store_path,
+                strict=True,
+            )
+    except ModelRequiredError as exc:
         raise SynthesisError(str(exc)) from exc
+    if port is None:
+        raise SynthesisError(note or "literature synthesis has no usable model")
+    return port
 
 
 def _source_map(pack: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
@@ -226,12 +240,13 @@ def synthesize_literature(
     max_themes: int = 7,
     model: Any = None,
     output_dir: Optional[Path] = None,
+    profile_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     project = Path(project).resolve()
     target = run_dir(project, run_id)
     if not target.is_dir():
         raise SynthesisError("run does not exist: " + run_id)
-    model = model or default_synthesis_model()
+    model = model or default_synthesis_model(profile_id=profile_id)
     pack = load_writing_pack(project, run_id) or build_writing_pack(
         project, run_id, language="zh", venue="zh_core_journal",
         max_sources=20, max_spans_per_source=3,

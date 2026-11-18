@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Research Agent — 可核验的科研智能体</title>
-<meta name="description" content="Research Agent：把检索、复现、写作、核验接成一条可核验的证据链。公开工作台支持 OpenAlex 真实检索、证据卡、门禁与案例回放；LLM 与实验执行留在本地运行时。" />
+<title>Research Agent — 让结论有出处，让失败改方法</title>
+<meta name="description" content="Research Agent：让每个结论有出处，让每次失败改方法。内层证据闭合（span/RunCapsule/人签 claim/closure）已实现；外层方法演化（失败图谱、held-out 研究任务、人采纳与回滚）是 roadmap。" />
 <meta name="keywords" content="科研智能体,证据链,科研自动化,RWMT,证据运营,Research Agent" />
 <meta name="author" content="YXC" />
 <meta name="color-scheme" content="light" />
@@ -13,15 +13,15 @@
 <link rel="canonical" href="https://yangxc0414.github.io/research-agent/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Research Agent" />
-<meta property="og:title" content="Research Agent — 可核验的科研智能体" />
-<meta property="og:description" content="把科研自动化，做成一条可核验的证据链。真实 OpenAlex 检索、证据卡、导出门禁与变更回放。" />
+<meta property="og:title" content="Research Agent — 让结论有出处，让失败改方法" />
+<meta property="og:description" content="让每个结论有出处，让每次失败改方法。证据闭合已实现；方法演化是 roadmap。" />
 <meta property="og:url" content="https://yangxc0414.github.io/research-agent/" />
 <meta property="og:image" content="https://yangxc0414.github.io/research-agent/assets/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Research Agent — 可核验的科研智能体" />
-<meta name="twitter:description" content="把科研自动化，做成一条可核验的证据链。" />
+<meta name="twitter:title" content="Research Agent — 让结论有出处，让失败改方法" />
+<meta name="twitter:description" content="让每个结论有出处，让每次失败改方法。" />
 <meta name="twitter:image" content="https://yangxc0414.github.io/research-agent/assets/og.png" />
 <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
 <link rel="manifest" href="./manifest.webmanifest" />
@@ -182,7 +182,7 @@
 <body class="lp" data-dl-page="home">
 <a class="skip-link" href="#main">跳到内容</a>
 <header class="lp-nav">
-  <a class="lp-brand" href="./">RESEARCH AGENT <small>· 可核验的科研智能体</small></a>
+  <a class="lp-brand" href="./">RESEARCH AGENT <small>· 让结论有出处 · 让失败改方法</small></a>
   <nav class="lp-menu" aria-label="页内导航">
     <a href="#features">特性</a>
     <a href="#vision">愿景</a>
@@ -198,32 +198,32 @@
 <main id="main">
   <section class="lp-hero">
     <span class="lp-badge">静态演示镜像 · STATIC DEMO · 无真实执行</span>
-    <h1>把科研自动化，<br>做成一条<span>可核验的证据链</span>。</h1>
-    <p class="lp-lede">Research Agent 是一个证据可审计、能力可插拔、流程可组合的科研智能体运行时：文献检索、独立复现、科研写作与核验接成闭环，并在冻结模型权重下做受治理的程序级自改进。本页是 <b>早期 demo / 静态展示镜像</b>（无真实执行）；智能体产品本体是 <a href="https://github.com/Yangxc0414/Wellspring-Agent">Wellspring-Agent</a>——打开前端即工作台 + 本地 CLI + MCP，真实执行只在产品仓库的本地 runtime / CLI。</p>
+    <h1>让每个结论有出处，<br>让<span>每次失败改方法</span>。</h1>
+    <p class="lp-lede"><b>内层（已实现）：证据闭合</b>——文献检索、独立复现、科研写作与核验接成闭环，claim 只能由证据创建、由人签核。<b>研究执行（已跑通，探索性）</b>——把这条流水线用于 ESE：SE 文献→候选→方法协议→repository-mining 执行→反思，结果可封成 run-capsule/EA，等人签。<b>外层（roadmap）：方法演化</b>——把 durable 失败、复现结果与成本沉淀成方法/配方改动，用 held-out 研究任务验证，再经人采纳与回滚。本页是 <b>早期 demo / 静态展示镜像</b>（无真实执行），产品本体是 <a href="https://github.com/Yangxc0414/Wellspring-Agent">Wellspring-Agent</a>，真实执行只在本地 runtime / CLI。</p>
     <div class="lp-cta">
       <a class="lp-btn primary" href="./app/">进入科研工作台 →</a>
       <a class="lp-btn ghost" href="./innovation/">看 105 秒创新演示</a>
-      <a class="lp-btn ghost" href="./demo/">研究运行回放</a>
+      <a class="lp-btn ghost" href="./demo/">真实运行回放</a>
     </div>
     <div class="lp-chips">
-      <span>span-only 证据</span><span>独立重跑复现</span><span>升级人签 · 降级自动</span><span>MCP / HTTP / CLI</span><span>host-model 无外部 key</span>
+      <span>span-only 证据</span><span>独立重跑复现</span><span>升级人签 · 降级自动</span><span>阶段×方法注册表</span><span>类型化研究记忆</span><span>MCP / HTTP / CLI</span><span>host-model 无外部 key</span>
     </div>
     <div class="lp-stats" aria-label="当前实现规模">
-      <div><b>32</b><span>模块 SPEC</span></div>
+      <div><b>34</b><span>模块 SPEC</span></div>
       <div><b>46</b><span>MCP 工具</span></div>
-      <div><b>1300+</b><span>自动测试用例</span></div>
+      <div><b>1500+</b><span>自动测试用例</span></div>
       <div><b>4</b><span>人工门 · G1/G2/S5b/G5</span></div>
-      <div><b>4/4</b><span>反馈环改变下一步动作 · 默认关</span></div>
+      <div><b>4/4</b><span>反馈环已接入下一步动作（机制）· 默认关</span></div>
     </div>
-    <p class="lp-stats-note">数字截至 2026-11，随版本变化；测试数取自已记录的判定，不写成宣传口径。</p>
+    <p class="lp-stats-note">数字截至 2026-11，随版本变化；测试数取自已记录的判定，不写成宣传口径。以上都是<b>结构指标</b>（有多少模块/工具/测试/门/环），不是<b>能力指标</b>（研究质量是否真的变好）；后者目前 0 项可报，见下方<a href="#capability-metrics">「能力指标（空态）」</a>与<a href="#two-loops">「两条循环」</a>。</p>
     <details class="lp-glossary">
       <summary>这些数字对第一次看的人意味着什么？</summary>
       <ul>
-        <li><b>32 模块 SPEC</b> —— 每个能力先写「合同」再写代码：改行为必须先改合同，代码不能偷偷越权。价值：别人（或别的 Agent）扩展平台时，边界是读得懂、测得到的。</li>
+        <li><b>34 模块 SPEC</b> —— 每个能力先写「合同」再写代码：改行为必须先改合同，代码不能偷偷越权。价值：别人（或别的 Agent）扩展平台时，边界是读得懂、测得到的。</li>
         <li><b>46 MCP 工具</b> —— Claude Code / Qoder / Codex / Zcode 用同一份工具表接入；里面<b>没有任何签名/批准按钮</b>。价值：外部 Agent 能干活，但签字永远在人手里。</li>
-        <li><b>1300+ 自动测试</b> —— 每条边界（摘要不能当证据、未签不能导出、fixture 必须自报…）都有测试钉住。价值：改坏了立刻红，而不是演示时才发现。</li>
+        <li><b>1500+ 自动测试</b> —— 每条边界（摘要不能当证据、未签不能导出、fixture 必须自报…）都有测试钉住。价值：改坏了立刻红，而不是演示时才发现。</li>
         <li><b>4 人工门</b> —— 选想法 G1、批设计 G2、签结果 S5b、签导出 G5 必须人签（或人预先写策略授权 autopilot 代签并留痕）。价值：自动化跑门与门之间，高杠杆决定留给人。</li>
-        <li><b>4/4 反馈环</b> —— 上一轮的判定（证伪 / 评审 / 同质化 / 失效）会真实改变下一轮动作：否证条件带进新假设、被评审否掉的候选降权、单一视角强制换轴、失效沿哈希链锁导出。默认关闭、逐环开启；约束来源哈希过期即拒绝。价值：反思不是日志，是下一步的输入。</li>
+        <li><b>4/4 反馈环</b> —— 上一轮的判定（证伪 / 评审 / 同质化 / 失效）会真实改变下一轮动作：否证条件带进新假设、被评审否掉的候选降权、单一视角强制换轴、失效沿哈希链锁导出。默认关闭、逐环开启；约束来源哈希过期即拒绝。价值：反思不是日志，是下一步的输入。<b>边界：</b>这是机制已接通的读数；「接上环是否让研究更好」的效果测量（M1 多 run、M2 跨任务）仍未完成，n 与功效见 docs/fact-baseline.md。</li>
       </ul>
     </details>
   </section>
@@ -236,7 +236,7 @@
     </div>
     <div class="rel-grid">
       <a class="rel-card" href="./app/"><b>Agent 工作台（构建产物预览）</b><span>Wellspring-Agent 产品的对话式科研工作台：证据、自进化、签署视图；真实执行需本地 runtime。</span><em>./app/</em></a>
-      <a class="rel-card" href="./demo/"><b>研究运行控制台</b><span>9 幕叙事压缩的 SIM 回放（门禁对齐 S0–S16 canonical）：对象流 / 指令流 / 失败分支。</span><em>./demo/</em></a>
+      <a class="rel-card" href="./demo/"><b>真实运行回放 · 输入 → 产物</b><span>一次真实 ESE 运行的只读回放（8 篇全文 / 3 候选 / 手稿审计）：阶段状态、门禁、产物与边界。不是模拟控制台。</span><em>./demo/</em></a>
       <a class="rel-card" href="./innovation/"><b>创新点七幕演示</b><span>把创新点变成七个可看见的状态，105 秒 walkthrough。</span><em>./innovation/</em></a>
       <a class="rel-card" href="./qoder/"><b>接入矩阵</b><span>Qoder / Claude Code / Cursor / Cline / Codex CLI … 同一份工具表与门禁。</span><em>./qoder/</em></a>
       <a class="rel-card" href="./rsi/"><b>自进化接缝</b><span>执行交给 Harness²，平台只留判据、台账与人签；含一次真实运行的账本。</span><em>./rsi/</em></a>
@@ -246,15 +246,16 @@
   </section>
   <section class="lp-section" id="features">
     <div class="lp-sechead">
-      <p class="index">FEATURES / 四个判定</p>
+      <p class="index">FEATURES / 四个证据判定 + 一条演化闭环</p>
       <h2>不是再做一个论文生成器。</h2>
-      <p>差异在四个判定的交集：资格、完成、失效、供给。稳定的是证据与门禁，可变的是工具、流程与接入方式。</p>
+      <p>四个<b>证据判定</b>回答“这条结论是否可信”：资格、完成、失效、供给；稳定的是证据与门禁，可变的是工具、流程与接入方式。第五条是<b>演化判定</b>——这次方法改动是否让下一次研究更好；它需要 held-out 研究任务，当前仍是 roadmap。</p>
     </div>
     <div class="lp-feats">
       <div class="lp-feat"><i>1</i><b>资格判定 · 证据闭合</b><p>句子必须落到已持有 span 或人签实验证据；claim 只由 Evidence 创建，摘要不能当全文证据。</p></div>
       <div class="lp-feat"><i>2</i><b>完成判定 · 可复现</b><p>RunCapsule + 独立重跑 + EA；Work 与 Judge 分离，失败也留下可审计的运行胶囊与成本。</p></div>
       <div class="lp-feat"><i>3</i><b>失效判定 · 变更传播</b><p>spec/data/code/evidence/claim 以 SHA-256 串联；输入变了沿链标 stale，导出 fail-closed。</p></div>
       <div class="lp-feat"><i>4</i><b>供给判定 · 受治理自改进</b><p>模型可换（含无 key 的 host-model），但证据资格不可移植；经验准入/租约/撤销，升级人签、降级自动。</p></div>
+      <div class="lp-feat"><i>5</i><b>演化判定 · 方法层（roadmap）</b><p>判定要能驱动方法与配方的改动，而不只是下一次 run 的动作。已有：类型化研究记忆、阶段×方法注册表、候选/租约/回滚。缺：durable 失败图谱与 held-out 研究任务——没有它们，“改进”不可测。</p></div>
     </div>
   </section>
 
@@ -349,7 +350,7 @@
         <text x="450" y="605" text-anchor="middle" font-size="12" fill="#5b6472">人工门保留在高杠杆节点；所有反馈环必须改变下一步行动，而非只写反思文本（PerturbTrace / 可证伪问题二）。</text>
         <text x="450" y="625" text-anchor="middle" font-size="12" fill="#5b6472">T6 在本文拆为 T6a 三层验证（门）与 T6b 证伪 / 反事实（反馈环）；补全模块：信念修订（C）、同质化监测、溯源 / 失效（B）。</text>
       </svg>
-      <figcaption>实线向下 = 研究过程前向；红色方块 = 人工门，青色方块 = 自动门；虚线向上 = 反馈环（证伪/反事实、信念修订、溯源/失效）；「假设生成」阶段右侧自环 = 多样性/同质化监测。反馈均回指更早阶段，与前向流区分。</figcaption>
+      <figcaption>实线向下 = 研究过程前向；红色方块 = 人工门，青色方块 = 自动门；虚线向上 = 反馈环（证伪/反事实、信念修订、溯源/失效）；「假设生成」阶段右侧自环 = 多样性/同质化监测。反馈均回指更早阶段，与前向流区分。<br><b>跑通时（2026-11）：</b>七阶段链与 G1/G2/S5b/G5 真实执行；T6b 证伪/反事实当前只有审计项，自动回指闭环在 roadmap；信念修订与同质化监测未实现。<br><span class="fineprint" data-figure-provenance="schematic" data-artifact="design/71-四图对照与解耦设计-判定总线与反馈环一等化.md">图的性质：设计投影（手绘/说明图），不是某次运行生成的产物；运行态证据见「最近一次真实 ESE 全链运行」面板。 · <a href="#ese-run">运行态证据</a></span></figcaption>
     </figure>
     <h3 class="flow-title">② 记忆协调与证据准入</h3>
     <figure class="flow-pane" data-flow-pane="memory">
@@ -407,7 +408,7 @@
         <text x="450" y="330" text-anchor="middle" font-size="12" fill="#5b6472">准入门四向：左入新经验，右出「通过即绑定」，上出写入记忆图谱，下出拒绝（默认出口）。</text>
         <text x="450" y="350" text-anchor="middle" font-size="12" fill="#5b6472">记忆须绑定执行契约 / 溯源数据；上游变更触发失效并回指准入门复验（虚线）。</text>
       </svg>
-      <figcaption>中：新经验经学习证据准入门——通过则写入记忆图谱、未过则拒绝（默认拒绝）；上：记忆图谱供研究各阶段消费；右：通过即绑定执行契约/溯源数据；虚线：上游变更→失效→回指准入门复验。箭头均指向框边，反馈回指准入门而非边框。</figcaption>
+      <figcaption>中：新经验经学习证据准入门——通过则写入记忆图谱、未过则拒绝（默认拒绝）；上：记忆图谱供研究各阶段消费；右：通过即绑定执行契约/溯源数据；虚线：上游变更→失效→回指准入门复验。箭头均指向框边，反馈回指准入门而非边框。<br><b>跑通时（2026-11）：</b>memory_ab 记忆注入 A/B 与记忆库单一路径写入真实可用；类型化记忆图谱与运行时自动准入门未实现（M2 四存储策略对照只跑了准入半程）。<br><span class="fineprint" data-figure-provenance="schematic" data-artifact="modules/memory-port/SPEC.md">图的性质：设计投影（手绘/说明图），不是某次运行生成的产物；运行态证据见「最近一次真实 ESE 全链运行」面板。 · <a href="#ese-run">运行态证据</a></span></figcaption>
     </figure>
     <h3 class="flow-title">③ 科研持续委托闭环</h3>
     <figure class="flow-pane" data-flow-pane="delegate">
@@ -471,7 +472,7 @@
         <text x="450" y="386" text-anchor="middle" font-size="12" fill="#5b6472">闭环验收单位：一段时间内，科研委托是否被妥善办完（签署 + 核验 + 维护），而非单轮回复/单篇论文质量。</text>
         <text x="450" y="406" text-anchor="middle" font-size="12" fill="#5b6472">目标撤销或失效时停止并撤销授权；收到新事件先检查是否仍与目标相关。</text>
       </svg>
-      <figcaption>承接持续委托闭环：授权范围前置 → 触发(相关性检查) → 上下文(链式召回) → 方案(两级过滤) → 获批执行(人门/异步) → 核验外部结果(回执) → 更新记忆并继续负责 → 回指触发；虚线为持续负责回路，目标撤销/失效即停（右上红框）。</figcaption>
+      <figcaption>承接持续委托闭环：授权范围前置 → 触发(相关性检查) → 上下文(链式召回) → 方案(两级过滤) → 获批执行(人门/异步) → 核验外部结果(回执) → 更新记忆并继续负责 → 回指触发；虚线为持续负责回路，目标撤销/失效即停（右上红框）。<br><b>跑通时（2026-11）：</b>授权范围前置（policy scope）、越界即停、目标撤销即停真实执行；autopilot 是单次委托（从主题跑到封包后结束），图中「常驻触发 → 相关性检查 → 回指」的持续回路未实现。<br><span class="fineprint" data-figure-provenance="schematic" data-artifact="research_agent/waitpoints.py">图的性质：设计投影（手绘/说明图），不是某次运行生成的产物；运行态证据见「最近一次真实 ESE 全链运行」面板。 · <a href="#ese-run">运行态证据</a></span></figcaption>
     </figure>
     <h3 class="flow-title">④ 执行与路由架构</h3>
     <figure class="flow-pane" data-flow-pane="routing">
@@ -563,7 +564,7 @@
         <text x="450" y="380" text-anchor="middle" font-size="12" fill="#5b6472">存算分离：智能体循环无状态云端 + 状态持久化；执行环境留用户原地（守护进程 / 本地环境）。</text>
         <text x="450" y="400" text-anchor="middle" font-size="12" fill="#5b6472">执行单元隔离上下文 → 过程可复现 + 供给独立；路由层不执行 → 人注意力只花在门禁/验收。</text>
       </svg>
-      <figcaption>承接 DeepSeek Super-agent：触发事件经两级过滤（快层程序→慢层语义）入路由层；路由层冷启动分派隔离执行单元池；已订阅任务线程后续事件直通执行单元池；独立外部监督控制回路监控进展/偏离；人仅在门禁/验收交互；过滤层判定不行动时统一静默丢弃（默认拒绝）；存算分离使执行环境留在用户原地。</figcaption>
+      <figcaption>承接 DeepSeek Super-agent：触发事件经两级过滤（快层程序→慢层语义）入路由层；路由层冷启动分派隔离执行单元池；已订阅任务线程后续事件直通执行单元池；独立外部监督控制回路监控进展/偏离；人仅在门禁/验收交互；过滤层判定不行动时统一静默丢弃（默认拒绝）；存算分离使执行环境留在用户原地。<br><b>跑通时（2026-11）：</b>路由只协调不下场（MCP 46 工具零签名入口）、本地 runtime/CLI 执行、默认拒绝真实成立；「隔离执行单元」对应外部 host 进程 + Harness² Python 3.12 桥进程，不是平台内调度池；独立外部监督控制回路未实现。<br><span class="fineprint" data-figure-provenance="schematic" data-artifact="research_agent/execport/exec_port.py">图的性质：设计投影（手绘/说明图），不是某次运行生成的产物；运行态证据见「最近一次真实 ESE 全链运行」面板。 · <a href="#ese-run">运行态证据</a></span></figcaption>
     </figure>
     </div>
     <div class="gate-map">
@@ -572,9 +573,56 @@
       <p>图① 的「人门·假设选择 / 设计批准·契约 / 签署」分别对应 G1 / G2 / <b>S5b 结果签署</b>，青色「统计 / 复现门」是自动门。<b>G5 闭包签署在导出边界</b>（图③ 核验外部结果之后的授权收口），不在图① 的七阶段投影内 —— 不要把两者混读；图③ 的「必要时人签」落到实现就是 G2 / S5b。</p>
       <p>四条反馈（T6b 证伪 / 反事实、信念修订 / 假设再激活、同质化监测、溯源 / 失效传播）都<b>回指更早阶段并改变下一步动作</b>，而不是只写反思文本。子页 <a href="./demo/">S0–S16 全链</a>、<a href="./qoder/">接入闭环</a>、<a href="./innovation/">七幕演示</a> 与自进化循环按同一套语义绘制，门禁标签不另造口径。</p>
     </div>
+    <div class="strategy-map" id="two-loops">
+      <h4>两条循环 · 为什么现在还不是「自改进科研智能体」</h4>
+      <p class="sm-lede">上面四张图讲的是<b>内层：单个研究怎么做得可信</b>；它们没有画<b>外层：方法怎样随失败变强</b>。缺的不是门禁，是这一层——所以本站把「自改进」写成 roadmap，而不是能力。</p>
+      <figure class="flow-pane" style="margin:0 0 14px">
+        <img src="./assets/ese/double-loop.png" alt="内层研究循环与外层方法演化循环：内层已实现证据闭合，外层为 roadmap" style="width:100%;height:auto;border:1px solid #e3e7ef;border-radius:10px" loading="lazy">
+        <figcaption>内层（实线，已实现）：断言 → 预注册 + 探针 → 执行 + 指纹 → 区间 + 复现 → 人签 claim。外层（虚线，roadmap）：durable 失败图谱 → 候选改动（只改一层）→ ≥2 个 held-out 研究任务 → 人采纳 + 成本审计 → 版本 + 回滚点（方法指纹不只代码）。两层由判定总线相连；缺的一环是「判定要能驱动方法层改动」，而不只是驱动下一次 run 的动作。ESE 执行（repository mining）是内层 S5 的一个实例：协议→执行→区间；它目前只产出探索性结果，尚未接入 RunCapsule/EA/Claim（design/103）。<br><span class="fineprint" data-figure-provenance="generated" data-artifact="prototypes/ese/make_figure_loop.py">图的性质：由 prototypes/ese/make_figure_loop.py 生成的说明图，不是运行数据的作图；生成命令见 prototypes/ese/README。 · <a href="prototypes" data-local-doc="prototypes/ese/README.md">生成脚本与说明</a></span></figcaption>
+      </figure>
+      <div class="sm-rows">
+        <div class="sm-row"><span class="sm-key">已有</span><p>内层闭环（span → claim → closure → lineage）、判定总线（verdict-ledger 读时重算）、人签门、失效传播、受治理的 RSI 控制面（候选 / 租约 / 世代 / 回滚）。</p></div>
+        <div class="sm-row"><span class="sm-key">研究执行（ESE）</span><p><b>阶段×方法注册表</b>（9 方法 × 10 阶段）+ <b>arXiv cs.SE 语料</b>（8 篇 flaky-test 论文、6198 span）+ <b>协议执行器</b>：3 个 OSS 仓库 5132 次源码提交，37.5% 同提交改测试（95% CI 36.2–38.8）；分层后调整差 +6.8pp，但 requests +10.7 / httpx +4.3 / click −0.7，效应异质。<b>全链</b>：真实 API 下 S0–S16→创新评审→中文初稿（9401 汉字/73 引用）→手稿评审→成稿审计 <b>ready_for_human_review</b>；repository-mining 结果另已封成 run-capsule/EA（0 阻塞）。<b>边界</b>：G1/G2/G3/G5 仍人签，无 Claim；accepted≠通过，ready≠可投稿（design/99–112）。</p></div>
+        <div class="sm-row"><span class="sm-key">证据治理</span><p>内层闭环（span → claim → closure → lineage）、判定总线（读时重算）、人签门、失效传播、受治理 RSI 控制面（候选/租约/世代/回滚）。<b>边界</b>：门是人签的，机制接通不等于效果（design/71、75）。</p></div>
+        <div class="sm-row"><span class="sm-key">自改进候选</span><p><b>类型化记忆图</b>（12 类节点/9 类关系/准入/哈希过期/预算化 pack，e2e 实测 23 节点、6 条 durable 失败）+ <b>冻结 held-out rubric</b>（A 卡 12/14；B 卡 n=4 配对 +1.25（95% t-CI [0.46, 2.05]，符号检验 p=0.125））+ <b>配方候选 R1/R2</b>（A 卡 14/14）。<b>边界</b>：B 卡跨过 n≥4 守卫但未算区间；held-out 评分测的是智能体产出符合性，不是 ESE 现象结论（design/92–97）。</p></div>
+        <div class="sm-row"><span class="sm-key">缺</span><p>① 跨项目<b>失败图谱</b>：已有 6 条 durable 失败节点；<b>--memory-pack 可只读注入 S2/S4，但默认关闭、复用率未统计</b>；② <b>held-out 研究任务</b>：已有 3 张冻结任务卡与确定性 rubric（首轮 12/14，n=1）；记忆注入已接通（配对 12/14 vs 12/14，underpowered），缺多任务、多次重复与配方候选复测；③ 自改动的<b>对象</b>仍停在检索参数 / harness，而不是研究方法与设计。</p></div>
+        <div class="sm-row"><span class="sm-key">因此</span><p>本站的「自改进」只到<b>受治理控制面</b>：能记录候选、跑租约、人签采纳、留回滚点；还不能证明「研究做得更好」。这条界线写在 <code>design/82</code> 与 <code>modules/rsi/SPEC.md</code>，不在图上美化。</p></div>
+      </div>
+    </div>
+    <div class="strategy-map" id="capability-metrics">
+      <h4>能力指标（空态） · 研究质量到底有没有变好</h4>
+      <p class="sm-lede">结构指标可以靠多写模块、多写测试增长；能力指标只能靠真实研究测量。这张表每轮如实更新：<b>未测就写未测</b>，不用结构指标代替，也不把机制接通读成效果。</p>
+      <div class="sm-rows">
+        <div class="sm-row"><span class="sm-key">claim 存活率</span><p>定义：已签 claim 在 6 个月后仍未被 lineage/verdict 判失效的比例。当前：<b>未测</b>。缺口：需要跨项目、跨时间重查；现有证据只覆盖单项目 run。</p></div>
+        <div class="sm-row"><span class="sm-key">复现率</span><p>定义：reproduced/partial 的独立复现数 ÷ 已尝试复现数。当前：<b>仅 search-study 有</b>（跨数据集复现计数与功效阶梯）。缺口：ESE 实验还没有独立 replication 记录。</p></div>
+        <div class="sm-row"><span class="sm-key">失败复用率</span><p>定义：新研究在设计前读取并引用了相关 durable 失败的比例。当前：<b>图谱已有 6 条 durable 失败</b>（<code>research_agent/failures/atlas.json</code>，2026-11 真实踩坑），记忆包可通过 <code>--memory-pack</code> 只读注入 S2/S4（默认关闭）；<b>复用率仍未测</b>。缺口：默认注入策略与引用率统计。</p></div>
+        <div class="sm-row"><span class="sm-key">held-out 评分</span><p>定义：在未参与配方设计的冻结任务卡上，按预注册 rubric 通过的检查数。当前：A 卡（n=1/臂）baseline 12/14 · R1 14/14 · R2 14/14；<b>B 卡（未执行过的卡，n=4/臂）</b>baseline 12/12/12/12 vs R1 14/13/13/13，配对差 [2,1,1,1]，均值 <b>+1.25</b>，<b>95% t-CI [0.46, 2.05]</b>、<b>符号检验 p=0.125</b>（CI 不含零但符号检验不显著，n=4 时两者本来就该一起看；<b>不宣称显著</b>）。差异全部在 experiment 轴；idea/paper 已到 rubric ceiling。<b>定位</b>：评估对象是智能体产出的草稿是否符合方法规范，不是对 ESE 现象的实证结论（见 design/97、design/110）。</p></div>
+        <div class="sm-row"><span class="sm-key">human-minutes / claim</span><p>定义：人签 + 审阅 + 处理一条 claim 的分钟数。当前：<b>未测</b>。缺口：没有计时记录；自动化若不记录人工成本，等于把成本藏起来。</p></div>
+        <div class="sm-row"><span class="sm-key">反指标</span><p>点估计绕过区间门的次数应为 <b>0</b>（机制上不允许）；stale 建议实际发生次数已有读数（M1 抓到 1 次快照漂移）。反指标的作用是证明"没变坏"，不是证明"变好"。</p></div>
+      </div>
+      <p class="fineprint">口径与逐项读数以 docs/fact-baseline.md 为准；本表是导航与空态声明，不是证据。补齐剩余项需要多张 held-out 任务卡 + 配方对照 + 计时记录（design/83、design/93）。</p>
+    </div>
+    <!-- ESE-RUN-PANEL:START -->
+<div class="strategy-map" id="ese-run">
+  <h4>最近一次真实 ESE 全链运行 · PIPE-20261118T120549Z-f36858</h4>
+  <p class="sm-lede">本地真实 API 执行（非 fixture）；门按设计停住。面板由 scripts/build_ese_run_panel.py 从 demo.json 生成，不是手写。</p>
+  <div class="sm-rows">
+    <div class="sm-row"><span class="sm-key">literature</span><p>ok · 3 warning(s)</p></div>
+    <div class="sm-row"><span class="sm-key">synthesis</span><p>synthesized</p></div>
+    <div class="sm-row"><span class="sm-key">idea</span><p>candidates_need_human · 12 warning(s)</p></div>
+    <div class="sm-row"><span class="sm-key">experiment</span><p>needs_human · 8 warning(s)</p></div>
+    <div class="sm-row"><span class="sm-key">figure</span><p>schematic_ready</p></div>
+    <div class="sm-row"><span class="sm-key">paper</span><p>needs_evidence · 6 warning(s)</p></div>
+    <div class="sm-row"><span class="sm-key">manuscript-review</span><p>needs_more_work · rounds=1 · accepted=True</p></div>
+    <div class="sm-row"><span class="sm-key">final-audit</span><p>ready_for_human_review · citations=73 · han=9401 · submission_ready=False</p></div>
+    <div class="sm-row"><span class="sm-key">gates</span><p>Q0=pass · G1=needs_human · G2=needs_human · G3=blocked · G5=blocked</p></div>
+  </div>
+  <p class="fineprint">static mirror of one real local run; gates need a human, no Claim/EA/signature is created by this panel</p>
+</div>
+<!-- ESE-RUN-PANEL:END -->
     <div class="strategy-map">
       <h4>研究主线 · 四条策略 × 三个方向 × 四个可证伪问题（1110 组会口径）</h4>
-      <p class="sm-lede">一句话主张：<b>不做端到端「自动写论文」</b>——做两件事：<b>让过程可信</b>，<b>让判定真正改变下一步行动</b>。四条策略都是待验证的计划，不是已实现的功能；每条带一个能把它证伪的入口。新颖性只落在四处：<b>证据链复现 · 失效传播 · 判定消费 · 学习证据准入</b>。</p>
+      <p class="sm-lede">一句话主张：<b>不做端到端「自动写论文」</b>——做两件事：<b>让过程可信</b>，<b>让判定真正改变下一步行动</b>。四条策略都是待验证的计划，不是已实现的功能；每条带一个能把它证伪的入口。新颖性只落在四处：<b>证据链复现 · 失效传播 · 判定消费 · 学习证据准入</b>。2026-11 起，系统还能把同一流水线用于 ESE 研究执行（repository-mining 起，探索性结果、人签前；design/101–107）。</p>
       <div class="sm-strategies">
         <div class="sm-strategy"><b>策略① 过程可信底座<em>方向 B · 守内核</em></b><span>三层可验证（结果 / 过程 / 证据链）+ 溯源数据 + 失效传播。验证入口：留出集改上游，看系统能否推准失效范围。</span></div>
         <div class="sm-strategy"><b>策略② 反馈 → 行动（判定消费）<em>Q2 · 第一个诊断实验</em></b><span>同一任务给真实 / 打乱 / 过时 / 含噪 / 矛盾五类反馈，看下一步行动是否按证据质量变。反馈敏感性与信息价值一致 → 切口不成立。</span></div>
@@ -584,7 +632,7 @@
       <div class="sm-rows">
         <div class="sm-row"><span class="sm-key">顺序</span><p><b>B 守内核，A 做第一个切口，C 放后面</b>；②始终作为诊断实验贯穿。读图顺序 ③ → ① → ② → ④。</p></div>
         <div class="sm-row"><span class="sm-key">里程碑</span><p><b>M0</b> 最小证据闭合实例（能签署且变更锁导出）→ <b>M1</b> 五类反馈对照（Q2）→ <b>M2</b> 四存储策略 + 失效探针（Q3/N4）→ <b>M3</b> 论文与外部评审。每步的验收都是「可失败的」：达不到就重述口径，不换指标。</p></div>
-        <div class="sm-row"><span class="sm-key">四不做</span><p>不追端到端生成（42% 实验失败、基线幻觉 90% 的赛道）；<b>不重造度量</b>（ARS / CCFA 信封借来用）；不照搬静态 skill 目录；不放开无约束自主执行——人工门留在假设选择、设计批准、签署三处，自动化只跑门与门之间。</p></div>
+        <div class="sm-row"><span class="sm-key">四不做</span><p>不追端到端生成（外部审计：AI Scientist 42% 实验失败仍成文、Co-Scientist 无验证时严重结果幻觉 ~90%；见 design/1110 讨论与 arXiv 2502.14297）；<b>不重造度量</b>（ARS / CCFA 信封借来用）；不照搬静态 skill 目录；不放开无约束自主执行——人工门留在假设选择、设计批准、签署三处，自动化只跑门与门之间。</p></div>
         <div class="sm-row"><span class="sm-key">工程借鉴</span><p>控制面 / 执行面分离、两级过滤（程序快层 → 语义慢层）、任务线程直通、异步推理、存算分离、独立外部监督——来自 DeepSeek 两篇工程文章（非同行评审，只作设计参照）。</p></div>
       </div>
     </div>

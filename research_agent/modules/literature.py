@@ -231,6 +231,7 @@ class LiteratureAgent:
         facet_queries: Dict[str, List[str]],
         facet_sources: Dict[str, List[str]],
         cap_reached: bool,
+        requested_sources: int = TARGET_SOURCES,
     ) -> LiteratureBrief:
         span_by_source: Dict[str, List[Span]] = {}
         for span in spans:
@@ -312,7 +313,13 @@ class LiteratureAgent:
                 )
             )
 
-        source_ratio = min(len(hits) / TARGET_SOURCES, 1.0)
+        # Saturation is relative to the requested scope: fixed thresholds of 6 sources made an
+        # 8-paper corpus look "saturated" even when the caller asked for 24, which then
+        # produced too few candidates for idea convergence. A request larger than the corpus is
+        # now reported as partial with an explicit gap instead of silently saturated.
+        requested = max(1, int(requested_sources))
+        source_target = max(TARGET_SOURCES, requested)
+        source_ratio = min(len(hits) / float(source_target), 1.0)
         full_ratio = min(sources_read / TARGET_FULL_TEXT, 1.0)
         span_ratio = min(len(spans) / TARGET_SPANS, 1.0)
         coverage_score = round(
@@ -333,6 +340,8 @@ class LiteratureAgent:
             brief_gaps.append("source_cap_reached")
         if len(hits) < TARGET_SOURCES:
             brief_gaps.append("thin_source_count")
+        if len(hits) < requested:
+            brief_gaps.append("below_requested_sources:%d/%d" % (len(hits), requested))
         if sources_read < TARGET_FULL_TEXT:
             brief_gaps.append("thin_full_text")
         if len(spans) < TARGET_SPANS:
@@ -555,7 +564,15 @@ class LiteratureAgent:
         if not subqueries:
             warnings.append("empty question; result is insufficient_evidence")
 
-        brief = self._brief(hits, spans, sources_read, facet_queries, facet_sources, cap_reached)
+        brief = self._brief(
+            hits,
+            spans,
+            sources_read,
+            facet_queries,
+            facet_sources,
+            cap_reached,
+            requested_sources=max(1, int(request.max_sources)),
+        )
         if brief.saturation != "saturated":
             warnings.append(
                 "coverage=%s; %d sources / %d full texts / %d spans; see brief.gaps"

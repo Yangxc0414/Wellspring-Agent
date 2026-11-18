@@ -1,0 +1,48 @@
+{
+  "schema": "ese-study-protocol-0.1",
+  "study_id": "ESE-MS-20261118-01",
+  "method": "repository-mining",
+  "research_questions": [
+    "RQ1: among commits that touch Python source, what fraction also touch tests?",
+    "RQ2: is that fraction different for bug-fix commits than for other commits?"
+  ],
+  "sampling_frame": {
+    "repos": [
+      {
+        "name": "click",
+        "url": "https://github.com/pallets/click"
+      },
+      {
+        "name": "requests",
+        "url": "https://github.com/psf/requests"
+      },
+      {
+        "name": "httpx",
+        "url": "https://github.com/encode/httpx"
+      }
+    ],
+    "inclusion": "public Python projects with >=300 commits and a tests tree",
+    "exclusion": "vendored forks and snapshots without git history"
+  },
+  "time_window": {
+    "start": "2000-01-01",
+    "end": "2026-11-18"
+  },
+  "dedup_policy": "merge commits excluded; one commit is one unit; no same-message dedup",
+  "label_source": {
+    "unit": "commit touching at least one .py file",
+    "outcome": "same commit also touches tests/ or test_*.py or *_test.py",
+    "bugfix": "commit subject matches fix/fixes/fixed/bug/issue/regression/hotfix/patch"
+  },
+  "analysis": {
+    "metric": "test co-change rate",
+    "unit": "commit",
+    "ci_level": 0.95,
+    "permutation": {
+      "n": 2000,
+      "seed": 42
+    }
+  },
+  "frozen_at": "2026-11-18",
+  "boundary": "exploratory repository-mining study on three public Python projects; labels are path/message heuristics; no Claim/EA/signature"
+}

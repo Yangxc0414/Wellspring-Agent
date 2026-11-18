@@ -42,6 +42,7 @@ from ..workspace import (
     MemoryStore,
     WorkspaceStoreError,
 )
+from .ese_runs import scan_ese_runs
 from .jobs import (
     ArtifactPathError,
     JobManager,
@@ -424,13 +425,52 @@ def create_app(settings: Optional[RuntimeSettings] = None) -> FastAPI:
         allow_credentials=False,
     )
 
+    def _ese_run_rows():
+        import html as _html
+
+        runs = scan_ese_runs(Path(getattr(settings, "repo_root", "")) / "runtime_data")
+        if not runs:
+            return "<p>No ESE study directories with result.json were found under runtime_data/.</p>"
+        rows = []
+        for run in runs:
+            rows.append(
+                "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><code>%s</code></td></tr>"
+                % (
+                    _html.escape(str(run.get("study_id"))),
+                    _html.escape(str(run.get("commits"))),
+                    _html.escape(str(run.get("rate"))),
+                    _html.escape(str(run.get("adjusted_difference"))),
+                    _html.escape(str(run.get("status"))),
+                    _html.escape(str(run.get("capsule") or "(no capsule)")),
+                )
+            )
+        return (
+            "<table><thead><tr><th>study</th><th>commits</th><th>rate</th>"
+            "<th>adjusted diff</th><th>capsule status</th><th>capsule</th></tr></thead>"
+            "<tbody>" + "".join(rows) + "</tbody></table>"
+        )
+
     @app.get("/", response_class=HTMLResponse)
     def index() -> str:
         return (
+            "<!doctype html><html lang='zh'><head><meta charset='utf-8'>"
+            "<title>Research Agent Local Runtime</title>"
+            "<style>body{font-family:system-ui;margin:32px;line-height:1.6}"
+            "table{border-collapse:collapse}td,th{border:1px solid #ddd;padding:6px 10px;font-size:13px}"
+            "code{font-size:11px}</style></head><body>"
             "<h1>Research Agent Local Runtime</h1>"
-            "<p>Localhost-only. <a href='/docs'>OpenAPI docs</a> · "
-            "<a href='/api/health'>health</a></p>"
+            "<p>Localhost-only, read-only view. <a href='/docs'>OpenAPI docs</a> · "
+            "<a href='/api/health'>health</a> · <a href='/api/ese/runs'>ESE runs JSON</a></p>"
+            "<h2>ESE 研究执行（本地 runtime_data）</h2>" + _ese_run_rows() +
+            "<p><em>Read-only: gates and Claim signing stay on the CLI; this page cannot approve, sign or export.</em></p>"
+            "</body></html>"
         )
+
+    @app.get("/api/ese/runs")
+    def ese_runs() -> Dict[str, Any]:
+        from .ese_runs import summary as ese_summary
+
+        return ese_summary(Path(getattr(settings, "repo_root", "")) / "runtime_data")
 
     @app.get("/api/health")
     def health() -> Dict[str, Any]:

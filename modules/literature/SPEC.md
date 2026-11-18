@@ -2,7 +2,7 @@
 id: literature
 name: 文献调研
 stage: S1
-version: 0.12.0
+version: 0.14.0
 status: pilot
 owner: research-agent
 inputs:
@@ -114,6 +114,8 @@ S1 必须在 `LiteratureResult.warnings` 中输出一条结构化的证据广度
 
 ## Changelog
 
+- 2026-11-18 · v0.14.0 · status=pilot · 覆盖率饱和改为相对请求：source_target=max(TARGET_SOURCES,max_sources)，请求大于语料时报 partial 并给出 below_requested_sources:x/y；避免小语料被误判为 saturated
+- 2026-11-18 · v0.13.0 · status=pilot · synthesize 支持 --profile 并统一模型解析：先显式 profile，再 literature gateway binding，最后 DEEPSEEK_API_KEY；此前 S1b 在只有网关配置时会直接失败
 - 2026-11-08 · v0.12.0 · status=pilot · Stage1 低成本候选预筛与可解释排序（信息源层与证据层之间）：用户参考「标题与摘要级 Stage1 预筛压缩候选集合，再做候选评分」后复核，现有 conference_fetcher._topic_score 已有标题+摘要词法命中的先例、fixture/local retriever 有检索排序，但没有独立 Stage1 层；上一轮 paper_discovery 故意不存摘要（摘要不能当证据），因此预筛必须用「摘要只作内存过滤输入、输出不回显不落盘」的方式接。新增 research_agent/prescreen.py 纯函数：Stage1 结构完整性 + query 词法命中硬过滤，每条拒绝带可核对 reason；Stage2 可解释多信号加权分只做排序、不改变 kept 集合；报告给压缩比、score_range 与后续下载→--source local 链路。CLI literature prescreen。边界：不联网、不用模型、不改 Q0、不改 S1 默认行为、不生成 span/SourceHit/Claim/EA/gate；分数恒标 ranking_signal_only，不得充当 novelty 或质量判据（innovation_review 的模型 1-10 自评分不是独立证据）。通过预筛只表示更值得下载，不代表具备证据资格。新增 tests/test_prescreen.py 全离线用例。
 - 2026-11-07 · v0.11.0 · status=pilot · 信息源层：多源候选论文发现（clue-only，不产 span）。用户参考「arXiv 关键词 + HF Daily Papers + Trending 抓取候选论文」后复核：现有已有 ArxivFetcher 关键词搜索与 literature fetch 下载、conference_fetcher 按 venue/year 抓 arXiv、OpenAlex 只给摘要；缺的是三路汇聚成统一候选清单并按 arXiv id 去重，且全库无 HF 相关代码。核实 HF 端点事实：Daily Papers 与 Trending 是同一 GET /api/daily_papers 的 sort=publishedAt / sort=trending 两种取值（官方文档），另有 /api/papers/{id} 取结构化元数据；本环境 curl 该端点 6 秒超时，故按文档实现、测试全部离线注入 transport，如实标注未实测联网。新增 adapters/paper_discovery.py 与 CLI literature discover；候选恒标 clue_only=true / span_eligible=false，allow_network 默认 false 且未授权返回 blocked 而非空清单；报告附可照抄的下载与 --source local 解析链路。边界：不生成 span/SourceHit/Claim/EA/gate、不改 Q0、不改 S1 默认行为；「抓到多少篇」不等于「证据够多少篇」。新增 tests/test_paper_discovery.py 全离线用例。
 - 2026-11-06 · v0.10.0 · status=pilot · 证据广度回执（只改披露，不动门禁）：实测默认 fixture 把 max_sources 从 3 调到 50，来源数恒为 3、span 恒为 5、coverage_score 恒为 0.454、saturation 恒为 partial、Q0 恒为 pass；而用本地 7 篇 CC-BY 正文语料配 max_sources=12 可得 7 来源 / 56 span / 1.0 / saturated，Q0 仍是同一个 pass 理由。也就是说 Q0 的输出无法区分 3 篇演练语料与综述级语料，且两层 SPEC 都未规定最小来源数。Contract 新增 evidence_breadth 条款：S1 必须显式声明独立来源/全文/span/覆盖度/saturation/review_grade，未达综述级时附可照抄的扩语料命令。不改 status、不改 q0_decision、不阻断 S2、不写 Claim/EA/gate；Q0 加来源数下限属门禁语义变化，仍需人工确认，本轮未做。新增 tests/test_literature.py 三条用例钉住 3 篇判 no、7 篇判 yes、以及回执不改变 Q0 状态。

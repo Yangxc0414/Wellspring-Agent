@@ -100,6 +100,25 @@ class ExperimentDesignAgent:
                     accepted["controls"] = controls
         return accepted
 
+    @staticmethod
+    def _metric_looks_like_identifier(value: str) -> bool:
+        text = (value or "").strip()
+        if not text:
+            return True
+        if len(text) > 48 or " " in text or text.endswith("."):
+            return False
+        return not any(mark in text for mark in (",", ";", "：", ":", "。", "，"))
+
+    @staticmethod
+    def _budget_looks_specified(value: str) -> bool:
+        text = (value or "").strip()
+        if not text:
+            return True
+        low = text.lower()
+        if any(mark in low for mark in ("not specified", "unspecified", "tbd", "to be decided", "待定")):
+            return False
+        return any(char.isdigit() for char in text)
+
     def run(self, request: ExperimentRequest) -> ExperimentDesign:
         if self.spec.status in ("revoked", "deprecated"):
             raise ExperimentError("module spec status is %s; refusing to run" % self.spec.status)
@@ -188,6 +207,21 @@ class ExperimentDesignAgent:
         seeds = max(1, int(request.seeds))
         if seeds < 3:
             warnings.append("fewer than 3 seeds; variance/CI will be weak")
+        # S5 executes a metric identifier, not a sentence. A model (or a human) may fill
+        # primary_metric with a description; the draft stays usable as prose but cannot be
+        # executed, so say so instead of letting design.required pass on "non-empty".
+        if primary_metric and not self._metric_looks_like_identifier(primary_metric):
+            warnings.append(
+                "primary_metric is a description, not a metric identifier: "
+                + repr(str(primary_metric)[:60])
+                + "; name the metric S5 will compute (e.g. accuracy, r2, mutation_score)"
+            )
+        if budget and not self._budget_looks_specified(budget):
+            warnings.append(
+                "budget does not state a measurable budget: "
+                + repr(str(budget)[:60])
+                + "; give seeds x evaluations or a numeric cap, or mark it explicitly as unspecified"
+            )
         stopping_rule = "预注册后由人冻结；主指标、样本量、停止条件不得事后修改"
         status = "ready_for_g2" if not missing and controls and not model_fields else "needs_human"
         if model_fields:

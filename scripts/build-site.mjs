@@ -25,19 +25,22 @@ function copyDemo() {
 
 function copyDocs() {
   ensureDir(docsDir);
+  // Design docs moved into design/ (2026-11-11). The old root paths silently copied
+  // nothing, so the committed site/docs copies went stale. Keep one list, one location.
   const docs = [
     ["README.md", "README.md"],
-    ["16-科研Skill生态调研与动态流程编排.md", "16-科研Skill生态调研.md"],
-    ["17-基于Skill契约的上层微服务架构.md", "17-上层微服务架构.md"],
-    ["18-GitHub Pages部署与多智能体Skill设计.md", "18-GitHub Pages部署与多智能体Skill设计.md"],
-    ["71-四图对照与解耦设计-判定总线与反馈环一等化.md", "71-四图对照与解耦设计.md"]
+    ["design/16-科研Skill生态调研与动态流程编排.md", "16-科研Skill生态调研.md"],
+    ["design/17-基于Skill契约的上层微服务架构.md", "17-上层微服务架构.md"],
+    ["design/18-GitHub Pages部署与多智能体Skill设计.md", "18-GitHub Pages部署与多智能体Skill设计.md"],
+    ["design/71-四图对照与解耦设计-判定总线与反馈环一等化.md", "71-四图对照与解耦设计.md"]
   ];
   const copied = [];
   for (const [source, target] of docs) {
     const sourcePath = path.join(root, source);
     if (!fs.existsSync(sourcePath)) {
-      console.warn("skip missing doc:", source);
-      continue;
+      // a missing doc is a build error, not a warning: silently skipping is how the
+      // committed copies drifted from the design archive in the first place
+      throw new Error("missing doc declared for site: " + source);
     }
     fs.copyFileSync(sourcePath, path.join(docsDir, target));
     copied.push(target);

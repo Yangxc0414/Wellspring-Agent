@@ -48,7 +48,7 @@ jobs:
             # inputs ship with the repository — and each pin only runs when its file
             # is actually tracked here (the demo repository intentionally tracks a
             # subset; missing pins are reported, never silently assumed green).
-            pinned="test_evolution_generations test_rsi_harness2 test_plugin_bundle test_evolution_policy test_release_surface test_release_integrity test_workspace"
+            pinned="test_evolution_generations test_rsi_harness2 test_plugin_bundle test_evolution_policy test_release_surface test_release_integrity test_workspace test_repo_hygiene test_method_registry"
             mods=""
             missing=""
             for m in $pinned; do

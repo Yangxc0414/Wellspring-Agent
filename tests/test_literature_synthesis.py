@@ -23,6 +23,62 @@ class _FakeModel:
         return self.responses.pop(0)
 
 
+class DefaultSynthesisModelTest(unittest.TestCase):
+    """Synthesis must follow the same gateway resolution as every other generation stage."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.store = Path(self.tmp.name) / "model_gateway.json"
+        self.store.write_text(json.dumps({
+            "schema_version": "model-gateway-0.1",
+            "providers": [{
+                "provider_id": "autodl",
+                "kind": "openai_compatible",
+                "label": "test",
+                "base_url": "https://example.invalid/v1",
+                "api_key_env": "AUTODL_TEST_KEY",
+                "models": ["DeepSeek-V4.1-Flash-1017"],
+            }],
+            "profiles": [{
+                "profile_id": "deepseek-v41",
+                "provider_id": "autodl",
+                "model": "DeepSeek-V4.1-Flash-1017",
+                "thinking": {"mode": "off"},
+                "thinking_supported": False,
+                "max_tokens": 512,
+                "context_window": 8192,
+                "max_output_tokens": 1024,
+            }],
+            "bindings": {"literature": "deepseek-v41"},
+        }), encoding="utf-8")
+        self.env = mock.patch.dict(os.environ, {"AUTODL_TEST_KEY": "test-key"}, clear=False)
+        self.env.start()
+        self.path_patch = mock.patch(
+            "research_agent.models.store.default_store_path", return_value=self.store
+        )
+        self.path_patch.start()
+
+    def tearDown(self):
+        self.path_patch.stop()
+        self.env.stop()
+        self.tmp.cleanup()
+
+    def test_gateway_binding_is_used(self):
+        from research_agent.literature_synthesis import default_synthesis_model
+
+        model = default_synthesis_model()
+        self.assertIn("DeepSeek-V4.1-Flash-1017", model.model_id)
+
+    def test_missing_key_names_the_env_var(self):
+        from research_agent.literature_synthesis import SynthesisError, default_synthesis_model
+
+        with mock.patch.dict(os.environ, {"AUTODL_TEST_KEY": ""}, clear=False):
+            with self.assertRaises(SynthesisError) as context:
+                default_synthesis_model()
+        message = str(context.exception)
+        self.assertIn("AUTODL_TEST_KEY", message)
+
+
 def _payload(extra_invalid=False):
     themes = [
         {

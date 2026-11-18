@@ -368,7 +368,21 @@ class ModelGateway:
             finish = str(choices[0].get("finish_reason", "")) if choices else ""
             request_id = str(data.get("id", ""))
         if not text:
-            raise ModelCallError("provider returned no text content", provider=provider.provider_id)
+            # An empty message is almost always a token-budget problem on reasoning models
+            # (all completion tokens spent on reasoning, content never emitted). Say which
+            # finish_reason and whether the budget was hit, instead of a bare "no content".
+            usage = _usage_ints(data.get("usage"))
+            completion = int(usage.get("completion_tokens") or usage.get("output_tokens") or 0)
+            detail = "finish_reason=%s" % (finish or "unknown")
+            if finish == "length" or (completion and completion >= profile.max_tokens):
+                detail += ", completion_tokens=%d >= max_tokens=%d (raise the profile budget)" % (
+                    completion,
+                    profile.max_tokens,
+                )
+            raise ModelCallError(
+                "provider returned no text content (%s)" % detail,
+                provider=provider.provider_id,
+            )
         return ModelResponse(
             text=text,
             provider_id=provider.provider_id,

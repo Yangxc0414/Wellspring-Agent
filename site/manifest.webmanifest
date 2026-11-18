@@ -1,7 +1,7 @@
 {
   "name": "Research Agent",
   "short_name": "Research Agent",
-  "description": "可核验的科研智能体：检索、复现、写作、核验与签署。",
+  "description": "让结论有出处，让失败改方法：证据闭合已实现，方法演化是 roadmap。",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f8fbff",
