@@ -366,6 +366,12 @@
   white-space: nowrap;
 }
 
+.settings-badge.is-static {
+  border-color: rgba(154, 107, 30, 0.28);
+  background: var(--amber-dim);
+  color: var(--amber);
+}
+
 .settings-card {
   padding: 15px 16px;
   border: 1px solid var(--line);

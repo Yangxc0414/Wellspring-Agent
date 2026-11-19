@@ -62,7 +62,11 @@ export function ModelBindings() {
     try {
       applySnapshot(await loadRuntimeModelSnapshot());
     } catch (exc) {
-      setError(exc instanceof Error ? exc.message : "runtime 未连接");
+      setError(
+        __STATIC_ONLY__
+          ? "静态演示构建：runtime 在构建时已禁用，模块绑定只在本地 CLI 可用。"
+          : exc instanceof Error ? exc.message : "runtime 未连接"
+      );
       setSnapshot(null);
     } finally {
       setBusy("");

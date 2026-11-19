@@ -164,7 +164,11 @@ export function SettingsPage() {
           <em>SETTINGS</em>
         </button>
         <div className="settings-titlebar-actions">
-          <span className="settings-badge">LOCAL · WORKSPACE</span>
+          {/* The global StaticModeNotice is mounted behind this full-screen modal,
+              so the settings surface has to disclose the static build itself. */}
+          <span className={`settings-badge${__STATIC_ONLY__ ? " is-static" : ""}`}>
+            {__STATIC_ONLY__ ? "STATIC · DEMO" : "LOCAL · WORKSPACE"}
+          </span>
           <button
             type="button"
             className="icon-button settings-close"

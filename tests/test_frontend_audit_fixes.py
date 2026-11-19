@@ -54,7 +54,10 @@ class FrontendAuditFixesTest(unittest.TestCase):
         self.assertIn("纯 UI 幻觉", text)
         self.assertIn("前后端 skill 清单漂移", text)
         index = (ROOT / "design" / "README.md").read_text(encoding="utf-8")
-        self.assertIn("编号 00–127（128 份", index)
+        # Do not pin an exact document count: every new design doc would turn this
+        # red for no reason. Require the count marker to exist and the entry to be
+        # indexed; docs_audit already checks the number against the real maximum.
+        self.assertRegex(index, r"编号 00–\d+（\d+ 份")
         self.assertIn("127-前端demo与skill框架的系统性反思和改进", index)
 
 

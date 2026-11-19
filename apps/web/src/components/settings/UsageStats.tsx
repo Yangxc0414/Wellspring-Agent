@@ -509,7 +509,11 @@ export function UsageStats() {
           <span className="quiet-chip">{runtimeCalls.length} calls</span>
         </div>
         {runtimeCallError ? (
-          <p className="settings-empty">runtime 未连接；当前只显示本地估算。{runtimeCallError}</p>
+          <p className="settings-empty">
+            {__STATIC_ONLY__
+              ? "静态演示构建：runtime 在构建时已禁用，这里只有本地估算，没有真实 API 调用记录。"
+              : `runtime 未连接；当前只显示本地估算。${runtimeCallError}`}
+          </p>
         ) : runtimeCalls.length ? (
           <div className="settings-kv-list">
             {runtimeCalls.slice(0, 8).map((call, index) => (

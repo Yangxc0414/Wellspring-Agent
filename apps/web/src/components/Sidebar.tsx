@@ -102,7 +102,11 @@ export function Sidebar() {
         `后端运行计划 ${plan.fingerprint.slice(-8)} 已生成：${plan.stages.length} 阶段，停在 ${plan.stop_at}`
       );
     } catch {
-      actions.notify("已切换到全自动；runtime 离线，使用本地阶段计划");
+      actions.notify(
+        __STATIC_ONLY__
+          ? "已切换到全自动；静态演示构建不含 runtime，使用本地阶段计划推演"
+          : "已切换到全自动；runtime 离线，使用本地阶段计划"
+      );
     }
   };
 

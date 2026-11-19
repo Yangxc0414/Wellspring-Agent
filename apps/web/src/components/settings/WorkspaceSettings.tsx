@@ -283,7 +283,12 @@ export function MemorySettingsPage() {
           ) : (
             <div className="settings-boundary">
               <Icon name="shield" size={14} />
-              <span>未连接本地 runtime（{runtimeBaseLabel()}）。本地记忆仍可用；启动 `python -m research_agent.runtime` 后可同步。{remoteError && <small> {remoteError}</small>}</span>
+              <span>
+                {__STATIC_ONLY__
+                  ? "静态演示构建：runtime 在构建时已禁用。本地记忆仍可编辑并保存在浏览器；跨端同步请在本地 CLI 工作台进行。"
+                  : `未连接本地 runtime（${runtimeBaseLabel()}）。本地记忆仍可用；启动 \`python -m research_agent.runtime\` 后可同步。`}
+                {!__STATIC_ONLY__ && remoteError && <small> {remoteError}</small>}
+              </span>
             </div>
           )}
         </Card>
@@ -610,10 +615,16 @@ export function RuntimeSettingsPage() {
             <div><span>model store</span><b>{health.model_store ?? "—"}</b></div>
           </div>
         ) : (
-          <div className="settings-boundary">
-            <Icon name="shield" size={14} />
-            <span>{loading ? "正在连接本地 runtime…" : "未连接本地 runtime。启动：python -m research_agent.runtime --port 8787"}</span>
-          </div>
+            <div className="settings-boundary">
+              <Icon name="shield" size={14} />
+              <span>
+                {__STATIC_ONLY__
+                  ? "静态演示构建：runtime 在构建时已禁用，浏览器不会发起本地连接。真实运行 / 队列 / 签核请在本地 CLI 工作台查看。"
+                  : loading
+                    ? "正在连接本地 runtime…"
+                    : "未连接本地 runtime。启动：python -m research_agent.runtime --port 8787"}
+              </span>
+            </div>
         )}
       </Card>
       <Card title="Signer 身份" description="本地 HMAC signer；runtime 只读，创建与签核只在 CLI。">
@@ -865,7 +876,11 @@ export function ArchiveSettingsPage() {
           ) : (
             <div className="settings-boundary">
               <Icon name="shield" size={14} />
-              <span>未连接本地 runtime。{remoteError && ` ${remoteError}`}</span>
+              <span>
+                {__STATIC_ONLY__
+                  ? "静态演示构建：runtime 归档在构建时已禁用；这里只显示浏览器内归档记录。"
+                  : `未连接本地 runtime。${remoteError ?? ""}`}
+              </span>
             </div>
           )}
         </Card>
