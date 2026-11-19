@@ -136,7 +136,7 @@ const MessageView = memo(function MessageView({ item }: { item: Message }) {
 
   const isUser = item.role === "user";
   return (
-    <div className={`message${isUser ? " is-user" : ""}`}>
+    <div className={`message${isUser ? " is-user" : ""}`} data-stage={item.stage}>
       <div className="avatar" aria-hidden="true">
         {isUser ? "YOU" : <Icon name="logo" size={14} />}
       </div>
@@ -182,6 +182,7 @@ export function Conversation() {
   const task = useWorkspaceStore(selectCurrentTask);
   const autoScroll = useWorkspaceStore((state) => state.preferences.autoScroll);
   const reduceMotion = useWorkspaceStore((state) => state.preferences.reduceMotion);
+  const focusStage = useWorkspaceStore((state) => state.ui.focusStage);
   const threadRef = useRef<HTMLDivElement>(null);
   const messageCount = task?.messages.length ?? 0;
   const autoIndex = task?.auto.index ?? 0;
@@ -218,6 +219,21 @@ export function Conversation() {
   useEffect(() => {
     replayInitialCount.current = null;
   }, [task?.id]);
+
+  // Flow node -> conversation jump: scroll the first message tagged with the
+  // clicked stage into view and flash a highlight so the presenter's point is
+  // visible. tick makes repeated clicks on the same node re-trigger.
+  useEffect(() => {
+    if (!focusStage || !threadRef.current) return;
+    const target = threadRef.current.querySelector<HTMLElement>(
+      `[data-stage="${focusStage.id}"]`
+    );
+    if (!target) return;
+    target.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+    target.classList.add("is-stage-focused");
+    const timer = window.setTimeout(() => target.classList.remove("is-stage-focused"), 2200);
+    return () => window.clearTimeout(timer);
+  }, [focusStage, reduceMotion]);
 
   return (
     <main className="conversation">

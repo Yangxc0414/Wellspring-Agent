@@ -6459,6 +6459,30 @@ select.control {
   color: var(--amber);
   background: var(--amber-dim);
 }
+.flow-stage-jump {
+  margin-left: auto;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.45;
+}
+.flow-stage-head:hover .flow-stage-jump,
+.flow-stage-jump:focus-visible {
+  opacity: 1;
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+.flow-stage-jump:focus-visible {
+  outline: 2px solid var(--accent);
+}
 .flow-stage-body {
   background: var(--surface-2);
   border: 1px solid var(--line);

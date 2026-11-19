@@ -194,7 +194,9 @@ export function ArtifactCard({ card }: { card: Card }) {
   if (card.type === "run") {
     const claim = task?.evidence.find((item) => item.kind === "claim");
     const claimLabel = claimSignatureLabel(claim);
-    const delta = card.mean - card.baseline;
+    // Round to a readable precision: raw float subtraction leaks long tails
+    // like "+0.21200000000000002" into a demo card.
+    const delta = Number((card.mean - (card.baseline ?? 0)).toFixed(4));
     return (
       <article className="artifact">
         <CardHead label={`RUN / ${card.id}`} meta="EA SEALED" />

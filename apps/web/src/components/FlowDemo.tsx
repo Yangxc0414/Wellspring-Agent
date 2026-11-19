@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useWorkspaceStore } from "../state/workspaceStore";
 
 /**
  * Front-end walkthrough of the whole research flow, S1 survey -> META.
@@ -127,6 +128,23 @@ export function FlowDemo() {
   const [step, setStep] = useState(0);
   const [signed, setSigned] = useState(false);
   const [open, setOpen] = useState<number | null>(0);
+  const setUI = useWorkspaceStore((state) => state.actions.setUI);
+  const notify = useWorkspaceStore((state) => state.actions.notify);
+  const currentMessages = useWorkspaceStore(
+    (state) => state.tasks.find((t) => t.id === state.selectedTaskId)?.messages ?? []
+  );
+
+  // Clicking a flow node expands its detail AND jumps the conversation thread
+  // to the first message tagged with that stage, so a presenter can point at a
+  // stage and see the corresponding evidence/action in the transcript.
+  const focusInThread = (stageId: string) => {
+    const hasStage = currentMessages.some((m) => m.stage === stageId);
+    if (!hasStage) {
+      notify(`当前会话没有「${stageId}」的定位消息；切到「完整闭环」会话可体验阶段↔会话联动`);
+      return;
+    }
+    setUI({ focusStage: { id: stageId, tick: Date.now() } });
+  };
 
   const signDemo = () => {
     if (step < SIGN_STEP || signed) return;
@@ -206,14 +224,38 @@ export function FlowDemo() {
               <button
                 type="button"
                 className="flow-stage-head"
-                onClick={() => setOpen(open === i ? null : i)}
+                onClick={() => {
+                  setOpen(open === i ? null : i);
+                  focusInThread(stage.id);
+                }}
                 aria-expanded={open === i}
+                title="展开详情，并定位到历史会话中该阶段对应的消息"
               >
                 <span className="flow-stage-mark">{done(i) ? "✓" : stage.human ? "人" : "·"}</span>
                 <span className="flow-stage-id">{stage.id}</span>
                 <span className="flow-stage-label">{stage.label}</span>
                 {stage.gate ? <span className="flow-stage-gate">{stage.gate}</span> : null}
                 {stage.human ? <span className="flow-stage-human">人工</span> : null}
+                <span
+                  className="flow-stage-jump"
+                  role="button"
+                  tabIndex={0}
+                  title="跳到会话中对应消息"
+                  aria-label={`跳到会话中 ${stage.id} ${stage.label} 对应的消息`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    focusInThread(stage.id);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      focusInThread(stage.id);
+                    }
+                  }}
+                >
+                  ↗
+                </span>
               </button>
               {open === i ? (
                 <div className="flow-stage-body">

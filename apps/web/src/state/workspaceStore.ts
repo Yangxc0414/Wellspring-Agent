@@ -141,7 +141,8 @@ const defaultUI: UIState = {
   filesOpen: false,
   filesWorkspaceId: "",
   focusComposerTick: 0,
-  claimGateOpen: false
+  claimGateOpen: false,
+  focusStage: null
 };
 
 export interface ToastState {

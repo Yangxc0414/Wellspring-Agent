@@ -1078,6 +1078,19 @@
   animation: message-rise 0.24s ease both;
 }
 
+/* Flashed when a RESEARCH FLOW node jumps the thread to this stage's message. */
+.message.is-stage-focused .bubble {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim), var(--shadow-soft);
+  animation: stage-focus-pulse 2.2s ease both;
+}
+@keyframes stage-focus-pulse {
+  0% { background: var(--accent-dim-strong); }
+  25% { background: var(--surface); }
+  45% { background: var(--accent-dim); }
+  100% { background: var(--surface); }
+}
+
 .message.is-user {
   margin-left: auto;
   flex-direction: row-reverse;

@@ -77,6 +77,11 @@ function user(text: string, at = "08:32:10"): Message {
   return { id: uid("msg"), role: "user", at, text };
 }
 
+/** Tag a message with its flow stage so a flow node can jump to it in the thread. */
+function withStage(message: Message, stage: string): Message {
+  return { ...message, stage };
+}
+
 function freshStages(): AutoStage[] {
   return AUTO_STAGE_CATALOG.map((stage) => ({ ...stage, status: "pending" }));
 }
@@ -665,7 +670,7 @@ export function seedFullChainDemo(): ResearchTask {
         "10:00:00"
       ),
       user("从一份文献开始，完整演示一遍：系统怎么把问题变成可追溯的结论，再怎么把经验留下来。", "10:00:12"),
-      agent(
+      withStage(agent(
         "第一步不是找答案，是把问题拆成可检索的子问题，并先写清楚「什么算证据」。摘要-only 只作线索。",
         planCard(
           ["perovskite interface passivation damp heat", "passivation layer defect density T80", "双分子钝化 湿热稳定性 配对对照"],
@@ -674,20 +679,20 @@ export function seedFullChainDemo(): ResearchTask {
           "没有全文不生成 span；coverage gap 单独登记。"
         ),
         "10:00:40"
-      ),
+      ), "S1"),
       user("先查界面钝化与湿热稳定性的证据，重点看有没有配对定量对照。", "10:01:05"),
-      agent(
+      withStage(agent(
         "**S1 检索完成** · 4 sources / 12 spans / 2 gaps\n\n- 3 条全文，1 条摘要-only（只登记为线索）\n- 湿热配对对照仍是空白\n\n> 检索产物是 SourceHit + span，不是结论。",
         sourcesCard(),
         "10:02:18"
-      ),
-      agent(
+      ), "S1"),
+      withStage(agent(
         "### S2–S3：从 gap 到候选假设\n配对定量对照缺失，足以支撑一个可否证的假设，但还不够支撑 claim。\n\n> 候选不是 claim；G1 必须人工收敛。",
         ideaCard(),
         "10:02:44"
-      ),
+      ), "S2–S3"),
       user("G1：收敛到 H1（钝化层降低缺陷密度 → 延长 T80），H2 作为竞争假设保留。", "10:03:20"),
-      agent(
+      withStage(agent(
         "**G1 已收敛** · H1 主假设 / H2 竞争假设。\n\n下一步冻结设计。这一步必须人来确认——预注册一旦定稿，主指标就不能改。",
         {
           type: "gate",
@@ -697,8 +702,8 @@ export function seedFullChainDemo(): ResearchTask {
           status: "pass"
         },
         "10:03:38"
-      ),
-      agent(
+      ), "S2–S3"),
+      withStage(agent(
         "### S4：设计冻结（预注册）\n协议先于数据：假设、基线、主指标、seeds、对照组都在这里定死。执行器之后只做提取与统计。",
         {
           type: "protocol",
@@ -710,9 +715,9 @@ export function seedFullChainDemo(): ResearchTask {
           status: "G2 needs_human（本演示已确认）"
         },
         "10:04:02"
-      ),
+      ), "S4"),
       user("G2：确认协议，按 3 seeds 跑。", "10:04:30"),
-      agent(
+      withStage(agent(
         "**G2 已冻结** · 协议哈希绑定；执行器无权改主指标或协议。",
         {
           type: "gate",
@@ -722,8 +727,8 @@ export function seedFullChainDemo(): ResearchTask {
           status: "pass"
         },
         "10:04:48"
-      ),
-      agent(
+      ), "S4"),
+      withStage(agent(
         "**S5a 执行完成** · RUN-014 / 3 seeds。\n\nR² 0.164（对照 −0.048）。这是演示代理指标；协议主指标 T80 需真实实验。数据与代码版本写入 capsule。",
         {
           type: "run",
@@ -737,8 +742,8 @@ export function seedFullChainDemo(): ResearchTask {
           ea: "EA-7c41"
         },
         "10:05:55"
-      ),
-      agent(
+      ), "S5a"),
+      withStage(agent(
         "### S5b：证据判定\nverdict 是两态加一道 underpowered 守卫：区间跨零、样本不足时明确标注「too few to interpret a sign」，不把「没测出差异」写成「无效」。负结果如实保留。",
         {
           type: "gate",
@@ -748,15 +753,20 @@ export function seedFullChainDemo(): ResearchTask {
           status: "needs_human"
         },
         "10:06:20"
-      ),
+      ), "S5b"),
+      withStage(agent(
+        "**S6 结果图**：SVG 主图与 manifest 绑定 EA；上游数据变更后，受影响的图会被标 stale 并暂停导出，不会拿旧图配新结论。",
+        undefined,
+        "10:06:35"
+      ), "S6"),
       user("写作阶段怎么保证不先填数？", "10:06:50"),
-      agent(
+      withStage(agent(
         "**S8–S12 写作槽位**：Results / Figure / Abstract 全部 locked。\n\n槽位只接受已签 claim / EA / closure 引用；正文不会先于证据填数。",
         writingCard({ protocolFrozen: true, claimSigned: false }),
         "10:07:12"
-      ),
+      ), "S8–S12"),
       user("现在能签了吗？", "10:07:40"),
-      agent(
+      withStage(agent(
         "还不能由我签。证据链五段：\n\n- 来源 ✓　片段 ✓　运行记录 ✓　证据制品 ✓\n- 断言 · 待人工\n\nclosure 只核对四件产物一致性；签名只能在本地 CLI 产生，网页不代签。",
         {
           type: "gate",
@@ -766,17 +776,17 @@ export function seedFullChainDemo(): ResearchTask {
           status: "blocked"
         },
         "10:08:00"
-      ),
+      ), "S13–S16"),
       system(
         "待人工：run claim → closure check → closure sign。签完 Results 槽位解锁、徽章变 SIGNED；未签时不宣称已闭合。",
         "10:08:12"
       ),
       user("这一轮有什么经验能留下给下次用？", "10:08:40"),
-      agent(
+      withStage(agent(
         "**META 自改进提案**：把「检索前追加 review 子查询」写进方法插件，不训练模型权重。\n\nlease 未授予前不生效；采纳决定由人做。",
         { type: "evolution", candidate: makeCandidate() },
         "10:09:05"
-      ),
+      ), "META"),
       agent(
         "### 边界与反思\n- 版本迭代不改骨架（S1→META 固定）\n- 单题参数不上长为通用默认\n- 新版本不追认旧结果\n\n↑ 这三条保证「自改进」不会把一次性观察写成永远适用的规则。",
         undefined,

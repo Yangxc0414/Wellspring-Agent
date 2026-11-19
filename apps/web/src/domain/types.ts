@@ -797,6 +797,8 @@ export interface Message {
   at: string;
   text: string;
   card?: Card;
+  /** Flow stage this message belongs to (e.g. "S4"). Enables flow-node -> message jump. */
+  stage?: string;
 }
 
 export interface ResearchTask {
@@ -908,6 +910,8 @@ export interface UIState {
   filesWorkspaceId: string;
   focusComposerTick: number;
   claimGateOpen: boolean;
+  /** Flow-node -> conversation jump. tick forces re-trigger on repeated clicks. */
+  focusStage: { id: string; tick: number } | null;
 }
 
 export interface PersistedWorkspace {
