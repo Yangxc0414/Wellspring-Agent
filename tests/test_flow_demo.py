@@ -13,7 +13,7 @@ class FlowDemoTest(unittest.TestCase):
     def test_registered_as_default_tab(self):
         self.assertIn('"ese" | "flow"', TYPES)
         self.assertIn('{ id: "flow", label: "演示流程" }', PANEL)
-        self.assertIn('tab === "flow" && <FlowDemo />', PANEL)
+        self.assertIn('tab === "flow" && <FlowDemo key={task.id} />', PANEL)
         self.assertIn('contextTab: "flow"', STORE)
 
     def test_demo_never_writes_or_fakes_a_signature(self):
