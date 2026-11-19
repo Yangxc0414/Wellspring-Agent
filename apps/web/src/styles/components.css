@@ -6321,6 +6321,14 @@ select.control {
 .flow-banner p b {
   color: var(--coral);
 }
+.flow-banner .flow-banner-hint {
+  padding-top: 6px;
+  border-top: 1px dashed var(--line-strong);
+  color: var(--muted);
+}
+.flow-banner .flow-banner-hint b {
+  color: var(--accent-deep);
+}
 .flow-controls {
   display: flex;
   flex-wrap: wrap;

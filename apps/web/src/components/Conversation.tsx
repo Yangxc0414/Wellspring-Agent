@@ -32,6 +32,12 @@ function TaskHeader() {
         ).size
       )
     : task.completedStages.length;
+  // For a progressed replay the mode kicker ("RESEARCH / S1–S3") contradicts the
+  // stage counter (e.g. 8/9). Show the actual stage the session has reached.
+  const currentStage = task.autoStages[Math.min(task.stage, task.autoStages.length - 1)];
+  const stageKicker = completedCount > 1 && currentStage
+    ? `${meta.kicker.split(" / ")[0]} / ${currentStage.id} · ${currentStage.label}`
+    : meta.kicker;
   const statusLabel = runtimeCard
     ? runtimeLabel
     : task.auto.running
@@ -64,7 +70,7 @@ function TaskHeader() {
         <div className="task-kicker">
           <span>{workspace?.name ?? "WORKSPACE"}</span>
           <i>/</i>
-          <span>{meta.kicker}</span>
+          <span>{stageKicker}</span>
           <span className={`run-led ${task.auto.running && !task.auto.paused ? "is-live" : ""}`} />
           <span>{statusLabel}</span>
         </div>
@@ -180,13 +186,38 @@ export function Conversation() {
   const messageCount = task?.messages.length ?? 0;
   const autoIndex = task?.auto.index ?? 0;
 
+  // A static replay is a recorded walkthrough: start at the top so a demo
+  // presenter can tell the story from the first question, not land on the
+  // closing message. A live chat still follows the newest message.
+  const isReplay = Boolean(
+    task?.messages.some(
+      (item) => item.role === "system" && item.text.startsWith("STATIC ")
+    )
+  );
+  // Remember the message count at mount so the first paint of a replay sits at
+  // the top, but a message added later by a demo action still scrolls into view.
+  const replayInitialCount = useRef<number | null>(null);
   useEffect(() => {
-    if (!autoScroll || !threadRef.current) return;
+    if (!threadRef.current) return;
+    if (isReplay && replayInitialCount.current === null) {
+      replayInitialCount.current = messageCount;
+      threadRef.current.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
+    const initial = replayInitialCount.current;
+    if (isReplay && initial !== null && messageCount <= initial) {
+      threadRef.current.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
+    if (!autoScroll) return;
     threadRef.current.scrollTo({
       top: threadRef.current.scrollHeight,
       behavior: reduceMotion ? "auto" : "smooth"
     });
-  }, [messageCount, autoIndex, autoScroll, reduceMotion]);
+  }, [messageCount, autoIndex, autoScroll, reduceMotion, isReplay, task?.id]);
+  useEffect(() => {
+    replayInitialCount.current = null;
+  }, [task?.id]);
 
   return (
     <main className="conversation">

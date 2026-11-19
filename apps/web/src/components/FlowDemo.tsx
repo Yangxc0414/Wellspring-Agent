@@ -155,6 +155,9 @@ export function FlowDemo() {
           从文献检索一路走到结论签署与自改进。这是<b>前端推演</b>：所有状态只在页面内存中，「模拟人签」不会生成真实
           signature.json；真实签名仍须在本地 CLI 执行。刷新页面即回到待签。
         </p>
+        <p className="flow-banner-hint">
+          和左侧会话的分工：<b>左侧是"已走完整场"的回放</b>（可以直接读每一轮结论）；<b>这里是从第 0 步亲手推一遍</b>的教学版——所以进度各自独立，按「推进下一步」走给你看即可。
+        </p>
       </div>
 
       <div className="flow-controls">
