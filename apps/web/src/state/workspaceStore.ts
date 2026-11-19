@@ -200,6 +200,7 @@ interface WorkspaceActions {
   runExperiment: () => void;
   signClaim: () => void;
   closeClaimGate: () => void;
+  openClaimGate: () => void;
   previewDemoClaim: () => void;
   resetDemoClaim: () => void;
   importSignedClaim: (record: SignedClaimRecord, scopeWarning?: string) => void;
@@ -2092,6 +2093,11 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
       },
       closeClaimGate: () => {
         set((state) => ({ ui: { ...state.ui, claimGateOpen: false } }));
+      },
+      openClaimGate: () => {
+        // Read-only entry: opening the panel to inspect where a signature came
+        // from must not pause an autopilot run or roll G5 back to blocked.
+        set((state) => ({ ui: { ...state.ui, claimGateOpen: true, paletteOpen: false } }));
       },
       previewDemoClaim: () => {
         if (!__STATIC_ONLY__) {

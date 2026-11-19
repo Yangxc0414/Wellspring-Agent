@@ -285,6 +285,40 @@
   font-style: normal;
 }
 
+/* Capability label: lets a viewer tell "real / demo / needs CLI" at a glance. */
+.settings-cap {
+  margin-left: 8px;
+  padding: 2px 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: calc(9px * var(--settings-font-scale));
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  cursor: help;
+}
+.settings-cap.is-real {
+  border-color: rgba(15, 138, 158, 0.22);
+  background: var(--teal-dim);
+  color: var(--teal);
+}
+.settings-cap.is-demo {
+  border-color: rgba(154, 107, 30, 0.25);
+  background: var(--amber-dim);
+  color: var(--amber);
+}
+.settings-cap.is-cli {
+  border-color: rgba(180, 83, 9, 0.25);
+  background: var(--coral-dim);
+  color: var(--coral);
+}
+.settings-cap.is-runtime {
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+  color: var(--faint);
+}
+
 .settings-section-body {
   display: flex;
   flex-direction: column;

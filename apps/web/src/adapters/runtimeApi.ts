@@ -1,6 +1,7 @@
 import type { AutomationPlan, EvidencePackage, MemoryKind } from "../domain/types";
 import type { AutopilotSnapshot, ClosureInventory, ProjectExperimentInventory, ProjectSummary } from "../domain/types";
 
+import { requireRuntime } from "../domain/capabilities";
 import { authHeaders, describeAuthRefusal } from "./runtimeAuth";
 
 const runtimeBase = (import.meta.env.VITE_RUNTIME_URL ?? "").replace(/\/$/, "");
@@ -659,7 +660,7 @@ export interface SnapshotResult<T> {
 }
 
 async function request<T>(path: string, init?: RequestInit, timeoutMs = 2600): Promise<T> {
-  if (__STATIC_ONLY__) throw new Error("runtime disabled in static build");
+  requireRuntime(path);
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {

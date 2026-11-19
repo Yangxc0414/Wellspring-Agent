@@ -2,6 +2,7 @@ import type { ModelProfile } from "../domain/types";
 import type { ApiFormat } from "../domain/modelCatalog";
 import type { ModelProviderEntry } from "../state/modelStore";
 
+import { requireRuntime } from "../domain/capabilities";
 import { authHeaders, describeAuthRefusal } from "./runtimeAuth";
 
 const runtimeBase = (import.meta.env.VITE_RUNTIME_URL ?? "").replace(/\/$/, "");
@@ -68,7 +69,7 @@ async function requestJson(
   path: string,
   body?: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
-  if (__STATIC_ONLY__) throw new Error("runtime disabled in static build");
+  requireRuntime(path);
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), 3200);
   try {
@@ -90,10 +91,9 @@ async function requestJson(
 }
 
 async function getJson(path: string): Promise<Record<string, unknown>> {
-  // Static builds have no runtime (disabled at compile time). Bail before the
-  // fetch so the demo does not emit 404s for /api/models in the console; the
-  // caller's catch path already renders an honest "static build" message.
-  if (__STATIC_ONLY__) throw new Error("runtime disabled in static build");
+  // Bail before the fetch in a static build so the demo never emits 404s for
+  // /api/models; the caller's catch path renders an honest "static build" note.
+  requireRuntime(path);
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), 5000);
   try {

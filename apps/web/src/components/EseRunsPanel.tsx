@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { runtimeAvailable } from "../domain/capabilities";
 
 type EseRun = {
   study_id: string;
@@ -415,8 +416,14 @@ export function EseRunsPanel() {
         </div>
         {state.runs.length === 0 ? (
           <p className="context-note">
-            本地 runtime 未运行且没有静态快照。运行 <code>python -m research_agent runtime serve</code> 后，
-            这里会列出 runtime_data 里的 ESE 研究。
+            {runtimeAvailable ? (
+              <>
+                本地 runtime 未运行且没有静态快照。运行 <code>python -m research_agent runtime serve</code> 后，
+                这里会列出 runtime_data 里的 ESE 研究。
+              </>
+            ) : (
+              <>静态演示构建：runtime 在构建时已禁用且没有 ESE 快照；真实运行结果请在本地 CLI 工作台查看。</>
+            )}
           </p>
         ) : (
           <table className="ese-runs-table">

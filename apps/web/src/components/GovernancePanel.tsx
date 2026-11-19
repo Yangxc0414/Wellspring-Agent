@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { runtimeAvailable } from "../domain/capabilities";
 import { loadGovernancePreflight } from "../adapters/runtimeApi";
 import type { GovernancePreflight } from "../adapters/runtimeApi";
 
@@ -45,8 +46,10 @@ export function GovernancePanel() {
       <section className="context-card">
         <div className="card-label"><span>GOVERNANCE</span><em>UNAVAILABLE</em></div>
         <p className="rsi-headline">
-          没有连上本地 runtime，无法读取治理链状态。启动 `python -m research_agent runtime serve` 后重试。
-          {error ? ` （${error}）` : ""}
+          {runtimeAvailable
+            ? "没有连上本地 runtime，无法读取治理链状态。启动 `python -m research_agent runtime serve` 后重试。"
+            : "静态演示构建：runtime 在构建时已禁用，治理链状态只在本地 CLI 工作台可见。"}
+          {runtimeAvailable && error ? ` （${error}）` : ""}
         </p>
       </section>
     );

@@ -50,8 +50,11 @@ class SettingsRealAvailabilityTest(unittest.TestCase):
         self.assertIn("静态演示构建：runtime 在构建时已禁用，模块绑定只在本地 CLI 可用", BINDINGS)
 
     def test_model_runtime_never_fetches_in_static_build(self):
-        # both request helpers must bail before fetch, otherwise the demo logs 404s
-        self.assertEqual(MODEL_RT.count('if (__STATIC_ONLY__) throw new Error("runtime disabled in static build");'), 2)
+        # Both request helpers must refuse to fetch in a static build. The guard
+        # now lives in capabilities.ts (design/129), so assert the call site
+        # rather than the old inline literal.
+        self.assertEqual(MODEL_RT.count("requireRuntime(path)"), 2)
+        self.assertNotIn("__STATIC_ONLY__", MODEL_RT)
 
     def test_sidebar_automation_fallback_is_accurate(self):
         self.assertIn("静态演示构建不含 runtime", SIDEBAR)

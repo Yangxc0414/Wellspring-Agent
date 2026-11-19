@@ -3,6 +3,8 @@ import { APP_VERSION, BUILD_DATE } from "../../domain/catalog";
 import type { SettingsSection } from "../../domain/types";
 import { usePreviewStore } from "../../state/previewStore";
 import { useWorkspaceStore } from "../../state/workspaceStore";
+import { CAPABILITY_META, runtimeAvailable } from "../../domain/capabilities";
+import type { CapabilityLevel } from "../../domain/capabilities";
 import { Icon } from "../Icon";
 import type { IconName } from "../Icon";
 import { LineagePage } from "./LineagePage";
@@ -74,6 +76,30 @@ const NAV_GROUPS: Array<{
   }
 ];
 
+/**
+ * What each settings surface can actually do here, per the design/128 audit.
+ * Declared once so the header can label it instead of making the user read the
+ * whole page to find out whether a toggle is real, demo-only, or needs the CLI.
+ */
+const SECTION_CAPABILITY: Record<SettingsSection, CapabilityLevel> = {
+  general: "real",
+  appearance: "real",
+  shortcuts: "real",
+  commands: "demo",
+  model: "real",
+  memory: "real",
+  agents: "demo",
+  plugins: "demo",
+  evolution: "demo",
+  runtime: "runtime",
+  usage: "real",
+  lineage: "demo",
+  archive: "real",
+  data: "real",
+  guide: "demo",
+  about: "real",
+};
+
 const SECTION_META: Record<SettingsSection, { group: string; label: string }> = NAV_GROUPS.reduce(
   (meta, group) => {
     for (const item of group.items) meta[item.id] = { group: group.label, label: item.label };
@@ -135,6 +161,9 @@ export function SettingsPage() {
   const navRef = useRef<HTMLElement>(null);
   const activeSection = welcomeOpen && TASK_SECTIONS.has(section) ? "general" : section;
   const meta = SECTION_META[activeSection];
+  // "needs runtime" collapses to "real" when this build actually ships a runtime.
+  const declared = SECTION_CAPABILITY[activeSection];
+  const capability: CapabilityLevel = declared === "runtime" && runtimeAvailable ? "real" : declared;
   const backLabel = origin.kind === "welcome" ? "返回欢迎页" : `返回任务 · ${origin.label}`;
 
   useEffect(() => {
@@ -228,6 +257,9 @@ export function SettingsPage() {
                 <span>{meta.group}</span>
                 <i>/</i>
                 <span>{meta.label}</span>
+                <span className={`settings-cap is-${capability}`} title={CAPABILITY_META[capability].hint}>
+                  {CAPABILITY_META[capability].label}
+                </span>
               </div>
               <SectionContent section={activeSection} />
             </div>

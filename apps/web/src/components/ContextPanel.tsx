@@ -6,6 +6,7 @@ import type { AutopilotSnapshot, AutoStage, Card, ClosureInventory, ContextTab, 
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { claimSignCommand, closureSignCommand, experimentApproveCommands, protocolFreezeCommand } from "../domain/gateCommands";
 import { claimSignatureLabel } from "../domain/claimSignature";
+import { runtimeAvailable } from "../domain/capabilities";
 import { hypothesisConvergence, literatureCoverage } from "../domain/researchBrief";
 import { defaultRuntimeSource, runtimeRunState, runtimeSourceLabel } from "../domain/runtimeSnapshot";
 import type { ResearchCheck } from "../domain/researchBrief";
@@ -306,7 +307,14 @@ function StageDetailBody({ task, stage, index }: { task: ResearchTask; stage: Au
           <span>EA<b>{task.run?.ea ?? "NOT SEALED"}</b></span>
         </div>
         <div className="stage-detail-actions">
-          <StageAction primary onClick={actions.signClaim}>
+          <StageAction
+            primary
+            onClick={
+              claimLabel.state === "unsigned" || claimLabel.state === "missing"
+                ? actions.signClaim
+                : actions.openClaimGate
+            }
+          >
             {claimLabel.state === "unsigned" || claimLabel.state === "missing"
               ? "签署 claim · 人工门"
               : "查看 claim 签署来源"}
@@ -1212,7 +1220,24 @@ function ProjectExperimentInventoryPanel() {
     };
   }, [active]);
 
-  if (!projects.length && !loading && !error) return null;
+  if (!projects.length && !loading && !error) {
+    // An empty tab with no explanation reads as broken. State what is missing
+    // and where the real inventory comes from.
+    return (
+      <section className="context-section project-experiments">
+        <div className="section-title">
+          <span>PROJECT EXPERIMENTS</span>
+          <em>EMPTY</em>
+        </div>
+        <p className="context-note">
+          还没有登记项目实验链。这一栏读取 runtime 的 `project-experiments` 清单；
+          {runtimeAvailable
+            ? "启动本地 runtime 并登记项目后会出现在这里。"
+            : "静态演示构建不含 runtime，真实清单请在本地 CLI 工作台查看。"}
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="context-section project-experiments">
@@ -1778,6 +1803,7 @@ function RuntimeLoopMap({ task }: { task: ResearchTask }) {
 function EvidenceContext({ task }: { task: ResearchTask }) {
   const actions = useWorkspaceStore((state) => state.actions);
   const claim = task.evidence.find((item) => item.kind === "claim");
+  const claimLabel = claimSignatureLabel(claim);
   const closure = task.gates.find((gate) => gate.id === "G5");
   const packages = task.evidencePackages ?? [];
   const packageReady = packages.filter((item) => item.status === "ready").length;
@@ -1790,7 +1816,7 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
   const nodes = [
     { label: "来源", title: "SOURCE HIT：检索到的文献/仓库，只是线索，不是证据", value: `${task.coverage.sources} sources`, state: task.coverage.sources ? "ok" : "idle" },
     { label: "片段", title: "SPAN：能指回原文的具体句子；摘要-only 不算证据", value: `${task.coverage.spans} located`, state: task.coverage.spans ? "ok" : "idle" },
-    { label: "断言", title: "CLAIM：一句可检验的话 + 数值断言；必须由人签署", value: claim ? (claim.status === "signed" ? "signed" : "unsigned") : "none", state: claim?.status === "signed" ? "ok" : claim ? "warn" : "idle" },
+    { label: "断言", title: "CLAIM：一句可检验的话 + 数值断言；必须由人签署", value: claim ? claimLabel.short : "none", state: claimLabel.state === "signed-cli" || claimLabel.state === "signed-import" ? "ok" : claim ? "warn" : "idle" },
     { label: "证据", title: "EA：结果文件被哈希钉住；改动会被发现", value: task.run ? task.run.ea : "not sealed", state: task.run ? "ok" : "idle" },
     { label: "闭合", title: "CLOSURE：再核对四件产物一致；不一致就 blocked", value: closure?.status === "pass" ? "pass" : task.run ? "locked" : "n/a", state: closure?.status === "pass" ? "ok" : task.run ? "warn" : "idle" }
   ];
@@ -1836,7 +1862,7 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
           <div><b>{task.coverage.spans}</b><span>SPANS</span></div>
           <div><b>{task.coverage.gaps}</b><span>GAPS</span></div>
           <div><b>{task.coverage.abstractOnly}</b><span>ABSTRACT-ONLY</span></div>
-          <div><b>{claim?.status === "signed" ? 1 : 0}</b><span>SIGNED CLAIMS</span></div>
+          <div><b>{claimLabel.state === "signed-cli" || claimLabel.state === "signed-import" ? 1 : 0}</b><span>SIGNED CLAIMS</span></div>
         </div>
       </section>
 
@@ -2156,7 +2182,11 @@ function EvolutionRuntimeContext() {
         </div>
       ) : (
         <p className="context-empty">
-          {error ? `runtime 不可达：${error}` : "还没有 runtime observation；跑完一次 job 后自动写入，但不会成为证据。"}
+          {!runtimeAvailable
+            ? "静态演示构建：runtime 在构建时已禁用，这里没有 observation 数据。"
+            : error
+              ? `runtime 不可达：${error}`
+              : "还没有 runtime observation；跑完一次 job 后自动写入，但不会成为证据。"}
         </p>
       )}
       <p className="run-hint">
@@ -2363,6 +2393,7 @@ function BriefContext({ task }: { task: ResearchTask }) {
   const actions = useWorkspaceStore((state) => state.actions);
   const stage = briefStage(task);
   const claim = task.evidence.find((item) => item.kind === "claim");
+  const claimLabel = claimSignatureLabel(claim);
   const closure = task.gates.find((gate) => gate.id === "G5");
   const blockers = task.gates.filter((gate) => gate.status === "needs_human" || gate.status === "blocked");
   const reviews = task.reviewPack;
@@ -2428,7 +2459,13 @@ function BriefContext({ task }: { task: ResearchTask }) {
           <div className="brief-row"><b>G2 协议</b><p>{task.protocolFrozen
             ? (task.runtime ? "runtime 证据：ProtocolCard 已冻结" : "演示推进；真实 G2 由 CLI 冻结")
             : "待人工冻结；网页不代为冻结"}</p></div>
-          <div className="brief-row"><b>claim</b><p>{claim?.status === "signed" ? "已签署（证据来自 CLI）；不是浏览器生成" : "待人工签署；写作与导出保持锁定"}</p></div>
+          <div className="brief-row"><b>claim</b><p>{
+            claimLabel.state === "signed-demo"
+              ? "演示态预览：未产生真实签名；closure 与导出仍需 CLI 人签"
+              : claimLabel.state === "signed-cli" || claimLabel.state === "signed-import"
+                ? `已签署（${claimLabel.state === "signed-import" ? "导入的 CLI 产物" : "本地 CLI"}）；不是浏览器生成`
+                : "待人工签署；写作与导出保持锁定"
+          }</p></div>
           <div className="brief-row"><b>最近 review</b><p>{reviews ? `${reviews.summary} · ${reviews.generatedAt}` : "尚未运行 Review Pack"}</p></div>
           {artifacts.map((artifact) => <div className="brief-row" key={artifact}><p>{artifact}</p></div>)}
         </div>

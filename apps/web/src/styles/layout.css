@@ -1744,6 +1744,10 @@
 .context-tabs {
   display: flex;
   gap: 1px;
+  /* Eight tabs overflow a narrow context panel. Wrap instead of clipping so
+     EVOLUTION / EVAL / ESE stay reachable below ~1150px. */
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .context-tabs button {

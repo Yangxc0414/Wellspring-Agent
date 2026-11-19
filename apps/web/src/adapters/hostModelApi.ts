@@ -7,6 +7,7 @@
  * capability output, never a signature: gates and audits are unchanged.
  */
 
+import { requireRuntime } from "../domain/capabilities";
 import { authHeaders, describeAuthRefusal } from "./runtimeAuth";
 
 const runtimeBase = (import.meta.env.VITE_RUNTIME_URL ?? "").replace(/\/$/, "");
@@ -59,7 +60,7 @@ export interface HostModelQueue {
 }
 
 async function request<T>(path: string, init?: RequestInit, timeoutMs = 6000): Promise<T> {
-  if (__STATIC_ONLY__) throw new Error("runtime disabled in static build");
+  requireRuntime(path);
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
