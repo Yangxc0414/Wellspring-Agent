@@ -1148,6 +1148,12 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => {
           activeWorkspaceId: task.workspaceId,
           ui: {
             ...state.ui,
+            // 演示流程 is a generic teaching template. Carrying it across a task
+            // switch means the first panel a viewer reads describes a different
+            // project, so fall back to that task's own brief. An explicit choice
+            // (EVIDENCE / RUN / ...) is left alone.
+            contextTab:
+              state.ui.contextTab === "flow" && id !== "full-chain-demo" ? "brief" : state.ui.contextTab,
             welcomeOpen: false,
             sidebarOpen: false,
             contextOpen: false,

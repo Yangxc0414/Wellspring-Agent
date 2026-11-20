@@ -140,6 +140,21 @@ server.listen(0, "127.0.0.1", async () => {
       fail(title, "transcript cites an EA id but EVIDENCE says not sealed");
     }
 
+    await openPanel(page, "BRIEF");
+    const briefNext = (await page.locator(".brief-next").innerText().catch(() => "")).replace(/\s+/g, " ");
+    const briefKpi = (await page.locator(".brief-kpis").innerText().catch(() => "")).replace(/\n/g, "|");
+    // A task that already produced a capsule must not be told to start retrieval.
+    if (hasRunRecord && /先跑文献调研|先跑一轮检索/.test(briefNext)) {
+      fail(title, `BRIEF NEXT asks for retrieval although the run exists: ${briefNext.slice(0, 40)}`);
+    }
+    if (/写作/.test(title) && /文献调研/.test(briefNext)) {
+      fail(title, "BRIEF NEXT sends a writing task back to retrieval");
+    }
+    // A delegated signature must never read as plain "signed" in the KPI cell.
+    if (/委托签|\[delegated:autopilot\]/.test(threadText) && /\|signed\|/.test(briefKpi)) {
+      fail(title, "BRIEF KPI reports a delegated signature as signed");
+    }
+
     await openPanel(page, "演示流程");
     const banner = (await page.locator(".flow-banner").innerText().catch(() => "")).replace(/\s+/g, " ");
     if (title !== "完整闭环：从检索到自改进" && !/通用模板（非当前任务）/.test(banner)) {

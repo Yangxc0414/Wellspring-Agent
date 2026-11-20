@@ -2026,6 +2026,8 @@ function EvaluationContext({ task }: { task: ResearchTask }) {
   const domainPercent = total ? Math.round((domain / total) * 100) : 0;
   const hiddenUsed = evaluation.hiddenAccessCount > 0;
   const auditTone = evaluation.audit === "pass" ? "ok" : evaluation.audit === "flagged" ? "bad" : "warn";
+  // An all-dash baseline grid reads as broken. Say why the numbers are absent.
+  const hasBaseline = evaluation.baselinePaper !== null || evaluation.baselineReproduced !== null;
   const baselineDelta =
     evaluation.baselinePaper && evaluation.baselineReproduced
       ? ((evaluation.baselineReproduced - evaluation.baselinePaper) / evaluation.baselinePaper) * 100
@@ -2102,7 +2104,11 @@ function EvaluationContext({ task }: { task: ResearchTask }) {
           <div><span>REPRODUCED</span><b>{evaluation.baselineReproduced ?? "—"}</b></div>
           <div><span>Δ REPRO</span><b>{baselineDelta === null ? "—" : `${baselineDelta.toFixed(1)}%`}</b></div>
         </div>
-        <p className="context-empty">改进只与复现基线比较；复现差异不隐藏，也不冒充论文原数字。</p>
+        <p className="context-empty">
+          {hasBaseline
+            ? "改进只与复现基线比较；复现差异不隐藏，也不冒充论文原数字。"
+            : "这条任务还没有登记论文基线，所以 PAPER / REPRODUCED / Δ REPRO 都是空的。改进必须先复现基线，再谈相对提升。"}
+        </p>
       </section>
 
       <section className="context-section">
@@ -2382,35 +2388,84 @@ function EvolutionContext({ task }: { task: ResearchTask }) {
 function briefStage(task: ResearchTask): AutoStage | null {
   const running = task.autoStages.find((stage) => stage.status === "running");
   if (running) return running;
+  // A blocked task's `stage` points at where it would go next (META for the
+  // full-chain seeds), so reading it directly claims a stage that was never
+  // cleared. Show the last stage it actually passed instead.
+  if (task.status === "blocked") {
+    const cleared = [...task.completedStages].sort((a, b) => b - a)[0];
+    if (typeof cleared === "number" && task.autoStages[cleared]) return task.autoStages[cleared];
+  }
   return task.autoStages[Math.min(task.stage, Math.max(0, task.autoStages.length - 1))] ?? null;
 }
 
+/**
+ * The single most actionable line in BRIEF, so it has to match the task's real
+ * state rather than assume every task is still doing literature review. It used
+ * to check only `claim.status` and `coverage.spans`, which told a repository
+ * study that already ran 5132 commits to "先跑文献调研", treated an autopilot
+ * delegation as a signed claim, and sent a writing task back to retrieval.
+ */
 function briefNext(task: ResearchTask): string {
   const closure = task.gates.find((gate) => gate.id === "G5");
   const claim = task.evidence.find((item) => item.kind === "claim");
+  const label = claimSignatureLabel(claim);
   if (task.status === "done") return "任务已完成；复核证据链后再进入导出。";
   if (task.auto.running && task.auto.paused) {
     return task.auto.gate === "claim"
       ? "全自动停在 claim 人工门；请作者签核，或回到证据链补证据。"
       : "全自动已暂停；检查当前阶段后继续。";
   }
-  if (!claim || claim.status !== "signed") {
-    return task.coverage.spans > 0
-      ? "证据已到 span 层；下一步是 G1 收敛与 claim 人工签署。"
-      : "先跑文献调研，至少拿到可定位的 span，再进入假设收敛。";
+  // 1. A human/CLI signature exists — closure is the next gate.
+  if (label.state === "signed-cli" || label.state === "signed-import") {
+    return closure?.status === "pass"
+      ? "claim 已签、closure 已通过；复核签名与导出清单。"
+      : "claim 已签；下一步运行 closure，修复未绑定槽位后再导出。";
   }
-  if (!closure || closure.status !== "pass") {
-    return "claim 已签；下一步运行 closure，修复未绑定槽位后再导出。";
+  // 2. A signature record exists but is not a human one — say which.
+  if (label.state === "signed-delegated") {
+    return "盘上是 autopilot 委托签，不是人签；下一步由作者在本地 CLI 签核 claim → closure → signature。";
+  }
+  // 3. A run exists — the next human step is the claim, not more retrieval.
+  if (task.run) {
+    return "RunCapsule 与 EA 已就位；下一步在本地 CLI 执行 run claim 生成待签 claim（网页不代签）。";
+  }
+  // 4. Writing without a claim cannot fill the slots.
+  if (task.mode === "writing") {
+    return "写作槽位 locked：先拿到已签 claim 与 EA，再填 Results / Abstract。";
+  }
+  // 5. G1 still open — converge candidates before freezing a design.
+  if (task.gates.some((gate) => gate.id === "G1" && gate.status === "needs_human")) {
+    const hasCandidates = task.evidence.some((item) => item.kind === "hypothesis");
+    return hasCandidates
+      ? "已有候选方向；下一步是 G1 人工收敛，收敛后才冻结设计。"
+      : task.coverage.spans > 0
+        ? "证据已到 span 层；下一步是 G1 人工收敛候选，收敛后才冻结设计。"
+        : "还没有可定位的 span；先跑一轮检索，再把候选收敛到 G1。";
   }
   const next = task.autoStages.find((stage) => stage.status === "pending");
-  return next ? `继续 ${next.label}。` : "证据已闭合；复核签名与导出清单。";
+  return next ? `继续 ${next.label}。` : "复核证据链与门禁状态。";
+}
+
+/**
+ * Gates plus non-gate blockers. A blocked run contract (E2E: min_delta is not
+ * verifiable) is a real reason a numeric claim cannot be made, but it is not a
+ * gate, so the gate-only list hid it from BRIEF.
+ */
+function briefBlockers(task: ResearchTask): Array<{ id: string; waiting: boolean; reason: string }> {
+  const rows = task.gates
+    .filter((gate) => gate.status === "needs_human" || gate.status === "blocked")
+    .map((gate) => ({ id: gate.id, waiting: gate.status === "needs_human", reason: gate.reason }));
+  if (task.run && /blocked/i.test(task.run.status)) {
+    rows.push({ id: "RUN CONTRACT", waiting: false, reason: task.run.note ?? task.run.status });
+  }
+  return rows;
 }
 
 function briefMarkdown(task: ResearchTask): string {
   const stage = briefStage(task);
   const claim = task.evidence.find((item) => item.kind === "claim");
   const closure = task.gates.find((gate) => gate.id === "G5");
-  const blockers = task.gates.filter((gate) => gate.status === "needs_human" || gate.status === "blocked");
+  const blockers = briefBlockers(task);
   const reviews = task.reviewPack;
   return [
     `# ${task.name}`,
@@ -2422,11 +2477,11 @@ function briefMarkdown(task: ResearchTask): string {
     `- stage: ${stage?.label ?? "未开始"} (${stage?.status ?? "pending"})`,
     `- status: ${task.status}`,
     `- coverage: ${task.coverage.sources} sources / ${task.coverage.spans} spans / ${task.coverage.gaps} gaps`,
-    `- claim: ${claim?.status ?? "none"}`,
+    `- claim: ${claimSignatureLabel(claim).kpi}`,
     `- closure: ${closure?.status ?? "not_started"}`,
     "",
     "## Blockers",
-    ...(blockers.length ? blockers.map((gate) => `- ${gate.id}: ${gate.reason}`) : ["- none recorded"]),
+    ...(blockers.length ? blockers.map((row) => `- ${row.id}: ${row.reason}`) : ["- none recorded"]),
     "",
     "## Next",
     briefNext(task),
@@ -2443,7 +2498,7 @@ function BriefContext({ task }: { task: ResearchTask }) {
   const claim = task.evidence.find((item) => item.kind === "claim");
   const claimLabel = claimSignatureLabel(claim);
   const closure = task.gates.find((gate) => gate.id === "G5");
-  const blockers = task.gates.filter((gate) => gate.status === "needs_human" || gate.status === "blocked");
+  const blockers = briefBlockers(task);
   const reviews = task.reviewPack;
   const artifacts = [
     task.run?.id ? `run ${task.run.id}` : "",
@@ -2474,7 +2529,7 @@ function BriefContext({ task }: { task: ResearchTask }) {
           <div className="brief-kpis">
             <span><b>{stage?.label ?? "未开始"}</b>STAGE</span>
             <span><b>{task.coverage.spans}</b>SPANS</span>
-            <span><b>{claim?.status ?? "none"}</b>CLAIM</span>
+            <span><b>{claimLabel.kpi}</b>CLAIM</span>
             <span><b>{closure?.status ?? "not_started"}</b>CLOSURE</span>
           </div>
         </div>
@@ -2486,7 +2541,7 @@ function BriefContext({ task }: { task: ResearchTask }) {
           <div className="brief-list">
             {blockers.map((gate) => (
               <div className="brief-row" key={gate.id}>
-                <b>{gate.id} · {gate.status === "needs_human" ? "等待人工" : "阻塞"}</b>
+                <b>{gate.id} · {gate.waiting ? "等待人工" : "阻塞"}</b>
                 <p>{gate.reason}</p>
               </div>
             ))}
@@ -2505,7 +2560,11 @@ function BriefContext({ task }: { task: ResearchTask }) {
         <div className="section-title"><span>DECISIONS &amp; ARTIFACTS</span><em>{artifacts.length} ARTIFACTS</em></div>
         <div className="brief-list">
           <div className="brief-row"><b>G2 协议</b><p>{task.protocolFrozen
-            ? (task.runtime ? "runtime 证据：ProtocolCard 已冻结" : "演示推进；真实 G2 由 CLI 冻结")
+            ? task.runtime
+              ? "runtime 证据：ProtocolCard 已冻结"
+              : task.replay?.basis === "real" || task.replay?.basis === "fixture"
+                ? "已冻结；run-capsule 绑定 protocol sha256（真实产物，不是演示推进）"
+                : "演示推进；真实 G2 由 CLI 冻结"
             : "待人工冻结；网页不代为冻结"}</p></div>
           <div className="brief-row"><b>claim</b><p>{
             claimLabel.state === "signed-demo"

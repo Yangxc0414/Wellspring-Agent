@@ -21,6 +21,10 @@ export interface ClaimSignatureLabel {
   badge: string;
   short: string;
   detail: string;
+  /** One word for compact KPI cells. Keeps BRIEF from printing a raw
+   *  `status` ("signed") that hides the difference between a human signature
+   *  and an autopilot delegation. */
+  kpi: "none" | "unsigned" | "signed" | "delegated" | "demo";
   demo: boolean;
 }
 
@@ -28,6 +32,7 @@ export function claimSignatureLabel(claim?: EvidenceItem): ClaimSignatureLabel {
   if (!claim) {
     return {
       state: "missing",
+      kpi: "none",
       badge: "n/a",
       short: "NOT CREATED",
       detail: "还没有 claim draft；先跑出 RunCapsule / EA。",
@@ -37,6 +42,7 @@ export function claimSignatureLabel(claim?: EvidenceItem): ClaimSignatureLabel {
   if (claim.status !== "signed") {
     return {
       state: "unsigned",
+      kpi: "unsigned",
       badge: "待人工签署",
       short: "待人工签署",
       detail: "EA 已封存，但 claim 必须由作者/PI 在终端签核；系统不会自动签署。",
@@ -46,6 +52,7 @@ export function claimSignatureLabel(claim?: EvidenceItem): ClaimSignatureLabel {
   if (claim.origin === "demo") {
     return {
       state: "signed-demo",
+      kpi: "demo",
       badge: "DEMO · 无真实签名",
       short: "演示态预览（未签署）",
       detail:
@@ -56,6 +63,7 @@ export function claimSignatureLabel(claim?: EvidenceItem): ClaimSignatureLabel {
   if (claim.origin === "cli-import") {
     return {
       state: "signed-import",
+      kpi: "signed",
       badge: "signed · CLI 产物",
       short: "已导入 CLI 签署产物",
       detail: "签名来自用户在终端执行 run claim 后导入的 claim.json；工作台只读取，不代签、不回写。",
@@ -67,6 +75,7 @@ export function claimSignatureLabel(claim?: EvidenceItem): ClaimSignatureLabel {
     // is not a human signature, so it must never read as "已人工签署".
     return {
       state: "signed-delegated",
+      kpi: "delegated",
       badge: "委托签 · 非人签",
       short: "委托签署（非人签）",
       detail:
@@ -76,6 +85,7 @@ export function claimSignatureLabel(claim?: EvidenceItem): ClaimSignatureLabel {
   }
   return {
     state: "signed-cli",
+      kpi: "signed",
     badge: "signed",
     short: "已人工签署（证据来自 CLI）",
     detail: "签名来自本地 CLI 的证据文件；工作台只读取该状态，不会代为签署。",
