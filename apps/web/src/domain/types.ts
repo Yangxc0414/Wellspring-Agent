@@ -427,8 +427,10 @@ export interface EvidenceItem {
    * Where a "signed" claim state came from. A browser click must never be read as a
    * human signature, so demo previews and imported CLI artifacts are labelled at the
    * data level; absent means the legacy/CLI-backed state (read-only snapshot).
+   * "delegated" is an autopilot signature under a written policy — it produces a
+   * signature record but is NOT a human signature, and must never render as one.
    */
-  origin?: "cli" | "cli-import" | "demo";
+  origin?: "cli" | "cli-import" | "demo" | "delegated";
 }
 
 export interface EvidencePackage {

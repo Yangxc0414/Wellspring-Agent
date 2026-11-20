@@ -64,7 +64,12 @@ export function ClaimGateDialog() {
   // workbench there is no preview button at all (__STATIC_ONLY__ gate below).
   const pending = __STATIC_ONLY__
     ? label.state !== "signed-demo"
-    : Boolean(claim && (claim.status !== "signed" || claim.origin === "demo"));
+    // A delegated (autopilot) signature still leaves the human gate open, so it must
+    // keep the gate actionable rather than counting as "already signed".
+    : Boolean(
+        claim &&
+          (claim.status !== "signed" || claim.origin === "demo" || claim.origin === "delegated")
+      );
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

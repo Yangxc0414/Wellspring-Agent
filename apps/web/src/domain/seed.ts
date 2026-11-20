@@ -48,6 +48,14 @@ export const DEMO_LABELS: Record<
     tone: "pending",
     hint: "真实 ESE 研究回放（ESE-MS-20261118-03）：3 个仓库 / 5132 提交，缺陷修复比例 +0.046，分层后 click 方向反转；claim / closure / signature 仍待人签。"
   },
+  "e2e-closed-loop": {
+    label: "端到端闭环·委托签",
+    // "待签" is already the gate truth (G5 needs_human); the delegated-signature
+    // nuance belongs in the tooltip, not in a second suffix.
+    short: "闭环·待签",
+    tone: "pending",
+    hint: "真实执行的端到端闭环（PIPE-20261110T163849Z-e2bd4a）：S1→G5 全部门禁真实生效、closure 16 项检查 ready；但语料是 fixture（不可作科学结论），G5 的签名是 autopilot 委托签（submission=false），不是人签。"
+  },
   perovskite: {
     label: "示例·调研",
     short: "示例·调研",
@@ -632,6 +640,190 @@ export function seedEseStudy(): ResearchTask {
   };
 }
 
+/**
+ * Replay of a really-executed end-to-end closed loop
+ * (runtime_data/e2e-closed-loop, PIPE-20261110T163849Z-e2bd4a).
+ *
+ * Every reading below comes from that run's report.md / artifacts. Two honest
+ * caveats are carried in the UI rather than hidden:
+ *   - the pipeline really ran, but the corpus is fixture data (`fixture_mode:
+ *     true`, "no API, no real experiment"), so it demonstrates the mechanism,
+ *     not a scientific result;
+ *   - the on-disk signature under G5 is `[delegated:autopilot]` with
+ *     submission=false, which is NOT a human signature — the gate stays
+ *     needs_human.
+ */
+export function seedE2EClosedLoop(): ResearchTask {
+  return {
+    id: "e2e-closed-loop",
+    name: "E2E 闭环：Iris 协议验证",
+    goal: "完整走一遍 S1→G5 的受治理闭环：文献 → 候选 → G1 → 协议冻结 → 运行 → 证据 → 写作 → 闭合 → 签署，检验每一步的门禁是否真的卡住。",
+    domain: "方法学 · 协议验证",
+    mode: "experiment",
+    access: "ask",
+    status: "blocked",
+    workspaceId: "thesis",
+    createdAt: "2026-11-10",
+    updatedAt: "2026-11-10T16:39:00",
+    stage: 8,
+    completedStages: [0, 1, 2, 3, 4, 5, 6, 7],
+    harness: { version: "v1", budget: 6, label: "autopilot · policy AUTO-79d748b88e" },
+    model: defaultModelSettings(),
+    ...seedUsage([]),
+    guidance: [],
+    plugins: [],
+    toolCalls: [],
+    budget: { used: 3, total: 40 },
+    gates: [
+      { id: "Q0", status: "pass", reason: "1 篇全文 + 2 个 span；全文缺失的摘要只作线索" },
+      { id: "G1", status: "pass", reason: "human-selected IDEA-02（独立预审 advance=0 / revise=2 / reject=0）" },
+      { id: "G2", status: "pass", reason: "冻结的 ProtocolCard 与当前设计一致" },
+      { id: "G3", status: "pass", reason: "论文契约与槽位已绑定；closure ready" },
+      { id: "S5", status: "pass", reason: "capsule/EA 齐备；已绑定一条受支持的 claim" },
+      { id: "G5", status: "needs_human", reason: "closure ready（16 项检查）；导出仍需人签——盘上是 autopilot 委托签，不是人签" }
+    ],
+    coverage: { sources: 2, spans: 2, gaps: 4, abstractOnly: 1 },
+    evidence: [
+      {
+        id: "CLM-8a1d500c25",
+        kind: "claim",
+        text: "在本地 iris 协议上，三个种子的平均 accuracy 为 0.956。",
+        status: "signed",
+        scope: "local protocol validation · 不可外推到科学结论",
+        refs: ["RUN-20261110T163848Z-f84f16", "EA-bf9f4eeca1d7"],
+        note: "签署来源为 [delegated:autopilot]，submission=false；不是人签。",
+        origin: "delegated"
+      }
+    ],
+    protocol: {
+      hypothesis: "StandardScaler + logistic regression 在冻结协议上超过多数类基线。",
+      baseline: "majority class",
+      metric: "accuracy",
+      seeds: 3,
+      controls: ["majority baseline"]
+    },
+    protocolFrozen: true,
+    run: {
+      id: "RUN-20261110T163848Z-f84f16",
+      dataset: "sklearn:iris:150x4",
+      seeds: 3,
+      metric: "accuracy",
+      mean: 0.956,
+      baseline: 0,
+      status: "completed · run contract blocked（min_delta 不可验证）",
+      ea: "EA-bf9f4eeca1d7"
+    },
+    evaluation: emptyEvaluation(),
+    evolution: { status: "idle", candidate: null, lease: "", history: [] },
+    auto: { running: false, paused: false, index: 8, cycle: 0, gate: "claim", gateApproved: false },
+    autoStages: freshStages().map((stage, index) =>
+      index <= 7 ? { ...stage, status: "done" } : index === 8 ? { ...stage, status: "waiting" } : stage
+    ),
+    messages: [
+      system(
+        "STATIC REPLAY · 回放一次真实执行的端到端闭环（PIPE-20261110T163849Z-e2bd4a）。机制全部真实跑过，但语料是 fixture：数据不得当作科学结论；G5 盘上那份签名是 autopilot 委托签（submission=false），不是人签。",
+        "16:30:00"
+      ),
+      user("用 fixture 语料把完整闭环跑一遍，我要看每一步的门是不是真的会卡住。", "16:30:12"),
+      withStage(agent(
+        "S1 完成。**覆盖只有 partial**：2 篇来源、1 篇有全文、2 个可定位 span、4 个 gap。\n\n只覆盖了 2/6 个检索面向（核心问题、综述），缺方法、评测、局限、近期进展。建议目标 ≥6 篇来源 / ≥3 篇全文 / ≥12 个 span。",
+        {
+          type: "sources",
+          items: [
+            { title: "FX-002 · Fixture Paper B", meta: "全文 · 2024 · Fixture Workshop（合成）", status: "ok" },
+            { title: "FX-003 · Fixture Paper C", meta: "摘要线索 · 2023 · 不生成 span", status: "warn" }
+          ],
+          note: "摘要-only 只作线索；它不会变成 span，也不进入 claim。这两篇都是合成语料。"
+        },
+        "16:31:05"
+      ), "S1"),
+      withStage(agent(
+        "S2–S3：从 span 生成两个候选帧，并做了独立预审。\n\n- **IDEA-01**（机制）：围绕「协议要求记录温度、湿度、样本量与停止条件」\n- **IDEA-02**（测量）：围绕「三次重复只有两次满足记录完整性检查」\n\n独立预审结果：**advance=0 / revise=2 / reject=0**。两个候选都需要改，G1 仍是人工收敛。",
+        {
+          type: "idea",
+          gap: "只有 1 篇全文、2 个 span；候选是工作流演示，不是文献综述结论",
+          candidates: [
+            { id: "IDEA-01", text: "机制类：协议记录完整性 → 结果可判定性" },
+            { id: "IDEA-02", text: "测量类：重复次数不足 → 不宣称稳定性提升" }
+          ],
+          note: "词法新颖性不等于文献新颖性；这是结构信号，不是新颖性证明。"
+        },
+        "16:32:10"
+      ), "S2–S3"),
+      user("G1：收敛到 IDEA-02，机制和指标由我补。", "16:33:00"),
+      withStage(agent(
+        "G1 记录为 pass，human-selected IDEA-02。\n\n注意：这一步在盘上是 autopilot 按 policy 执行的委托决策，文件在 `g1-decision.json`。",
+        {
+          type: "gate",
+          gate: "G1",
+          title: "候选已由人工语义收敛",
+          reason: "选中 IDEA-02；两个候选预审均为 revise；候选不写入 claim",
+          status: "pass"
+        },
+        "16:33:20"
+      ), "S2–S3"),
+      withStage(agent(
+        "S4 设计冻结。\n\n- 假设：StandardScaler + logistic regression 超过多数类基线\n- 基线：majority class｜主指标：accuracy｜对照：majority baseline｜seeds：3\n- 设计审计：`attention`（blockers=0，warnings=1）\n- 协议卡 design_sha256 已绑定，G2 判 pass。",
+        {
+          type: "protocol",
+          hypothesis: "StandardScaler + logistic regression 在冻结协议上超过多数类基线。",
+          baseline: "majority class",
+          metric: "accuracy",
+          seeds: 3,
+          controls: ["majority baseline"],
+          status: "G2 pass · 已冻结"
+        },
+        "16:34:05"
+      ), "S4"),
+      withStage(agent(
+        "S5a 执行完成：`RUN-20261110T163848Z-f84f16`，dataset `sklearn:iris:150x4`，seeds [17, 18, 19]，平均 **accuracy 0.956**；EA `EA-bf9f4eeca1d7` 已封装且不可变。\n\n但 run contract 判 **blocked**：`min_delta` 不可验证——没有与基线配对的指标读数，所以只能报均值，不能宣称“超过基线”。",
+        {
+          type: "run",
+          id: "RUN-20261110T163848Z-f84f16",
+          dataset: "sklearn:iris:150x4",
+          seeds: 3,
+          metric: "accuracy",
+          mean: 0.956,
+          baseline: 0,
+          status: "completed · run contract blocked",
+          ea: "EA-bf9f4eeca1d7"
+        },
+        "16:35:00"
+      ), "S5a"),
+      withStage(agent(
+        "S5b：claim 已绑定到 EA 与运行胶囊，但签署来源是 `[delegated:autopilot]`——**委托签不等于人签**，submission=false。\n\n所以这条 claim 只能在“本地协议验证”范围内引用，不能外推成科学结论。",
+        undefined,
+        "16:35:40"
+      ), "S5b"),
+      withStage(agent(
+        "S8–S12 写作槽位：8 个章节全部有绑定状态，没有先于证据填数。\n\n- Abstract / Introduction / Related Work / Discussion → `draft_evidence`\n- Method / Experimental Setup → `bound_protocol`\n- Results / Conclusion → `bound_claim`\n\nResults 只引已签 claim `CLM-8a1d500c25`，不重算它的数值。",
+        undefined,
+        "16:36:20"
+      ), "S8–S12"),
+      withStage(agent(
+        "中文投稿稿审计：**blocked**，submission_ready=False。四个阻断项：\n\n- `references.verified`：1 条引用缺可核验的文献元数据\n- `claims.evidence_ledger`：2 句需要证据\n- `claims.registry_coverage`：3 个候选只登记 1 个\n- `evidence.fixture`：fixture 证据不可引用\n\n这四条都是真阻断，不是提示。",
+        undefined,
+        "16:37:10"
+      ), "S13–S16"),
+      withStage(agent(
+        "G5：closure **ready（16 项检查通过）**，但导出仍需要人签。\n\n盘上确实有一份 `signature.json`，但它是：\n- `human_reason`: `[delegated:autopilot] G5 closure signature under policy AUTO-79d748b88e`\n- `submission`: **false**\n- `signed_at`: 空\n\n所以 G5 在治理语义上仍是 `needs_human`——**机制闭环了，人签没有发生**。这不是缺陷，是门禁在正常工作。",
+        {
+          type: "gate",
+          gate: "G5",
+          title: "闭合完成，但仍待人签",
+          reason: "closure 16 项检查 ready；盘上签名是 autopilot 委托签（submission=false），不是人签",
+          status: "needs_human"
+        },
+        "16:38:00"
+      ), "S13–S16"),
+      system(
+        "闭环结束。可对外的说法：机制全程真实执行、门禁逐一生效；语料是 fixture，不能作为科学结论；签署是委托签，不是人签。三件事必须一起讲，少一件就是夸大。",
+        "16:39:00"
+      )
+    ]
+  };
+}
+
 export function seedFullChainDemo(): ResearchTask {
   return {
     id: "full-chain-demo",
@@ -866,6 +1058,7 @@ export function createSeedWorkspace(): PersistedWorkspace {
     tasks: [
       seedFullChainDemo(),
       seedEseStudy(),
+      seedE2EClosedLoop(),
       seedPerovskite(),
       seedArchives(),
       seedThesisTask("evidence-writing", "证据驱动科研写作系统", "把 claim 与 span 的绑定做成可审计的写作工作流。", "2026-10-23T16:40:00", "writing"),

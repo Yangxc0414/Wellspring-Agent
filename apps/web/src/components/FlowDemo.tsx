@@ -175,6 +175,7 @@ export function FlowDemo() {
         </p>
         <p className="flow-banner-hint">
           和左侧会话的分工：<b>左侧是"已走完整场"的回放</b>（可以直接读每一轮结论）；<b>这里是从第 0 步亲手推一遍</b>的教学版——所以进度各自独立，按「推进下一步」走给你看即可。
+          每步写的产物数字是<b>教学示例</b>，不是当前任务的真实读数；真实读数以左侧对话为准。
         </p>
       </div>
 
@@ -271,7 +272,7 @@ export function FlowDemo() {
                     <code>{stage.cmd}</code>
                   </div>
                   <div className="flow-kv">
-                    <span>产物</span>
+                    <span>产物（示例）</span>
                     <code>{stage.artifact}</code>
                   </div>
                   <p>{stage.detail}</p>

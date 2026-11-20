@@ -2495,9 +2495,11 @@ function BriefContext({ task }: { task: ResearchTask }) {
           <div className="brief-row"><b>claim</b><p>{
             claimLabel.state === "signed-demo"
               ? "演示态预览：未产生真实签名；closure 与导出仍需 CLI 人签"
-              : claimLabel.state === "signed-cli" || claimLabel.state === "signed-import"
-                ? `已签署（${claimLabel.state === "signed-import" ? "导入的 CLI 产物" : "本地 CLI"}）；不是浏览器生成`
-                : "待人工签署；写作与导出保持锁定"
+              : claimLabel.state === "signed-delegated"
+                ? "委托签署（autopilot 按策略代签，submission=false）——不是人签，人工门仍未通过"
+                : claimLabel.state === "signed-cli" || claimLabel.state === "signed-import"
+                  ? `已签署（${claimLabel.state === "signed-import" ? "导入的 CLI 产物" : "本地 CLI"}）；不是浏览器生成`
+                  : "待人工签署；写作与导出保持锁定"
           }</p></div>
           <div className="brief-row"><b>最近 review</b><p>{reviews ? `${reviews.summary} · ${reviews.generatedAt}` : "尚未运行 Review Pack"}</p></div>
           {artifacts.map((artifact) => <div className="brief-row" key={artifact}><p>{artifact}</p></div>)}

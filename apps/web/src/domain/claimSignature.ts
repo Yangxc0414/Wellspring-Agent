@@ -13,7 +13,8 @@ export type ClaimSignatureState =
   | "unsigned"
   | "signed-cli"
   | "signed-import"
-  | "signed-demo";
+  | "signed-demo"
+  | "signed-delegated";
 
 export interface ClaimSignatureLabel {
   state: ClaimSignatureState;
@@ -58,6 +59,18 @@ export function claimSignatureLabel(claim?: EvidenceItem): ClaimSignatureLabel {
       badge: "signed · CLI 产物",
       short: "已导入 CLI 签署产物",
       detail: "签名来自用户在终端执行 run claim 后导入的 claim.json；工作台只读取，不代签、不回写。",
+      demo: false
+    };
+  }
+  if (claim.origin === "delegated") {
+    // Autopilot can sign under a written policy. That produces a signature record but
+    // is not a human signature, so it must never read as "已人工签署".
+    return {
+      state: "signed-delegated",
+      badge: "委托签 · 非人签",
+      short: "委托签署（非人签）",
+      detail:
+        "签名由 autopilot 按事先写好的策略代签（submission=false）。它留了策略哈希与委托标记，但**不是作者人签**；人工门在治理语义上仍未通过。",
       demo: false
     };
   }
