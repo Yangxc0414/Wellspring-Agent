@@ -460,6 +460,9 @@ export interface RunRecord {
   baseline: number | null;
   ea: string;
   status: string;
+  /** Optional provenance/scoping line shown next to the reading. Used to say
+   *  what the number does and does not support (e.g. pooled vs per-project). */
+  note?: string;
 }
 
 export interface AutomationPlanStage {
@@ -656,9 +659,18 @@ export type Card =
       id: string;
       dataset: string;
       seeds: number;
+      /** What was actually measured. This is the card's headline label, so a
+       *  repository-mining rate must not be rendered under a T80 heading. */
       metric: string;
       mean: number;
-      baseline: number;
+      /** null when the run has no single baseline (e.g. a comparison between
+       *  two commit classes); the card then omits DELTA instead of inventing one. */
+      baseline: number | null;
+      /** Unit suffix ("h" for T80 hours). Omitted for rates and R². */
+      unit?: string;
+      /** Provenance line. Defaults to the demo wording only when absent, so real
+       *  readings are never labelled "演示数据". */
+      note?: string;
       status: string;
       ea: string;
     }
@@ -831,6 +843,16 @@ export interface ResearchTask {
   protocol: Protocol | null;
   protocolFrozen: boolean;
   run: RunRecord | null;
+  /**
+   * Where a seeded session's numbers come from. Panels used to label every
+   * non-runtime task "演示数据", which understates a real replay and would let a
+   * fixture run borrow the credibility of a real one. Declared at the data level
+   * so each surface renders the same word.
+   */
+  replay?: {
+    basis: "real" | "fixture" | "demo";
+    source?: string;
+  };
   runtime?: { source: RuntimeSource; runId?: string; appliedAt: string };
   runtimeLoop?: RuntimeLoop;
   autoPlan?: AutomationPlan | null;

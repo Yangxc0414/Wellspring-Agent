@@ -658,7 +658,15 @@ function RunContext({ task }: { task: ResearchTask }) {
           <>
             <div className="card-label">
               <span>GOVERNED AUTO</span>
-              <em>{task.auto.cycle ? `CYCLE ${task.auto.cycle}` : "演示数据"}</em>
+              <em title={task.replay?.source ?? undefined}>
+                {task.auto.cycle
+                  ? `CYCLE ${task.auto.cycle}`
+                  : task.replay?.basis === "real"
+                    ? "真实回放"
+                    : task.replay?.basis === "fixture"
+                      ? "FIXTURE · 真实执行"
+                      : "演示数据"}
+              </em>
             </div>
             <div className="run-state-row">
               <span className={`run-state${task.auto.running && !task.auto.paused ? " is-live" : ""}`}>
@@ -1845,7 +1853,10 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
       <section className="context-card">
         <div className="card-label">
           <span>EVIDENCE CHAIN</span>
-          <em>SPAN-ONLY</em>
+          {/* The discipline label must match the evidence basis. Repository mining
+              produces a run capsule + EA, not literature spans, so claiming
+              SPAN-ONLY there would describe a chain the task never built. */}
+          <em>{task.coverage.spans > 0 ? "SPAN-ONLY" : task.run ? "RUN-CAPSULE" : "SPAN-ONLY"}</em>
         </div>
         <div className="chain">
           {nodes.map((node, index) => (
@@ -1951,7 +1962,11 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
               </article>
             ))
           ) : (
-            <p className="context-empty">还没有 span 或 gap。先运行一次检索；摘要-only 来源不会进入这里。</p>
+            <p className="context-empty">
+              {task.run
+                ? "这条任务的证据是运行记录 + EA，没有登记文献 span / gap。链上前两段为空是正常的，可复核的是 capsule 与 EA。"
+                : "还没有 span 或 gap。先运行一次检索；摘要-only 来源不会进入这里。"}
+            </p>
           )}
         </div>
       </section>

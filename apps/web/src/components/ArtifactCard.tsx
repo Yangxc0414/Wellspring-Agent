@@ -195,23 +195,26 @@ export function ArtifactCard({ card }: { card: Card }) {
     const claim = task?.evidence.find((item) => item.kind === "claim");
     const claimLabel = claimSignatureLabel(claim);
     // Round to a readable precision: raw float subtraction leaks long tails
-    // like "+0.21200000000000002" into a demo card.
-    const delta = Number((card.mean - (card.baseline ?? 0)).toFixed(4));
+    // like "+0.21200000000000002" into a demo card. A null baseline means the
+    // run compares two groups rather than beating a baseline, so there is no
+    // honest delta to print.
+    const delta = card.baseline == null ? null : Number((card.mean - card.baseline).toFixed(4));
+    const unit = card.unit ? <small> {card.unit}</small> : null;
     return (
       <article className="artifact">
         <CardHead label={`RUN / ${card.id}`} meta="EA SEALED" />
         <div className="metric-grid">
           <div>
-            <span>MEAN T80</span>
-            <b>{card.mean}<small> h</small></b>
+            <span title={card.metric}>MEAN · {card.metric}</span>
+            <b>{card.mean}{unit}</b>
           </div>
           <div>
             <span>BASELINE</span>
-            <b>{card.baseline}<small> h</small></b>
+            <b>{card.baseline == null ? "—" : card.baseline}{card.baseline == null ? null : unit}</b>
           </div>
           <div className="metric-delta">
             <span>DELTA</span>
-            <b>+{delta}<small> h</small></b>
+            <b>{delta == null ? "—" : `+${delta}`}{delta == null ? null : unit}</b>
           </div>
         </div>
         <dl className="artifact-kv compact">
@@ -224,7 +227,9 @@ export function ArtifactCard({ card }: { card: Card }) {
           <dt>Claim</dt>
           <dd>{claimLabel.short}</dd>
         </dl>
-        <p className="artifact-note">数值是演示数据，仅用于展示 EA → claim 的边界，不作为真实材料实验结论。</p>
+        <p className="artifact-note">
+          {card.note ?? "数值是演示数据，仅用于展示 EA → claim 的边界，不作为真实材料实验结论。"}
+        </p>
         <Actions>
           <ActionButton onClick={() => actions.setContextTab("evidence")}>查看 EA</ActionButton>
           <ActionButton variant="primary" onClick={actions.signClaim}>

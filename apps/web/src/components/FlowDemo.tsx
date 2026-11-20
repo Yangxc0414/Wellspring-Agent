@@ -133,6 +133,11 @@ export function FlowDemo() {
   const currentMessages = useWorkspaceStore(
     (state) => state.tasks.find((t) => t.id === state.selectedTaskId)?.messages ?? []
   );
+  const selectedTaskId = useWorkspaceStore((state) => state.selectedTaskId);
+  // This panel is a generic teaching walkthrough of the nine-stage template. It
+  // is only the *same story* as the thread for the full-chain demo; on any other
+  // task it would silently tell the wrong story, so say so.
+  const isGenericReplay = selectedTaskId !== "full-chain-demo";
 
   // Clicking a flow node expands its detail AND jumps the conversation thread
   // to the first message tagged with that stage, so a presenter can point at a
@@ -167,16 +172,24 @@ export function FlowDemo() {
     <div className="context-stack flow-demo">
       <div className="flow-banner">
         <div className="flow-banner-title">
-          <span className="flow-dot" /> 全流程演示 · FRONT-END REPLAY
+          <span className="flow-dot" />{" "}
+          {isGenericReplay ? "全流程演示 · 通用模板（非当前任务）" : "全流程演示 · FRONT-END REPLAY"}
         </div>
         <p>
           从文献检索一路走到结论签署与自改进。这是<b>前端推演</b>：所有状态只在页面内存中，「模拟人签」不会生成真实
           signature.json；真实签名仍须在本地 CLI 执行。刷新页面即回到待签。
         </p>
-        <p className="flow-banner-hint">
-          和左侧会话的分工：<b>左侧是"已走完整场"的回放</b>（可以直接读每一轮结论）；<b>这里是从第 0 步亲手推一遍</b>的教学版——所以进度各自独立，按「推进下一步」走给你看即可。
-          每步写的产物数字是<b>教学示例</b>，不是当前任务的真实读数；真实读数以左侧对话为准。
-        </p>
+        {isGenericReplay ? (
+          <p className="flow-banner-hint is-warn">
+            当前选中的不是「完整闭环」任务：这里演的是<b>通用九阶段模板</b>，不是这条任务的流程。
+            这条任务的真实进度与读数，请看左侧会话和 BRIEF / RUN / EVIDENCE 面板。
+          </p>
+        ) : (
+          <p className="flow-banner-hint">
+            和左侧会话的分工：<b>左侧是"已走完整场"的回放</b>（可以直接读每一轮结论）；<b>这里是从第 0 步亲手推一遍</b>的教学版——所以进度各自独立，按「推进下一步」走给你看即可。
+            每步写的产物数字是<b>教学示例</b>，不是当前任务的真实读数；真实读数以左侧对话为准。
+          </p>
+        )}
       </div>
 
       <div className="flow-controls">

@@ -467,6 +467,11 @@ function seedArchives(): ResearchTask {
           "6 sources · span-only",
           "先宽后深；摘要-only 来源不生成 span。"
         )
+      ),
+      // This example stops at the plan on purpose. Saying so is what makes it
+      // demonstrable: a viewer otherwise assumes the flow died half-way.
+      agent(
+        "**这一条只到检索计划，不往下走**\n\n- 目的是先说明 archive 有三种（代码版本 / 轨迹反思 / 评测结果），混在一起谈会得到假结论\n- 还没有 span，也没有可检验假设，所以 G1 不开\n\n> 示例到此为止：它用来说明“先分层再调研”，不是一次完整研究。要看完整闭环请开「完整闭环」或「E2E 闭环」。"
       )
     ]
   };
@@ -491,7 +496,9 @@ function seedThesisTask(
     createdAt: "2026-10-23",
     updatedAt,
     stage: mode === "writing" ? 6 : 0,
-    completedStages: [],
+    // Must move with stage, otherwise the thread chip reads "回放 0/9" while the
+    // RUN panel reads "6/9 stages" for the same task.
+    completedStages: mode === "writing" ? [0, 1, 2, 3, 4, 5] : [],
     harness: { version: "v1", budget: 6, label: "incumbent · broad-first" },
     model: defaultModelSettings(),
     ...seedUsage([]),
@@ -508,9 +515,18 @@ function seedThesisTask(
     evaluation: emptyEvaluation(),
     evolution: { status: "idle", candidate: null, lease: "", history: [] },
     auto: { running: false, paused: false, index: 0, cycle: 0, gate: "", gateApproved: false },
-    autoStages: freshStages(),
+    // A writing task sits at the写作阶段; leaving every stage pending made RUN
+    // say "NEXT S1" while the header said S8–S12.
+    autoStages: freshStages().map((stage, index) =>
+      mode === "writing" && index < 6 ? { ...stage, status: "done" } : stage
+    ),
     messages: [
       system("STATIC WORKSPACE · 示例任务；不调用模型、不执行真实实验。"),
+      user(
+        mode === "writing"
+          ? "这篇论文我想先写 Results 和 Abstract，能不能直接开始？"
+          : "我的毕设想做科研智能体，但命题还很散，怎么收敛？"
+      ),
       agent(
         mode === "writing"
           ? `任务已创建：${name}。写作从槽位开始；没有已签 claim 之前，结果与摘要槽位保持 locked。`
@@ -529,6 +545,29 @@ function seedThesisTask(
               "4 sources · span-only",
               "摘要-only 只作线索；没有全文不生成 span。"
             )
+          ),
+      // Every example must end on its gate, otherwise it reads as a finished
+      // fragment rather than a step that is deliberately blocked.
+      mode === "writing"
+        ? agent(
+            "**四个槽位全部 locked**\n\n- Methods / Results / Figure / Abstract 都只接受已签 claim、EA、closure 引用\n- 当前没有一条已签 claim，所以没有任何槽位可以填数\n\n> 下一步不是“先写一版”，而是回 S5 完成 claim 人签。正文先于证据，后面每一段都要重写。",
+            {
+              type: "gate",
+              gate: "S8–S12",
+              title: "写作槽位保持 locked",
+              reason: "缺少已签 claim / EA / closure 引用",
+              status: "blocked"
+            }
+          )
+        : agent(
+            "**G1 待人工收敛**\n\n现在只有候选方向，还不是 claim。建议的验证顺序：\n\n1. 先证明门禁会卡住（可复现的 blocked）\n2. 再证明判定可重算（同一 EA 两次判定一致）\n3. 最后才谈自动化程度\n\n> 候选不写入 claim；G1 必须由人来定。",
+            {
+              type: "gate",
+              gate: "G1",
+              title: "候选假设待人工收敛",
+              reason: "只有候选方向；尚未形成可检验 claim",
+              status: "needs_human"
+            }
           )
     ]
   };
@@ -557,16 +596,44 @@ export function seedEseStudy(): ResearchTask {
     budget: { used: 3, total: 30 },
     gates: [
       { id: "Q0", status: "pass", reason: "3 个仓库 HEAD 已固定；协议先于数据冻结" },
-      { id: "G1", status: "needs_human", reason: "四条 RQ 已收敛为一条可检验断言" },
-      { id: "G2", status: "needs_human", reason: "分层与置换计划已冻结，等待人工确认" },
+      // G1/G2 must read pass: the run below only exists because the protocol was
+      // frozen and approved. Leaving them needs_human while S5 passed produced an
+      // impossible sequence (a run cannot execute before its design gate).
+      { id: "G1", status: "pass", reason: "四条 RQ 已收敛为一条可检验断言（合并样本 + 分层）" },
+      { id: "G2", status: "pass", reason: "分层与置换计划已冻结；run-capsule 绑定 protocol sha256" },
       { id: "S5", status: "pass", reason: "run-capsule completed · EA immutable" },
       { id: "G5", status: "blocked", reason: "claim / closure / signature 尚未人签" }
     ],
     coverage: { sources: 3, spans: 0, gaps: 1, abstractOnly: 0 },
-    evidence: [],
+    evidence: [
+      {
+        id: "CLM-ESE-01",
+        kind: "claim",
+        status: "unsigned",
+        text: "在 click / requests / httpx 合并样本上，缺陷修复提交触碰测试的比例比其它提交高 0.0464（0.4136 vs 0.3672，置换 p=0.015）；但 click 内方向反转（−0.0067），因此不能外推到单个项目。",
+        scope: "三仓库便利样本 · 启发式标签 · 不可外推",
+        refs: ["EA-65d32e114229", "ESE-MS-20261118-03"],
+        note: "待人工签署：statement 与 human_reason 需在本地 CLI 定稿，网页不代签。"
+      }
+    ],
     protocol: null,
     protocolFrozen: true,
-    run: null,
+    // The run really happened (runtime_data/ese-ms-20261118-03/run/). Leaving the
+    // structured record null made EVIDENCE print "not run / not sealed" while the
+    // S5 gate and the transcript both cited this capsule and EA — the same screen
+    // contradicting itself.
+    run: {
+      id: "ESE-MS-20261118-03",
+      dataset: "msr-corpus:click,httpx,requests",
+      seeds: 1,
+      metric: "test_cochange_rate",
+      mean: 0.3749,
+      baseline: null,
+      status: "completed · EA immutable",
+      ea: "EA-65d32e114229",
+      note: "读数来自 runtime_data/ese-ms-20261118-03/run/metrics.json（seed 42）。合并样本 0.3749；缺陷修复 0.4136 vs 其它 0.3672（差 +0.0464，置换 p=0.015），但 click 内方向反转，不能外推到单项目。"
+    },
+    replay: { basis: "real", source: "runtime_data/ese-ms-20261118-03" },
     evaluation: emptyEvaluation(),
     evolution: { status: "idle", candidate: null, lease: "", history: [] },
     auto: { running: false, paused: false, index: 0, cycle: 0, gate: "", gateApproved: false },
@@ -709,10 +776,14 @@ export function seedE2EClosedLoop(): ResearchTask {
       seeds: 3,
       metric: "accuracy",
       mean: 0.956,
-      baseline: 0,
+      // The run contract is blocked on min_delta precisely because there is no
+      // paired baseline reading; a numeric 0 here would fake a delta.
+      baseline: null,
       status: "completed · run contract blocked（min_delta 不可验证）",
-      ea: "EA-bf9f4eeca1d7"
+      ea: "EA-bf9f4eeca1d7",
+      note: "真实执行、fixture 语料（sklearn iris）。run contract 判 blocked：没有与基线配对的读数，只能报均值，不能宣称超过基线。"
     },
+    replay: { basis: "fixture", source: "runtime_data/e2e-closed-loop" },
     evaluation: emptyEvaluation(),
     evolution: { status: "idle", candidate: null, lease: "", history: [] },
     auto: { running: false, paused: false, index: 8, cycle: 0, gate: "claim", gateApproved: false },
@@ -784,9 +855,12 @@ export function seedE2EClosedLoop(): ResearchTask {
           seeds: 3,
           metric: "accuracy",
           mean: 0.956,
-          baseline: 0,
+          // No paired baseline reading exists, so the card must not print a
+          // delta: the run contract itself is blocked on min_delta.
+          baseline: null,
           status: "completed · run contract blocked",
-          ea: "EA-bf9f4eeca1d7"
+          ea: "EA-bf9f4eeca1d7",
+          note: "run contract 判 blocked：min_delta 不可验证（没有与基线配对的指标读数）。只能报均值，不能宣称超过基线；数值来自真实执行，语料是 fixture。"
         },
         "16:35:00"
       ), "S5a"),
@@ -870,6 +944,7 @@ export function seedFullChainDemo(): ResearchTask {
       ea: "EA-7c41",
       status: "completed"
     },
+    replay: { basis: "demo", source: "前端教学演示 · 代理指标" },
     evaluation: demoEvaluation(),
     evolution: {
       status: "proposed",

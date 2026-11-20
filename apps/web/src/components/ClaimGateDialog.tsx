@@ -138,8 +138,12 @@ export function ClaimGateDialog() {
           ) : (
             <p className="claim-gate-text">
               {__STATIC_ONLY__
-                ? "这条是静态演示会话，没有真实 claim；用下方 DEMO 预览查看签署后的界面即可。"
-                : "还没有 claim draft。先运行 pipeline 生成 RunCapsule / EA，再回到这里。"}
+                ? task?.run
+                  ? "这条任务已有 RunCapsule 与 EA，但还没有 claim draft。下一步是在本地 CLI 用 run claim 生成待签 claim；网页不代签。"
+                  : "这条是静态演示会话，没有真实 claim；用下方 DEMO 预览查看签署后的界面即可。"
+                : task?.run
+                  ? "RunCapsule 与 EA 已就位，但还没有 claim draft。先在本地 CLI 执行 run claim 生成待签 claim，再回到这里。"
+                  : "还没有 claim draft。先运行 pipeline 生成 RunCapsule / EA，再回到这里。"}
             </p>
           )}
           <p className="claim-gate-detail">{label.detail}</p>

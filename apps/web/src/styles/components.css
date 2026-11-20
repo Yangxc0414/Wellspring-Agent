@@ -6432,6 +6432,14 @@ select.control {
 .flow-banner .flow-banner-hint b {
   color: var(--accent-deep);
 }
+/* The panel is a generic template; on a non-full-chain task this line must be
+   impossible to miss, otherwise a presenter narrates the wrong project. */
+.flow-banner .flow-banner-hint.is-warn {
+  color: var(--amber);
+}
+.flow-banner .flow-banner-hint.is-warn b {
+  color: var(--amber);
+}
 .flow-controls {
   display: flex;
   flex-wrap: wrap;

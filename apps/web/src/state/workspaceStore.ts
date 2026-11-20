@@ -373,9 +373,10 @@ function runCard(): Card {
     id: "RUN-014",
     dataset: "perovskite / 本地 fixture",
     seeds: 3,
-    metric: "T80 (h)",
+    metric: "T80",
     mean: 412,
     baseline: 286,
+    unit: "h",
     status: "EA sealed · claim unsigned",
     ea: "EA-7c41"
   };
