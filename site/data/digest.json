@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-18T08:35:51.674Z",
+  "generated_at": "2026-11-19T08:51:14.256Z",
   "source": "OpenAlex /works",
   "mode": "CACHED",
   "license": "OpenAlex metadata; respect source licenses and attribution",
@@ -17,7 +17,7 @@
           "doi": "https://doi.org/10.1038/s41586-021-03406-5",
           "title": "Pseudo-halide anion engineering for α-FAPbI3 perovskite solar cells",
           "year": 2021,
-          "cited_by": 3228,
+          "cited_by": 3229,
           "venue": "Nature",
           "authors": [
             "Jaeki Jeong",
@@ -32,7 +32,7 @@
           "doi": "https://doi.org/10.1038/s41560-019-0529-5",
           "title": "Consensus statement for stability assessment and reporting for perovskite photovoltaics based on ISOS procedures",
           "year": 2020,
-          "cited_by": 2076,
+          "cited_by": 2077,
           "venue": "Nature Energy",
           "authors": [
             "Mark Khenkin",
@@ -109,7 +109,7 @@
       "label": "固态电池界面",
       "query": "solid-state battery interface",
       "from_year": 2020,
-      "total_hits": 6864,
+      "total_hits": 6860,
       "returned": 4,
       "works": [
         {
@@ -117,7 +117,7 @@
           "doi": "https://doi.org/10.1002/aenm.202203307",
           "title": "Lithium Batteries and the Solid Electrolyte Interphase (SEI)—Progress and Outlook",
           "year": 2023,
-          "cited_by": 920,
+          "cited_by": 921,
           "venue": "Advanced Energy Materials",
           "authors": [
             "Henry Adenusi",
@@ -132,7 +132,7 @@
           "doi": "https://doi.org/10.1002/aenm.202002689",
           "title": "Solid‐State Li–Metal Batteries: Challenges and Horizons of Oxide and Sulfide Solid Electrolytes and Their Interfaces",
           "year": 2020,
-          "cited_by": 901,
+          "cited_by": 902,
           "venue": "Advanced Energy Materials",
           "authors": [
             "Kun Joong Kim",
@@ -147,7 +147,7 @@
           "doi": "https://doi.org/10.1038/s41586-021-03486-3",
           "title": "A dynamic stability design strategy for lithium metal solid state batteries",
           "year": 2021,
-          "cited_by": 800,
+          "cited_by": 801,
           "venue": "Nature",
           "authors": [
             "Luhan Ye",

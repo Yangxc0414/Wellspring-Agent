@@ -68,7 +68,7 @@ export function TopBar() {
           <Icon name="logo" size={18} />
         </span>
         <span className="brand-copy">
-          <b>Research Agent</b>
+          <b>Wellspring Agent</b>
           <small>LOCAL WORKSPACE</small>
         </span>
       </button>

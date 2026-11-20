@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { IconName } from "./Icon";
 import { Icon } from "./Icon";
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 interface PaletteItem {
   label: string;
@@ -15,6 +16,7 @@ export function CommandPalette() {
   const actions = useWorkspaceStore((state) => state.actions);
   const task = useWorkspaceStore(selectCurrentTask);
   const welcomeOpen = useWorkspaceStore((state) => state.ui.welcomeOpen);
+  const paletteOpen = useWorkspaceStore((state) => state.ui.paletteOpen);
   const autoRunning = Boolean(task?.auto.running);
   const autoPaused = Boolean(task?.auto.paused);
   const gateUnsigned = Boolean(task?.auto.running && task.auto.gate === "claim" && !task.auto.gateApproved);
@@ -28,6 +30,17 @@ export function CommandPalette() {
   const evaluated = Boolean((task?.evaluation.hiddenAccessCount ?? 0) > 0);
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState(0);
+  const [confirmReset, setConfirmReset] = useState(false);
+  // The layer unmounts when the palette closes but this component stays mounted
+  // (App renders it unconditionally so the reset ConfirmDialog survives the
+  // close-then-confirm sequence); keep query/index from carrying into the next
+  // open, matching the pre-change fresh-mount semantics.
+  useEffect(() => {
+    if (!paletteOpen) {
+      setQuery("");
+      setIndex(0);
+    }
+  }, [paletteOpen]);
 
   const items = useMemo<PaletteItem[]>(() => {
     if (welcomeOpen) {
@@ -45,7 +58,7 @@ export function CommandPalette() {
           keywords: "reset 重置 clear",
           icon: "trash",
           run: () => {
-            if (window.confirm("重置会清空本地示例状态，确定继续？")) actions.resetWorkspace();
+            setConfirmReset(true);
           }
         }
       ];
@@ -96,7 +109,7 @@ export function CommandPalette() {
         keywords: "reset 重置 clear",
         icon: "trash",
         run: () => {
-          if (window.confirm("重置会清空本地示例状态，确定继续？")) actions.resetWorkspace();
+          setConfirmReset(true);
         }
       }
     ];
@@ -115,6 +128,8 @@ export function CommandPalette() {
   };
 
   return (
+    <>
+    {paletteOpen && (
     <div className="palette-layer" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) actions.setUI({ paletteOpen: false });
     }}>
@@ -166,5 +181,16 @@ export function CommandPalette() {
         </footer>
       </section>
     </div>
+    )}
+      <ConfirmDialog
+        open={confirmReset}
+        eyebrow="RESET / LOCAL"
+        title="重置示例？"
+        body="本地演示状态（含你写入的记忆与归档改动）将被清空并重新播种；不会影响 claim / EA / 门禁。此操作无法撤销。"
+        confirmLabel="重置"
+        onConfirm={() => { actions.resetWorkspace(); setConfirmReset(false); }}
+        onCancel={() => setConfirmReset(false)}
+      />
+    </>
   );
 }

@@ -216,7 +216,7 @@ export default function App() {
         {ui.filesOpen && <WorkspaceFilesDialog />}
         {ui.permissionRequest && <PermissionDialog />}
         {ui.claimGateOpen && <ClaimGateDialog />}
-        {ui.paletteOpen && <CommandPalette />}
+        <CommandPalette />
       </Suspense>
       <Toast />
     </div>

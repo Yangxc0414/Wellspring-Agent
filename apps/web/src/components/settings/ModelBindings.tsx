@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { describeRuntimeError } from "../../domain/capabilities";
 import {
   bindRuntimeModule,
   clearRuntimeProviderKey,
@@ -145,7 +146,7 @@ export function ModelBindings() {
         </button>
       </div>
 
-      {error && <p className="settings-empty">读取失败：{error}</p>}
+      {error && <p className="settings-empty">{describeRuntimeError(error)}</p>}
       {!snapshot && !error && <p className="settings-empty">读取 runtime 模型配置…</p>}
 
       {snapshot && (

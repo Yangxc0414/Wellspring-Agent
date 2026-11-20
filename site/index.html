@@ -193,7 +193,7 @@
     <a href="#boundary">边界</a>
     <a href="./docs/">文档</a>
   </nav>
-  <a class="lp-navcta" href="./app/">进入工作台 ↗</a>
+  <a class="lp-navcta" href="./app/">进入工作台 →</a>
 </header>
 <main id="main">
   <section class="lp-hero">
@@ -201,7 +201,7 @@
     <h1>让每个结论有出处，<br>让<span>每次失败改方法</span>。</h1>
     <p class="lp-lede"><b>内层（已实现）：证据闭合</b>——文献检索、独立复现、科研写作与核验接成闭环，claim 只能由证据创建、由人签核。<b>研究执行（已跑通，探索性）</b>——把这条流水线用于 ESE：SE 文献→候选→方法协议→repository-mining 执行→反思，结果可封成 run-capsule/EA，等人签。<b>外层（roadmap）：方法演化</b>——把 durable 失败、复现结果与成本沉淀成方法/配方改动，用 held-out 研究任务验证，再经人采纳与回滚。本页是 <b>早期 demo / 静态展示镜像</b>（无真实执行），产品本体是 <a href="https://github.com/Yangxc0414/Wellspring-Agent">Wellspring-Agent</a>，真实执行只在本地 runtime / CLI。</p>
     <div class="lp-cta">
-      <a class="lp-btn primary" href="./app/">进入科研工作台 →</a>
+      <a class="lp-btn primary" href="./app/">进入工作台 →</a>
       <a class="lp-btn ghost" href="./innovation/">看 105 秒创新演示</a>
       <a class="lp-btn ghost" href="./demo/">真实运行回放</a>
     </div>
@@ -211,7 +211,7 @@
     <div class="lp-stats" aria-label="当前实现规模">
       <div><b>34</b><span>模块 SPEC</span></div>
       <div><b>46</b><span>MCP 工具</span></div>
-      <div><b>1500+</b><span>自动测试用例</span></div>
+      <div><b>1695</b><span>自动测试用例</span></div>
       <div><b>4</b><span>人工门 · G1/G2/S5b/G5</span></div>
       <div><b>4/4</b><span>反馈环已接入下一步动作（机制）· 默认关</span></div>
     </div>
@@ -221,7 +221,7 @@
       <ul>
         <li><b>34 模块 SPEC</b> —— 每个能力先写「合同」再写代码：改行为必须先改合同，代码不能偷偷越权。价值：别人（或别的 Agent）扩展平台时，边界是读得懂、测得到的。</li>
         <li><b>46 MCP 工具</b> —— Claude Code / Qoder / Codex / Zcode 用同一份工具表接入；里面<b>没有任何签名/批准按钮</b>。价值：外部 Agent 能干活，但签字永远在人手里。</li>
-        <li><b>1500+ 自动测试</b> —— 每条边界（摘要不能当证据、未签不能导出、fixture 必须自报…）都有测试钉住。价值：改坏了立刻红，而不是演示时才发现。</li>
+        <li><b>1695 项自动测试</b> —— 每条边界（摘要不能当证据、未签不能导出、fixture 必须自报…）都有测试钉住。价值：改坏了立刻红，而不是演示时才发现。</li>
         <li><b>4 人工门</b> —— 选想法 G1、批设计 G2、签结果 S5b、签导出 G5 必须人签（或人预先写策略授权 autopilot 代签并留痕）。价值：自动化跑门与门之间，高杠杆决定留给人。</li>
         <li><b>4/4 反馈环</b> —— 上一轮的判定（证伪 / 评审 / 同质化 / 失效）会真实改变下一轮动作：否证条件带进新假设、被评审否掉的候选降权、单一视角强制换轴、失效沿哈希链锁导出。默认关闭、逐环开启；约束来源哈希过期即拒绝。价值：反思不是日志，是下一步的输入。<b>边界：</b>这是机制已接通的读数；「接上环是否让研究更好」的效果测量（M1 多 run、M2 跨任务）仍未完成，n 与功效见 docs/fact-baseline.md。</li>
       </ul>
@@ -657,7 +657,7 @@
     <p class="fineprint flow-source">图来源：科研智能体策略论证（1110 可读性修订版）· 第 07 节。四张图是策略投影，不是实现地图；当前实现状态以功能地图为准，本站为静态镜像、无真实执行。</p>
     <div class="flow-links">
       <a class="nav-cta" href="./innovation/">看七幕创新演示 ↗</a>
-      <a class="nav-cta" href="./app/">进 Agent 工作台 ↗</a>
+      <a class="nav-cta" href="./app/">进入工作台 ↗</a>
       <a class="nav-cta" href="./demo/#console">跑一次研究运行 ↗</a>
       <a class="nav-cta" href="./qoder/">客户端接入 ↗</a>
     </div>

@@ -28,6 +28,7 @@ import type {
   SignerSnapshot,
   SnapshotResult
 } from "../../adapters/runtimeApi";
+import { describeRuntimeError } from "../../domain/capabilities";
 import { SHORTCUT_ACTIONS, formatShortcutLabel } from "../../domain/shortcuts";
 import { siteHref } from "../../domain/links";
 import type { MemoryKind } from "../../domain/types";
@@ -359,7 +360,7 @@ export function AgentsSettingsPage() {
           <button type="button" className="settings-btn" onClick={reload}>重新读取</button>
         </div>
         {loading && <p className="settings-empty">读取 SPEC 注册表…</p>}
-        {error && <p className="settings-empty">读取失败：{error}</p>}
+        {error && <p className="settings-empty">{describeRuntimeError(error)}</p>}
         <div className="agent-list">
           {filtered.map((agent) => (
             <article className="agent-card" key={agent.id} data-status={agent.status}>
@@ -458,7 +459,7 @@ export function CommandsSettingsPage() {
           <button type="button" className="settings-btn" onClick={reload}>重新读取</button>
         </div>
         {loading && <p className="settings-empty">读取命令目录…</p>}
-        {error && <p className="settings-empty">读取失败：{error}</p>}
+        {error && <p className="settings-empty">{describeRuntimeError(error)}</p>}
         {groups.map(([group, items]) => (
           <div className="command-group" key={group}>
             <div className="settings-group-label">{group}</div>

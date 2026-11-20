@@ -258,7 +258,13 @@ def build(study_dir):
         "late_ci": _esc(_ci(late.get("ci"))),
         "time_diff": _esc(_num(time_split.get("difference"))),
         "time_p": _esc(time_perm.get("p_value_two_sided")),
-        "boundary": _esc(result.get("boundary")),
+        # The source boundary is English and says "no Claim/EA/signature" — it
+        # means this read-only page does not create them, not that the run never
+        # produced them. The stage table above may show EA as completed, so add
+        # a clarification to prevent the two from reading as a contradiction.
+        "boundary": _esc(result.get("boundary"))
+        + "<br />说明：此处「no Claim/EA/signature」指本页只读回放、不会新建或签署证据；"
+        + "上方阶段表显示的是该运行实际已有的产物状态（如 EA 已封装），两者不矛盾。",
     }
     return render(values)
 
@@ -267,7 +273,7 @@ def render(values):
     return """<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ESE 研究闭环的来龙去脉 · {study_id}</title>
+<title>ESE 研究闭环的来龙去脉 · {study_id} · Research Agent</title>
 <meta name="description" content="一次真实经验软件工程研究的证据链：协议、数据、结果、分层与非结果，以及 capsule→EA→claim→closure→signature 的当前状态。本页由产物生成。" />
 <link rel="stylesheet" href="../../assets/demo-legibility.css" />
 <style>
@@ -338,7 +344,7 @@ a{{color:#2563eb}} code{{font-size:11.5px}}
 
 <h2>7. 复跑与下一步</h2>
 <pre># 1) 人签 claim（statement / human-reason 由人定稿）
-"D:/Program Files/Python38/python.exe" -m research_agent run claim \\
+python -m research_agent run claim \\
   --capsule runtime_data/ese-ms-20261118-03/run/run-capsule.json \\
   --ea runtime_data/ese-ms-20261118-03/run/ea.json \\
   --scope S5/ESE-MS-20261118-03 \\
@@ -348,14 +354,14 @@ a{{color:#2563eb}} code{{font-size:11.5px}}
   --output-dir runtime_data/ese-ms-20261118-03/claim
 
 # 2) 结构闭合（只读检查，不签）
-"D:/Program Files/Python38/python.exe" -m research_agent closure ese-check \\
+python -m research_agent closure ese-check \\
   --capsule runtime_data/ese-ms-20261118-03/run/run-capsule.json \\
   --ea runtime_data/ese-ms-20261118-03/run/ea.json \\
   --claim runtime_data/ese-ms-20261118-03/claim/claim.json \\
   --output-dir runtime_data/ese-ms-20261118-03/closure
 
 # 3) 最终签名（人签）
-"D:/Program Files/Python38/python.exe" -m research_agent closure ese-sign \\
+python -m research_agent closure ese-sign \\
   --report runtime_data/ese-ms-20261118-03/closure/closure-report.json \\
   --capsule runtime_data/ese-ms-20261118-03/run/run-capsule.json \\
   --ea runtime_data/ese-ms-20261118-03/run/ea.json \\
@@ -364,7 +370,7 @@ a{{color:#2563eb}} code{{font-size:11.5px}}
   --output-dir runtime_data/ese-ms-20261118-03/signature
 
 # 4) 签完后重生成本页，状态会自动变成 SIGNED
-"D:/Program Files/Python38/python.exe" scripts/build_ese_study_page.py</pre>
+python scripts/build_ese_study_page.py</pre>
 <p class="meta">返回：<a href="../">demo 回放首页</a> · <a href="../run/">主版本来龙去脉</a> · <a href="../../app/">工作台 ESE 面板</a></p>
 </main>
 <script src="../../assets/demo-legibility.js"></script>

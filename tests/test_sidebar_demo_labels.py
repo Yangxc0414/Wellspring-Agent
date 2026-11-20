@@ -31,7 +31,8 @@ class SidebarDemoLabelsTest(unittest.TestCase):
     def test_labels_are_shown_in_sidebar_not_raw_dates(self):
         self.assertIn("DEMO_LABELS", SIDEBAR)
         self.assertIn("const demo = DEMO_LABELS[task.id]", SIDEBAR)
-        self.assertIn("if (demo) return demo.label", SIDEBAR)
+        self.assertIn("demo.label", SIDEBAR)
+        self.assertIn("`${demo.label} · 待签`", SIDEBAR)
         self.assertIn("demo.hint", SIDEBAR)
         self.assertIn('data-demo={demo ? "1" : undefined}', SIDEBAR)
         self.assertIn("data-demo-tone={demo?.tone}", SIDEBAR)

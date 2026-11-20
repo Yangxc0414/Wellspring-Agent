@@ -6,12 +6,13 @@ import type { AutopilotSnapshot, AutoStage, Card, ClosureInventory, ContextTab, 
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { claimSignCommand, closureSignCommand, experimentApproveCommands, protocolFreezeCommand } from "../domain/gateCommands";
 import { claimSignatureLabel } from "../domain/claimSignature";
-import { runtimeAvailable } from "../domain/capabilities";
+import { describeRuntimeError, runtimeAvailable } from "../domain/capabilities";
 import { hypothesisConvergence, literatureCoverage } from "../domain/researchBrief";
 import { defaultRuntimeSource, runtimeRunState, runtimeSourceLabel } from "../domain/runtimeSnapshot";
 import type { ResearchCheck } from "../domain/researchBrief";
 import { probeRuntime, loadAutopilotStatus, loadEvolutionActive, loadEvolutionObservations, loadProjectClosures, loadProjects, loadProjectExperiments } from "../adapters/runtimeApi";
 import type { EvolutionActive, EvolutionObservations, RuntimeHealth } from "../adapters/runtimeApi";
+import { EmptyState } from "./EmptyState";
 import { GateCommandItem, HumanGateCommand } from "./HumanGateCommand";
 import { Icon } from "./Icon";
 import { GovernancePanel } from "./GovernancePanel";
@@ -1106,7 +1107,9 @@ function RunContext({ task }: { task: ResearchTask }) {
               ))}
             </div>
           ) : (
-            <p className="context-empty">运行中输入任何文本都会进入指导队列，在下一阶段边界生效，并写入 trace。</p>
+            <EmptyState tone="note" icon="command" title="还没有插入指导">
+              运行中输入文本会进入队列，在下一个阶段边界生效并写入 trace；它只改执行策略，不改 claim 与门禁。
+            </EmptyState>
           )}
         </section>
       )}
@@ -1221,20 +1224,18 @@ function ProjectExperimentInventoryPanel() {
   }, [active]);
 
   if (!projects.length && !loading && !error) {
-    // An empty tab with no explanation reads as broken. State what is missing
-    // and where the real inventory comes from.
     return (
       <section className="context-section project-experiments">
         <div className="section-title">
           <span>PROJECT EXPERIMENTS</span>
           <em>EMPTY</em>
         </div>
-        <p className="context-note">
-          还没有登记项目实验链。这一栏读取 runtime 的 `project-experiments` 清单；
+        <EmptyState icon="branch" title="还没有登记项目实验链">
+          这一栏读取本地 runtime 的 project-experiments 清单。
           {runtimeAvailable
-            ? "启动本地 runtime 并登记项目后会出现在这里。"
-            : "静态演示构建不含 runtime，真实清单请在本地 CLI 工作台查看。"}
-        </p>
+            ? "启动 runtime 并登记项目后，实验链会出现在这里。"
+            : "当前是静态演示构建，真实清单请在本地 CLI 工作台查看。"}
+        </EmptyState>
       </section>
     );
   }
@@ -1262,7 +1263,14 @@ function ProjectExperimentInventoryPanel() {
         </div>
       )}
       {loading && <p className="run-hint">读取项目实验链…</p>}
-      {error && <p className="run-hint">项目实验链不可用：{error}</p>}
+      {error &&
+        (runtimeAvailable ? (
+          <p className="run-hint">{describeRuntimeError(error, "项目实验链不可用")}</p>
+        ) : (
+          <EmptyState icon="branch" title="静态构建不含项目实验链">
+            这一栏读取本地 runtime 的 /api/projects 清单；真实项目与实验包请在本地 CLI 工作台查看。
+          </EmptyState>
+        ))}
       {inventory && inventory.experiments.length === 0 && (
         <p className="run-hint">该 project 尚无 experiments；CLI 生成实验包后会出现在这里。</p>
       )}
@@ -1813,12 +1821,16 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
   const packageMissing = packages.filter((item) =>
     ["missing", "blocked", "not_run"].includes(item.status)
   ).length;
+  // One canonical six-stage chain, shared with the guide below and with
+  // FlowDemo's CHAIN. Order is the real workflow: a claim is signed *after* the
+  // EA is sealed, so "断言" must follow "证据制品", not precede it.
   const nodes = [
     { label: "来源", title: "SOURCE HIT：检索到的文献/仓库，只是线索，不是证据", value: `${task.coverage.sources} sources`, state: task.coverage.sources ? "ok" : "idle" },
     { label: "片段", title: "SPAN：能指回原文的具体句子；摘要-only 不算证据", value: `${task.coverage.spans} located`, state: task.coverage.spans ? "ok" : "idle" },
+    { label: "运行记录", title: "CAPSULE：数据、代码版本、协议哈希与种子", value: task.run ? "1 capsule" : "not run", state: task.run ? "ok" : "idle" },
+    { label: "证据制品", title: "EA：结果文件被哈希钉住；改动会被发现", value: task.run?.ea ?? "not sealed", state: task.run ? "ok" : "idle" },
     { label: "断言", title: "CLAIM：一句可检验的话 + 数值断言；必须由人签署", value: claim ? claimLabel.short : "none", state: claimLabel.state === "signed-cli" || claimLabel.state === "signed-import" ? "ok" : claim ? "warn" : "idle" },
-    { label: "证据", title: "EA：结果文件被哈希钉住；改动会被发现", value: task.run ? task.run.ea : "not sealed", state: task.run ? "ok" : "idle" },
-    { label: "闭合", title: "CLOSURE：再核对四件产物一致；不一致就 blocked", value: closure?.status === "pass" ? "pass" : task.run ? "locked" : "n/a", state: closure?.status === "pass" ? "ok" : task.run ? "warn" : "idle" }
+    { label: "闭合", title: "CLOSURE：核对四件产物一致；不一致就 blocked", value: closure?.status === "pass" ? "pass" : task.run ? "locked" : "n/a", state: closure?.status === "pass" ? "ok" : task.run ? "warn" : "idle" }
   ];
 
   const kindLabel: Record<EvidenceItem["kind"], string> = {
@@ -1844,16 +1856,23 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
             </div>
           ))}
         </div>
+        <div className="chain-legend" aria-label="证据链状态图例">
+          <span className="ok">已就绪</span>
+          <span className="warn">待人工</span>
+          <span className="idle">未产出</span>
+          <em>箭头方向 = 证据依赖，从左到右</em>
+        </div>
         <details className="chain-guide">
-          <summary>这五段是什么意思？什么时候需要人签？</summary>
+          <summary>六段的含义与人工签署时点</summary>
           <div className="chain-guide-body">
-            <p>证据链从可定位的来源走到人签的结论，五段各管一件事：</p>
+            <p>证据链从可定位的来源走到人签的结论，六段各管一件事：</p>
             <ul>
               <li><b>来源</b>：检索到的文献或仓库，只是线索。</li>
               <li><b>片段</b>：能指回原文的具体句子；摘要-only 不算证据。</li>
               <li><b>运行记录</b>：这次实验的数据、代码、协议哈希与种子。</li>
               <li><b>证据制品</b>：结果文件被哈希钉住，改动会被发现。</li>
               <li><b>断言</b>：一句可检验的话 + 数值断言；必须由人签署。</li>
+              <li><b>闭合</b>：核对来源、片段、运行记录、断言四件产物一致；不一致即 blocked。</li>
             </ul>
             <p><b>待签 = 证据齐了，但你还没确认。</b> 典型情况：运行完成、EA 已封装、断言能重算，但 statement 与 human_reason 还没由人定稿。签核只能在本地 CLI 完成，网页不会代签。</p>
           </div>
@@ -1900,10 +1919,10 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
             </div>
           </>
         ) : (
-          <p className="context-empty">
-            运行本地 runtime 任务后，这里会显示 S1–S13 每个证据包的状态（就绪 / 待人工 / 待签署 / 缺失）。
+          <EmptyState icon="evidence" title="还没有证据包">
+            运行本地 runtime 任务后，这里会按 S1–S13 显示每个证据包的状态（就绪 / 待人工 / 待签署 / 缺失）。
             静态预览不产生真实证据包。
-          </p>
+          </EmptyState>
         )}
       </section>
 
@@ -1940,17 +1959,31 @@ function EvidenceContext({ task }: { task: ResearchTask }) {
       <section className="context-section">
         <div className="section-title">
           <span>ADMISSION</span>
-          <em>HUMAN GATES</em>
+          <em>{task.gates.filter((gate) => gate.status === "pass").length}/{task.gates.length} PASS</em>
         </div>
+        {/* RUN already lists every gate with its command. Here we only surface
+            the ones that are not through, so the same list is not printed twice. */}
         <div className="gate-list">
-          {task.gates.map((gate) => (
-            <div className="gate-row" key={gate.id}>
-              <span className={`gate-dot ${statusTone(gate.status)}`} />
-              <span className="gate-name"><b>{gate.id}</b><small>{gate.reason}</small></span>
-              <span className={`badge ${statusTone(gate.status)}`}>{gate.status.replace("_", " ")}</span>
-            </div>
-          ))}
+          {task.gates.filter((gate) => gate.status !== "pass").length ? (
+            task.gates
+              .filter((gate) => gate.status !== "pass")
+              .map((gate) => (
+                <div className="gate-row" key={gate.id}>
+                  <span className={`gate-dot ${statusTone(gate.status)}`} />
+                  <span className="gate-name"><b>{gate.id}</b><small>{gate.reason}</small></span>
+                  <span className={`badge ${statusTone(gate.status)}`}>{gate.status.replace("_", " ")}</span>
+                </div>
+              ))
+          ) : (
+            <EmptyState tone="note" icon="check" title="全部人工门已通过">
+              仍需在本地 CLI 完成 claim 签署与 closure 核对，导出才会解锁。
+            </EmptyState>
+          )}
         </div>
+        <button type="button" className="context-link" onClick={() => actions.setContextTab("run")}>
+          在 RUN 面板查看全部 {task.gates.length} 道门与命令
+          <Icon name="arrow" size={12} />
+        </button>
       </section>
 
       <div className="context-footnote">

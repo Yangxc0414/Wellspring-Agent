@@ -13,6 +13,7 @@ import type {
   EvolutionPolicySnapshot
 } from "../../adapters/runtimeApi";
 import { Card } from "./SettingsSections";
+import { ConfirmDialog } from "../ConfirmDialog";
 import { AGENT_TEMPLATES, type AgentPreset, type AgentTemplate } from "../../domain/agentTemplates";
 import { SourcePill, type SourceKind } from "../SourcePill";
 
@@ -149,6 +150,7 @@ export function AgentManagement() {
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CustomAgentRecord | null>(null);
   const [batchOpen, setBatchOpen] = useState(false);
   const [pending, setPending] = useState<PendingAgent[]>([]);
   const [batchError, setBatchError] = useState("");
@@ -509,11 +511,12 @@ export function AgentManagement() {
       }
     } catch (error: unknown) {
       setAgentState((current) => ({ ...current, error: String(error) }));
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
   const onDeleteAgent = async (agent: CustomAgentRecord) => {
-    if (!window.confirm(`删除自定义子智能体「${agent.name}」？`)) return;
     try {
       if (agentState.source === "runtime") {
         await deleteCustomAgent(agent.id);
@@ -761,7 +764,7 @@ export function AgentManagement() {
                 <div className="custom-agent-actions">
                   <Switch checked={agent.enabled} onChange={() => void onToggleAgent(agent)} label={`启用 ${agent.name}`} />
                   <button type="button" className="settings-mini-btn" onClick={() => startEdit(agent)}>编辑</button>
-                  <button type="button" className="settings-mini-btn" onClick={() => void onDeleteAgent(agent)}>删除</button>
+                  <button type="button" className="settings-mini-btn" onClick={() => setDeleteTarget(agent)}>删除</button>
                 </div>
               </div>
               <p>{agent.purpose}</p>
@@ -843,6 +846,15 @@ export function AgentManagement() {
           关闭是“停止新的自动改进”，不是撤销已有证据或租约；Claim/EA/gate 仍需人工。{policySource === "local" ? "本地草稿不会改变 CLI 读取的 runtime policy 文件。" : ""}
         </p>
       </Card>
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        eyebrow="DELETE / LOCAL"
+        title={deleteTarget ? `删除自定义子智能体「${deleteTarget.name}」？` : "删除？"}
+        body="该子智能体只读、只产生 advisory 检查；删除后其注册记录从本地移除，不影响已产生的证据或门禁。"
+        confirmLabel="删除"
+        onConfirm={() => { void onDeleteAgent(deleteTarget!); }}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

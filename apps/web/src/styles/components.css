@@ -583,6 +583,66 @@ select.control {
   gap: 10px;
 }
 
+/* Unified empty state. The block variant reuses .context-empty-card (below) so
+   there is one visual language; only the title/action slots are added here. */
+.empty-state .empty-state-title {
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--text);
+  font-weight: 600;
+}
+.empty-state .empty-state-action {
+  margin-top: 3px;
+}
+
+/* Compact variant: sits inside a populated panel without competing for space. */
+.empty-state.is-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  color: var(--faint);
+}
+.empty-state.is-note > div {
+  flex: 1;
+  min-width: 0;
+}
+.empty-state.is-note b {
+  display: block;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--muted);
+  font-weight: 600;
+}
+.empty-state.is-note p {
+  margin: 3px 0 0;
+  color: var(--faint);
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.6;
+}
+.empty-state.is-note .empty-state-action {
+  margin-top: 0;
+  flex: none;
+}
+
+/* Base style for the inline explanation line used across the context panel.
+   This class had no rule at all, so a dozen "empty" surfaces fell back to raw
+   browser defaults and read as broken rather than intentionally empty. */
+.context-note {
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.6;
+}
+.context-note code {
+  color: var(--accent-deep);
+}
+
 .context-card {
   display: grid;
   gap: 7px;
@@ -1148,10 +1208,51 @@ select.control {
 .chain-link {
   position: absolute;
   top: 50%;
-  right: -5px;
-  width: 5px;
+  right: -6px;
+  width: 6px;
   height: 1px;
   background: var(--line-strong);
+}
+.chain-link::after {
+  /* Direction marker: evidence dependency reads left-to-right. */
+  content: "";
+  position: absolute;
+  right: 0;
+  top: -2px;
+  border-left: 4px solid var(--line-strong);
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+}
+
+.chain-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  margin: 8px 0 2px;
+  font-size: calc(9px * var(--font-scale, 1));
+  font-family: var(--mono);
+}
+.chain-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+.chain-legend span::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+}
+.chain-legend .ok::before { background: var(--teal); border-color: var(--teal); }
+.chain-legend .warn::before { background: var(--amber); border-color: var(--amber); }
+.chain-legend .idle::before { background: var(--surface-2); }
+.chain-legend em {
+  margin-left: auto;
+  color: var(--faint);
+  font-style: normal;
 }
 
 .coverage-grid {
@@ -1185,7 +1286,9 @@ select.control {
   font-family: var(--mono);
   font-size: calc(10px * var(--font-scale, 1));
   letter-spacing: 0.02em;
-  white-space: nowrap;
+  /* 长标签（ABSTRACT-ONLY / SIGNED CLAIMS）在窄面板下要断行，
+     否则会溢出到相邻格并粘连成一串。 */
+  overflow-wrap: anywhere;
 }
 
 .evidence-list {

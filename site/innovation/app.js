@@ -93,9 +93,15 @@ function renderRail() {
     <span><b class="act-name">${esc(act.name)}</b><span class="act-sub">${esc(act.sub)}</span></span>
     <span class="act-mark" aria-hidden="true"></span>
   </button>`; }).join("");
-  // on the horizontal mobile rail the active act can sit off-screen; keep it in view
-  const on = $("act-rail").querySelector(".act-btn.is-on");
-  if (on) on.scrollIntoView({ block: "nearest", inline: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+  // on the horizontal mobile rail the active act can sit off-screen; keep it in view.
+  // scroll the rail only: scrollIntoView() also scrolls the page itself, which used to
+  // land a fresh visitor mid-document (past the hero) instead of at the top.
+  const rail = $("act-rail");
+  const on = rail.querySelector(".act-btn.is-on");
+  if (on) {
+    const target = on.offsetLeft - (rail.clientWidth - on.clientWidth) / 2;
+    rail.scrollTo({ left: Math.max(0, target), behavior: REDUCED ? "auto" : "smooth" });
+  }
 }
 
 function noteFor(index) {

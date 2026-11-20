@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { describeRuntimeError, runtimeAvailable } from "../domain/capabilities";
 import {
   loadCriticPanel,
   loadHostModelTurns,
@@ -151,7 +152,9 @@ export function HostModelPanel() {
         <p className="rsi-headline">
           读不到宿主模型队列。这是本地 runtime 的只读视图：未启动 runtime、或构建为静态模式时不可用。
         </p>
-        <p className="host-error">{error}</p>
+        {runtimeAvailable ? (
+          <p className="host-error">{describeRuntimeError(error, "读取失败")}</p>
+        ) : null}
       </section>
     );
   }

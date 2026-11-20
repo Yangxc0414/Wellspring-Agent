@@ -185,8 +185,13 @@ export function FlowDemo() {
           disabled={!canAdvance}
           onClick={() => {
             if (!canAdvance) return;
-            setStep((s) => s + 1);
-            setOpen(Math.min(step, STAGES.length - 1));
+            // Open the stage we just advanced *into* (index === old step), not
+            // the one we completed. Using the stale `step` here used to expand
+            // the previous stage, so the presenter could never point at the
+            // current one.
+            const next = step + 1;
+            setStep(next);
+            setOpen(Math.min(next, STAGES.length - 1));
           }}
         >
           推进下一步 →
@@ -234,8 +239,10 @@ export function FlowDemo() {
                 <span className="flow-stage-mark">{done(i) ? "✓" : stage.human ? "人" : "·"}</span>
                 <span className="flow-stage-id">{stage.id}</span>
                 <span className="flow-stage-label">{stage.label}</span>
+                {/* One gate marker only. The "人" mark above and this gate badge
+                    already say "human gate"; a third amber "人工" chip used to
+                    duplicate both and introduce a second colour for one idea. */}
                 {stage.gate ? <span className="flow-stage-gate">{stage.gate}</span> : null}
-                {stage.human ? <span className="flow-stage-human">人工</span> : null}
                 <span
                   className="flow-stage-jump"
                   role="button"

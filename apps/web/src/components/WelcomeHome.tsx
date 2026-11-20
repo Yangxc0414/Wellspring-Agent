@@ -16,19 +16,19 @@ const PROMPTS: Array<{ icon: IconName; title: string; hint: string; text: string
     icon: "search",
     title: "文献调研",
     hint: "来源 → span → gap",
-    text: "帮我做一轮文献调研，先盘点来源、可定位 span 与证据缺口："
+    text: "帮我做一轮文献调研，先盘点来源、可定位 span 与证据缺口。主题是：界面钝化与湿热稳定性"
   },
   {
     icon: "shield",
     title: "实验设计",
     hint: "baseline / 指标 / seeds",
-    text: "把一个研究问题转成可复现实验，先给出 baseline、主指标、对照与 seeds："
+    text: "把一个研究问题转成可复现实验，先给出 baseline、主指标、对照与 seeds。问题是：钝化层能否延长钙钛矿器件的 T80"
   },
   {
     icon: "book",
     title: "写作槽位",
     hint: "先槽位，后正文",
-    text: "帮我规划论文写作：哪些 claim 可以写、哪些槽位必须先锁住？主题是："
+    text: "帮我规划论文写作：哪些 claim 可以写、哪些槽位必须先锁住？主题是：钝化层湿热稳定性"
   },
   {
     icon: "evolution",
@@ -126,7 +126,8 @@ export function WelcomeHome() {
         </div>
 
         <div className="welcome-head">
-          <h1>{greeting}</h1>
+          <span className="eyebrow">WELLSPRING AGENT · {greeting}</span>
+          <h1>科研智能体工作台</h1>
           <p>从文献、实验到写作，在同一个证据边界里推进。全自动也会停在 claim 人工门，不会替作者签署结论。</p>
         </div>
 
@@ -171,7 +172,7 @@ export function WelcomeHome() {
             rows={3}
             value={value}
             maxLength={4000}
-            placeholder="向 Research Agent 提问，使用 / 调用 Skill……"
+            placeholder="向 Wellspring Agent 提问，使用 / 调用 Skill……"
             aria-label="新会话输入"
             onChange={(event) => setValue(event.target.value)}
             onKeyDown={(event) => {
@@ -225,6 +226,7 @@ export function WelcomeHome() {
           </div>
         </div>
 
+        <p className="welcome-prompts-hint">点选示例会填入下方输入框，确认后再发送——不会自动执行。</p>
         <div className="welcome-prompts" aria-label="起始建议">
           {PROMPTS.map((prompt) => (
             <button
@@ -235,6 +237,7 @@ export function WelcomeHome() {
             >
               <Icon name={prompt.icon} size={13} />
               <span>{prompt.title}</span>
+              <small>填入</small>
             </button>
           ))}
         </div>

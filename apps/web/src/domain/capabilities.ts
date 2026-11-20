@@ -43,3 +43,19 @@ export function requireRuntime(what: string): void {
     throw new Error(`${what} requires the local runtime; this build was compiled without it`);
   }
 }
+
+/**
+ * Turn a caught runtime error into something a viewer can act on.
+ *
+ * Without this, a static build surfaced raw English like
+ * "/api/projects requires the local runtime; this build was compiled without it"
+ * inside otherwise Chinese UI. A build-time disable is not a user error, so it
+ * gets its own sentence instead of being concatenated after a colon.
+ */
+export function describeRuntimeError(error: unknown, fallback = "读取失败"): string {
+  if (!runtimeAvailable) {
+    return "静态演示构建：runtime 在构建时已禁用，这项功能只在本地 CLI 工作台可用。";
+  }
+  const text = error instanceof Error ? error.message : String(error ?? "");
+  return text ? `${fallback}：${text}` : fallback;
+}

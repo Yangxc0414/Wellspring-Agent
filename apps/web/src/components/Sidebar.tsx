@@ -130,8 +130,15 @@ export function Sidebar() {
   const taskStatus = (task: ResearchTask) => {
     if (task.auto.running) return task.auto.paused ? "暂停" : "运行中";
     // Seeded demo sessions carry a role label so a viewer can tell them apart at a glance.
+    // But a demo role must not swallow a real gate state: the full-chain replay
+    // is blocked at the claim gate, and the right panel says so — the sidebar
+    // must not read as "finished normally".
     const demo = DEMO_LABELS[task.id];
-    if (demo) return demo.label;
+    if (demo) {
+      return task.status === "blocked" && !demo.label.includes("待签")
+        ? `${demo.label} · 待签`
+        : demo.label;
+    }
     if (task.status === "blocked") return "待签";
     return relativeTime(task.updatedAt);
   };

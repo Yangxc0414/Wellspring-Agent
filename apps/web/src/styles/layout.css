@@ -2164,8 +2164,15 @@
   cursor: not-allowed;
 }
 
+.welcome-prompts-hint {
+  margin: 14px 0 0;
+  color: var(--faint);
+  font-size: calc(10px * var(--font-scale, 1));
+  text-align: center;
+}
+
 .welcome-prompts {
-  margin-top: 12px;
+  margin-top: 6px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
@@ -2215,6 +2222,18 @@
   color: var(--faint);
   font-family: var(--mono);
   font-size: calc(10px * var(--font-scale, 1));
+}
+
+/* The visible "填入" tag: the click-fills-input behaviour must not be
+   hover-only, or touch users read the chip as "run this now". */
+.welcome-prompts button small {
+  margin: 0 0 0 auto;
+  padding: 2px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--faint);
+  font-size: calc(9px * var(--font-scale, 1));
+  white-space: nowrap;
 }
 
 .welcome-foot {

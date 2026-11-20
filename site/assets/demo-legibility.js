@@ -11,8 +11,24 @@
 (function () {
   "use strict";
 
-  var MODE_TEXT =
+  var MODE_TEXT_SIM =
     "静态演示模式：本页数值来自快照 / fixture（固定演示样本），不是实时检索或真实实验；真实运行、人工签核与导出只在本地 CLI 可用。";
+
+  var MODE_TEXT_REPLAY =
+    "真实运行回放（只读）：本页展示一次已发生运行的输入与产物，fixture_mode: false；页面不会重新执行或改动任何数据，人工签署与导出仍只在本地 CLI 完成。";
+
+  // Some Pages subpages replay a real run (fixture_mode: false) while others are
+  // fixtures. Detecting the page's own declaration avoids slapping a "SIM / 演示
+  // 数据" banner onto a page that explicitly says it is a real run — a direct
+  // contradiction a reader cannot reconcile.
+  function isRealReplay() {
+    var text = (document.body.textContent || "").slice(0, 4000);
+    return /fixture_mode:\s*false/.test(text) || /非\s*SIM/.test(text);
+  }
+
+  function modeText() {
+    return isRealReplay() ? MODE_TEXT_REPLAY : MODE_TEXT_SIM;
+  }
 
   var TERMS = {
     "SPEC": { zh: "模块规格", desc: "每个能力先写「合同」再写代码；改行为必须先改规格，代码不能偷偷越权。" },
@@ -143,7 +159,7 @@
       ]
     },
     demo: {
-      summary: "研究运行控制台（SIM）：用固定样本回放证据链与导出闸门。所有数值是演示数据，负结果与失败判定会原样保留。",
+      summary: "按阶段展示这条运行的输入、命令与产物，以及证据链与导出闸门。负结果与失败判定原样保留；本页不重新执行任何步骤。",
       terms: ["SIM", "fixture", "stale", "EA", "claim", "closure", "span", "scored-verdict", "FailureRecord", "manifest", "bound_claim", "gate"],
       legend: [
         { tone: "warn", label: "标注「仅说明」的按钮点击后只显示一条说明，不会改变数据或执行操作" },
@@ -164,13 +180,13 @@
     section.setAttribute("aria-label", "本页阅读说明");
 
     var head = make("div", "dl-guide-head");
-    head.appendChild(make("span", "dl-tag", "静态演示 · STATIC / SIM"));
+    head.appendChild(make("span", "dl-tag", isRealReplay() ? "真实运行回放 · 只读" : "静态演示 · STATIC / SIM"));
     head.appendChild(make("b", "", "这一页在讲什么"));
     head.appendChild(make("span", "dl-readonly", "只读预览 · 不执行操作"));
     section.appendChild(head);
 
     section.appendChild(make("p", "dl-summary", cfg.summary));
-    section.appendChild(make("p", "dl-mode", MODE_TEXT));
+    section.appendChild(make("p", "dl-mode", modeText()));
 
     var details = make("details", "dl-glossary");
     details.appendChild(make("summary", "", "本页术语（点击展开中文解释）· " + cfg.terms.length + " 条"));
@@ -202,7 +218,9 @@
     var pres = document.querySelectorAll("pre:not([data-dl-cli-done])");
     Array.prototype.forEach.call(pres, function (pre) {
       var text = pre.textContent || "";
-      if (!/python -m research_agent|research_agent\.cli/.test(text)) return;
+      // Match both `python -m research_agent` and a quoted interpreter path
+      // like `"D:/Program Files/Python38/python.exe" -m research_agent`.
+      if (!/(-m\s+research_agent|research_agent\.cli|python\s+-m\s+research_agent)/.test(text)) return;
       pre.setAttribute("data-dl-cli-done", "1");
       var note = make("div", "dl-cli-note");
       note.appendChild(make("span", "", "本地 CLI 命令 · 网页不会执行它 · <尖括号> 占位符需替换为实际路径 / ID"));
@@ -236,12 +254,14 @@
 
   function mount() {
     if (document.body.getAttribute("data-dl-mounted") === "1") return;
-    var page = document.body.getAttribute("data-dl-page") || "";
+    // The page marker lives on <main>, not <body> — reading only body meant the
+    // guide never mounted on any Pages subpage. Read from either.
+    var main = document.querySelector("main") || document.body;
+    var page = (main.getAttribute("data-dl-page") || document.body.getAttribute("data-dl-page") || "");
     var cfg = PAGES[page];
     if (!cfg) return;
     document.body.setAttribute("data-dl-mounted", "1");
 
-    var main = document.querySelector("main") || document.body;
     main.insertBefore(buildGuide(cfg), main.firstChild);
     markCliBlocks();
     markInfoOnlyButtons();

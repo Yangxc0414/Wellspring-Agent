@@ -189,7 +189,7 @@ export function SettingsPage() {
         >
           <span className="settings-return-arrow"><Icon name="arrow" size={13} /></span>
           <span className="settings-brand-mark"><Icon name="logo" size={17} /></span>
-          <b>Research Agent</b>
+          <b>Wellspring Agent</b>
           <em>SETTINGS</em>
         </button>
         <div className="settings-titlebar-actions">

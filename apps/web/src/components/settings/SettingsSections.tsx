@@ -19,6 +19,7 @@ import { useAllModelProfiles } from "../../state/modelStore";
 import { useFolderStorage } from "../../state/useFolderStorage";
 import { selectCurrentTask, useWorkspaceStore } from "../../state/workspaceStore";
 import { Icon } from "../Icon";
+import { ConfirmDialog } from "../ConfirmDialog";
 import { ModelBindings } from "./ModelBindings";
 import { ModelProviderManager } from "./ModelProviderManager";
 
@@ -445,6 +446,7 @@ export function DataSettingsPage() {
   const storage = useFolderStorage();
   const importRef = useRef<HTMLInputElement>(null);
   const [storageBusy, setStorageBusy] = useState("");
+  const [pendingReset, setPendingReset] = useState(false);
   const totalMessages = tasks.reduce((sum, task) => sum + task.messages.length, 0);
   const usageDays = tasks.reduce((sum, task) => sum + Object.keys(task.usageDays ?? {}).length, 0);
   const activeTaskCount = tasks.filter((task) => !archivedTaskIds.includes(task.id)).length;
@@ -595,11 +597,7 @@ export function DataSettingsPage() {
           <button
             type="button"
             className="settings-btn danger"
-            onClick={() => {
-              if (window.confirm("重置会清空本地示例状态，确定继续？")) {
-                actions.resetWorkspace();
-              }
-            }}
+            onClick={() => setPendingReset(true)}
           >
             <Icon name="trash" size={12} />重置为示例
           </button>
@@ -615,6 +613,15 @@ export function DataSettingsPage() {
           <span>工作区快照只写入 workspace.json；不包含 API 密钥，不读取文件夹中的其他文件。演示数据、模型设置与 usageDays 仍不调用 API、不生成真实 claim、不执行真实实验。</span>
         </div>
       </Card>
+      <ConfirmDialog
+        open={pendingReset}
+        eyebrow="RESET / LOCAL"
+        title="重置为示例？"
+        body="本地演示状态（含你写入的记忆与归档改动）将被清空并重新播种；不会影响 claim / EA / 门禁。此操作无法撤销。"
+        confirmLabel="重置"
+        onConfirm={() => { actions.resetWorkspace(); setPendingReset(false); }}
+        onCancel={() => setPendingReset(false)}
+      />
     </div>
   );
 }
@@ -757,7 +764,7 @@ export function AboutSettingsPage() {
       <PageHead
         eyebrow="SUPPORT / ABOUT"
         title="关于与边界"
-        description="Research Agent Workspace · 证据闭合的对话式科研工作台。"
+        description="Wellspring Agent · 证据闭合的对话式科研工作台。"
       />
 
       <Card title="版本" description="静态工作台与部署信息。">

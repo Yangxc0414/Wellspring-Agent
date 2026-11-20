@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>研究运行回放 · 输入 → 输出（真实运行）</title>
+<title>运行回放 · Research Agent</title>
 <meta name="description" content="一次真实 ESE 运行的输入与阶段产物：文献、候选、设计、稿件、评审与审计；不是工作台，不含 SIM 控制台。" />
+<link rel="stylesheet" href="../assets/subpage.css" />
 <link rel="stylesheet" href="../assets/demo-legibility.css" />
 <style>
 body{margin:0;padding:32px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.7;color:#1f2937;background:#f8fafc}
@@ -17,12 +18,20 @@ th{color:#5b6472;font-weight:600}
 .badge{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:#eef2ff;color:#2563eb;margin-right:6px}
 .boundary{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:13px}
 a{color:#2563eb}
+.st{display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,monospace;font-size:12.5px}
+.st i{width:8px;height:8px;border-radius:999px;flex:none}
+.st-ok i{background:#059669}.st-ok{color:#047857}
+.st-human i{background:#d97706}.st-human{color:#92400e}
+.st-blocked i{background:#dc2626}.st-blocked{color:#b91c1c}
+.st-neutral i{background:#94a3b8}.st-neutral{color:#475569}
+.table-note{color:#5b6472;font-size:12px;margin:4px 0 0}
 </style>
 </head>
 <body>
+<div class="sp-top"><a class="sp-home" href="../">← 返回主页</a><span class="sp-chip">只读回放 · 数据来自一次真实本地运行</span><nav class="sp-sib"><a href="../demo/">运行</a><a href="../innovation/">创新</a><a href="../app/">工作台</a><a href="../qoder/">接入</a><a href="../rsi/">自进化</a></nav></div>
 <main data-dl-page="demo" data-demo-run="PIPE-20261118T120549Z-f36858">
-  <span class="badge">REAL RUN · 非 SIM</span><span class="badge">只读</span>
-  <h1>研究运行回放：输入 → 产物</h1>
+  <span class="badge">真实运行回放 · 页面只读</span><span class="badge">非 SIM</span>
+  <h1>真实运行回放：输入 → 产物</h1>
   <p class="meta">run: PIPE-20261118T120549Z-f36858 · fixture_mode: false · 真实工作台在 <a href="../app/">/app/</a>，本页是这份运行的只读回放。</p>
 
   <h2>1. 输入</h2>
@@ -30,7 +39,8 @@ a{color:#2563eb}
   <p>文献语料：8 篇全文来源、6198 个 span（pdf 解析，摘要不进入证据）。</p>
 
   <h2>2. 阶段 → 产物</h2>
-  <table><thead><tr><th>阶段</th><th>状态</th><th>warning 数</th></tr></thead><tbody><tr><td>S1 文献 / 全证据</td><td>ok</td><td>3</td></tr><tr><td>S1b 跨来源综合</td><td>synthesized</td><td>0</td></tr><tr><td>S2-S3 假设</td><td>candidates_need_human</td><td>12</td></tr><tr><td>S4 设计与协议</td><td>needs_human</td><td>8</td></tr><tr><td>S6 图</td><td>schematic_ready</td><td>0</td></tr><tr><td>S8-S12 稿件</td><td>needs_evidence</td><td>6</td></tr></tbody></table>
+  <table><caption class="table-note">状态语义：<span class="st st-ok"><i></i>ok</span> 完成 · <span class="st st-human"><i></i>needs_human</span> 等人工门 · <span class="st st-blocked"><i></i>blocked</span> 默认拒绝 · <span class="st st-neutral"><i></i>其他</span></caption>
+  <thead><tr><th>阶段</th><th>状态</th><th>warning 数</th></tr></thead><tbody><tr><td>S1 文献 / 全证据</td><td><span class="st st-ok"><i></i>ok</span></td><td>3</td></tr><tr><td>S1b 跨来源综合</td><td><span class="st st-ok"><i></i>synthesized</span></td><td>0</td></tr><tr><td>S2-S3 假设</td><td><span class="st st-human"><i></i>candidates_need_human</span></td><td>12</td></tr><tr><td>S4 设计与协议</td><td><span class="st st-human"><i></i>needs_human</span></td><td>8</td></tr><tr><td>S6 图</td><td><span class="st st-ok"><i></i>schematic_ready</span></td><td>0</td></tr><tr><td>S8-S12 稿件</td><td><span class="st st-human"><i></i>needs_evidence</span></td><td>6</td></tr></tbody></table>
   <p>门禁：Q0=pass · G1=needs_human · G2=needs_human · G3=blocked · G5=blocked</p>
 
   <h2>3. S2-S3 候选（前 3 条）</h2>

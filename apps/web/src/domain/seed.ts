@@ -1,5 +1,6 @@
 import { AUTO_STAGE_CATALOG, DEFAULT_PREFERENCES, builtinSkills, clampModel, defaultModelSettings, modelSettingsForProfile, seedGithubPlugin } from "./catalog";
 import type {
+  MemoryEntry,
   AccessMode,
   AutoStage,
   Card,
@@ -318,6 +319,25 @@ const EVIDENCE: EvidenceItem[] = [
     refs: ["SPAN-009"]
   }
 ];
+
+// 一个默认就已归档的任务：让「归档管理」在首次打开时就展示完整的
+// 归档 → 恢复/下载 流程，而不是三个 0 计数（与侧栏 6 个活跃任务对齐）。
+export function seedArchivedTask(): ResearchTask {
+  return {
+    ...seedThesisTask(
+      "materials-archive-demo",
+      "湿热稳定性对照组设计",
+      "为钙钛矿任务设计湿热稳定性对照组、样本量与停止规则。",
+      "2026-10-21T10:30:00"
+    ),
+    workspaceId: "materials",
+    domain: "实验设计",
+    createdAt: "2026-10-19",
+    updatedAt: "2026-10-21T10:30:00",
+    stage: 4,
+    completedStages: [0, 1, 2, 3]
+  };
+}
 
 function seedPerovskite(): ResearchTask {
   return {
@@ -797,6 +817,35 @@ export function seedFullChainDemo(): ResearchTask {
   };
 }
 
+export const SEED_MEMORY_ENTRIES: MemoryEntry[] = [
+      {
+        id: "mem-seed-retrieval",
+        text: "钙钛矿任务检索计划固定 2020–2026 中英双语，全文优先；摘要-only 只作线索。",
+        kind: "decision",
+        scope: "钙钛矿界面钝化",
+        source: "任务固定",
+        createdAt: "2026-10-24T09:30:00"
+      },
+      {
+        id: "mem-seed-ese",
+        text: "ESE 分层数据显示 click 方向反转；引用该结论必须带分层口径。",
+        kind: "note",
+        scope: "ESE 研究",
+        source: "runtime 同步",
+        createdAt: "2026-11-05T14:10:00",
+        syncedAt: "2026-11-05T14:12:00"
+      },
+      {
+        id: "mem-seed-writing",
+        text: "写作槽位只接受已签 claim；未签前 Results 槽位保持 locked。",
+        kind: "constraint",
+        scope: "证据驱动科研写作系统",
+        source: "任务固定",
+        createdAt: "2026-10-23T17:00:00"
+      }
+
+];
+
 export function createSeedWorkspace(): PersistedWorkspace {
   return {
     version: 1,
@@ -806,16 +855,17 @@ export function createSeedWorkspace(): PersistedWorkspace {
     workspaces: WORKSPACES,
     plugins: [seedGithubPlugin()],
     skills: builtinSkills(),
-    memory: [],
-    archivedTaskIds: [],
     tasks: [
       seedFullChainDemo(),
       seedEseStudy(),
       seedPerovskite(),
       seedArchives(),
       seedThesisTask("evidence-writing", "证据驱动科研写作系统", "把 claim 与 span 的绑定做成可审计的写作工作流。", "2026-10-23T16:40:00", "writing"),
-      seedThesisTask("proposal-review", "项目命题设计与反思", "收敛毕设命题、边界与验证顺序。", "2026-10-23T15:20:00")
-    ]
+      seedThesisTask("proposal-review", "项目命题设计与反思", "收敛毕设命题、边界与验证顺序。", "2026-10-23T15:20:00"),
+      seedArchivedTask()
+    ],
+    memory: SEED_MEMORY_ENTRIES.map((entry) => ({ ...entry })),
+    archivedTaskIds: ["materials-archive-demo"]
   };
 }
 

@@ -113,7 +113,7 @@ async function writeSnapshot(
   await writeJson(handle, WORKSPACE_FILE, snapshot);
   const savedAt = new Date().toISOString();
   await writeJson(handle, META_FILE, {
-    app: "Research Agent",
+    app: "Wellspring Agent",
     schema_version: snapshot.version,
     file: WORKSPACE_FILE,
     saved_at: savedAt,

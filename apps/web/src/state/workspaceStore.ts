@@ -26,8 +26,10 @@ import {
   createConversationTask,
   createSeedWorkspace,
   createTask as buildTask,
+  seedArchivedTask,
   seedEseStudy,
   seedFullChainDemo,
+  SEED_MEMORY_ENTRIES,
   planCard,
   writingCard
 } from "../domain/seed";
@@ -67,6 +69,7 @@ import type {
 import { clockTime, formatBytes, isoDateOffset, isoNow, uid } from "../domain/utils";
 
 const ESE_REPLAY_TASK_ID = "ese-ms-20261118-03";
+const ARCHIVED_SEED_TASK_ID = "materials-archive-demo";
 
 /**
  * Add the ESE replay to an already-persisted workspace once. The replay is a
@@ -110,8 +113,43 @@ function ensureSeedFullChainDemo(snapshot: PersistedWorkspace): PersistedWorkspa
 }
 
 const loadedSnapshot = staticAdapter.load();
+/**
+ * Bring the archive/memory seeds into already-persisted workspaces once, so the
+ * 归档管理 and 记忆 settings pages demonstrate their flows instead of showing
+ * three zero counts next to six rich sidebar tasks. Memory entries merge by id
+ * (user deletions win); the archived task follows the explicit-delete-wins rule
+ * shared by the other seed migrations.
+ */
+function ensureSeedArchiveAndMemory(snapshot: PersistedWorkspace): PersistedWorkspace {
+  // run-once 哨兵：任一条种子记忆已存在即视为迁移完成，之后用户删除/恢复都赢过迁移
+  if ((snapshot.memory ?? []).some((item) => item.id === "mem-seed-retrieval")) return snapshot;
+  if (
+    !snapshot.tasks.some((task) => task.id === ARCHIVED_SEED_TASK_ID) &&
+    !(snapshot.archivedTaskIds ?? []).includes(ARCHIVED_SEED_TASK_ID)
+  ) {
+    snapshot = {
+      ...snapshot,
+      tasks: [...snapshot.tasks, seedArchivedTask()],
+      archivedTaskIds: [...(snapshot.archivedTaskIds ?? []), ARCHIVED_SEED_TASK_ID]
+    };
+  }
+  const existingMemory = snapshot.memory ?? [];
+  const merged = SEED_MEMORY_ENTRIES.filter(
+    (entry) => !existingMemory.some((item) => item.id === entry.id)
+  );
+  if (merged.length) {
+    snapshot = { ...snapshot, memory: [...existingMemory, ...merged] };
+  }
+  try {
+    staticAdapter.save(snapshot);
+  } catch {
+    /* quota / private mode: the in-memory snapshot still shows the seeds */
+  }
+  return snapshot;
+}
+
 const seededSnapshot = loadedSnapshot ? ensureSeedEseTask(loadedSnapshot) : createSeedWorkspace();
-const initialSnapshot = ensureSeedFullChainDemo(seededSnapshot);
+const initialSnapshot = ensureSeedArchiveAndMemory(ensureSeedFullChainDemo(seededSnapshot));
 
 const defaultUI: UIState = {
   contextTab: "flow",

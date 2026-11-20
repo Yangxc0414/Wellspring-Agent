@@ -142,7 +142,7 @@ const MessageView = memo(function MessageView({ item }: { item: Message }) {
       </div>
       <div className="message-body">
         <div className="message-head">
-          <b>{isUser ? "你" : "Research Agent"}</b>
+          <b>{isUser ? "你" : "Wellspring Agent"}</b>
           <span>{item.at}</span>
         </div>
         <div className={`bubble${isUser ? " is-user-bubble" : " is-agent-bubble"}`}>

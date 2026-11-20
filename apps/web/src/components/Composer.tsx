@@ -49,8 +49,11 @@ function suggestionsFor(task: ResearchTask): string[] {
     if (task.protocol) return ["G2 冻结命令", "查看证据链"];
     return ["送入实验设计", "查看证据链"];
   }
-  if (task.coverage.spans > 0) return ["运行真实 pipeline", "运行审阅包", "查看证据链"];
-  return ["运行真实 pipeline", "开始检索", "查看证据链"];
+  // A static build has no runtime at compile time, so a button promising to run
+  // the "real pipeline" can only fail. Offer the honest, working alternative.
+  const pipelineLabel = __STATIC_ONLY__ ? "推演一次 pipeline（演示）" : "运行真实 pipeline";
+  if (task.coverage.spans > 0) return [pipelineLabel, "运行审阅包", "查看证据链"];
+  return [pipelineLabel, "开始检索", "查看证据链"];
 }
 
 export function Composer() {
@@ -124,7 +127,11 @@ export function Composer() {
   const handleSuggestion = (suggestion: string) => {
     switch (suggestion) {
       case "运行真实 pipeline":
-        void actions.startLiveRun();
+      case "推演一次 pipeline（演示）":
+        // In a static build there is no runtime to call, so run the local stage
+        // walkthrough the label promises instead of failing on a fetch.
+        if (__STATIC_ONLY__) actions.startAuto();
+        else void actions.startLiveRun();
         break;
       case "开始检索":
       case "扩展检索":
@@ -286,7 +293,7 @@ export function Composer() {
             value={value}
             maxLength={4000}
             placeholder={meta.placeholder}
-            aria-label="给 Research Agent 发消息"
+            aria-label="给 Wellspring Agent 发消息"
             onChange={(event) => {
               setValue(event.target.value);
               setSlashIndex(0);
