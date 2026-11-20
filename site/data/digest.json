@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-19T08:51:14.256Z",
+  "generated_at": "2026-11-20T08:37:47.161Z",
   "source": "OpenAlex /works",
   "mode": "CACHED",
   "license": "OpenAlex metadata; respect source licenses and attribution",
@@ -9,7 +9,7 @@
       "label": "钙钛矿太阳能电池稳定性",
       "query": "perovskite solar cell stability",
       "from_year": 2020,
-      "total_hits": 16742,
+      "total_hits": 16739,
       "returned": 6,
       "works": [
         {
@@ -32,7 +32,7 @@
           "doi": "https://doi.org/10.1038/s41560-019-0529-5",
           "title": "Consensus statement for stability assessment and reporting for perovskite photovoltaics based on ISOS procedures",
           "year": 2020,
-          "cited_by": 2077,
+          "cited_by": 2082,
           "venue": "Nature Energy",
           "authors": [
             "Mark Khenkin",
@@ -47,7 +47,7 @@
           "doi": "https://doi.org/10.1126/science.abb7167",
           "title": "Stable perovskite solar cells with efficiency exceeding 24.8% and 0.3-V voltage loss",
           "year": 2020,
-          "cited_by": 1581,
+          "cited_by": 1582,
           "venue": "Science",
           "authors": [
             "Mingyu Jeong",
@@ -62,7 +62,7 @@
           "doi": "https://doi.org/10.1126/science.abp8873",
           "title": "Inactive (PbI 2 ) 2 RbCl stabilizes perovskite films for efficient solar cells",
           "year": 2022,
-          "cited_by": 1489,
+          "cited_by": 1490,
           "venue": "Science",
           "authors": [
             "Yang Zhao",
@@ -77,7 +77,7 @@
           "doi": "https://doi.org/10.1126/science.adm9474",
           "title": "Improved charge extraction in inverted perovskite solar cells with dual-site-binding ligands",
           "year": 2024,
-          "cited_by": 1477,
+          "cited_by": 1482,
           "venue": "Science",
           "authors": [
             "Hao Chen",
@@ -92,7 +92,7 @@
           "doi": "https://doi.org/10.1126/science.abh1885",
           "title": "Conformal quantum dot–SnO 2 layers as electron transporters for efficient perovskite solar cells",
           "year": 2022,
-          "cited_by": 1381,
+          "cited_by": 1382,
           "venue": "Science",
           "authors": [
             "Minjin Kim",
@@ -109,7 +109,7 @@
       "label": "固态电池界面",
       "query": "solid-state battery interface",
       "from_year": 2020,
-      "total_hits": 6860,
+      "total_hits": 6861,
       "returned": 4,
       "works": [
         {
@@ -117,7 +117,7 @@
           "doi": "https://doi.org/10.1002/aenm.202203307",
           "title": "Lithium Batteries and the Solid Electrolyte Interphase (SEI)—Progress and Outlook",
           "year": 2023,
-          "cited_by": 921,
+          "cited_by": 924,
           "venue": "Advanced Energy Materials",
           "authors": [
             "Henry Adenusi",
@@ -132,7 +132,7 @@
           "doi": "https://doi.org/10.1002/aenm.202002689",
           "title": "Solid‐State Li–Metal Batteries: Challenges and Horizons of Oxide and Sulfide Solid Electrolytes and Their Interfaces",
           "year": 2020,
-          "cited_by": 902,
+          "cited_by": 903,
           "venue": "Advanced Energy Materials",
           "authors": [
             "Kun Joong Kim",
