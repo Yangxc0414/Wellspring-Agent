@@ -103,17 +103,23 @@ type LoadState = { source: "runtime" | "static" | "none"; runs: EseRun[]; error?
 type HistoryState = { source: "static" | "none"; entries: EseHistoryEntry[]; boundary?: string };
 
 async function load(): Promise<LoadState> {
-  try {
-    const response = await fetch("/api/ese/runs", { headers: { Accept: "application/json" } });
-    if (response.ok) {
-      const payload = (await response.json()) as Snapshot;
-      return { source: "runtime", runs: payload.runs ?? [] };
+  // Static builds have no runtime — skip the /api call instead of logging a
+  // guaranteed 404 — and read the bundled snapshot by a path relative to this
+  // app. The JSON files sit beside index.html (site/app/), so an absolute
+  // "/ese-runs.json" resolves to the site root and 404s even locally.
+  if (runtimeAvailable) {
+    try {
+      const response = await fetch("/api/ese/runs", { headers: { Accept: "application/json" } });
+      if (response.ok) {
+        const payload = (await response.json()) as Snapshot;
+        return { source: "runtime", runs: payload.runs ?? [] };
+      }
+    } catch {
+      /* fall through to the bundled snapshot */
     }
-  } catch {
-    /* fall through to the bundled snapshot */
   }
   try {
-    const response = await fetch("/ese-runs.json", { headers: { Accept: "application/json" } });
+    const response = await fetch("./ese-runs.json", { headers: { Accept: "application/json" } });
     if (response.ok) {
       const payload = (await response.json()) as Snapshot;
       return { source: "static", runs: payload.runs ?? [] };
@@ -121,14 +127,14 @@ async function load(): Promise<LoadState> {
   } catch {
     /* nothing bundled */
   }
-  return { source: "none", runs: [], error: "no /api/ese/runs and no /ese-runs.json" };
+  return { source: "none", runs: [], error: "no ESE run data available" };
 }
 
 async function loadHistory(): Promise<HistoryState> {
   try {
     // The version query keeps GitHub Pages from serving the 404 it cached when this file
     // first appeared. Bump it when the curated history changes shape.
-    const response = await fetch("/ese-history.json?v=1", { headers: { Accept: "application/json" } });
+    const response = await fetch("./ese-history.json?v=1", { headers: { Accept: "application/json" } });
     if (response.ok) {
       const payload = (await response.json()) as HistorySnapshot;
       return { source: "static", entries: payload.entries ?? [], boundary: payload.boundary };
@@ -141,7 +147,7 @@ async function loadHistory(): Promise<HistoryState> {
 
 async function loadStudies(): Promise<EseStudy[]> {
   try {
-    const response = await fetch("/ese-studies.json?v=1", { headers: { Accept: "application/json" } });
+    const response = await fetch("./ese-studies.json?v=1", { headers: { Accept: "application/json" } });
     if (response.ok) {
       const payload = (await response.json()) as StudiesSnapshot;
       return payload.studies ?? [];

@@ -208,15 +208,15 @@ export function FlowDemo() {
         <button type="button" className="flow-btn" onClick={reset}>
           重置为待签
         </button>
-        <span className={`flow-state ${signed ? "is-signed" : ""}`}>
-          {signed ? "已签 · DEMO" : `待签 · 第 ${step}/${STAGES.length} 步`}
+        <span className={`flow-state ${signed ? "is-signed" : ""}`} title="教学重演：从第 0 步开始，与左侧已录完的回放进度无关">
+          {signed ? "已签 · DEMO" : `教学重演 · 待签 · 第 ${step}/${STAGES.length} 步`}
         </span>
       </div>
 
       <section className="context-card">
         <div className="card-label">
           <span>RESEARCH FLOW</span>
-          <em>{signed ? "SIGNED · DEMO" : "IN PROGRESS"}</em>
+          <em>{signed ? "SIGNED · DEMO" : "REPLAY · 教学重演"}</em>
         </div>
         <ol className="flow-stages">
           {STAGES.map((stage, i) => (

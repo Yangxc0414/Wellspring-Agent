@@ -32,12 +32,17 @@ function TaskHeader() {
         ).size
       )
     : task.completedStages.length;
-  // For a progressed replay the mode kicker ("RESEARCH / S1–S3") contradicts the
-  // stage counter (e.g. 8/9). Show the actual stage the session has reached.
+  // A blocked task has not reached the stage task.stage points at: the full-chain
+  // seed has stage=META while G5 is still blocked at the signing gate, so saying
+  // "META · 自进化提案" claims a closure that has not happened. When blocked, name
+  // the gate instead of a stage we never actually cleared.
   const currentStage = task.autoStages[Math.min(task.stage, task.autoStages.length - 1)];
-  const stageKicker = completedCount > 1 && currentStage
-    ? `${meta.kicker.split(" / ")[0]} / ${currentStage.id} · ${currentStage.label}`
-    : meta.kicker;
+  const kickerRoot = meta.kicker.split(" / ")[0];
+  const stageKicker = task.status === "blocked"
+    ? `${kickerRoot} · 人签门待人签`
+    : completedCount > 1 && currentStage
+      ? `${kickerRoot} / ${currentStage.id} · ${currentStage.label}`
+      : meta.kicker;
   const statusLabel = runtimeCard
     ? runtimeLabel
     : task.auto.running
@@ -84,7 +89,7 @@ function TaskHeader() {
       <div className="task-head-side">
         <div className="task-chips">
           <span className="chip blue">{meta.label}</span>
-          <span className="chip">{completedCount}/9 stages</span>
+          <span className="chip" title="这是已录完的回放进度；右侧 RESEARCH FLOW 是从第 0 步开始的教学重演，两者口径不同">回放 {completedCount}/9 stages</span>
           <span className={`chip${taskChip.tone ? ` ${taskChip.tone}` : ""}`}>
             {taskChip.label}
           </span>
