@@ -142,7 +142,10 @@ const MessageView = memo(function MessageView({ item }: { item: Message }) {
       </div>
       <div className="message-body">
         <div className="message-head">
-          <b>{isUser ? "你" : "Wellspring Agent"}</b>
+          {/* The user avatar already reads "YOU"; repeating it as "你" here
+              showed the same identity twice. Own messages conventionally show
+              only a timestamp; the agent keeps its name as the source label. */}
+          {!isUser && <b>Wellspring Agent</b>}
           <span>{item.at}</span>
         </div>
         <div className={`bubble${isUser ? " is-user-bubble" : " is-agent-bubble"}`}>

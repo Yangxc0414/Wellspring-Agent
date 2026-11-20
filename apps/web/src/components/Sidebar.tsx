@@ -135,9 +135,11 @@ export function Sidebar() {
     // must not read as "finished normally".
     const demo = DEMO_LABELS[task.id];
     if (demo) {
-      return task.status === "blocked" && !demo.label.includes("待签")
-        ? `${demo.label} · 待签`
-        : demo.label;
+      // Short pill text keeps the task title readable. Full label + hint stay
+      // in the row tooltip, so no information is lost.
+      return task.status === "blocked" && !demo.short.includes("待签")
+        ? `${demo.short} · 待签`
+        : demo.short;
     }
     if (task.status === "blocked") return "待签";
     return relativeTime(task.updatedAt);

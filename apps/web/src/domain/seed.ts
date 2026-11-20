@@ -32,35 +32,43 @@ export const WORKSPACES: Workspace[] = [
  */
 export const DEMO_LABELS: Record<
   string,
-  { label: string; hint: string; tone: "demo" | "pending" | "example" }
+  { label: string; short: string; hint: string; tone: "demo" | "pending" | "example" }
 > = {
   "full-chain-demo": {
     label: "全流程演示",
+    // Compact form for the sidebar row: a long status pill was stealing the
+    // space the title needed, and this is the most important demo task.
+    short: "演示·待签",
     tone: "demo",
     hint: "教学演示：从文献检索一路走到结论签署与自改进，九个阶段逐条可展开；点「模拟人签」演示待签→已签。状态只在页面内存，刷新即回待签。"
   },
   "ese-ms-20261118-03": {
     label: "真实研究·待签",
+    short: "回放·待签",
     tone: "pending",
     hint: "真实 ESE 研究回放（ESE-MS-20261118-03）：3 个仓库 / 5132 提交，缺陷修复比例 +0.046，分层后 click 方向反转；claim / closure / signature 仍待人签。"
   },
   perovskite: {
     label: "示例·调研",
+    short: "示例·调研",
     tone: "example",
     hint: "静态示例：span-only 文献检索与 gap→候选假设，停在 G1 人工收敛前。"
   },
   archives: {
     label: "示例·调研",
+    short: "示例·调研",
     tone: "example",
     hint: "静态示例：自改进 agent 的 archive 使用，只有检索计划，未进入执行。"
   },
   "evidence-writing": {
     label: "示例·写作",
+    short: "示例·写作",
     tone: "example",
     hint: "静态示例：证据驱动写作槽位；没有已签 claim 前，结果与摘要保持 locked。"
   },
   "proposal-review": {
     label: "示例·命题",
+    short: "示例·命题",
     tone: "example",
     hint: "静态示例：毕设命题设计与反思，用于说明证据边界与验证顺序。"
   }

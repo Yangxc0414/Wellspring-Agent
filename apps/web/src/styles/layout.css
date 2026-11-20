@@ -1172,20 +1172,27 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 6px;
-  padding: 1px 0;
-  color: var(--faint);
+  gap: 7px;
+  /* This line carries the "demo / not a real signature" boundary — the most
+     important disclaimer on the page. It used to be 10px faint text and read
+     like a watermark. A quiet bordered note gives it weight without turning
+     it into a chat message. */
+  padding: 6px 12px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--muted);
   font-family: var(--mono);
-  font-size: calc(10px * var(--font-scale, 1));
-  line-height: 1.6;
-  text-align: center;
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.65;
+  text-align: left;
 }
 
 .system-dot {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   flex: none;
-  margin-top: 5px;
+  margin-top: 6px;
   border-radius: 50%;
   background: var(--teal);
 }
@@ -2718,31 +2725,30 @@
   color: var(--coral);
 }
 
-/* Seeded demo sessions show a role label as a small badge for demos. */
+/* Seeded demo role labels. These are context, not the row's subject: a solid
+   pill (especially the coral "待签") outshone the task title and, at 93px,
+   truncated the two most important demo titles. Use a quiet text tag so the
+   title reads first and the colour still hints at the role. */
 .task-row[data-demo="1"] .task-row-time {
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  padding: 2px 7px;
+  border: 0;
+  border-radius: 0;
+  padding: 0 0 0 6px;
   font-family: var(--sans);
   font-size: calc(9.5px * var(--font-scale, 1));
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0.01em;
-  color: var(--muted);
-  background: var(--surface-2);
+  color: var(--faint);
+  background: transparent;
 }
 .task-row[data-demo-tone="demo"] .task-row-time {
   color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-dim);
 }
 .task-row[data-demo-tone="pending"] .task-row-time {
   color: var(--coral);
-  border-color: var(--coral);
-  background: var(--coral-dim);
 }
 .task-row[data-demo="1"] .task-row-title {
-  color: var(--muted);
+  color: var(--text);
 }
 
 .task-delete {

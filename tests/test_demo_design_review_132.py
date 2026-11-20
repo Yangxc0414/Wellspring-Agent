@@ -40,8 +40,8 @@ class DemoDesignReviewTest(unittest.TestCase):
 
     # --- Sidebar ---
     def test_blocked_demo_label_is_not_swallowed(self):
-        self.assertIn('task.status === "blocked" && !demo.label.includes("待签")', SIDEBAR)
-        self.assertIn("`${demo.label} · 待签`", SIDEBAR)
+        self.assertIn('task.status === "blocked" && !demo.short.includes("待签")', SIDEBAR)
+        self.assertIn("`${demo.short} · 待签`", SIDEBAR)
 
     # --- Evidence chain ---
     def test_chain_is_one_canonical_six_stage_vocabulary(self):
