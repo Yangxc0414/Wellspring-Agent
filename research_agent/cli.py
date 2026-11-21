@@ -2866,6 +2866,7 @@ def _cmd_pipeline_run(args: argparse.Namespace) -> int:
             ),
             claim_file=args.claim_file or "",
             adaptive_retrieval=bool(getattr(args, "adaptive_retrieval", False)),
+            method_id=getattr(args, "method", "") or "",
         )
     )
     ese_method_report = None
@@ -3628,6 +3629,24 @@ def _cmd_method_card(args: argparse.Namespace) -> int:
 
     try:
         _print_json(task_card(args.stage, args.method_id))
+    except MethodRegistryError as exc:
+        print(str(exc))
+        return 2
+    return 0
+
+
+def _cmd_method_recommend(args: argparse.Namespace) -> int:
+    from .method_registry import MethodRegistryError, recommend_methods
+
+    brief = args.brief
+    if getattr(args, "brief_file", None):
+        try:
+            brief = Path(args.brief_file).read_text(encoding="utf-8")
+        except OSError as exc:
+            print("cannot read brief: {0}".format(exc))
+            return 2
+    try:
+        _print_json(recommend_methods(brief or ""))
     except MethodRegistryError as exc:
         print(str(exc))
         return 2
@@ -5919,6 +5938,11 @@ def build_parser() -> argparse.ArgumentParser:
     pipeline_run.add_argument("--max-sources", type=int, default=6)
     pipeline_run.add_argument("--max-candidates", type=int, default=3, help="S2-S3 候选上限（1-8）；文献更宽时可放大，仍由 G1 人签收敛")
     pipeline_run.add_argument(
+        "--method",
+        default="",
+        help="method id from the registry, or 'auto' to let the pipeline propose one from the topic (advisory; a human still confirms)",
+    )
+    pipeline_run.add_argument(
         "--adaptive-retrieval",
         action="store_true",
         help="let the S1 coverage verdict widen the next retrieval budget (bounded, no human gate crossed)",
@@ -6656,6 +6680,10 @@ def build_parser() -> argparse.ArgumentParser:
     method_card.add_argument("--stage", required=True)
     method_card.add_argument("--method", dest="method_id", required=True)
     method_card.set_defaults(func=_cmd_method_card)
+    method_recommend = method_sub.add_parser("recommend", help="rank methods for a research brief (advisory)")
+    method_recommend.add_argument("--brief", default="")
+    method_recommend.add_argument("--brief-file", dest="brief_file", default=None)
+    method_recommend.set_defaults(func=_cmd_method_recommend)
     method_diff = method_sub.add_parser("diff", help="explain the essential difference between two methods")
     method_diff.add_argument("method_a")
     method_diff.add_argument("method_b")

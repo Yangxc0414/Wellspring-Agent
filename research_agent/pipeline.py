@@ -288,10 +288,38 @@ class PipelineRunner:
         # covers and emits stage_skip for uncovered ones (advisory, not a gate).
         composition_plan = None
         covered_pipeline_stages = None
-        if request.method_id:
+        method_selection = None
+        resolved_method_id = request.method_id
+        if resolved_method_id == "auto":
+            # design/168: the agent proposes a method from the brief; a human still
+            # confirms it. When the signal is weak or tied we deliberately do not
+            # pick one — an auto-chosen method would be exactly the "guess dressed
+            # as a decision" this project forbids.
+            try:
+                from .method_registry import recommend_methods
+                recommendation = recommend_methods(request.topic)
+                resolved_method_id = recommendation["proposed"] or ""
+                method_selection = {
+                    "mode": "auto",
+                    "status": recommendation["status"],
+                    "proposed": recommendation["proposed"],
+                    "candidates": recommendation["candidates"],
+                    "needs_human": True,
+                    "boundary": "advisory selection; no gate reads it",
+                }
+            except Exception as exc:  # registry missing/malformed must not break a run
+                resolved_method_id = ""
+                method_selection = {
+                    "mode": "auto",
+                    "status": "failed",
+                    "proposed": None,
+                    "reason": str(exc)[:200],
+                    "needs_human": True,
+                }
+        if resolved_method_id:
             try:
                 from .method_registry import pipeline_stage_plan
-                composition_plan = pipeline_stage_plan(request.method_id)
+                composition_plan = pipeline_stage_plan(resolved_method_id)
                 covered_pipeline_stages = set(composition_plan["covered_stages"])
                 self._emit("stage_start", "composition",
                            "composition resolved: %s covers %s" % (
@@ -358,6 +386,8 @@ class PipelineRunner:
                 "pre-registration and claim-bound runs"
             )
         modules: Dict[str, Any] = {}
+        if method_selection is not None:
+            modules["method_selection"] = method_selection
         manuscript_bundle: Optional[Dict[str, Any]] = None
         source_ledger: Optional[Dict[str, Any]] = None
         design_audit_result: Optional[Dict[str, Any]] = None

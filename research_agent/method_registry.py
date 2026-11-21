@@ -24,7 +24,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-SCHEMA = "ese-method-registry-0.6"
+SCHEMA = "ese-method-registry-0.7"
 SEVERITIES = ("blocker", "warn")
 
 # design/166: a closed vocabulary for validity focus. The list is literature-derived
@@ -130,6 +130,17 @@ def validate(registry: Dict[str, Any]) -> Dict[str, Any]:
         _require(isinstance(rule, dict), method_id + ": iteration_rule required (design/166)")
         _require(rule.get("kind") in ITERATION_KINDS, method_id + ": unknown iteration kind")
         _require(bool(str(rule.get("detail") or "")), method_id + ": iteration_rule detail required")
+        signals = method.get("selection_signals")
+        _require(isinstance(signals, list) and signals, method_id + ": selection_signals required (design/168)")
+        phrases = []
+        for signal in signals:
+            phrase = str(signal.get("phrase") or "").strip()
+            _require(bool(phrase), method_id + ": signal phrase required")
+            _require(phrase not in phrases, method_id + ": duplicate signal phrase " + phrase)
+            weight = signal.get("weight")
+            _require(isinstance(weight, int) and 1 <= weight <= 3,
+                     method_id + ": signal weight must be an int in 1..3")
+            phrases.append(phrase)
         keys = []
         for guideline in method["guidelines"]:
             key = str(guideline.get("key") or "")
@@ -557,4 +568,64 @@ def method_diff(a: str, b: str, registry: Optional[Dict[str, Any]] = None) -> Di
             "same": left["iteration_rule"]["kind"] == right["iteration_rule"]["kind"],
         },
         "boundary": "structural difference only; no method is ranked and no Claim is created",
+    }
+
+
+def recommend_methods(
+    brief: str,
+    registry: Optional[Dict[str, Any]] = None,
+    limit: int = 3,
+    min_score: int = 3,
+) -> Dict[str, Any]:
+    """Rank methods by how well a research brief matches their declared signals.
+
+    Advisory only: this proposes candidates, never chooses a method on the
+    human's behalf and never touches a gate. Rules live in the registry as data
+    (selection_signals), so Python and the workbench rank the same text the same
+    way. A brief with too little signal returns status=insufficient rather than
+    a confident guess; a tie at the top returns ambiguous.
+    """
+    text = str(brief or "").strip()
+    if not text:
+        raise MethodRegistryError("brief is required for method recommendation")
+    data = registry or load_registry()
+    lowered = text.lower()
+    scored = []
+    for method in data["methods"]:
+        matched = []
+        score = 0
+        for signal in method.get("selection_signals", []):
+            phrase = str(signal.get("phrase") or "")
+            if phrase and phrase.lower() in lowered:
+                score += int(signal.get("weight") or 0)
+                matched.append(phrase)
+        if score:
+            plan = stage_plan(method["id"], data)
+            scored.append({
+                "id": method["id"],
+                "name_zh": method["name_zh"],
+                "score": score,
+                "matched": matched,
+                "composition": plan["composition"],
+                "plan": [step["slot"] for step in plan["stages"]],
+            })
+    scored.sort(key=lambda row: (-row["score"], row["id"]))
+    candidates = scored[: max(1, int(limit))]
+    if not candidates or candidates[0]["score"] < int(min_score):
+        status = "insufficient"
+    elif len(candidates) > 1 and candidates[0]["score"] == candidates[1]["score"]:
+        status = "ambiguous"
+    else:
+        status = "ok"
+    return {
+        "schema": "ese-method-recommendation-0.1",
+        "brief": text,
+        "status": status,
+        "min_score": int(min_score),
+        "candidates": candidates,
+        "proposed": candidates[0]["id"] if status == "ok" else None,
+        "boundary": (
+            "advisory ranking from registry signals only: the human still confirms "
+            "the method, and no gate reads this"
+        ),
     }

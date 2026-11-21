@@ -422,5 +422,56 @@ class MethodDiffTest(unittest.TestCase):
         self.assertFalse(payload["validity"]["same"])
 
 
+class MethodRecommendationTest(unittest.TestCase):
+    """design/168: content -> method ranking, with honest refusal on weak signal."""
+
+    def test_randomised_brief_proposes_a_controlled_experiment(self):
+        result = method_registry.recommend_methods(
+            "用随机对照实验检验提示策略，随机分组，看因果效应"
+        )
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["proposed"], "controlled-experiment")
+        self.assertIn("随机", result["candidates"][0]["matched"])
+
+    def test_repository_brief_proposes_mining(self):
+        result = method_registry.recommend_methods(
+            "分析开源仓库的提交历史与缺陷修复，看是否更常触碰测试"
+        )
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["proposed"], "repository-mining")
+
+    def test_vague_brief_returns_insufficient_instead_of_guessing(self):
+        result = method_registry.recommend_methods("我想研究软件工程里的问题")
+        self.assertEqual(result["status"], "insufficient")
+        self.assertIsNone(result["proposed"])
+        self.assertEqual(result["candidates"], [])
+
+    def test_tie_at_the_top_returns_ambiguous(self):
+        result = method_registry.recommend_methods("用问卷和案例研究")
+        self.assertEqual(result["status"], "ambiguous")
+        self.assertIsNone(result["proposed"])
+
+    def test_empty_brief_is_rejected(self):
+        with self.assertRaises(method_registry.MethodRegistryError):
+            method_registry.recommend_methods("   ")
+
+    def test_every_method_declares_weighted_signals(self):
+        for method in method_registry.load_registry()["methods"]:
+            signals = method["selection_signals"]
+            self.assertTrue(signals, method["id"])
+            for signal in signals:
+                self.assertTrue(signal["phrase"].strip(), method["id"])
+                self.assertIn(signal["weight"], (1, 2, 3), method["id"])
+
+    def test_cli_recommend_returns_payload(self):
+        args = cli.argparse.Namespace(brief="分析仓库提交历史与缺陷修复", brief_file=None)
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            code = cli._cmd_method_recommend(args)
+        self.assertEqual(code, 0)
+        payload = json.loads(buffer.getvalue())
+        self.assertEqual(payload["proposed"], "repository-mining")
+
+
 if __name__ == "__main__":
     unittest.main()

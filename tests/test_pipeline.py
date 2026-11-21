@@ -1,4 +1,5 @@
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -918,6 +919,41 @@ class FeedbackLoopWiringTest(unittest.TestCase):
             self.assertTrue(
                 any(w.startswith("feedback_constraint_stale_denied:") for w in result.warnings)
             )
+
+
+class AutoMethodSelectionTest(unittest.TestCase):
+    """design/168: the pipeline may propose a method from the topic, but it must
+    never turn weak signal into a confident choice."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.store = SpecStore()
+
+    def _run(self, topic: str):
+        with tempfile.TemporaryDirectory() as tmp:
+            return PipelineRunner(self.store, run_output_dir=Path(tmp) / "run").run(
+                PipelineRequest(
+                    topic=topic,
+                    language="zh",
+                    venue_type="zh_core_journal",
+                    method_id="auto",
+                )
+            )
+
+    def test_decisive_brief_selects_a_method_and_still_needs_a_human(self):
+        result = self._run("分析开源仓库的提交历史与缺陷修复是否更常触碰测试")
+        selection = result.modules["method_selection"]
+        self.assertEqual(selection["status"], "ok")
+        self.assertEqual(selection["proposed"], "repository-mining")
+        self.assertTrue(selection["needs_human"])
+        self.assertEqual(result.modules["composition_plan"]["composition"], "exploratory")
+
+    def test_vague_brief_does_not_guess(self):
+        result = self._run("我想研究软件工程里的问题")
+        selection = result.modules["method_selection"]
+        self.assertEqual(selection["status"], "insufficient")
+        self.assertIsNone(selection["proposed"])
+        self.assertNotIn("composition_plan", result.modules)
 
 
 if __name__ == "__main__":

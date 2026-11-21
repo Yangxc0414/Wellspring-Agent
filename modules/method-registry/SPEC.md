@@ -2,13 +2,14 @@
 id: method-registry
 name: 研究方法注册表（阶段 × 方法）
 stage: META
-version: 0.4.0
+version: 0.5.0
 status: draft
 owner: research-agent
 inputs:
   - StageId
   - MethodId
   - MethodPair
+  - ResearchBrief
   - DesignPayload
 outputs:
   - MethodList
@@ -18,6 +19,7 @@ outputs:
   - MethodCheckReport
   - PipelineStagePlan  # advisory projection: composition slots -> pipeline stage names
   - MethodDiff  # structural difference between two methods (validity/evidence/order)
+  - MethodRecommendation  # advisory ranking of methods for a research brief
 tools:
   - method.list
   - method.show
@@ -25,6 +27,7 @@ tools:
   - method.card
   - method.check
   - method.diff
+  - method.recommend
 gates: []
 invariants:
   - 注册表是数据不是门禁：检查结果只作 advisory，不改变 claim/EA/closure/signature 语义
@@ -34,6 +37,7 @@ invariants:
   - 每个方法必须声明 `iteration_rule`（fixed/saturation/cycle/convergence + 停止条件的文字说明）
   - 每个组合接线步骤必须有非空 `rationale`：回答“为何是这个顺序”，而不是只记录顺序
   - 注册表必须带 `not_research` 对照：至少列出一种不算研究的形态及其缺失要素
+- 每个方法必须声明 `selection_signals`（短语 + 1..3 权重），用于按研究内容排序候选；推荐是 advisory，不选方法、不读门
   - fit_stages 与 stage_tasks 必须落在已声明阶段内；未知阶段直接拒绝
   - 缺字段按 fail-closed 报告；TODO(...) 占位等同未填写
   - 不联网、不写项目产物、不创建 Claim
@@ -88,6 +92,8 @@ invariants:
 5. 不把检查项直接接进门禁；如确需，另写设计文档并人工确认。
 
 ## Changelog
+
+- 2026-11-21 · v0.5.0 · status=draft · 新增 `selection_signals`（每方法 6 条短语+权重）与 `recommend_methods(brief)`：按研究内容命中短语排序候选，返回 ok / insufficient / ambiguous 三态，仅在 ok 时给出 `proposed`；`pipeline --method auto` 只在 ok 时采纳，并始终写 `needs_human=true`。schema 0.6→0.7。advisory 定位不变，不改变任何门。实现对应 design/168。
 
 - 2026-11-21 · v0.4.0 · status=draft · 新增声明式字段与只读查询：`validity_focus`（效力主/次类型，封闭词表 9 项）、`iteration_rule`（fixed/saturation/cycle/convergence + 停止条件）、组合 wiring 每步 `rationale`、顶层 `not_research`（非研究形态对照）；新增 `method_diff(a,b)` 输出效力/证据/顺序结构差异。schema 0.5→0.6。动机：研讨纪要追问“为何是这个顺序”，原注册表只有顺序没有理由。不改变 claim/EA/closure/门禁语义。实现对应 design/166。
 

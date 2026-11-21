@@ -1,9 +1,9 @@
 {
   "schema_version": "workspace-0.1",
-  "generated_at": "2026-11-21T12:15:40+00:00",
-  "count": 227,
+  "generated_at": "2026-11-21T12:59:41+00:00",
+  "count": 228,
   "curated": 51,
-  "derived": 176,
+  "derived": 177,
   "commands": [
     {
       "id": "study.baseline",
@@ -1100,6 +1100,15 @@
       "label": "matrix",
       "syntax": "python -m research_agent method matrix",
       "description": "usage: research_agent method matrix [-h] [--stage STAGE]",
+      "safety": "catalog_only",
+      "curated": false
+    },
+    {
+      "id": "method.recommend",
+      "group": "method",
+      "label": "recommend",
+      "syntax": "python -m research_agent method recommend",
+      "description": "usage: research_agent method recommend [-h] [--brief BRIEF]\n                                       [--brief-file BRIEF_FILE]",
       "safety": "catalog_only",
       "curated": false
     },

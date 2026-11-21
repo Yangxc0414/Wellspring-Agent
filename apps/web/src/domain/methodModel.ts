@@ -67,6 +67,8 @@ export interface MethodRegistryMethod {
   validity_focus?: ValidityFocus;
   /** design/166: how the method knows it is done (fixed / saturation / cycle / convergence). */
   iteration_rule?: IterationRule;
+  /** design/168: phrases that indicate this method fits a research brief. */
+  selection_signals?: Array<{ phrase: string; weight: number }>;
 }
 
 export interface MethodRegistryData {
@@ -108,7 +110,7 @@ export async function loadMethodRegistry(): Promise<MethodRegistryData | null> {
     const response = await fetch("./method-registry.json", { cache: "no-cache" });
     if (!response.ok) throw new Error(String(response.status));
     const data = (await response.json()) as MethodRegistryData;
-    cache = data.schema === "ese-method-registry-0.6" ? data : null;
+    cache = data.schema === "ese-method-registry-0.7" ? data : null;
   } catch {
     cache = null;
   }
@@ -241,6 +243,69 @@ const ITERATION_LABELS: Record<string, string> = {
 export function iterationLabel(kind?: string): string {
   if (!kind) return "—";
   return ITERATION_LABELS[kind] ?? kind;
+}
+
+export interface MethodRecommendationCandidate {
+  id: string;
+  name_zh: string;
+  score: number;
+  matched: string[];
+  composition: string;
+  plan: string[];
+}
+
+export interface MethodRecommendation {
+  schema: string;
+  status: "ok" | "insufficient" | "ambiguous";
+  candidates: MethodRecommendationCandidate[];
+  proposed: string | null;
+}
+
+/**
+ * design/168: rank methods for a research brief using the registry's own
+ * selection_signals. Mirrors the Python recommend_methods exactly so the page
+ * and the pipeline give the same advice. Advisory only: it proposes, never
+ * chooses on the human's behalf, and refuses to guess on weak signal.
+ */
+export function recommendMethods(
+  registry: MethodRegistryData,
+  brief: string,
+  limit = 3,
+  minScore = 3
+): MethodRecommendation {
+  const text = brief.trim();
+  if (!text) {
+    return { schema: "ese-method-recommendation-0.1", status: "insufficient", candidates: [], proposed: null };
+  }
+  const lowered = text.toLowerCase();
+  const scored = registry.methods
+    .map((method) => {
+      const matched = (method.selection_signals ?? []).filter(
+        (signal) => signal.phrase && lowered.includes(signal.phrase.toLowerCase())
+      );
+      const score = matched.reduce((sum, signal) => sum + (signal.weight || 0), 0);
+      const plan = stagePlanFor(method, registry);
+      return {
+        id: method.id,
+        name_zh: method.name_zh,
+        score,
+        matched: matched.map((signal) => signal.phrase),
+        composition: plan?.compositionId ?? method.composition_id ?? "",
+        plan: (plan?.stages ?? []).map((step) => step.slot)
+      };
+    })
+    .filter((row) => row.score > 0)
+    .sort((a, b) => (b.score - a.score) || a.id.localeCompare(b.id));
+  const candidates = scored.slice(0, Math.max(1, limit));
+  let status: MethodRecommendation["status"] = "ok";
+  if (!candidates.length || candidates[0].score < minScore) status = "insufficient";
+  else if (candidates.length > 1 && candidates[0].score === candidates[1].score) status = "ambiguous";
+  return {
+    schema: "ese-method-recommendation-0.1",
+    status,
+    candidates,
+    proposed: status === "ok" ? candidates[0].id : null
+  };
 }
 
 /**

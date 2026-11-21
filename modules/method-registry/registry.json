@@ -1,5 +1,5 @@
 {
-  "schema": "ese-method-registry-0.6",
+  "schema": "ese-method-registry-0.7",
   "boundary": "方法注册表是数据不是门禁：它给出阶段×方法的任务卡、必填字段与检查项，检查结果只作 advisory，不改变任何 gate/claim/signature 语义。",
   "stages": [
     {
@@ -193,7 +193,33 @@
       "iteration_rule": {
         "kind": "fixed",
         "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "系统综述",
+          "weight": 3
+        },
+        {
+          "phrase": "文献综述",
+          "weight": 3
+        },
+        {
+          "phrase": "PRISMA",
+          "weight": 3
+        },
+        {
+          "phrase": "检索策略",
+          "weight": 2
+        },
+        {
+          "phrase": "纳入排除",
+          "weight": 2
+        },
+        {
+          "phrase": "研究空白",
+          "weight": 1
+        }
+      ]
     },
     {
       "id": "repository-mining",
@@ -357,7 +383,37 @@
       "iteration_rule": {
         "kind": "fixed",
         "detail": "仓库快照与时间切分固定；不得按结果重新切分"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "仓库",
+          "weight": 3
+        },
+        {
+          "phrase": "commit",
+          "weight": 3
+        },
+        {
+          "phrase": "提交历史",
+          "weight": 3
+        },
+        {
+          "phrase": "缺陷修复",
+          "weight": 3
+        },
+        {
+          "phrase": "版本历史",
+          "weight": 2
+        },
+        {
+          "phrase": "代码库",
+          "weight": 2
+        },
+        {
+          "phrase": "挖掘",
+          "weight": 2
+        }
+      ]
     },
     {
       "id": "controlled-experiment",
@@ -527,7 +583,33 @@
       "iteration_rule": {
         "kind": "fixed",
         "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "随机",
+          "weight": 3
+        },
+        {
+          "phrase": "对照实验",
+          "weight": 3
+        },
+        {
+          "phrase": "A/B",
+          "weight": 3
+        },
+        {
+          "phrase": "因果",
+          "weight": 2
+        },
+        {
+          "phrase": "干预",
+          "weight": 2
+        },
+        {
+          "phrase": "实验组",
+          "weight": 2
+        }
+      ]
     },
     {
       "id": "quasi-experiment",
@@ -650,7 +732,33 @@
       "iteration_rule": {
         "kind": "fixed",
         "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "准实验",
+          "weight": 3
+        },
+        {
+          "phrase": "无法随机",
+          "weight": 3
+        },
+        {
+          "phrase": "自然实验",
+          "weight": 3
+        },
+        {
+          "phrase": "政策",
+          "weight": 2
+        },
+        {
+          "phrase": "前后对比",
+          "weight": 2
+        },
+        {
+          "phrase": "选择偏倚",
+          "weight": 2
+        }
+      ]
     },
     {
       "id": "benchmark-evaluation",
@@ -802,7 +910,33 @@
       "iteration_rule": {
         "kind": "fixed",
         "detail": "基准版本、污染检查与多重比较策略固定"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "基准",
+          "weight": 3
+        },
+        {
+          "phrase": "榜单",
+          "weight": 3
+        },
+        {
+          "phrase": "SOTA",
+          "weight": 3
+        },
+        {
+          "phrase": "评测集",
+          "weight": 3
+        },
+        {
+          "phrase": "排行榜",
+          "weight": 2
+        },
+        {
+          "phrase": "污染",
+          "weight": 2
+        }
+      ]
     },
     {
       "id": "case-study",
@@ -954,7 +1088,37 @@
       "iteration_rule": {
         "kind": "saturation",
         "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "案例研究",
+          "weight": 3
+        },
+        {
+          "phrase": "访谈",
+          "weight": 3
+        },
+        {
+          "phrase": "三角验证",
+          "weight": 3
+        },
+        {
+          "phrase": "现场",
+          "weight": 2
+        },
+        {
+          "phrase": "单个团队",
+          "weight": 2
+        },
+        {
+          "phrase": "为什么",
+          "weight": 1
+        },
+        {
+          "phrase": "如何",
+          "weight": 1
+        }
+      ]
     },
     {
       "id": "survey",
@@ -1087,7 +1251,33 @@
       "iteration_rule": {
         "kind": "fixed",
         "detail": "抽样框、预试与发放窗口固定；不得中途改题"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "问卷",
+          "weight": 3
+        },
+        {
+          "phrase": "调查",
+          "weight": 3
+        },
+        {
+          "phrase": "量表",
+          "weight": 3
+        },
+        {
+          "phrase": "受访者",
+          "weight": 3
+        },
+        {
+          "phrase": "无应答",
+          "weight": 2
+        },
+        {
+          "phrase": "抽样",
+          "weight": 1
+        }
+      ]
     },
     {
       "id": "design-science",
@@ -1215,7 +1405,33 @@
       "iteration_rule": {
         "kind": "cycle",
         "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "设计科学",
+          "weight": 3
+        },
+        {
+          "phrase": "原型",
+          "weight": 3
+        },
+        {
+          "phrase": "系统设计",
+          "weight": 2
+        },
+        {
+          "phrase": "构建",
+          "weight": 2
+        },
+        {
+          "phrase": "效用评估",
+          "weight": 2
+        },
+        {
+          "phrase": "产物",
+          "weight": 1
+        }
+      ]
     },
     {
       "id": "action-research",
@@ -1338,7 +1554,29 @@
       "iteration_rule": {
         "kind": "cycle",
         "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "行动研究",
+          "weight": 3
+        },
+        {
+          "phrase": "组织变革",
+          "weight": 3
+        },
+        {
+          "phrase": "介入",
+          "weight": 2
+        },
+        {
+          "phrase": "循环",
+          "weight": 2
+        },
+        {
+          "phrase": "研究者参与",
+          "weight": 2
+        }
+      ]
     },
     {
       "id": "ml-iterative-experiment",
@@ -1509,7 +1747,33 @@
       "iteration_rule": {
         "kind": "convergence",
         "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
-      }
+      },
+      "selection_signals": [
+        {
+          "phrase": "模型训练",
+          "weight": 3
+        },
+        {
+          "phrase": "消融",
+          "weight": 3
+        },
+        {
+          "phrase": "超参",
+          "weight": 3
+        },
+        {
+          "phrase": "深度学习",
+          "weight": 3
+        },
+        {
+          "phrase": "多种子",
+          "weight": 2
+        },
+        {
+          "phrase": "数据集",
+          "weight": 1
+        }
+      ]
     }
   ],
   "tag_vocabulary": [

@@ -8042,6 +8042,34 @@ select.control {
   color: var(--faint);
   font-size: calc(9px * var(--font-scale, 1));
 }
+/* design/168: research brief -> method recommendation (advisory, never auto-decides). */
+.method-recommend {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.method-recommend textarea {
+  flex: 1;
+  min-height: 62px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.6;
+  resize: vertical;
+}
+.method-recommend textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.method-recommend-result {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
 .composition-step.is-diverge small {
   color: var(--coral);
   font-weight: 600;

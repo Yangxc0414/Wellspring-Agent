@@ -6,7 +6,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { iterationLabel, validityName } from "../src/domain/methodModel.ts";
+import { iterationLabel, recommendMethods, validityName } from "../src/domain/methodModel.ts";
 
 const registry = JSON.parse(
   fs.readFileSync(new URL("../public/method-registry.json", import.meta.url), "utf8")
@@ -28,7 +28,7 @@ test("iteration labels cover all four legitimate kinds", () => {
 });
 
 test("every exported method declares a validity focus in vocabulary", () => {
-  assert.equal(registry.schema, "ese-method-registry-0.6");
+  assert.equal(registry.schema, "ese-method-registry-0.7");
   const vocab = new Set(registry.validity_vocabulary.map((entry) => entry.key));
   for (const method of registry.methods) {
     assert.ok(vocab.has(method.validity_focus.primary), method.id);
@@ -46,4 +46,24 @@ test("every exported wiring step explains why it sits there", () => {
       );
     }
   }
+});
+
+test("recommendMethods ranks a repository brief first", () => {
+  const result = recommendMethods(registry, "分析开源仓库的提交历史与缺陷修复，看是否更常触碰测试");
+  assert.equal(result.status, "ok");
+  assert.equal(result.proposed, "repository-mining");
+  assert.ok(result.candidates[0].matched.includes("仓库"));
+});
+
+test("recommendMethods refuses to guess on weak signal", () => {
+  const result = recommendMethods(registry, "我想研究软件工程里的问题");
+  assert.equal(result.status, "insufficient");
+  assert.equal(result.proposed, null);
+  assert.equal(result.candidates.length, 0);
+});
+
+test("recommendMethods reports a tie instead of picking one", () => {
+  const result = recommendMethods(registry, "用问卷和案例研究");
+  assert.equal(result.status, "ambiguous");
+  assert.equal(result.proposed, null);
 });

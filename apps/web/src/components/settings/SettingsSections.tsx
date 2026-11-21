@@ -19,9 +19,11 @@ import {
   fitMap,
   iterationLabel,
   loadMethodRegistry,
+  recommendMethods,
   stagePlanFor,
   tagAnalysis,
   validityName,
+  type MethodRecommendation,
   type MethodRegistryData
 } from "../../domain/methodModel";
 import {
@@ -768,6 +770,8 @@ export function MethodModelSettingsPage() {
   const [registry, setRegistry] = useState<MethodRegistryData | null>(null);
   const [missing, setMissing] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  const [brief, setBrief] = useState("");
+  const [recommendation, setRecommendation] = useState<MethodRecommendation | null>(null);
   // design/159: 任务卡矩阵视图 — the advisor's 阶段×方法 two-dimensional model
   // rendered as data (cross cells = 方法论约束下的阶段性任务 from stage_tasks).
   const [taskMatrixView, setTaskMatrixView] = useState(false);
@@ -920,6 +924,65 @@ export function MethodModelSettingsPage() {
           Longino 1990《Science as Social Knowledge》（客观性 = 批判性 discourse）；
           Creswell《Research Design》（研究设计要素框架）；Easterbrook et al. 2008（按问题选择实证方法，证据类型差异）。
         </small>
+      </div>
+
+      <div className="settings-card">
+        <div className="settings-card-title">研究内容 → 方法推荐（advisory）</div>
+        <p className="method-contrast-note" style={{ margin: "0 0 8px" }}>
+          写下研究问题、数据来源、是否有随机或对照。系统按注册表里的 <b>selection_signals</b> 排序候选，
+          并给出该方法会走的阶段计划。<b>推荐不等于选定</b>：G1/G2 仍由人确认，信号不足时它不会猜。
+        </p>
+        <div className="method-recommend">
+          <textarea
+            value={brief}
+            onChange={(event) => setBrief(event.target.value)}
+            placeholder="例：分析开源仓库的提交历史与缺陷修复，看是否更常触碰测试"
+            rows={3}
+          />
+          <button
+            type="button"
+            className="control primary"
+            disabled={!brief.trim()}
+            onClick={() => {
+              const result = recommendMethods(registry, brief);
+              setRecommendation(result);
+              if (result.proposed) setSelected(result.proposed);
+            }}
+          >
+            推荐方法
+          </button>
+        </div>
+        {recommendation ? (
+          <div className="method-recommend-result">
+            {recommendation.status === "ok" && recommendation.candidates.length ? (
+              <p className="method-contrast-note">
+                <b>建议：{recommendation.candidates[0].name_zh}</b>
+                （score {recommendation.candidates[0].score}）——命中：
+                {recommendation.candidates[0].matched.join(" / ")}。
+                <br />
+                阶段计划：{recommendation.candidates[0].plan.join(" → ")}。
+                仍由人在 G1/G2 确认；这不是自动选定。
+              </p>
+            ) : recommendation.status === "ambiguous" ? (
+              <p className="method-contrast-note">
+                <b>前两名同分，系统不替你选：</b>
+                {recommendation.candidates.slice(0, 2).map((item) => `${item.name_zh}（${item.score}）`).join(" vs ")}。
+                请补充“是否随机 / 有无对照 / 数据来源”后再试。
+              </p>
+            ) : (
+              <p className="method-contrast-note">
+                <b>信号不足，不做推荐。</b>请补充：研究问题、数据来源、是否有随机或对照、预期证据形态。
+              </p>
+            )}
+            {recommendation.candidates.length > 1 ? (
+              <div className="method-chips">
+                {recommendation.candidates.slice(1).map((item) => (
+                  <code key={item.id}>{item.name_zh} · {item.score}</code>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="settings-card">
