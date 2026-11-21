@@ -2,12 +2,13 @@
 id: method-registry
 name: 研究方法注册表（阶段 × 方法）
 stage: META
-version: 0.3.0
+version: 0.4.0
 status: draft
 owner: research-agent
 inputs:
   - StageId
   - MethodId
+  - MethodPair
   - DesignPayload
 outputs:
   - MethodList
@@ -16,17 +17,23 @@ outputs:
   - TaskCard
   - MethodCheckReport
   - PipelineStagePlan  # advisory projection: composition slots -> pipeline stage names
+  - MethodDiff  # structural difference between two methods (validity/evidence/order)
 tools:
   - method.list
   - method.show
   - method.matrix
   - method.card
   - method.check
+  - method.diff
 gates: []
 invariants:
   - 注册表是数据不是门禁：检查结果只作 advisory，不改变 claim/EA/closure/signature 语义
   - 每个方法必须声明非空 cannot_support，否则拒绝加载
   - 每个方法必须引用至少一条指导性文献（key/citation/mandates 齐全）
+  - 每个方法必须声明 `validity_focus`（主类型 + 次类型），取值限于封闭词表；主类型不得重复出现在次类型
+  - 每个方法必须声明 `iteration_rule`（fixed/saturation/cycle/convergence + 停止条件的文字说明）
+  - 每个组合接线步骤必须有非空 `rationale`：回答“为何是这个顺序”，而不是只记录顺序
+  - 注册表必须带 `not_research` 对照：至少列出一种不算研究的形态及其缺失要素
   - fit_stages 与 stage_tasks 必须落在已声明阶段内；未知阶段直接拒绝
   - 缺字段按 fail-closed 报告；TODO(...) 占位等同未填写
   - 不联网、不写项目产物、不创建 Claim
@@ -81,6 +88,8 @@ invariants:
 5. 不把检查项直接接进门禁；如确需，另写设计文档并人工确认。
 
 ## Changelog
+
+- 2026-11-21 · v0.4.0 · status=draft · 新增声明式字段与只读查询：`validity_focus`（效力主/次类型，封闭词表 9 项）、`iteration_rule`（fixed/saturation/cycle/convergence + 停止条件）、组合 wiring 每步 `rationale`、顶层 `not_research`（非研究形态对照）；新增 `method_diff(a,b)` 输出效力/证据/顺序结构差异。schema 0.5→0.6。动机：研讨纪要追问“为何是这个顺序”，原注册表只有顺序没有理由。不改变 claim/EA/closure/门禁语义。实现对应 design/166。
 
 - 2026-11-21 · v0.3.0 · status=draft · 新增 advisory 输出 `pipeline_stage_plan(method_id)`：把组合驱动的槽位计划投影为 pipeline 阶段名集合，供执行器记录与发事件。契约变化仅为新增只读输出；注册表本身仍是数据不是门禁，fail-closed 加载校验不变，claim/EA/closure/signature 语义不变。实现对应 design/164，测试 `PipelineStagePlanTest` 五例。
 

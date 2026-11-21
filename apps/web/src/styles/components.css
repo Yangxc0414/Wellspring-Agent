@@ -8007,6 +8007,7 @@ select.control {
 }
 .composition-step {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 7px;
   border: 1px solid var(--line);
@@ -8029,6 +8030,17 @@ select.control {
 }
 .composition-step.is-diverge b {
   color: var(--coral);
+}
+/* design/166: every wiring step must show why it sits there, not just where. */
+.composition-rationale {
+  flex-basis: 100%;
+  color: var(--faint);
+  font-size: calc(9px * var(--font-scale, 1));
+  line-height: 1.55;
+}
+.validity-secondary {
+  color: var(--faint);
+  font-size: calc(9px * var(--font-scale, 1));
 }
 .composition-step.is-diverge small {
   color: var(--coral);

@@ -330,5 +330,97 @@ class PipelineStagePlanTest(unittest.TestCase):
             method_registry.pipeline_stage_plan("no-such-method", self.registry)
 
 
+class ValidityModelTest(unittest.TestCase):
+    """design/166: validity focus, stopping rules, order rationales and the
+    not-research boundary are declared data, not prose."""
+
+    def setUp(self):
+        self.registry = method_registry.load_registry()
+
+    def test_every_method_uses_the_closed_validity_vocabulary(self):
+        vocab = {entry["key"] for entry in self.registry["validity_vocabulary"]}
+        self.assertEqual(vocab, set(method_registry.VALIDITY_KEYS))
+        for method in self.registry["methods"]:
+            focus = method["validity_focus"]
+            self.assertIn(focus["primary"], vocab, method["id"])
+            for key in focus["secondary"]:
+                self.assertIn(key, vocab, method["id"])
+            self.assertNotIn(focus["primary"], focus["secondary"], method["id"])
+
+    def test_every_method_declares_a_stopping_rule(self):
+        for method in self.registry["methods"]:
+            rule = method["iteration_rule"]
+            self.assertIn(rule["kind"], method_registry.ITERATION_KINDS, method["id"])
+            self.assertTrue(rule["detail"].strip(), method["id"])
+
+    def test_every_wiring_step_explains_why_it_is_in_that_order(self):
+        for composition in self.registry["compositions"]:
+            for step in composition["wiring"]:
+                self.assertTrue(
+                    str(step.get("rationale") or "").strip(),
+                    composition["id"] + " / " + step["element"],
+                )
+
+    def test_not_research_boundary_is_declared(self):
+        entries = self.registry["not_research"]
+        self.assertGreaterEqual(len(entries), 3)
+        for entry in entries:
+            for field in ("id", "label", "missing", "why"):
+                self.assertTrue(str(entry.get(field) or "").strip(), field)
+
+    def test_missing_rationale_is_rejected(self):
+        import copy
+        broken = copy.deepcopy(self.registry)
+        broken["compositions"][0]["wiring"][0]["rationale"] = ""
+        with self.assertRaises(method_registry.MethodRegistryError):
+            method_registry.validate(broken)
+
+    def test_unknown_validity_key_is_rejected(self):
+        import copy
+        broken = copy.deepcopy(self.registry)
+        broken["methods"][0]["validity_focus"]["primary"] = "vibes"
+        with self.assertRaises(method_registry.MethodRegistryError):
+            method_registry.validate(broken)
+
+
+class MethodDiffTest(unittest.TestCase):
+    def test_mining_vs_case_study_differs_in_validity_order_and_stopping(self):
+        diff = method_registry.method_diff("repository-mining", "case-study")
+        self.assertFalse(diff["validity"]["same"])
+        self.assertEqual(diff["validity"]["a"], "construct")
+        self.assertEqual(diff["validity"]["b"], "transferability")
+        self.assertFalse(diff["order"]["same"])
+        self.assertIsNotNone(diff["order"]["first_divergence"])
+        self.assertFalse(diff["iteration"]["same"])
+        self.assertEqual(diff["iteration"]["a"]["kind"], "fixed")
+        self.assertEqual(diff["iteration"]["b"]["kind"], "saturation")
+
+    def test_controlled_and_quasi_share_validity_but_differ_in_randomisation_evidence(self):
+        diff = method_registry.method_diff("controlled-experiment", "quasi-experiment")
+        self.assertTrue(diff["validity"]["same"])
+        self.assertIn("分配与偏离记录（随机化留痕）", diff["evidence"]["only_a"])
+
+    def test_same_method_has_no_differences(self):
+        diff = method_registry.method_diff("controlled-experiment", "controlled-experiment")
+        self.assertTrue(diff["validity"]["same"])
+        self.assertTrue(diff["order"]["same"])
+        self.assertTrue(diff["iteration"]["same"])
+        self.assertEqual(diff["evidence"]["only_a"], [])
+
+    def test_unknown_method_is_rejected(self):
+        with self.assertRaises(method_registry.MethodRegistryError):
+            method_registry.method_diff("controlled-experiment", "no-such-method")
+
+    def test_cli_diff_returns_payload(self):
+        args = cli.argparse.Namespace(method_a="repository-mining", method_b="case-study")
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            code = cli._cmd_method_diff(args)
+        self.assertEqual(code, 0)
+        payload = json.loads(buffer.getvalue())
+        self.assertEqual(payload["schema"], "ese-method-diff-0.1")
+        self.assertFalse(payload["validity"]["same"])
+
+
 if __name__ == "__main__":
     unittest.main()

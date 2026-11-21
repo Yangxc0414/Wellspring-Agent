@@ -17,9 +17,11 @@ import {
   blockerCount,
   evidenceProfileFor,
   fitMap,
+  iterationLabel,
   loadMethodRegistry,
   stagePlanFor,
   tagAnalysis,
+  validityName,
   type MethodRegistryData
 } from "../../domain/methodModel";
 import {
@@ -812,6 +814,7 @@ export function MethodModelSettingsPage() {
   const methodContrast = compareMethodProfiles(registry);
   // 标签化梳理 (design/155): the reproducible commonality/difference extraction.
   const tags = tagAnalysis(registry);
+  const compositionList = registry.compositions ?? COMPOSITION_ORDER.map((id) => COMPOSITIONS[id]);
 
   return (
     <div className="settings-section-body">
@@ -920,6 +923,57 @@ export function MethodModelSettingsPage() {
       </div>
 
       <div className="settings-card">
+        <div className="settings-card-title">研究方法 × 效力类型（变的部分也有依据）</div>
+        <p className="method-contrast-note" style={{ margin: "0 0 8px" }}>
+          不变的是“每个主张都要声明效力范围”；可变的是<b>买哪种效力</b>。下表每一行来自该方法的方法论文献，
+          不是按经验分配——受控实验买内部效度，案例研究买可转移性，DSR 买效用，ML 迭代买判别力。
+        </p>
+        <table className="essence-map">
+          <thead>
+            <tr>
+              <th>方法</th>
+              <th>效力主类型</th>
+              <th>证据形态</th>
+              <th>停止规则</th>
+              <th>组合</th>
+            </tr>
+          </thead>
+          <tbody>
+            {registry.methods.map((method) => (
+              <tr key={method.id}>
+                <td>{method.name_zh}</td>
+                <td>
+                  {validityName(registry, method.validity_focus?.primary)}
+                  {method.validity_focus?.secondary?.length ? (
+                    <small className="validity-secondary">
+                      {" "}+ {method.validity_focus.secondary.map((key) => validityName(registry, key)).join(" / ")}
+                    </small>
+                  ) : null}
+                </td>
+                <td>{evidenceProfileFor(method.id)?.artifactForm ?? "—"}</td>
+                <td>{iterationLabel(method.iteration_rule?.kind)}</td>
+                <td>
+                  {registry.compositions?.find((item) => item.id === method.composition_id)?.label
+                    ?? method.composition_id
+                    ?? "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <small className="essence-basis">
+          效力词表：{registry.validity_vocabulary?.map((entry) => entry.name_zh).join(" / ") ?? "—"}。
+          “判别力”是 ESE 工程实验的扩展，不属于 Cook &amp; Campbell 四分。
+        </small>
+        {registry.not_research?.length ? (
+          <p className="method-contrast-note">
+            <b>边界（不算完整研究）</b>：
+            {registry.not_research.map((entry) => `「${entry.label}」缺 ${entry.missing}`).join("；")}。
+          </p>
+        ) : null}
+      </div>
+
+      <div className="settings-card">
         <div className="settings-card-title">共性槽位（治理不变）</div>
         <div className="method-slots">
           {registry.stages.map((slot) => {
@@ -944,9 +998,16 @@ export function MethodModelSettingsPage() {
           非法接线（如探索式里让方案消费尚不存在的假设）会被端口校验拒绝。
         </p>
         <div className="composition-grid">
-          {(registry.compositions ??
-            COMPOSITION_ORDER.map((id) => COMPOSITIONS[id])).map((composition) => {
+          {compositionList.map((composition) => {
             const violations = validateComposition(composition as Parameters<typeof validateComposition>[0]);
+            const other = compositionList.find((item) => item.id !== composition.id);
+            // Mark the first position where the two wirings actually diverge, not a
+            // fixed element: the difference is the order, not the element itself.
+            const divergenceIndex = other
+              ? composition.wiring.findIndex(
+                  (step, index) => other.wiring[index]?.element !== step.element
+                )
+              : -1;
             return (
               <div className="composition-col" key={composition.id}>
                 <div className="composition-head">
@@ -955,14 +1016,17 @@ export function MethodModelSettingsPage() {
                 </div>
                 <ol className="composition-wiring">
                   {composition.wiring.map((step, index) => {
-                    const isPlan = step.element === "方案";
+                    const isDiverge = index === divergenceIndex;
                     return (
                       <li
                         key={`${composition.id}-${step.element}-${index}`}
-                        className={`composition-step${isPlan ? " is-diverge" : ""}`}
+                        className={`composition-step${isDiverge ? " is-diverge" : ""}`}
                       >
                         <b>{step.element}</b>
                         <small>{step.consumes ? `消费 ${step.consumes}` : "入口"}</small>
+                        {step.rationale ? (
+                          <small className="composition-rationale">{step.rationale}</small>
+                        ) : null}
                       </li>
                     );
                   })}
@@ -1194,6 +1258,15 @@ export function MethodModelSettingsPage() {
               <p className="method-evidence-kind">{evidenceProfileFor(active.id)?.kind ?? "—"}</p>
               <p className="method-artifact-form">
                 <i>S5 证据形态：</i>{evidenceProfileFor(active.id)?.artifactForm ?? "—"}
+              </p>
+              <p className="method-artifact-form">
+                <i>效力主类型：</i>{validityName(registry, active.validity_focus?.primary)}
+                {active.validity_focus?.secondary?.length
+                  ? `（次：${active.validity_focus.secondary.map((key) => validityName(registry, key)).join(" / ")}）`
+                  : ""}
+              </p>
+              <p className="method-artifact-form">
+                <i>停止规则：</i>{iterationLabel(active.iteration_rule?.kind)} —— {active.iteration_rule?.detail ?? "—"}
               </p>
               <small className="method-evidence-basis">{evidenceProfileFor(active.id)?.basis ?? ""}</small>
             </div>

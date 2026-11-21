@@ -24,8 +24,24 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-SCHEMA = "ese-method-registry-0.5"
+SCHEMA = "ese-method-registry-0.6"
 SEVERITIES = ("blocker", "warn")
+
+# design/166: a closed vocabulary for validity focus. The list is literature-derived
+# (Cook & Campbell's four + transferability + utility + cycle + reproducibility), with
+# discriminability marked as an ESE-specific engineering-experiment extension.
+VALIDITY_KEYS = (
+    "internal",
+    "external",
+    "construct",
+    "statistical",
+    "transferability",
+    "utility",
+    "cycle",
+    "reproducibility",
+    "discriminability",
+)
+ITERATION_KINDS = ("fixed", "saturation", "cycle", "convergence")
 
 # The closed port-type vocabulary for the element/composition layer (design/156).
 PORT_TYPES = (
@@ -102,6 +118,18 @@ def validate(registry: Dict[str, Any]) -> Dict[str, Any]:
         _require(bool(method.get("guidelines")), method_id + ": at least one guideline is required")
         _require(bool(method.get("cannot_support")), method_id + ": cannot_support is required")
         _require(bool(method.get("checks")), method_id + ": at least one check is required")
+        focus = method.get("validity_focus")
+        _require(isinstance(focus, dict), method_id + ": validity_focus required (design/166)")
+        _require(focus.get("primary") in VALIDITY_KEYS, method_id + ": unknown primary validity")
+        secondary = focus.get("secondary")
+        _require(isinstance(secondary, list), method_id + ": validity_focus.secondary must be a list")
+        unknown_secondary = [key for key in secondary if key not in VALIDITY_KEYS]
+        _require(not unknown_secondary, method_id + ": unknown secondary validity " + ", ".join(unknown_secondary))
+        _require(focus["primary"] not in secondary, method_id + ": primary must not repeat in secondary")
+        rule = method.get("iteration_rule")
+        _require(isinstance(rule, dict), method_id + ": iteration_rule required (design/166)")
+        _require(rule.get("kind") in ITERATION_KINDS, method_id + ": unknown iteration kind")
+        _require(bool(str(rule.get("detail") or "")), method_id + ": iteration_rule detail required")
         keys = []
         for guideline in method["guidelines"]:
             key = str(guideline.get("key") or "")
@@ -131,10 +159,25 @@ def validate(registry: Dict[str, Any]) -> Dict[str, Any]:
         _require(tag not in vocab_tags, "duplicate vocabulary tag: " + tag)
         vocab_tags.append(tag)
     for method in methods:
+        mid = str(method.get("id") or "")
         tags = method.get("tags")
-        _require(isinstance(tags, list) and tags, method_id + ": tags must be a non-empty list")
+        _require(isinstance(tags, list) and tags, mid + ": tags must be a non-empty list")
         unknown = [tag for tag in tags if tag not in vocab_tags]
-        _require(not unknown, method_id + ": tags missing from vocabulary: " + ", ".join(unknown))
+        _require(not unknown, mid + ": tags missing from vocabulary: " + ", ".join(unknown))
+
+    # design/166: validity vocabulary must cover the closed key set exactly.
+    validity = registry.get("validity_vocabulary")
+    _require(isinstance(validity, list) and validity, "registry needs a validity_vocabulary list")
+    seen_validity = []
+    for entry in validity:
+        key = str(entry.get("key") or "")
+        _require(key in VALIDITY_KEYS, "unknown validity key: " + key)
+        _require(key not in seen_validity, "duplicate validity key: " + key)
+        for field in ("name_zh", "definition", "basis"):
+            _require(bool(str(entry.get(field) or "")), key + ": " + field + " required")
+        seen_validity.append(key)
+    missing_validity = [key for key in VALIDITY_KEYS if key not in seen_validity]
+    _require(not missing_validity, "validity vocabulary missing: " + ", ".join(missing_validity))
 
     # design/156: the element/composition layer — the meta-model (elements with
     # typed ports) plus reference wirings, all fail-closed so the "framework is
@@ -199,6 +242,10 @@ def validate(registry: Dict[str, Any]) -> Dict[str, Any]:
                     consumed in available,
                     composition_id + ": port " + str(consumed) + " has not been produced upstream",
                 )
+            _require(
+                bool(str(step.get("rationale") or "")),
+                composition_id + ": wiring step " + element_id + " needs rationale (design/166)",
+            )
             rule = None
             for candidate in element["outputs"]:
                 if candidate.get("consumes") == consumed:
@@ -207,13 +254,25 @@ def validate(registry: Dict[str, Any]) -> Dict[str, Any]:
             _require(rule is not None, composition_id + ": no output rule for " + str(consumed))
             if rule["produces"] not in available:
                 available.append(rule["produces"])
+    not_research = registry.get("not_research")
+    _require(isinstance(not_research, list) and not_research, "registry needs a not_research boundary list")
+    boundary_ids = []
+    for entry in not_research:
+        entry_id = str(entry.get("id") or "")
+        _require(bool(entry_id), "not_research id required")
+        _require(entry_id not in boundary_ids, "duplicate not_research id: " + entry_id)
+        boundary_ids.append(entry_id)
+        for field in ("label", "missing", "why"):
+            _require(bool(str(entry.get(field) or "")), entry_id + ": " + field + " required")
+
     for method in methods:
+        mid = str(method.get("id") or "")
         binding = method.get("composition_id")
-        _require(binding in composition_slot_maps, method_id + ": composition_id must reference a composition")
+        _require(binding in composition_slot_maps, mid + ": composition_id must reference a composition")
         for slot in method["fit_stages"]:
             _require(
                 any(slot in slots for element, slots in composition_slot_maps[binding].items()),
-                method_id + ": fit stage " + str(slot) + " not walked by composition " + str(binding),
+                mid + ": fit stage " + str(slot) + " not walked by composition " + str(binding),
             )
     return registry
 
@@ -443,4 +502,59 @@ def pipeline_stage_plan(method_id: str, registry: Optional[Dict[str, Any]] = Non
         "label": plan["label"],
         "covered_stages": sorted(covered),
         "plan": plan["stages"],
+    }
+
+
+def method_diff(a: str, b: str, registry: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Explain the essential difference between two methods (design/166).
+
+    Compares the three places a method difference should live: validity focus,
+    evidence sources, and the order its composition walks the governance slots.
+    Returns structure, not a ranking: no method is "better" and nothing here
+    creates a Claim.
+    """
+    data = registry or load_registry()
+    left = get_method(a, data)
+    right = get_method(b, data)
+    lv = left["validity_focus"]
+    rv = right["validity_focus"]
+    left_evidence = set(left["evidence_sources"])
+    right_evidence = set(right["evidence_sources"])
+    left_plan = stage_plan(a, data)
+    right_plan = stage_plan(b, data)
+    left_slots = [step["slot"] for step in left_plan["stages"]]
+    right_slots = [step["slot"] for step in right_plan["stages"]]
+    divergence = None
+    for index in range(min(len(left_slots), len(right_slots))):
+        if left_slots[index] != right_slots[index]:
+            divergence = {"index": index, "a": left_slots[index], "b": right_slots[index]}
+            break
+    return {
+        "schema": "ese-method-diff-0.1",
+        "a": {"id": a, "name": left["name_zh"], "composition": left_plan["composition"]},
+        "b": {"id": b, "name": right["name_zh"], "composition": right_plan["composition"]},
+        "validity": {
+            "a": lv["primary"],
+            "b": rv["primary"],
+            "same": lv["primary"] == rv["primary"],
+            "a_secondary": list(lv["secondary"]),
+            "b_secondary": list(rv["secondary"]),
+        },
+        "evidence": {
+            "only_a": sorted(left_evidence - right_evidence),
+            "only_b": sorted(right_evidence - left_evidence),
+            "shared": sorted(left_evidence & right_evidence),
+        },
+        "order": {
+            "a": left_slots,
+            "b": right_slots,
+            "same": left_slots == right_slots,
+            "first_divergence": divergence,
+        },
+        "iteration": {
+            "a": dict(left["iteration_rule"]),
+            "b": dict(right["iteration_rule"]),
+            "same": left["iteration_rule"]["kind"] == right["iteration_rule"]["kind"],
+        },
+        "boundary": "structural difference only; no method is ranked and no Claim is created",
     }

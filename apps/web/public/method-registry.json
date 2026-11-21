@@ -1,5 +1,5 @@
 {
-  "schema": "ese-method-registry-0.5",
+  "schema": "ese-method-registry-0.6",
   "boundary": "方法注册表是数据不是门禁：它给出阶段×方法的任务卡、必填字段与检查项，检查结果只作 advisory，不改变任何 gate/claim/signature 语义。",
   "stages": [
     {
@@ -182,7 +182,18 @@
         "质量评估",
         "综合矩阵"
       ],
-      "composition_id": "confirmatory"
+      "composition_id": "confirmatory",
+      "validity_focus": {
+        "primary": "reproducibility",
+        "secondary": [
+          "construct",
+          "external"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "fixed",
+        "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+      }
     },
     {
       "id": "repository-mining",
@@ -335,7 +346,18 @@
         "许可核对",
         "快照哈希"
       ],
-      "composition_id": "exploratory"
+      "composition_id": "exploratory",
+      "validity_focus": {
+        "primary": "construct",
+        "secondary": [
+          "reproducibility",
+          "external"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "fixed",
+        "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+      }
     },
     {
       "id": "controlled-experiment",
@@ -493,7 +515,19 @@
         "功效分析",
         "停止规则"
       ],
-      "composition_id": "confirmatory"
+      "composition_id": "confirmatory",
+      "validity_focus": {
+        "primary": "internal",
+        "secondary": [
+          "statistical",
+          "construct",
+          "external"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "fixed",
+        "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+      }
     },
     {
       "id": "quasi-experiment",
@@ -605,7 +639,18 @@
         "混杂清单",
         "敏感性分析"
       ],
-      "composition_id": "confirmatory"
+      "composition_id": "confirmatory",
+      "validity_focus": {
+        "primary": "internal",
+        "secondary": [
+          "statistical",
+          "construct"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "fixed",
+        "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+      }
     },
     {
       "id": "benchmark-evaluation",
@@ -746,7 +791,18 @@
         "饱和分析",
         "多重比较策略"
       ],
-      "composition_id": "confirmatory"
+      "composition_id": "confirmatory",
+      "validity_focus": {
+        "primary": "construct",
+        "secondary": [
+          "statistical",
+          "external"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "fixed",
+        "detail": "基准版本、污染检查与多重比较策略固定"
+      }
     },
     {
       "id": "case-study",
@@ -887,7 +943,18 @@
         "成员核查",
         "伦理审查"
       ],
-      "composition_id": "exploratory"
+      "composition_id": "exploratory",
+      "validity_focus": {
+        "primary": "transferability",
+        "secondary": [
+          "construct",
+          "external"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "saturation",
+        "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+      }
     },
     {
       "id": "survey",
@@ -1009,7 +1076,18 @@
         "预试记录",
         "伦理审查"
       ],
-      "composition_id": "confirmatory"
+      "composition_id": "confirmatory",
+      "validity_focus": {
+        "primary": "construct",
+        "secondary": [
+          "external",
+          "statistical"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "fixed",
+        "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+      }
     },
     {
       "id": "design-science",
@@ -1126,7 +1204,18 @@
         "贡献声明",
         "边界条件"
       ],
-      "composition_id": "exploratory"
+      "composition_id": "exploratory",
+      "validity_focus": {
+        "primary": "utility",
+        "secondary": [
+          "transferability",
+          "construct"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "cycle",
+        "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+      }
     },
     {
       "id": "action-research",
@@ -1238,7 +1327,18 @@
         "研究者角色声明",
         "伦理审查"
       ],
-      "composition_id": "exploratory"
+      "composition_id": "exploratory",
+      "validity_focus": {
+        "primary": "cycle",
+        "secondary": [
+          "transferability",
+          "construct"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "cycle",
+        "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+      }
     },
     {
       "id": "ml-iterative-experiment",
@@ -1398,7 +1498,18 @@
         "种子披露",
         "toy 实验"
       ],
-      "composition_id": "exploratory"
+      "composition_id": "exploratory",
+      "validity_focus": {
+        "primary": "discriminability",
+        "secondary": [
+          "reproducibility",
+          "statistical"
+        ]
+      },
+      "iteration_rule": {
+        "kind": "convergence",
+        "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+      }
     }
   ],
   "tag_vocabulary": [
@@ -1754,39 +1865,48 @@
       "wiring": [
         {
           "element": "问题",
-          "consumes": null
+          "consumes": null,
+          "rationale": "先固定研究问题，后续协议字段都引用它，避免问题随结果漂移"
         },
         {
           "element": "假设",
-          "consumes": "研究问题"
+          "consumes": "研究问题",
+          "rationale": "假设必须先于数据：事后假设冒充事前假设会破坏内部效度（HARKing）"
         },
         {
           "element": "方案",
-          "consumes": "候选假设（可判别）"
+          "consumes": "候选假设（可判别）",
+          "rationale": "方案消费可判别假设，把预测转成可执行的对照与测量"
         },
         {
           "element": "证据",
-          "consumes": "判别式协议"
+          "consumes": "判别式协议",
+          "rationale": "证据在协议冻结后收集，防止按结果调整纳入标准"
         },
         {
           "element": "判定",
-          "consumes": "RunCapsule + EA"
+          "consumes": "RunCapsule + EA",
+          "rationale": "判定在证据封存后进行，保持收集与判定分离"
         },
         {
           "element": "图表",
-          "consumes": "RunCapsule + EA"
+          "consumes": "RunCapsule + EA",
+          "rationale": "图表只消费已封存的 capsule/EA，避免图先于证据"
         },
         {
           "element": "写作",
-          "consumes": "ClaimRecord"
+          "consumes": "ClaimRecord",
+          "rationale": "写作只绑定已签 claim，正文不先于证据"
         },
         {
           "element": "闭包",
-          "consumes": "ClaimRecord"
+          "consumes": "ClaimRecord",
+          "rationale": "闭包核对四件产物一致，不一致即 blocked"
         },
         {
           "element": "经验",
-          "consumes": "closure + 导出"
+          "consumes": "closure + 导出",
+          "rationale": "经验回流只在闭包后发生，避免把未闭合的过程写成方法"
         }
       ],
       "slot_map": {
@@ -1825,39 +1945,48 @@
       "wiring": [
         {
           "element": "问题",
-          "consumes": null
+          "consumes": null,
+          "rationale": "先固定研究问题，但允许在证据阶段细化子问题"
         },
         {
           "element": "方案",
-          "consumes": "研究问题"
+          "consumes": "研究问题",
+          "rationale": "先定探索方案与抽样边界，避免无边界收集"
         },
         {
           "element": "证据",
-          "consumes": "数据收集协议"
+          "consumes": "数据收集协议",
+          "rationale": "探索式先收集证据：案例/挖掘的证据先于假设，允许归纳"
         },
         {
           "element": "假设",
-          "consumes": "RunCapsule + EA"
+          "consumes": "RunCapsule + EA",
+          "rationale": "假设在证据之后形成：允许从资料归纳，但必须标注为事后假设"
         },
         {
           "element": "判定",
-          "consumes": "RunCapsule + EA"
+          "consumes": "RunCapsule + EA",
+          "rationale": "判定区分“探索发现”与“验证结论”，后者仍需验证式设计"
         },
         {
           "element": "图表",
-          "consumes": "RunCapsule + EA"
+          "consumes": "RunCapsule + EA",
+          "rationale": "图表标注探索性质，不呈现为因果"
         },
         {
           "element": "写作",
-          "consumes": "ClaimRecord"
+          "consumes": "ClaimRecord",
+          "rationale": "写作把事后假设显式标注，避免读成预注册结论"
         },
         {
           "element": "闭包",
-          "consumes": "ClaimRecord"
+          "consumes": "ClaimRecord",
+          "rationale": "闭包核对探索链的每个跳跃都有证据锚"
         },
         {
           "element": "经验",
-          "consumes": "closure + 导出"
+          "consumes": "closure + 导出",
+          "rationale": "经验回流记录哪些归纳后来被验证、哪些被推翻"
         }
       ],
       "slot_map": {
@@ -1890,5 +2019,87 @@
       }
     }
   ],
-  "composition_slot_maps_note": "slot_map 桥接组合要素与治理槽位；证据要素跨 S1（收集）与 S5（执行）。"
+  "composition_slot_maps_note": "slot_map 桥接组合要素与治理槽位；证据要素跨 S1（收集）与 S5（执行）。",
+  "validity_vocabulary": [
+    {
+      "key": "internal",
+      "name_zh": "内部效度",
+      "definition": "观察到的共变能否解释为处理导致结果",
+      "basis": "Cook & Campbell 1979；Shadish, Cook & Campbell 2002"
+    },
+    {
+      "key": "external",
+      "name_zh": "外部效度",
+      "definition": "结论能否跨人员、情境、处理、测量与时间泛化",
+      "basis": "Shadish, Cook & Campbell 2002"
+    },
+    {
+      "key": "construct",
+      "name_zh": "构造效度",
+      "definition": "操作化与测量是否真的代表目标构念",
+      "basis": "Cook & Campbell 1979"
+    },
+    {
+      "key": "statistical",
+      "name_zh": "统计结论效度",
+      "definition": "共变及强度的统计推断是否成立（功效、检验假设、区间）",
+      "basis": "Cook & Campbell 1979"
+    },
+    {
+      "key": "transferability",
+      "name_zh": "可转移性",
+      "definition": "质性结论能否由他人在相似情境中判断可迁移；依赖 thick description",
+      "basis": "Lincoln & Guba 1985"
+    },
+    {
+      "key": "utility",
+      "name_zh": "效用",
+      "definition": "产物在目标情境中的有用性、质量与有效性是否被严格评估",
+      "basis": "Hevner et al. 2004"
+    },
+    {
+      "key": "cycle",
+      "name_zh": "循环完整性",
+      "definition": "诊断→行动→评估→反思的循环是否闭合且角色透明",
+      "basis": "Susman & Evered 1978"
+    },
+    {
+      "key": "reproducibility",
+      "name_zh": "可复现性",
+      "definition": "检索或运行能否被他人重放并得到同一快照",
+      "basis": "Kitchenham & Charters 2007；run contract"
+    },
+    {
+      "key": "discriminability",
+      "name_zh": "判别力",
+      "definition": "消融或对照能否区分各组成部分的贡献（ESE 工程实验扩展，非 Cook & Campbell 四分）",
+      "basis": "Agarwal et al. 2021；消融实验实践"
+    }
+  ],
+  "not_research": [
+    {
+      "id": "pure-engineering",
+      "label": "纯工程交付",
+      "missing": "可否证主张",
+      "why": "造出能用的系统不等于主张了关于世界的事实"
+    },
+    {
+      "id": "pure-experience",
+      "label": "纯经验报告",
+      "missing": "可核查证据",
+      "why": "个人经验无法被他人复算或定位到来源"
+    },
+    {
+      "id": "sota-only",
+      "label": "只有 SOTA 数字",
+      "missing": "效力声明",
+      "why": "数字高不说明在什么范围、什么条件下成立"
+    },
+    {
+      "id": "post-hoc",
+      "label": "事后假设冒充预测",
+      "missing": "时间顺序",
+      "why": "把结果知情后的假设当成事前假设（HARKing），效力不可恢复"
+    }
+  ]
 }

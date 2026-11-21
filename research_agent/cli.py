@@ -3634,6 +3634,17 @@ def _cmd_method_card(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_method_diff(args: argparse.Namespace) -> int:
+    from .method_registry import MethodRegistryError, method_diff
+
+    try:
+        _print_json(method_diff(args.method_a, args.method_b))
+    except MethodRegistryError as exc:
+        print(str(exc))
+        return 2
+    return 0
+
+
 def _cmd_method_check(args: argparse.Namespace) -> int:
     from .method_registry import MethodRegistryError, check
     from .storage import read_json
@@ -6645,6 +6656,10 @@ def build_parser() -> argparse.ArgumentParser:
     method_card.add_argument("--stage", required=True)
     method_card.add_argument("--method", dest="method_id", required=True)
     method_card.set_defaults(func=_cmd_method_card)
+    method_diff = method_sub.add_parser("diff", help="explain the essential difference between two methods")
+    method_diff.add_argument("method_a")
+    method_diff.add_argument("method_b")
+    method_diff.set_defaults(func=_cmd_method_diff)
     method_check = method_sub.add_parser("check", help="advisory check of a design against one method")
     method_check.add_argument("--method", dest="method_id", required=True)
     method_check.add_argument("--design", required=True)

@@ -122,6 +122,9 @@ export interface WiringStep {
   element: string;
   /** The input port this step actually consumes (null = entry element). */
   consumes: PortType | null;
+  /** design/166: why this element sits at this position. Present on the
+   *  registry copy; the built-in fallback wirings omit it. */
+  rationale?: string;
 }
 
 export interface Composition {

@@ -114,7 +114,7 @@ class WorkspaceStoreTest(unittest.TestCase):
         # The method registry rides the same export: the frontend method-model
         # view must consume the same data the CLI queries (design/149).
         self.assertGreaterEqual(result["methods"], 9)
-        self.assertEqual(methods["schema"], "ese-method-registry-0.5")
+        self.assertEqual(methods["schema"], "ese-method-registry-0.6")
 
         committed_agents = REPO / "apps" / "web" / "public" / "agent-registry.json"
         committed_commands = REPO / "apps" / "web" / "public" / "command-catalog.json"

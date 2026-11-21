@@ -32,6 +32,16 @@ export interface TagVocabularyEntry {
   basis: string;
 }
 
+export interface ValidityFocus {
+  primary: string;
+  secondary: string[];
+}
+
+export interface IterationRule {
+  kind: "fixed" | "saturation" | "cycle" | "convergence" | string;
+  detail: string;
+}
+
 export interface MethodRegistryMethod {
   id: string;
   name_zh: string;
@@ -53,6 +63,10 @@ export interface MethodRegistryMethod {
   stage_tasks?: Record<string, string>;
   /** design/155: vocabulary tags from the 标签化梳理 todo. */
   tags?: string[];
+  /** design/166: what kind of validity this method is primarily buying. */
+  validity_focus?: ValidityFocus;
+  /** design/166: how the method knows it is done (fixed / saturation / cycle / convergence). */
+  iteration_rule?: IterationRule;
 }
 
 export interface MethodRegistryData {
@@ -70,11 +84,15 @@ export interface MethodRegistryData {
     outputs: Array<{ consumes: string | null; produces: string }>;
     human: boolean;
   }>;
+  /** design/166: closed validity vocabulary shared by every method. */
+  validity_vocabulary?: Array<{ key: string; name_zh: string; definition: string; basis: string }>;
+  /** design/166: what is NOT research, so the boundary is visible. */
+  not_research?: Array<{ id: string; label: string; missing: string; why: string }>;
   compositions?: Array<{
     id: string;
     label: string;
     sub: string;
-    wiring: Array<{ element: string; consumes: string | null }>;
+    wiring: Array<{ element: string; consumes: string | null; rationale?: string }>;
     /** design/162: element id -> governance slots it walks. */
     slot_map?: Record<string, string[]>;
   }>;
@@ -90,7 +108,7 @@ export async function loadMethodRegistry(): Promise<MethodRegistryData | null> {
     const response = await fetch("./method-registry.json", { cache: "no-cache" });
     if (!response.ok) throw new Error(String(response.status));
     const data = (await response.json()) as MethodRegistryData;
-    cache = data.schema === "ese-method-registry-0.5" ? data : null;
+    cache = data.schema === "ese-method-registry-0.6" ? data : null;
   } catch {
     cache = null;
   }
@@ -205,6 +223,24 @@ export const EVIDENCE_PROFILES: Record<string, EvidenceProfile> = {
 
 export function evidenceProfileFor(methodId: string): EvidenceProfile | null {
   return EVIDENCE_PROFILES[methodId] ?? null;
+}
+
+/** design/166: render a validity key through the registry's closed vocabulary. */
+export function validityName(registry: MethodRegistryData | null, key?: string): string {
+  if (!key) return "—";
+  return registry?.validity_vocabulary?.find((entry) => entry.key === key)?.name_zh ?? key;
+}
+
+const ITERATION_LABELS: Record<string, string> = {
+  fixed: "固定阶段",
+  saturation: "饱和停止",
+  cycle: "循环回路",
+  convergence: "收敛停止"
+};
+
+export function iterationLabel(kind?: string): string {
+  if (!kind) return "—";
+  return ITERATION_LABELS[kind] ?? kind;
 }
 
 /**
