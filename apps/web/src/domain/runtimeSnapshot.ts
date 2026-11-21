@@ -193,6 +193,19 @@ function buildStages(demo: RuntimeDemo): AutoStage[] {
   ];
 }
 
+/**
+ * 这条 run 记录的研究方法。真实 pipeline 在 `modules.composition_plan` 里写着
+ * 它按哪个方法的组合接线解析过（`method`）；`--method auto` 还会额外留一份
+ * `method_selection`（含三态与 needs_human）。两处都读，谁也不猜：都没写就
+ * 返回 undefined，让面板如实显示「没有声明方法」。
+ */
+function runtimeMethodId(modules: Loose): string | undefined {
+  const fromPlan = text(object(modules.composition_plan).method);
+  if (fromPlan) return fromPlan;
+  const proposed = text(object(modules.method_selection).proposed);
+  return proposed || undefined;
+}
+
 export function applyRuntimeSnapshot(
   task: ResearchTask,
   demo: RuntimeDemo,
@@ -234,6 +247,7 @@ export function applyRuntimeSnapshot(
     run: run ?? task.run,
     autoStages: stages,
     completedStages,
+    methodId: runtimeMethodId(modules) ?? task.methodId,
     stage: stages[6]?.status === "done" ? 6 : task.stage,
     status: "active",
     runtime: {

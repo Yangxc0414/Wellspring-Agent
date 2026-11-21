@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { AUTO_STAGE_CATALOG } from "../domain/catalog";
 import { demoStagePlan, stageLabel } from "../domain/demoPlayer";
-import { methodForSession, loadMethodRegistry, type MethodRegistryData } from "../domain/methodModel";
-import { STAGE_MODULE_CONTRACTS } from "../domain/gateContracts";
+import { loadMethodRegistry, methodForTask, type MethodRegistryData } from "../domain/methodModel";
+import { buildMethodFlow } from "../domain/stagePlan";
 import { humanTurns, turnsForStage } from "../domain/humanTurns";
 import { useWorkspaceStore } from "../state/workspaceStore";
+import { MethodPlanFlow } from "./MethodPlanFlow";
+import { StageContract } from "./StageContract";
 
 
 /**
@@ -144,26 +146,9 @@ const GATE_FOR_STAGE: Record<string, string> = {
 };
 
 /**
- * The backend contract that owns this stage — module id plus the hard
- * invariants it enforces. Data lives in gateContracts.STAGE_MODULE_CONTRACTS
- * (transcribed from AGENTS.md §5 and the modules SPEC files), so the panel
- * shows how the system REALLY constrains each stage, not just what the demo
- * does. Unknown stage ids render nothing (no invented contracts).
+ * The backend contract that owns this stage — moved to StageContract.tsx so the
+ * method-plan view (design/169) and the generic template share one copy.
  */
-function StageContract({ stageId }: { stageId: string }) {
-  const mc = STAGE_MODULE_CONTRACTS[stageId];
-  if (!mc) return null;
-  return (
-    <div className="flow-module-contract">
-      <span>后端契约 · {mc.module}</span>
-      <ul>
-        {mc.invariants.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 export function FlowDemo() {
   const [localStep, setLocalStep] = useState(0);
@@ -172,22 +157,25 @@ export function FlowDemo() {
   const setUI = useWorkspaceStore((state) => state.actions.setUI);
   const notify = useWorkspaceStore((state) => state.actions.notify);
   const actions = useWorkspaceStore((state) => state.actions);
-  const currentMessages = useWorkspaceStore(
-    (state) => state.tasks.find((t) => t.id === state.selectedTaskId)?.messages ?? []
+  const selectedTask = useWorkspaceStore((state) =>
+    state.tasks.find((t) => t.id === state.selectedTaskId)
   );
+  const currentMessages = selectedTask?.messages ?? [];
   const selectedTaskId = useWorkspaceStore((state) => state.selectedTaskId);
   const demoPlayer = useWorkspaceStore((state) => state.ui.demoPlayer);
   const allTurns = humanTurns(currentMessages);
 
   // SESSION PATH: stage tags on this transcript define the list, so the panel
-  // tells THIS session's story and every node has a real jump target.
+  // tells THIS session's story and every node has a real jump target. When the
+  // task declares a research method, the list instead follows that method's
+  // composition wiring (design/169) and the session tags are compared to it.
   const sessionStageIds = demoStagePlan(currentMessages);
   const sessionMode = sessionStageIds.length > 0;
   const playerActive = Boolean(
     demoPlayer && demoPlayer.taskId === selectedTaskId && !demoPlayer.finished
   );
   const playerStageId = playerActive ? (demoPlayer?.stageId ?? null) : null;
-  // Which method profile this session demonstrates (from the registry snapshot).
+  // Which method profile this session declares (task field, then seeded fallback).
   const [registry, setRegistry] = useState<MethodRegistryData | null>(null);
   useEffect(() => {
     let cancelled = false;
@@ -198,7 +186,9 @@ export function FlowDemo() {
       cancelled = true;
     };
   }, []);
-  const sessionMethod = methodForSession(selectedTaskId, registry);
+  const sessionMethod = methodForTask(selectedTask, registry);
+  const methodFlow =
+    sessionMethod && registry ? buildMethodFlow(sessionMethod, registry, currentMessages) : null;
 
   // Clicking a flow node expands its detail AND jumps the conversation thread
   // to the first message tagged with that stage, so a presenter can point at a
@@ -206,11 +196,51 @@ export function FlowDemo() {
   const focusInThread = (stageId: string) => {
     const hasStage = currentMessages.some((m) => m.stage === stageId);
     if (!hasStage) {
-      notify(`当前会话没有「${stageId}」的定位消息`);
+      notify(`当前会话没有「${stageId}」的定位消息——切到「完整闭环」会话可看到该阶段`);
       return;
     }
     setUI({ focusStage: { id: stageId, tick: Date.now() } });
   };
+
+  if (methodFlow) {
+    return (
+      <div className="context-stack flow-demo">
+        <div className="flow-banner">
+          <div className="flow-banner-title">
+            <span className="flow-dot" /> 研究编排 · METHOD PLAN
+          </div>
+          <p>
+            这一列由<b>这条任务声明的研究方法</b>决定：方法 → 组合接线 → 阶段顺序，以及每个阶段
+            该做什么。会话真正走过的阶段标了条数；计划外与治理固定分开列出——不把执行器的全阶段
+            执行说成方法编排。
+          </p>
+        </div>
+
+        <div className="flow-controls is-player">
+          <span className={`flow-state ${playerActive && playerStageId ? "" : "is-hint"}`}>
+            {playerActive && playerStageId
+              ? `播放中 · 当前 ${playerStageId} ${stageLabel(playerStageId)}`
+              : sessionStageIds.length
+                ? `${sessionStageIds.length} 个会话阶段 · 点击节点跳到会话对应位置`
+                : "本会话还没有阶段记录 · 下面是计划，不是已发生的事实"}
+          </span>
+        </div>
+
+        <MethodPlanFlow
+          flow={methodFlow}
+          turns={allTurns}
+          playerStageId={playerStageId}
+          onFocusStage={focusInThread}
+          onFocusMessage={actions.focusMessage}
+        />
+
+        <div className="flow-boundary">
+          <b>边界：</b>轨道①是方法注册表声明的编排（advisory，不改门禁、不跳阶段）；轨道②是治理固定层；
+          轨道③是执行器当前仍会跑、但本方法未声明的阶段。真实进度与读数以 BRIEF / RUN / EVIDENCE 为准。
+        </div>
+      </div>
+    );
+  }
 
   if (sessionMode) {
     return (
@@ -223,10 +253,23 @@ export function FlowDemo() {
             这一列从<b>当前会话自己的 stage 标签</b>派生——不是通用模板，讲的就是这条任务走过的路。
             点击任意节点，左侧会话跳到该阶段对应的消息；播放演示时，当前阶段自动点亮展开。
           </p>
+          <p className="flow-banner-hint is-warn">
+            {sessionMethod ? (
+              <>
+                这条任务声明了方法「{sessionMethod.name_zh}」，但方法注册表里<b>没有可用的组合接线</b>
+                （缺 composition_id 或 slot_map）：投影不出阶段顺序，只能退回会话标签。
+              </>
+            ) : (
+              <>
+                这条任务<b>没有声明研究方法</b>（或注册表快照未加载）：所以这里只有会话标签，没有方法
+                编排可比对。方法一栏见 设置 → 方法模型。
+              </>
+            )}
+          </p>
         </div>
 
-          <div className="flow-controls is-player">
-          <span className="flow-state">
+        <div className="flow-controls is-player">
+          <span className={`flow-state ${playerActive && playerStageId ? "" : "is-hint"}`}>
             {playerActive && playerStageId
               ? `播放中 · 当前 ${playerStageId} ${stageLabel(playerStageId)}`
               : `${sessionStageIds.length} 个阶段 · 点击节点跳到会话对应位置`}

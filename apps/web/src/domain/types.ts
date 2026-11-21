@@ -864,6 +864,12 @@ export interface ResearchTask {
   protocolFrozen: boolean;
   run: RunRecord | null;
   /**
+   * 这条任务声明的研究方法（modules/method-registry 的 method id）。RESEARCH
+   * FLOW 按它把「方法 → 组合接线 → 阶段顺序」投影出来；缺失时面板只能按会话
+   * 标签派生，且必须说明自己没有方法依据（design/169）。
+   */
+  methodId?: string;
+  /**
    * Where a seeded session's numbers come from. Panels used to label every
    * non-runtime task "演示数据", which understates a real replay and would let a
    * fixture run borrow the credibility of a real one. Declared at the data level

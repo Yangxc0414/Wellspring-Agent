@@ -1,4 +1,4 @@
-import { DEFAULT_SHORTCUTS } from "./shortcuts";
+import { DEFAULT_SHORTCUTS } from "./shortcuts.ts";
 import type { AccessMode, AutoStage, Mode, ModelProfile, ModelSettings, Plugin, Preferences, Skill } from "./types";
 
 export const APP_VERSION = "0.2.0";

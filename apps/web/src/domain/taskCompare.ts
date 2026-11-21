@@ -1,4 +1,4 @@
-import { methodForSession, SESSION_METHOD, type MethodRegistryData, type MethodRegistryMethod } from "./methodModel.ts";
+import { methodForTask, SESSION_METHOD, type MethodRegistryData, type MethodRegistryMethod } from "./methodModel.ts";
 import { demoStagePlan, stageLabel } from "./demoPlayer.ts";
 import { claimSignatureLabel } from "./claimSignature.ts";
 import type { ResearchTask } from "./types.ts";
@@ -72,7 +72,7 @@ export function compareEmpiricalTasks(
     rows.push({
       taskId: task.id,
       name: task.name,
-      method: methodForSession(task.id, registry),
+      method: methodForTask(task, registry),
       uniqueTags: [],
       dataset: task.run?.dataset ?? null,
       metric: task.run?.metric ?? task.protocol?.metric ?? null,

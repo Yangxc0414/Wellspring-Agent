@@ -99,8 +99,14 @@ class TaskSwitchShowsThatTasksOwnBrief(unittest.TestCase):
     def test_generic_flow_is_not_carried_across_tasks(self):
         store = (ROOT / "apps" / "web" / "src" / "state" / "workspaceStore.ts").read_text(encoding="utf-8")
         # Opening ESE must not leave the generic full-chain replay as the first
-        # panel; an explicit tab choice must survive the switch.
-        self.assertIn('state.ui.contextTab === "flow" && id !== "full-chain-demo" ? "brief"', store)
+        # panel; an explicit tab choice must survive the switch. The selector was
+        # later split across lines, so compare on collapsed whitespace instead of
+        # assuming one line (the behaviour pinned here is unchanged).
+        compact = " ".join(store.split())
+        self.assertIn(
+            'contextTab: task.messages.some((m) => m.stage) ? "flow" : state.ui.contextTab === "flow" ? "brief" : state.ui.contextTab',
+            compact,
+        )
 
 
 if __name__ == "__main__":

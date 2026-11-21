@@ -6741,6 +6741,278 @@ select.control {
 }
 
 /* ------------------------------------------------------------------ */
+/* Method plan track (design/169): method → composition wiring → stages */
+/* 方法声明编排、治理固定、计划外三段必须一眼可分：紫色只给"方法"，   */
+/* 青色给"治理固定"，计划外用虚线灰，避免三种语义撞色。                */
+/* ------------------------------------------------------------------ */
+.flow-plan-flow {
+  display: grid;
+  gap: 10px;
+}
+.flow-plan-head {
+  border: 1px solid rgba(124, 58, 237, 0.28);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.07), var(--surface));
+  padding: 9px 11px;
+}
+.flow-plan-name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.flow-plan-name span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--faint);
+}
+.flow-plan-name b {
+  font-size: 13px;
+  color: var(--text);
+}
+.flow-plan-name em {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--faint);
+  font-family: var(--mono);
+}
+.flow-plan-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+.flow-plan-chip {
+  font-size: 10px;
+  border-radius: 999px;
+  padding: 1px 8px;
+  border: 1px solid var(--line-strong);
+  color: var(--muted);
+  background: var(--surface);
+  white-space: nowrap;
+}
+.flow-plan-chip.is-composition {
+  color: #7c3aed;
+  border-color: rgba(124, 58, 237, 0.3);
+  background: rgba(124, 58, 237, 0.07);
+}
+.flow-plan-sub {
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+/* Divergence is the sentence that must not be missable: the plan says one
+   order, the transcript shows another. Amber, not red — it is a known gap,
+   not a failure. */
+.flow-plan-divergence {
+  border: 1px solid rgba(154, 107, 30, 0.35);
+  border-radius: var(--radius);
+  background: var(--amber-dim);
+  padding: 8px 10px;
+}
+.flow-plan-divergence b {
+  color: var(--amber);
+  font-size: 11px;
+}
+.flow-plan-divergence p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.flow-plan-divergence code {
+  font-family: var(--mono);
+  font-size: 10px;
+  background: rgba(154, 107, 30, 0.12);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+.flow-plan-aligned {
+  font-size: 11px;
+  color: var(--teal);
+  padding: 0 2px;
+}
+.flow-plan-track {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 4px 10px 0;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line-strong);
+}
+.flow-plan-track span {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.flow-plan-track b {
+  font-size: 11px;
+  color: var(--text);
+}
+.flow-plan-track em {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--faint);
+}
+.flow-plan-track.is-fixed b {
+  color: var(--teal);
+}
+.flow-plan-count {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--faint);
+  white-space: nowrap;
+}
+.flow-plan-count.is-absent {
+  color: var(--amber);
+}
+.flow-plan-fixed {
+  font-size: 10px;
+  border-radius: 999px;
+  padding: 1px 7px;
+  color: var(--teal);
+  background: var(--teal-dim);
+  white-space: nowrap;
+}
+/* A planned stage the session never reached: keep the slot, drop the "done"
+   fill — an empty ring is more honest than a check mark. */
+.flow-stage.is-absent .flow-stage-mark {
+  border-style: dashed;
+  color: var(--faint);
+}
+.flow-plan-task {
+  margin: 8px 0;
+  padding: 7px 9px;
+  border-left: 2px solid #7c3aed;
+  background: rgba(124, 58, 237, 0.05);
+  border-radius: 0 6px 6px 0;
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 11px;
+}
+.flow-plan-task span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  color: #7c3aed;
+  margin-bottom: 3px;
+}
+.flow-plan-rationale {
+  margin: 6px 0;
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 11px;
+}
+.flow-plan-rationale span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+  margin-bottom: 2px;
+}
+.flow-plan-rationale.is-warn {
+  color: var(--amber);
+}
+.flow-plan-note {
+  margin: 0 10px 8px;
+  font-size: 10px;
+  line-height: 1.55;
+  color: var(--faint);
+}
+.flow-plan-note code {
+  font-family: var(--mono);
+  color: var(--muted);
+}
+.flow-plan-extra {
+  margin: 6px 10px 8px;
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 6px;
+}
+.flow-plan-extra-head {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  padding: 4px 0;
+  font: inherit;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+}
+.flow-plan-extra-head:hover {
+  color: var(--text);
+}
+.flow-plan-extra-head em {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--faint);
+}
+.flow-plan-extra-list {
+  list-style: none;
+  margin: 4px 0 6px;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+}
+.flow-plan-extra-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(46px, auto) minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 7px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 6px;
+  background: transparent;
+  padding: 4px 7px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+}
+.flow-plan-extra-row:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.flow-plan-extra-row:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.flow-plan-extra-row.is-current {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--text);
+}
+.flow-plan-extra-row code {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.flow-plan-extra-row i {
+  font-style: normal;
+  font-size: 9px;
+  color: var(--faint);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+.flow-plan-extra-row b {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------ */
 /* One-click demo player (一键演示完整流程) — chrome over a replayed   */
 /* transcript. Gate state is amber (human gate), done is teal.         */
 /* ------------------------------------------------------------------ */
@@ -6962,6 +7234,13 @@ select.control {
 }
 .flow-controls.is-player .flow-state {
   margin-left: 0;
+}
+/* Amber means "waiting on a human" everywhere else in this app; a plain count
+   hint must not borrow that colour. */
+.flow-state.is-hint {
+  color: var(--muted);
+  background: var(--surface);
+  border-color: var(--line-strong);
 }
 
 /* ------------------------------------------------------------------ */

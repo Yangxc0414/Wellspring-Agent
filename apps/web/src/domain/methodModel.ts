@@ -118,9 +118,10 @@ export async function loadMethodRegistry(): Promise<MethodRegistryData | null> {
 }
 
 /**
- * Which method profile each seeded session demonstrates. Declared here (not on
- * the task) because the demo sessions are frontend constants; a runtime task
- * should carry its method id in task metadata and bypass this map.
+ * 种子会话 → 方法 id 的兜底表（design/169）。任务自己声明的 `methodId` 才是
+ * 第一来源；这张表只为「本地持久化的旧工作区」保留——那些快照写于 Task 增加
+ * methodId 之前，若不兜底，刷新页面后 RESEARCH FLOW 会突然退回通用模板。
+ * 新任务不应再登记到这里。
  */
 export const SESSION_METHOD: Record<string, string> = {
   "ese-ms-20261118-03": "repository-mining",
@@ -128,13 +129,29 @@ export const SESSION_METHOD: Record<string, string> = {
   "full-chain-demo": "controlled-experiment"
 };
 
+export function methodById(
+  id: string | undefined,
+  registry: MethodRegistryData | null
+): MethodRegistryMethod | null {
+  if (!id || !registry) return null;
+  return registry.methods.find((method) => method.id === id) ?? null;
+}
+
+/** 方法解析：任务自声明优先，种子兜底表次之。 */
+export function methodForTask(
+  task: { id: string; methodId?: string } | undefined,
+  registry: MethodRegistryData | null
+): MethodRegistryMethod | null {
+  if (!task) return null;
+  return methodById(task.methodId ?? SESSION_METHOD[task.id], registry);
+}
+
 export function methodForSession(
   taskId: string | undefined,
   registry: MethodRegistryData | null
 ): MethodRegistryMethod | null {
-  if (!taskId || !registry) return null;
-  const id = SESSION_METHOD[taskId];
-  return id ? (registry.methods.find((m) => m.id === id) ?? null) : null;
+  if (!taskId) return null;
+  return methodById(SESSION_METHOD[taskId], registry);
 }
 
 /** fit map for the matrix: stage id -> the method declares activity there. */

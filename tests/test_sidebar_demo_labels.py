@@ -21,8 +21,11 @@ class SidebarDemoLabelsTest(unittest.TestCase):
             self.assertIn(key, SEED)
 
     def test_ese_label_marks_it_as_a_real_signed_pending_study(self):
-        # the ESE session is real data, still awaiting signature — the label must say so
-        self.assertIn('label: "真实研究·待签"', SEED)
+        # the ESE session is real data, still awaiting signature — the label must say so.
+        # 2026-11-21: the long label was renamed to "闭环回放" (it replays a finished
+        # study); the "待签" fact moved to `short`, which is what the sidebar row shows.
+        self.assertIn('label: "真实研究·闭环回放"', SEED)
+        self.assertIn('short: "闭环·待签"', SEED)
         self.assertIn("ESE-MS-20261118-03", SEED)
         self.assertIn("5132 提交", SEED)
         self.assertIn("click 方向反转", SEED)
