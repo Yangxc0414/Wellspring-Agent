@@ -1,7 +1,7 @@
 {
   "schema_version": "workspace-0.1",
   "source": "modules/*/SPEC.md",
-  "generated_at": "2026-11-18T14:40:50+00:00",
+  "generated_at": "2026-11-21T11:07:16+00:00",
   "count": 32,
   "agents": [
     {
@@ -243,7 +243,7 @@
       "id": "run",
       "name": "S5 执行与证据",
       "stage": "S5",
-      "version": "0.8.0",
+      "version": "0.9.0",
       "status": "draft",
       "owner": "research-agent",
       "outputs": [
@@ -980,7 +980,7 @@
       "id": "method-registry",
       "name": "研究方法注册表（阶段 × 方法）",
       "stage": "META",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "draft",
       "owner": "research-agent",
       "outputs": [
@@ -988,7 +988,8 @@
         "MethodDefinition",
         "StageMethodMatrix",
         "TaskCard",
-        "MethodCheckReport"
+        "MethodCheckReport",
+        "PipelineStagePlan  # advisory projection: composition slots -> pipeline stage names"
       ],
       "tools": [
         "method.list",

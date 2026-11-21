@@ -709,3 +709,24 @@
     display: none;
   }
 }
+
+/* Demo player chrome stacks on narrow screens: story switch and controls wrap
+   below the narration instead of competing with it in one row. */
+@media (max-width: 900px) {
+  .demo-bar-main {
+    flex-wrap: wrap;
+  }
+  .demo-bar-stage {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .demo-bar-actions {
+    margin-left: auto;
+  }
+  .welcome-demo-row {
+    grid-template-columns: 1fr;
+  }
+  .demo-trigger span {
+    display: none;
+  }
+}

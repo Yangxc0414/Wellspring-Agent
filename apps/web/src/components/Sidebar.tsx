@@ -203,6 +203,15 @@ export function Sidebar() {
           <div className="quick-grid">
             <button
               type="button"
+              className="quick-tile is-demo"
+              onClick={() => actions.startDemoPlayer()}
+              title="一键演示完整流程：逐步回放教学版九阶段（可暂停/步进/切真实闭环）"
+            >
+              <span className="quick-tile-icon is-play"><Icon name="play" size={13} /></span>
+              <span>完整演示</span>
+            </button>
+            <button
+              type="button"
               className="quick-tile"
               onClick={() => void handleAutomation()}
               title="自动化：欢迎页预填全自动；会话内生成后端运行计划并打开 RUN"

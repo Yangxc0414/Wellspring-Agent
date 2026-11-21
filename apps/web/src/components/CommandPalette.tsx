@@ -45,6 +45,9 @@ export function CommandPalette() {
   const items = useMemo<PaletteItem[]>(() => {
     if (welcomeOpen) {
       return [
+        { label: "播放完整闭环演示", hint: "DEMO", keywords: "demo 演示 一键 完整流程 replay", icon: "play", run: () => actions.startDemoPlayer("teaching") },
+        { label: "播放真实闭环回放（Iris）", hint: "DEMO", keywords: "demo 演示 真实 闭环 iris replay", icon: "shield", run: () => actions.startDemoPlayer("real") },
+        { label: "播放 ESE 闭环回放（仓库挖掘）", hint: "DEMO", keywords: "demo 演示 ese 闭环 仓库 mining replay", icon: "branch", run: () => actions.startDemoPlayer("ese") },
         { label: "Skills / 技能", hint: "SKILLS", keywords: "skill 技能 调用 创建", icon: "spark", run: () => actions.openOverlay("skillsOpen") },
         { label: "工作区文件", hint: "FILES", keywords: "files folder workspace 文件 文件夹 项目说明", icon: "folder", run: () => actions.openFiles() },
         { label: "表单新建任务", hint: "FORM", keywords: "new task form 任务 表单", icon: "plus", run: () => actions.openOverlay("newTaskOpen") },
@@ -86,6 +89,9 @@ export function CommandPalette() {
           { label: "单步执行", hint: "STEP", keywords: "step 单步", icon: "step", run: actions.stepAuto }
         ];
     return [
+      { label: "播放完整闭环演示", hint: "DEMO", keywords: "demo 演示 一键 完整流程 replay", icon: "play", run: () => actions.startDemoPlayer("teaching") },
+      { label: "播放真实闭环回放（Iris）", hint: "DEMO", keywords: "demo 演示 真实 闭环 iris replay", icon: "shield", run: () => actions.startDemoPlayer("real") },
+      { label: "播放 ESE 闭环回放（仓库挖掘）", hint: "DEMO", keywords: "demo 演示 ese 闭环 仓库 mining replay", icon: "branch", run: () => actions.startDemoPlayer("ese") },
       { label: "新会话", hint: "HOME", keywords: "new session home 新会话", icon: "plus", run: () => actions.openWelcome() },
       { label: "表单新建任务", hint: "FORM", keywords: "new task form 任务 表单", icon: "tasks", run: () => actions.openOverlay("newTaskOpen") },
       ...(autoRunning ? [] : manualItems),

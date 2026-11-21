@@ -192,6 +192,30 @@
   color: #fff;
 }
 
+/* One-click demo trigger: the group-meeting entry point, placed before the
+   runtime badge so it is the first actionable control in the top bar. */
+.demo-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: calc(12px * var(--font-scale, 1));
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.demo-trigger:hover {
+  background: var(--accent-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+}
+
 .mobile-tasks {
   display: none;
 }
@@ -2178,6 +2202,72 @@
   text-align: center;
 }
 
+/* One-click demo row: three buttons that actually start playback (unlike the
+   fill-only prompt chips below them). */
+.welcome-demo-row {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 6px;
+}
+
+.welcome-demo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: calc(12px * var(--font-scale, 1));
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.welcome-demo-btn small {
+  font-weight: 400;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.welcome-demo-btn:hover {
+  background: var(--accent-deep);
+  transform: translateY(-1px);
+}
+
+.welcome-demo-btn.is-real {
+  border-color: rgba(15, 138, 158, 0.35);
+  background: var(--teal-dim);
+  color: var(--teal);
+}
+
+.welcome-demo-btn.is-real small {
+  color: var(--teal);
+  opacity: 0.8;
+}
+
+.welcome-demo-btn.is-real:hover {
+  background: rgba(15, 138, 158, 0.16);
+}
+
+.welcome-demo-btn.is-ese {
+  border-color: rgba(124, 58, 237, 0.3);
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+}
+
+.welcome-demo-btn.is-ese small {
+  color: #7c3aed;
+  opacity: 0.8;
+}
+
+.welcome-demo-btn.is-ese:hover {
+  background: rgba(124, 58, 237, 0.16);
+}
+
 .welcome-prompts {
   margin-top: 6px;
   display: grid;
@@ -3358,7 +3448,9 @@
 
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* 2x2: 完整演示 / 自动化 / 技能 / 插件 — 4 tiles in one column of 2 rows
+     keeps the 10px labels readable in the narrow sidebar. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 5px;
 }
 
@@ -3525,4 +3617,16 @@
 
 .profile-icon:hover {
   border-color: var(--line);
+}
+
+/* Demo quick-tile: same play glyph as 自动化 but on the accent colour, so the
+   group-meeting entry reads as the primary tile at a glance. */
+.quick-tile.is-demo .quick-tile-icon.is-play {
+  background: var(--accent);
+  color: #fff;
+}
+
+.quick-tile.is-demo {
+  border-color: rgba(37, 99, 235, 0.3);
+  color: var(--accent-deep);
 }

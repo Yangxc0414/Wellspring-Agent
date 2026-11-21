@@ -10,7 +10,8 @@
  *   - nothing 404s and no JS error fires;
  *   - the thread's "回放 N/9" equals the RUN panel's "N/9 stages";
  *   - a task with a run record does not show "not run / not sealed" in EVIDENCE;
- *   - the teaching panel says it is a generic template on non-full-chain tasks.
+ *   - the flow panel switches to the session's own stage path when the
+ *     transcript carries stage tags, and declares the generic template otherwise.
  *
  * Usage (after `npm run build:site`):
  *   node scripts/check_task_readiness.mjs
@@ -157,7 +158,19 @@ server.listen(0, "127.0.0.1", async () => {
 
     await openPanel(page, "演示流程");
     const banner = (await page.locator(".flow-banner").innerText().catch(() => "")).replace(/\s+/g, " ");
-    if (title !== "完整闭环：从检索到自改进" && !/通用模板（非当前任务）/.test(banner)) {
+    // design/143: the flow panel is SESSION PATH whenever the transcript carries
+    // stage tags (it then tells this session's own story, with jump targets), and
+    // must declare itself a generic template only on untagged tasks.
+    const threadStageTags = await page.locator("#thread [data-stage]").count();
+    if (threadStageTags > 0) {
+      if (!/SESSION PATH|会话阶段路径/.test(banner)) {
+        fail(title, "flow panel does not switch to the session path on a stage-tagged transcript");
+      }
+      const sessionStages = await page.locator(".flow-stage").count();
+      if (sessionStages < 2) {
+        fail(title, `session path renders too few stages: ${sessionStages}`);
+      }
+    } else if (!/通用模板（非当前任务）/.test(banner)) {
       fail(title, "teaching panel does not declare it is a generic template");
     }
 

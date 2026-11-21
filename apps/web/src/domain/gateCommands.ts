@@ -25,15 +25,31 @@ function orPlaceholder(value: string | undefined, placeholder: string): string {
   return trimmed || placeholder;
 }
 
+/** G1 hypothesis convergence — `research_agent flow g1` writes g1-decision.json. */
+export function g1DecisionCommand(input: GateCommandInput = {}, ideaId?: string, humanReason?: string): string {
+  const dir = orPlaceholder(input.projectDir, "<output-dir>");
+  const ideaFile = orPlaceholder(input.demoFile, `${dir}/idea.json`);
+  const id = orPlaceholder(ideaId, "<IDEA-ID>");
+  const reason = orPlaceholder(humanReason, "<为什么收敛到这个候选>");
+  return [
+    "python -m research_agent flow g1 \\",
+    `  --idea-file ${ideaFile} \\`,
+    `  --idea-id ${id} \\`,
+    `  --human-reason "${reason}" \\`,
+    `  --output-dir ${dir}`
+  ].join("\n");
+}
+
 /** Q0/S5b claim signature — `research_agent run claim`. */
-export function claimSignCommand(input: GateCommandInput = {}): string {
+export function claimSignCommand(input: GateCommandInput = {}, humanReason?: string): string {
   const runDir = orPlaceholder(input.runDir, "<run-dir>");
+  const reason = orPlaceholder(humanReason, "已核对 EA 与指标");
   const lines = [
     "python -m research_agent run claim \\",
     `  --capsule ${runDir}/run-capsule.json \\`,
     `  --ea ${runDir}/ea.json \\`,
     '  --statement "<claim-draft.json 中的 statement>" \\',
-    '  --human-reason "已核对 EA 与指标" \\'
+    `  --human-reason "${reason}" \\`
   ];
   if (input.scope) {
     lines.push(`  --scope "${orPlaceholder(input.scope, "<S5/scope>")}" \\`);
@@ -43,16 +59,17 @@ export function claimSignCommand(input: GateCommandInput = {}): string {
 }
 
 /** G2 protocol freeze — `research_agent protocol freeze` (design must exist). */
-export function protocolFreezeCommand(input: GateCommandInput = {}): string {
+export function protocolFreezeCommand(input: GateCommandInput = {}, humanReason?: string): string {
   const project = orPlaceholder(input.projectDir, "<project>");
   const runDir = orPlaceholder(input.runDir, "<run-dir>");
   const experimentId = orPlaceholder(input.experimentId, "<EXP-ID>");
+  const reason = orPlaceholder(humanReason, "已核对 baseline / 主指标 / seeds");
   return [
     "python -m research_agent protocol freeze \\",
     `  --design ${project}/experiments/${experimentId}/experiment.json \\`,
     `  --capsule ${runDir}/run-capsule.json \\`,
     '  --limitation "本次适用范围与已知局限" \\',
-    '  --human-reason "已核对 baseline / 主指标 / seeds" \\',
+    `  --human-reason "${reason}" \\`,
     `  --output-dir ${project}/protocol`
   ].join("\n");
 }
@@ -68,18 +85,19 @@ export function experimentApproveCommands(input: GateCommandInput = {}): string[
 }
 
 /** G5 closure + export signature — `research_agent closure sign`. */
-export function closureSignCommand(input: GateCommandInput = {}): string {
+export function closureSignCommand(input: GateCommandInput = {}, humanReason?: string): string {
   const project = orPlaceholder(input.projectDir, "<project>");
   const runDir = orPlaceholder(input.runDir, "<run-dir>");
   const report = orPlaceholder(input.reportFile, `${project}/closure/<CLOSURE-ID>/closure-report.json`);
   const demo = orPlaceholder(input.demoFile, `${project}/closure/<CLOSURE-ID>/demo.json`);
   const claim = orPlaceholder(input.claimFile, `${runDir}/claim/claim.json`);
+  const reason = orPlaceholder(humanReason, "已复核 closure 与导出清单");
   return [
     "python -m research_agent closure sign \\",
     `  --report ${report} \\`,
     `  --demo ${demo} \\`,
     `  --claim ${claim} \\`,
-    '  --human-reason "已复核 closure 与导出清单" \\',
+    `  --human-reason "${reason}" \\`,
     `  --output-dir ${project}/closure-signature`
   ].join("\n");
 }

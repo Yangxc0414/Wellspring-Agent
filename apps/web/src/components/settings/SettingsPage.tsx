@@ -25,6 +25,7 @@ import {
   EvolutionSettingsPage,
   GeneralSettings,
   GuideSettingsPage,
+  MethodModelSettingsPage,
   ModelSettingsPage,
   PluginsSettingsPage
 } from "./SettingsSections";
@@ -57,7 +58,8 @@ const NAV_GROUPS: Array<{
     items: [
       { id: "runtime", label: "执行环境", icon: "globe" },
       { id: "usage", label: "使用统计", icon: "chart" },
-      { id: "lineage", label: "证据沿袭", icon: "branch" }
+      { id: "lineage", label: "证据沿袭", icon: "branch" },
+      { id: "methodModel", label: "方法模型", icon: "compass" }
     ]
   },
   {
@@ -94,6 +96,7 @@ const SECTION_CAPABILITY: Record<SettingsSection, CapabilityLevel> = {
   runtime: "runtime",
   usage: "real",
   lineage: "demo",
+  methodModel: "real",
   archive: "real",
   data: "real",
   guide: "demo",
@@ -141,6 +144,8 @@ function SectionContent({ section }: { section: SettingsSection }) {
       return <UsageStats />;
     case "lineage":
       return <LineagePage />;
+    case "methodModel":
+      return <MethodModelSettingsPage />;
     case "archive":
       return <ArchiveSettingsPage />;
     case "data":

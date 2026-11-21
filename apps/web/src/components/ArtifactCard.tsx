@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { Card } from "../domain/types";
 import { runtimeUrl } from "../adapters/runtimeApi";
 import { experimentApproveCommands, protocolFreezeCommand } from "../domain/gateCommands";
+import { gateIdForCard } from "../domain/gateContracts";
 import { claimSignatureLabel } from "../domain/claimSignature";
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { usePreviewStore } from "../state/previewStore";
@@ -152,9 +153,16 @@ export function ArtifactCard({ card }: { card: Card }) {
 
   if (card.type === "protocol") {
     const frozen = task?.protocolFrozen ?? false;
+    // The frozen state must follow the task's replay basis: a real run's
+    // protocol card is a real frozen artifact, not "演示已推进" (design/137's
+    // mislabeling class), and a genuinely frozen protocol is not 待人工冻结.
+    const realBasis = task?.replay?.basis === "real" || task?.replay?.basis === "fixture";
     return (
       <article className="artifact">
-        <CardHead label="PROTOCOL / S4" meta={frozen ? "DRAFT · 演示已推进" : "DRAFT"} />
+        <CardHead
+          label="PROTOCOL / S4"
+          meta={frozen ? (realBasis ? "FROZEN · 真实产物" : "FROZEN · 演示推进") : "DRAFT"}
+        />
         <p className="artifact-lede">{card.hypothesis}</p>
         <dl className="artifact-kv">
           <dt>Baseline</dt>
@@ -166,10 +174,21 @@ export function ArtifactCard({ card }: { card: Card }) {
           <dt>对照</dt>
           <dd>{card.controls.join(" · ")}</dd>
         </dl>
-        <div className="artifact-status-row">
-          <span className="badge warn">待人工冻结</span>
-          <span>G2 由人工在终端冻结；冻结后不得改写主指标、对照与 seeds</span>
-        </div>
+        {frozen ? (
+          <div className="artifact-status-row">
+            <span className="badge ok">已冻结</span>
+            <span>
+              {realBasis
+                ? "G2 已通过（真实产物，capsule 绑定 protocol sha256）；主指标、对照与 seeds 不得改写"
+                : "G2 已按演示推进冻结；主指标、对照与 seeds 不得改写，改协议须重新走 G2"}
+            </span>
+          </div>
+        ) : (
+          <div className="artifact-status-row">
+            <span className="badge warn">待人工冻结</span>
+            <span>G2 由人工在终端冻结；冻结后不得改写主指标、对照与 seeds</span>
+          </div>
+        )}
         <Actions>
           <ActionButton variant="primary" onClick={() => setGateRevealed((open) => !open)} disabled={autoBusy}>
             {gateRevealed ? "收起 G2 命令" : "G2 人工冻结命令"}
@@ -246,9 +265,44 @@ export function ArtifactCard({ card }: { card: Card }) {
     const claim = task?.evidence.find((item) => item.kind === "claim");
     const claimLabel = claimSignatureLabel(claim);
     const passed = claimLabel.state === "signed-cli" || claimLabel.state === "signed-import";
+    // Each gate card routes to ITS OWN human gate. Every card used to open the
+    // claim panel — a G1 card asking the viewer to "签署 claim" contradicted the
+    // backend, where G1 converges candidates and S5b signs claims.
+    const dialogGate = gateIdForCard(card.gate);
+    const isClaimGate = dialogGate === "S5b" || dialogGate === null;
+    const openOwnGate = () => {
+      if (dialogGate && dialogGate !== "S5b") actions.openGateDialog(dialogGate);
+      else actions.signClaim();
+    };
+    const primaryLabel = isClaimGate
+      ? claimLabel.state === "unsigned" || claimLabel.state === "missing"
+        ? "签署 claim · 人工门"
+        : "查看 claim 签署来源"
+      : dialogGate === "G1"
+        ? "G1 收敛候选 · 人工门"
+        : dialogGate === "G2"
+          ? "G2 冻结协议 · 人工门"
+          : "G5 闭合签署 · 人工门";
+    // The body must follow the card's own narrative (card.reason), not the claim
+    // status: a teaching S5b card above a sealed EA used to print "还没有 claim
+    // draft；先跑出 RunCapsule / EA" — contradicting the very message above it.
+    const gateStatusLabels: Record<string, string> = {
+      needs_human: "待人签",
+      blocked: "阻塞",
+      pass: "PASS",
+      not_started: "未开始"
+    };
+    const bodyText = claimLabel.demo
+      ? claimLabel.detail
+      : (card.reason ?? claimLabel.detail);
+    const metaText = claimLabel.demo
+      ? claimLabel.badge
+      : claim
+        ? claimLabel.badge
+        : (gateStatusLabels[card.status] ?? claimLabel.badge);
     return (
       <article className={`artifact gate-card${passed ? " is-pass" : ""}${claimLabel.demo ? " is-demo" : ""}`}>
-        <CardHead label={card.gate} meta={claimLabel.badge} />
+        <CardHead label={card.gate} meta={metaText} />
         <div className="gate-title">
           <span className="gate-icon">
             <Icon name={passed ? "check" : "lock"} size={16} />
@@ -261,14 +315,12 @@ export function ArtifactCard({ card }: { card: Card }) {
                   ? "claim 已签署（来源见证据面板）"
                   : card.title}
             </b>
-            <p>{claimLabel.detail}</p>
+            <p>{bodyText}</p>
           </div>
         </div>
         <Actions>
-          <ActionButton variant="primary" onClick={actions.signClaim}>
-            {claimLabel.state === "unsigned" || claimLabel.state === "missing"
-              ? "签署 claim · 人工门"
-              : "查看 claim 签署来源"}
+          <ActionButton variant="primary" onClick={openOwnGate}>
+            {primaryLabel}
           </ActionButton>
           <ActionButton onClick={() => actions.setContextTab("evidence")}>查看证据链</ActionButton>
         </Actions>

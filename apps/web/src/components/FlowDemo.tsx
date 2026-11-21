@@ -1,14 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AUTO_STAGE_CATALOG } from "../domain/catalog";
+import { demoStagePlan, stageLabel } from "../domain/demoPlayer";
+import { methodForSession, loadMethodRegistry, type MethodRegistryData } from "../domain/methodModel";
+import { STAGE_MODULE_CONTRACTS } from "../domain/gateContracts";
+import { humanTurns, turnsForStage } from "../domain/humanTurns";
 import { useWorkspaceStore } from "../state/workspaceStore";
+
 
 /**
  * Front-end walkthrough of the whole research flow, S1 survey -> META.
  *
- * This is a DEMO state machine: everything is local React state, nothing is
- * written to disk, and no signature.json is produced. The "模拟人签" button
- * only replays what a completed chain *looks like*; the real signature is
- * still created by the local CLI. Keeping it in memory (reset on refresh) is
- * deliberate so a demo can never be mistaken for a signed result.
+ * Two modes:
+ *  - SESSION PATH (default whenever the current transcript carries stage tags):
+ *    the stage list is derived from the session's own messages, so every node
+ *    click jumps to that stage's real place in the thread and the demo player
+ *    highlights the current stage for ANY storyline. No template numbers are
+ *    shown here — catalog `output` strings would mislabel other sessions' runs.
+ *  - GENERIC TEMPLATE (tasks without stage tags): the manual teaching machine
+ *    with 推进下一步 / 模拟人签. Everything is local React state, nothing is
+ *    written to disk, no signature.json is produced; the demo signature lives
+ *    in memory so it can never be mistaken for a signed result.
  */
 
 type Stage = {
@@ -124,20 +135,70 @@ const SLOTS = [
   { id: "S12.limitations", label: "Limitations", need: 99 }
 ];
 
+/** Which human gate sits inside a stage, for the session-path badges. */
+const GATE_FOR_STAGE: Record<string, string> = {
+  "S2–S3": "G1",
+  S4: "G2",
+  S5b: "S5b",
+  "S13–S16": "G5"
+};
+
+/**
+ * The backend contract that owns this stage — module id plus the hard
+ * invariants it enforces. Data lives in gateContracts.STAGE_MODULE_CONTRACTS
+ * (transcribed from AGENTS.md §5 and the modules SPEC files), so the panel
+ * shows how the system REALLY constrains each stage, not just what the demo
+ * does. Unknown stage ids render nothing (no invented contracts).
+ */
+function StageContract({ stageId }: { stageId: string }) {
+  const mc = STAGE_MODULE_CONTRACTS[stageId];
+  if (!mc) return null;
+  return (
+    <div className="flow-module-contract">
+      <span>后端契约 · {mc.module}</span>
+      <ul>
+        {mc.invariants.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function FlowDemo() {
-  const [step, setStep] = useState(0);
-  const [signed, setSigned] = useState(false);
-  const [open, setOpen] = useState<number | null>(0);
+  const [localStep, setLocalStep] = useState(0);
+  const [localSigned, setLocalSigned] = useState(false);
+  const [localOpen, setOpen] = useState<number | null>(0);
   const setUI = useWorkspaceStore((state) => state.actions.setUI);
   const notify = useWorkspaceStore((state) => state.actions.notify);
+  const actions = useWorkspaceStore((state) => state.actions);
   const currentMessages = useWorkspaceStore(
     (state) => state.tasks.find((t) => t.id === state.selectedTaskId)?.messages ?? []
   );
   const selectedTaskId = useWorkspaceStore((state) => state.selectedTaskId);
-  // This panel is a generic teaching walkthrough of the nine-stage template. It
-  // is only the *same story* as the thread for the full-chain demo; on any other
-  // task it would silently tell the wrong story, so say so.
-  const isGenericReplay = selectedTaskId !== "full-chain-demo";
+  const demoPlayer = useWorkspaceStore((state) => state.ui.demoPlayer);
+  const allTurns = humanTurns(currentMessages);
+
+  // SESSION PATH: stage tags on this transcript define the list, so the panel
+  // tells THIS session's story and every node has a real jump target.
+  const sessionStageIds = demoStagePlan(currentMessages);
+  const sessionMode = sessionStageIds.length > 0;
+  const playerActive = Boolean(
+    demoPlayer && demoPlayer.taskId === selectedTaskId && !demoPlayer.finished
+  );
+  const playerStageId = playerActive ? (demoPlayer?.stageId ?? null) : null;
+  // Which method profile this session demonstrates (from the registry snapshot).
+  const [registry, setRegistry] = useState<MethodRegistryData | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void loadMethodRegistry().then((data) => {
+      if (!cancelled) setRegistry(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const sessionMethod = methodForSession(selectedTaskId, registry);
 
   // Clicking a flow node expands its detail AND jumps the conversation thread
   // to the first message tagged with that stage, so a presenter can point at a
@@ -145,22 +206,149 @@ export function FlowDemo() {
   const focusInThread = (stageId: string) => {
     const hasStage = currentMessages.some((m) => m.stage === stageId);
     if (!hasStage) {
-      notify(`当前会话没有「${stageId}」的定位消息；切到「完整闭环」会话可体验阶段↔会话联动`);
+      notify(`当前会话没有「${stageId}」的定位消息`);
       return;
     }
     setUI({ focusStage: { id: stageId, tick: Date.now() } });
   };
 
+  if (sessionMode) {
+    return (
+      <div className="context-stack flow-demo">
+        <div className="flow-banner">
+          <div className="flow-banner-title">
+            <span className="flow-dot" /> 会话阶段路径 · SESSION PATH
+          </div>
+          <p>
+            这一列从<b>当前会话自己的 stage 标签</b>派生——不是通用模板，讲的就是这条任务走过的路。
+            点击任意节点，左侧会话跳到该阶段对应的消息；播放演示时，当前阶段自动点亮展开。
+          </p>
+        </div>
+
+          <div className="flow-controls is-player">
+          <span className="flow-state">
+            {playerActive && playerStageId
+              ? `播放中 · 当前 ${playerStageId} ${stageLabel(playerStageId)}`
+              : `${sessionStageIds.length} 个阶段 · 点击节点跳到会话对应位置`}
+          </span>
+          {sessionMethod && (
+            <span className="flow-state is-method" title={`该方法的方法学协议字段与能力边界见 设置 → 方法模型`}>
+              方法 · {sessionMethod.name_zh}
+            </span>
+          )}
+        </div>
+
+        <section className="context-card">
+          <div className="card-label">
+            <span>RESEARCH FLOW</span>
+            <em>SESSION PATH · {sessionStageIds.length} 阶段</em>
+          </div>
+          <ol className="flow-stages">
+            {sessionStageIds.map((stageId, i) => {
+              const meta = AUTO_STAGE_CATALOG.find((item) => item.id === stageId);
+              const gate = GATE_FOR_STAGE[stageId];
+              const isCurrent = playerStageId === stageId;
+              const expanded = localOpen === i || isCurrent;
+              const stageTurns = turnsForStage(allTurns, stageId);
+              return (
+                <li
+                  key={stageId}
+                  className={`flow-stage is-done${expanded ? " is-open" : ""}${gate ? " is-human" : ""}${isCurrent ? " is-current" : ""}`}
+                >
+                  <button
+                    type="button"
+                    className="flow-stage-head"
+                    onClick={() => {
+                      setOpen(expanded && !isCurrent ? null : i);
+                      focusInThread(stageId);
+                    }}
+                    aria-expanded={expanded}
+                    title="定位到该阶段在会话中对应的消息"
+                  >
+                    <span className="flow-stage-mark">✓</span>
+                    <span className="flow-stage-id">{stageId}</span>
+                    <span className="flow-stage-label">{stageLabel(stageId)}</span>
+                    {stageTurns.length > 0 && <span className="flow-stage-human">人×{stageTurns.length}</span>}
+                    {gate ? <span className="flow-stage-gate">{gate}</span> : null}
+                    <span
+                      className="flow-stage-jump"
+                      role="button"
+                      tabIndex={0}
+                      title="跳到会话中对应消息"
+                      aria-label={`跳到会话中 ${stageId} ${stageLabel(stageId)} 对应的消息`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        focusInThread(stageId);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          focusInThread(stageId);
+                        }
+                      }}
+                    >
+                      ↗
+                    </span>
+                  </button>
+                  {expanded ? (
+                    <div className="flow-stage-body">
+                      {stageTurns.length > 0 && (
+                        <div className="flow-human-turns">
+                          <span>人的表述</span>
+                          {stageTurns.map((turn) => (
+                            <button
+                              type="button"
+                              key={turn.id}
+                              className="flow-human-turn"
+                              onClick={() => actions.focusMessage(turn.id)}
+                              title="定位到会话中这条发言"
+                            >
+                              <i>{turn.at}</i>
+                              {turn.text.length > 80 ? `${turn.text.slice(0, 80)}…` : turn.text}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {meta?.cmd && (
+                        <div className="flow-kv">
+                          <span>命令</span>
+                          <code>{meta.cmd}</code>
+                        </div>
+                      )}
+                      <StageContract stageId={stageId} />
+                    </div>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
+        <div className="flow-boundary">
+          <b>边界：</b>会话路径只描述这条任务的叙事走过了哪些阶段（含如实呈现的未产出/locked 段）；
+          各阶段的治理状态——门禁、证据、签署——以 BRIEF / RUN / EVIDENCE 面板与左侧会话为准。
+        </div>
+      </div>
+    );
+  }
+
+  // Generic template: manual teaching machine for transcripts without stage tags.
+  const step = localStep;
+  const signed = localSigned;
+  const open = localOpen;
+  const isGenericReplay = true;
+
   const signDemo = () => {
     if (step < SIGN_STEP || signed) return;
-    setSigned(true);
-    setStep(8); // writing + closure done in the replay
+    setLocalSigned(true);
+    setLocalStep(8); // writing + closure done in the replay
     setOpen(7);
   };
 
   const reset = () => {
-    setStep(0);
-    setSigned(false);
+    setLocalStep(0);
+    setLocalSigned(false);
     setOpen(0);
   };
 
@@ -179,17 +367,10 @@ export function FlowDemo() {
           从文献检索一路走到结论签署与自改进。这是<b>前端推演</b>：所有状态只在页面内存中，「模拟人签」不会生成真实
           signature.json；真实签名仍须在本地 CLI 执行。刷新页面即回到待签。
         </p>
-        {isGenericReplay ? (
-          <p className="flow-banner-hint is-warn">
-            当前选中的不是「完整闭环」任务：这里演的是<b>通用九阶段模板</b>，不是这条任务的流程。
-            这条任务的真实进度与读数，请看左侧会话和 BRIEF / RUN / EVIDENCE 面板。
-          </p>
-        ) : (
-          <p className="flow-banner-hint">
-            和左侧会话的分工：<b>左侧是"已走完整场"的回放</b>（可以直接读每一轮结论）；<b>这里是从第 0 步亲手推一遍</b>的教学版——所以进度各自独立，按「推进下一步」走给你看即可。
-            每步写的产物数字是<b>教学示例</b>，不是当前任务的真实读数；真实读数以左侧对话为准。
-          </p>
-        )}
+        <p className="flow-banner-hint is-warn">
+          当前会话没有阶段标签：这里演的是<b>通用九阶段模板</b>，不是这条任务的流程。
+          这条任务的真实进度与读数，请看左侧会话和 BRIEF / RUN / EVIDENCE 面板。
+        </p>
       </div>
 
       <div className="flow-controls">
@@ -204,7 +385,7 @@ export function FlowDemo() {
             // the previous stage, so the presenter could never point at the
             // current one.
             const next = step + 1;
-            setStep(next);
+            setLocalStep(next);
             setOpen(Math.min(next, STAGES.length - 1));
           }}
         >
@@ -293,6 +474,7 @@ export function FlowDemo() {
                     <span>下一步义务</span>
                     <b>{stage.obligation}</b>
                   </div>
+                  <StageContract stageId={stage.id} />
                 </div>
               ) : null}
             </li>

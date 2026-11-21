@@ -12,6 +12,22 @@ import {
   modelProfile,
   thinkingLabel
 } from "../../domain/catalog";
+import { compareEmpiricalTasks, compareMethodProfiles } from "../../domain/taskCompare";
+import {
+  blockerCount,
+  evidenceProfileFor,
+  fitMap,
+  loadMethodRegistry,
+  stagePlanFor,
+  tagAnalysis,
+  type MethodRegistryData
+} from "../../domain/methodModel";
+import {
+  COMPOSITIONS,
+  COMPOSITION_ORDER,
+  validateComposition
+} from "../../domain/composition";
+import { ELEMENTS, isHumanElement } from "../../domain/elementGraph";
 import { siteHref } from "../../domain/links";
 import { folderStorage, folderStorageFileName } from "../../adapters/folderStorage";
 import type { ModelProfile } from "../../domain/types";
@@ -638,6 +654,15 @@ export function GuideSettingsPage() {
 
   const steps = [
     {
+      title: "一键演示完整流程",
+      text: "回放教学版九阶段（S1→META）：自动逐步揭示、S5b 停在人工门、可切真实闭环版；不调用模型、不写盘、不生成签名。",
+      action: "播放演示",
+      run: () => {
+        actions.closeSettings();
+        actions.startDemoPlayer("teaching");
+      }
+    },
+    {
       title: "新建一个任务",
       text: "命名目标并选择工作区；所有任务都会出现在左侧工作区树。",
       action: "新建任务",
@@ -725,6 +750,648 @@ export function GuideSettingsPage() {
         ))}
       </div>
       <p className="settings-inline-note">引导步骤使用本地演示状态；真实 pipeline 请用 /live 或 RUN 面板的「运行任务」。人工门只在本地 CLI 完成，浏览器不会代为签署。</p>
+    </div>
+  );
+}
+
+/**
+ * 方法模型（design/149）： ten governance slots × nine research methods, from
+ * the method registry EXPORTED AS DATA (workspace export -> method-registry.json).
+ * This page renders the 共性/差异 split the thesis asks for: the slots and their
+ * governance never move; what changes per method is where it fits, which
+ * protocol fields it must freeze, and what it cannot support.
+ */
+export function MethodModelSettingsPage() {
+  const tasks = useWorkspaceStore((state) => state.tasks);
+  const [registry, setRegistry] = useState<MethodRegistryData | null>(null);
+  const [missing, setMissing] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  // design/159: 任务卡矩阵视图 — the advisor's 阶段×方法 two-dimensional model
+  // rendered as data (cross cells = 方法论约束下的阶段性任务 from stage_tasks).
+  const [taskMatrixView, setTaskMatrixView] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadMethodRegistry().then((data) => {
+      if (cancelled) return;
+      if (data) {
+        setRegistry(data);
+        setSelected(data.methods[0]?.id ?? null);
+      } else {
+        setMissing(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (missing) {
+    return (
+      <div className="settings-section-body">
+        <PageHead
+          eyebrow="EVIDENCE / METHOD MODEL"
+          title="方法模型"
+          description="方法注册表快照缺失：运行 python -m research_agent workspace export 重新导出 method-registry.json。"
+        />
+      </div>
+    );
+  }
+  if (!registry) {
+    return (
+      <div className="settings-section-body">
+        <PageHead eyebrow="EVIDENCE / METHOD MODEL" title="方法模型" description="正在载入方法注册表…" />
+      </div>
+    );
+  }
+
+  const active = registry.methods.find((method) => method.id === selected) ?? registry.methods[0];
+  // Cross-task comparison: the same governance slots instantiated by different
+  // empirical tasks (design/150). Derived from each task's own fields.
+  const compareRows = compareEmpiricalTasks(tasks, registry);
+  const methodContrast = compareMethodProfiles(registry);
+  // 标签化梳理 (design/155): the reproducible commonality/difference extraction.
+  const tags = tagAnalysis(registry);
+
+  return (
+    <div className="settings-section-body">
+      <PageHead
+        eyebrow="EVIDENCE / METHOD MODEL"
+        title="方法模型"
+        description="十个治理槽位对所有方法不变；每种方法声明它落在哪些槽位、要冻结哪些协议字段、不能支持什么——模型驱动复用，不为每种方法单设流程。"
+      />
+
+      <div className="settings-callout">
+        <b>注册表边界</b>
+        <p>{registry.boundary}</p>
+      </div>
+
+      <div className="settings-card variance-card">
+        <div className="settings-card-title">变与不变控制表</div>
+        <p className="method-contrast-note" style={{ margin: "0 0 8px" }}>
+          框架不是固定的，也不是无界的——每个维度由谁控制、能变到什么程度，都在这张表上。
+          控制层级：治理语义（代码+SPEC，L3）→ 方法数据（注册表+租约，L2）→ 任务实例（runtime）。
+        </p>
+        <div className="variance-table">
+          <div className="variance-head">
+            <span>维度</span>
+            <span className="is-fixed">不变（治理语义）</span>
+            <span className="is-method">随方法变（注册表数据）</span>
+            <span className="is-content">随内容变（任务实例）</span>
+          </div>
+          <div className="variance-row">
+            <b>治理槽位与门</b>
+            <span>槽位语义与门位置固定</span>
+            <span>方法声明核心槽位（fit）</span>
+            <span>实际走过的槽位</span>
+          </div>
+          <div className="variance-row">
+            <b>证据形态</b>
+            <span>可固定 / 可复算 / 可核查（抽象要求）</span>
+            <span>RunCapsule、应答集、语料快照…（具体形态）</span>
+            <span>本次执行的产物</span>
+          </div>
+          <div className="variance-row">
+            <b>流程顺序</b>
+            <span>端口依赖推导（拓扑）</span>
+            <span>组合接线（验证式 / 探索式）</span>
+            <span>实际执行记录</span>
+          </div>
+          <div className="variance-row">
+            <b>主张</b>
+            <span>claim 三元组（主张+依据+范围）</span>
+            <span>cannot_support 能力边界</span>
+            <span>本次的 statement 与范围</span>
+          </div>
+          <div className="variance-row">
+            <b>自改进</b>
+            <span>租约 + 门 + 人签（治理不变）</span>
+            <span>方法/矩阵/组合的修订提案</span>
+            <span>过程经验与教训</span>
+          </div>
+        </div>
+        <small className="method-contrast-note">
+          每格的控制者不同：治理语义由代码与 SPEC 强制（不可经前端修改）；
+          方法数据经组合提案租约修订（L2）；任务实例由 runtime 产生（L1 只读投影）。
+        </small>
+      </div>
+
+      <div className="settings-card essence-card">
+        <div className="settings-card-title">研究的本质 · 原模型</div>
+        <p className="essence-def">
+          <b>研究是在公共可核查的约束下，把一个问题转成能判别候选答案的证据，再把证据转成经审查、带范围的主张，并积累进公共知识的循环。</b>
+          方法的差异不在步骤多少，而在三个变量：证据<b>类型</b>、证据的<b>判别力</b>、主张的<b>有效范围</b>。
+        </p>
+        <div className="essence-triad">
+          <div className="essence-layer">
+            <b>主张层</b>
+            <span>ClaimRecord：可检验的话 + 依据 + 范围</span>
+          </div>
+          <div className="essence-layer">
+            <b>证据层</b>
+            <span>RunCapsule + EA：受控条件下按方案生产、可复算的制品</span>
+          </div>
+          <div className="essence-layer">
+            <b>审查层</b>
+            <span>人工门 + 评审 + closure + lineage：组织化怀疑的制度化</span>
+          </div>
+        </div>
+        <table className="essence-map">
+          <thead>
+            <tr><th>原模型要素</th><th>系统对象</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>问题</td><td>S0 研究问题 · S1 子查询 · coverage gap</td></tr>
+            <tr><td>已知（文献）</td><td>文献台账 · 跨来源综合矩阵</td></tr>
+            <tr><td>猜想（假设）</td><td>候选假设 CAND/IDEA —— 不是 claim</td></tr>
+            <tr><td>方案（判别设计）</td><td>冻结协议 protocol sha256 · 设计审计</td></tr>
+            <tr><td>证据</td><td>RunCapsule · EA（immutable）</td></tr>
+            <tr><td>推断</td><td>判定/统计（分层、置换） · run contract 边界</td></tr>
+            <tr><td>主张</td><td>ClaimRecord（statement + scope + refs）</td></tr>
+            <tr><td>审查</td><td>人工门 · 评审包 · closure · lineage</td></tr>
+            <tr><td>积累</td><td>记忆/经验 · 自改进候选（知识增量 roadmap）</td></tr>
+          </tbody>
+        </table>
+        <small className="essence-basis">
+          依据：Popper《科学发现的逻辑》（可否证性）；Merton 1942（organized skepticism）；
+          Longino 1990《Science as Social Knowledge》（客观性 = 批判性 discourse）；
+          Creswell《Research Design》（研究设计要素框架）；Easterbrook et al. 2008（按问题选择实证方法，证据类型差异）。
+        </small>
+      </div>
+
+      <div className="settings-card">
+        <div className="settings-card-title">共性槽位（治理不变）</div>
+        <div className="method-slots">
+          {registry.stages.map((slot) => {
+            const node = ELEMENTS.find((item) => item.id === slot.id);
+            return (
+              <span className="method-slot" key={slot.id} title={node?.goal ?? slot.name}>
+                <b>{slot.id}</b>
+                <span>{slot.name}</span>
+                {node?.goal && <small className="method-slot-goal">{node.goal}</small>}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="settings-card">
+        <div className="settings-card-title">要素组合 · 端口与接线（变与不变的呈现）</div>
+        <p className="method-contrast-note" style={{ margin: "0 0 8px" }}>
+          元模型是<b>要素与端口</b>（每个要素消费什么、产出什么），方法是<b>接线方式</b>。
+          验证式与探索式共享同一组治理要素与门；差异只在接线——方案的输入端口不同，
+          产出也随之不同（判别式协议 vs 数据收集协议），假设的位置随接线移动。
+          非法接线（如探索式里让方案消费尚不存在的假设）会被端口校验拒绝。
+        </p>
+        <div className="composition-grid">
+          {(registry.compositions ??
+            COMPOSITION_ORDER.map((id) => COMPOSITIONS[id])).map((composition) => {
+            const violations = validateComposition(composition as Parameters<typeof validateComposition>[0]);
+            return (
+              <div className="composition-col" key={composition.id}>
+                <div className="composition-head">
+                  <b>{composition.label}</b>
+                  <span>{composition.sub}</span>
+                </div>
+                <ol className="composition-wiring">
+                  {composition.wiring.map((step, index) => {
+                    const isPlan = step.element === "方案";
+                    return (
+                      <li
+                        key={`${composition.id}-${step.element}-${index}`}
+                        className={`composition-step${isPlan ? " is-diverge" : ""}`}
+                      >
+                        <b>{step.element}</b>
+                        <small>{step.consumes ? `消费 ${step.consumes}` : "入口"}</small>
+                      </li>
+                    );
+                  })}
+                </ol>
+                <small className={`composition-valid${violations.length ? " is-bad" : ""}`}>
+                  {violations.length
+                    ? `非法接线：${violations[0].message}`
+                    : "✓ 端口校验通过：每步的输入都被上游产出满足"}
+                </small>
+              </div>
+            );
+          })}
+        </div>
+        <p className="method-contrast-note">
+          自改进的组合化方向：智能体可提出新的接线（组合提案），必须通过同样的端口校验与治理门，租约由人授予——
+          内部编排可变，用户面与治理语义不变。
+        </p>
+      </div>
+
+      <div className="settings-card">
+        <div className="settings-card-title">要素组合视图 · 顺序由依赖推导</div>
+        <p className="method-contrast-note" style={{ margin: "0 0 8px" }}>
+          流程顺序不是经验预设：每个治理要素声明它<b>消费</b>什么、<b>产出</b>什么，顺序是这张依赖图的拓扑序。
+          调换两个要素（如「问题与假设」与「研究方案」）会改变输入输出关系——所以顺序是被推导的，也是可按方法组合的。
+        </p>
+        <ol className="element-chain">
+          {ELEMENTS.map((node) => (
+            <li
+              key={node.id}
+              className={`element-node${isHumanElement(node) ? " is-human" : ""}`}
+              id={`element-${node.id}`}
+            >
+              <div className="element-node-head">
+                <b>{node.id}</b>
+                <span className="element-name">{node.element}</span>
+                {isHumanElement(node) && <span className="element-human-tag">人</span>}
+              </div>
+              <span className="element-goal"><i>目标</i>{node.goal}</span>
+              {node.consumes.length > 0 && (
+                <div className="element-consumes">
+                  {node.consumes.map((edge) => (
+                    <div className="element-edge" key={`${edge.from}-${edge.what}`}>
+                      <i>← {edge.from}</i>
+                      <span>{edge.what}</span>
+                      <small>{edge.source}</small>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="element-produces">
+                {node.produces.map((product) => (
+                  <code key={product}>{product}</code>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ol>
+        <p className="method-contrast-note">
+          边上的每条输入都标注后端出处（SPEC / 模块不变式）；要素的粒度与组合方式即「变与不变」中的不变层——
+          治理语义不变，方法组合可变。
+        </p>
+      </div>
+
+      <div className="settings-card">
+        <div className="settings-card-title">
+          方法 × 槽位矩阵（差异）
+          <span className="matrix-view-switch" role="group" aria-label="矩阵视图切换">
+            <button
+              type="button"
+              className={`matrix-view-btn${!taskMatrixView ? " is-on" : ""}`}
+              onClick={() => setTaskMatrixView(false)}
+            >
+              适配点阵
+            </button>
+            <button
+              type="button"
+              className={`matrix-view-btn${taskMatrixView ? " is-on" : ""}`}
+              onClick={() => setTaskMatrixView(true)}
+              title="交叉格 = 方法论约束下的阶段性任务卡（stage_tasks）"
+            >
+              任务卡
+            </button>
+          </span>
+        </div>
+        <p className="method-contrast-note" style={{ margin: "0 0 7px" }}>
+          二维模型：行 = <b>研究阶段</b>（治理不变），列 = <b>研究方法</b>（数据声明）；
+          交叉点 = 方法论约束下的阶段性任务。一个任务 = 选一列方法，按行走有效格——
+          流程不是固定的链，而是这张矩阵上的走法。
+        </p>
+        <div className="method-matrix" role="table" aria-label="方法与槽位的适配矩阵">
+          <div className="method-matrix-row method-matrix-head">
+            <span className="method-matrix-name">方法</span>
+            {registry.stages.map((slot) => (
+              <span key={slot.id} className="method-matrix-cell" title={slot.name}>
+                {slot.id}
+              </span>
+            ))}
+          </div>
+          {registry.methods.map((method) => {
+            const fit = fitMap(method);
+            return (
+              <button
+                type="button"
+                key={method.id}
+                className={`method-matrix-row${selected === method.id ? " is-on" : ""}`}
+                onClick={() => setSelected(method.id)}
+                title={`${method.name_zh}（${method.name_en}）`}
+              >
+                <span className="method-matrix-name">{method.name_zh}</span>
+                {registry.stages.map((slot) => {
+                  const taskText = taskMatrixView ? (method.stage_tasks?.[slot.id] ?? "") : "";
+                  const cellClass = taskMatrixView
+                    ? `method-matrix-cell method-matrix-cell-task${taskText ? " has-task" : ""}${fit[slot.id] ? " is-fit" : ""}`
+                    : `method-matrix-cell${fit[slot.id] ? " is-fit" : ""}`;
+                  return (
+                    <span
+                      key={slot.id}
+                      className={cellClass}
+                      title={taskMatrixView && taskText ? taskText : fit[slot.id] ? "核心槽位" : "非核心槽位"}
+                    >
+                      {taskMatrixView ? (taskText ? taskText.slice(0, 46) : "—") : fit[slot.id] ? "●" : "·"}
+                    </span>
+                  );
+                })}
+              </button>
+            );
+          })}
+        </div>
+        <small className="method-contrast-note">
+          任务卡文本逐字来自注册表 stage_tasks（advisor 待办"标签化梳理"的落点之一）；
+          自改进的层级：改 skill = 微观，修订本矩阵交叉点 = <b>流程级</b>（须走组合提案租约）。
+        </small>
+      </div>
+
+      {tags.length > 0 && (
+        <div className="settings-card">
+          <div className="settings-card-title">标签 × 方法（共性与差异的可复现提取）</div>
+          {[{ group: "common" as const, label: "共性（≥3 方法）" }, { group: "partial" as const, label: "部分共性（2 方法）" }, { group: "difference" as const, label: "本质差异（单方法独有）" }].map(
+            ({ group, label }) => {
+              const rows = tags.filter((row) => row.group === group);
+              if (!rows.length) return null;
+              return (
+                <div className="tag-group" key={group}>
+                  <div className="tag-group-title">{label}</div>
+                  {rows.map((row) => (
+                    <div className="tag-row" key={row.tag}>
+                      <b>{row.tag}</b>
+                      <span className="tag-row-def">{row.definition}</span>
+                      <div className="tag-row-methods">
+                        {row.methods.map((methodId) => {
+                          const method = registry.methods.find((item) => item.id === methodId);
+                          return <code key={methodId}>{method?.name_zh ?? methodId}</code>;
+                        })}
+                      </div>
+                      <small>依据：{row.basis}</small>
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+          )}
+          <p className="method-contrast-note">
+            标签来自各方法已注册的协议字段、检查项与任务卡——共性/差异的提取是数据计算，不再凭直觉。
+          </p>
+        </div>
+      )}
+
+      {active && (
+        <div className="settings-card">
+          <div className="settings-card-title">
+            {active.name_zh} <small>{active.name_en}</small>
+          </div>
+          <div className="method-detail-grid">
+            <div>
+              <b>输入（该方法消费什么）</b>
+              <div className="method-chips">
+                {(active.inputs ?? []).map((input) => (
+                  <code key={input}>{input}</code>
+                ))}
+              </div>
+            </div>
+            <div>
+              <b>证据源（证据从哪里来）</b>
+              <div className="method-chips">
+                {(active.evidence_sources ?? []).map((source) => (
+                  <code key={source}>{source}</code>
+                ))}
+              </div>
+            </div>
+            <div>
+              <b>评估维度（维度 + 文献依据）</b>
+              <div className="method-dims">
+                {(active.evaluation_dimensions ?? []).map((dim) => (
+                  <div className="method-dim" key={dim.dimension}>
+                    <span>{dim.dimension}</span>
+                    <small>{dim.basis}</small>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <b>须冻结的协议字段</b>
+              <div className="method-chips">
+                {active.protocol_fields.map((field) => (
+                  <code key={field}>{field}</code>
+                ))}
+              </div>
+            </div>
+            <div>
+              <b>产物</b>
+              <div className="method-chips">
+                {active.artifacts.map((artifact) => (
+                  <code key={artifact}>{artifact}</code>
+                ))}
+              </div>
+            </div>
+            <div>
+              <b>检查（blocker {blockerCount(active)}/{active.checks.length}）</b>
+              <div className="method-chips">
+                {active.checks.map((check) => (
+                  <code key={check.id} className={check.severity === "blocker" ? " is-blocker" : ""}>
+                    {check.id}
+                  </code>
+                ))}
+              </div>
+            </div>
+            <div>
+              <b>证据类型与效力</b>
+              <p className="method-evidence-kind">{evidenceProfileFor(active.id)?.kind ?? "—"}</p>
+              <p className="method-artifact-form">
+                <i>S5 证据形态：</i>{evidenceProfileFor(active.id)?.artifactForm ?? "—"}
+              </p>
+              <small className="method-evidence-basis">{evidenceProfileFor(active.id)?.basis ?? ""}</small>
+            </div>
+            <div>
+              <b>对智能体设计的含义（Prompt 与基线）</b>
+              <p className="method-design-baseline">
+                <i>基线策略：</i>{evidenceProfileFor(active.id)?.baselinePolicy ?? "—"}
+              </p>
+              <p className="method-design-prompt">
+                <i>Prompt 纪律：</i>不得宣称——
+                {active.cannot_support.map((limit) => (
+                  <code key={limit}>{limit}</code>
+                ))}
+              </p>
+              <small>
+                推导自该方法的证据类型与能力边界（cannot_support 逐字）；方法差异直接指导
+                智能体 Prompt 与基线对比（研讨纪要）。
+              </small>
+            </div>
+            <div>
+              <b>不能支持（能力边界）</b>
+              <ul className="method-limits">
+                {active.cannot_support.map((limit) => (
+                  <li key={limit}>{limit}</li>
+                ))}
+              </ul>
+            </div>
+            {active.guidelines && active.guidelines.length > 0 && (
+              <div>
+                <b>方法学依据</b>
+                <ul className="method-limits">
+                  {active.guidelines.map((guideline) => (
+                    <li key={guideline.key}>{guideline.citation}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(active.tags ?? []).length > 0 && (
+              <div>
+                <b>标签（来自标签化梳理）</b>
+                <div className="method-chips">
+                  {(active.tags ?? []).map((tag) => (
+                    <code key={tag}>{tag}</code>
+                  ))}
+                </div>
+              </div>
+            )}
+            {active.stage_tasks && Object.keys(active.stage_tasks).length > 0 && (
+              <div>
+                <b>槽位任务卡（每槽位该做什么）</b>
+                <div className="method-stage-tasks">
+                  {Object.entries(active.stage_tasks).map(([slot, text]) => (
+                    <div className="method-stage-task" key={slot}>
+                      <b>{slot}</b>
+                      <span>{text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {selected && (() => {
+        const activeMethod = registry.methods.find((method) => method.id === selected);
+        const plan = activeMethod ? stagePlanFor(activeMethod, registry) : null;
+        if (!plan) return null;
+        return (
+          <div className="settings-card">
+            <div className="settings-card-title">解析后的阶段计划 · {plan.label}</div>
+            <p className="method-contrast-note" style={{ margin: "0 0 8px" }}>
+              该方法实例化的组合接线，按治理槽位展开——<b>不同方法的计划顺序不同</b>，这就是「不是固定流程」的数据形态。
+            </p>
+            <ol className="method-plan">
+              {plan.stages.map((step) => (
+                <li key={step.slot} className={`method-plan-step${step.uncovered ? " is-uncovered" : ""}`}>
+                  <b>{step.slot}</b>
+                  <span>{step.task || "（无任务卡）"}</span>
+                  {step.uncovered && <small>组合未编排 · 规范序补入</small>}
+                </li>
+              ))}
+            </ol>
+            <small className="method-contrast-note">
+              执行器消费此计划仍为 roadmap（design/156 §4）；当前计划已通过端口校验。
+            </small>
+          </div>
+        );
+      })()}
+
+      {methodContrast.length > 0 && (
+        <div className="settings-card">
+          <div className="settings-card-title">协议字段对比 · 两种实证方法</div>
+          <div className="method-contrast">
+            {methodContrast.map((method) => (
+              <div className="method-contrast-col" key={method.id}>
+                <b>{method.nameZh}</b>
+                <div className="method-chips">
+                  {method.protocolFields.map((field) => (
+                    <code key={field}>{field}</code>
+                  ))}
+                </div>
+                <small>blocker 检查：{method.blockers.join(" · ")}</small>
+              </div>
+            ))}
+          </div>
+          <p className="method-contrast-note">
+            同一治理骨架：两边的差异只在「冻结什么、怎么检验」——执行、判定、签署的槽位与门完全复用。
+          </p>
+        </div>
+      )}
+
+      {compareRows.length > 0 && (
+        <div className="settings-card">
+          <div className="settings-card-title">实证任务对比 · 同一治理骨架，不同实例化</div>
+          <div className="task-compare" role="table" aria-label="实证任务对比">
+            <div className="task-compare-row task-compare-head">
+              <span>维度</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>{row.name}</span>
+              ))}
+            </div>
+            <div className="task-compare-row">
+              <span>方法 profile</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>{row.method?.name_zh ?? "—"}</span>
+              ))}
+            </div>
+            <div className="task-compare-row">
+              <span>证据源</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>{row.dataset ?? "—"}</span>
+              ))}
+            </div>
+            <div className="task-compare-row">
+              <span>主指标</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>{row.metric ?? "—"}</span>
+              ))}
+            </div>
+            <div className="task-compare-row">
+              <span>seeds</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>{row.seeds ?? "—"}</span>
+              ))}
+            </div>
+            <div className="task-compare-row">
+              <span>基线策略</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>{row.baseline ?? "—"}</span>
+              ))}
+            </div>
+            <div className="task-compare-row">
+              <span>断言（claim）</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>
+                  {row.claim ? (
+                    <>
+                      <b>{row.claim.id} · {row.claim.badge}</b>
+                      <small>{row.claim.text}</small>
+                      <small>范围：{row.claim.scope}</small>
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </span>
+              ))}
+            </div>
+            <div className="task-compare-row">
+              <span>已走槽位</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>{row.stagesWalked.join(" → ")}</span>
+              ))}
+            </div>
+            <div className="task-compare-row">
+              <span>开着的人工门</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>{row.openGates.length ? row.openGates.join(" / ") : "无"}</span>
+              ))}
+            </div>
+            <div className="task-compare-row">
+              <span>标签差异（单方法独有）</span>
+              {compareRows.map((row) => (
+                <span key={row.taskId}>
+                  {row.uniqueTags.length ? (
+                    row.uniqueTags.map((tag) => <code key={tag}>{tag}</code>)
+                  ) : (
+                    "—"
+                  )}
+                </span>
+              ))}
+            </div>
+          </div>
+          <p className="method-contrast-note">
+            对比派生自各任务自身字段与转录；运行时任务应由任务元数据携带 method_id 后进入同一张表。
+          </p>
+        </div>
+      )}
     </div>
   );
 }

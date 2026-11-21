@@ -2,11 +2,12 @@
 id: run
 name: S5 执行与证据
 stage: S5
-version: 0.8.0
+version: 0.9.0
 status: draft
 owner: research-agent
 inputs:
   - RunRequest
+  - PipelineRequest.method_id  # optional; advisory composition projection only
   - Protocol
   - protocol_sha256
 outputs:
@@ -94,6 +95,8 @@ invariants:
 4. 跑 `python -m unittest discover -s tests -v`。
 
 ## Changelog
+
+- 2026-11-21 · v0.9.0 · status=draft · `PipelineRequest` 增加可选 `method_id`：pipeline 启动时从方法注册表解析组合覆盖，写入 `modules["composition_plan"]` 并对未覆盖阶段发 `stage_skip` 事件。明确边界：这是 advisory 事件层，**阶段代码块仍全部执行**，组合未真正改变运行顺序；解析失败回退全阶段（fail-open）。不改变 run capsule / EA / claim 人工门 / closure。实现对应 design/164。
 
 - 2026-11-18 · v0.8.0 · status=draft · 可签证据来源显式化：`run claim` 增加 `--evidence-source`（可重复），默认仍只接受 `source=run`；显式放行 `ese-exec` 后才接受该 EA，claim 的 `verification.evidence_source` 记录实际来源、warnings 标注非 `RunAgent.execute` 来源。动机：ese-exec v0.4.1 已把 results 封成 run-capsule + EA + metrics 并声明"claim 数值断言可被 verify_claim_assertions 重算"，但 `run claim` 的来源校验把 `source=ese-exec` 一律拒绝，规格与实现不一致。实测该 EA 的两条断言（test_cochange_rate 0.3749、adjusted_difference 0.0681）可由 capsule/metrics 重算通过；默认拒绝用例见 tests/test_ese_closure_chain.py。默认路径行为一字未变。
 

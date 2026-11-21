@@ -6739,3 +6739,1537 @@ select.control {
 .flow-boundary b {
   color: var(--coral);
 }
+
+/* ------------------------------------------------------------------ */
+/* One-click demo player (一键演示完整流程) — chrome over a replayed   */
+/* transcript. Gate state is amber (human gate), done is teal.         */
+/* ------------------------------------------------------------------ */
+.demo-bar {
+  flex: none;
+  margin: 0 14px 6px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.05), rgba(37, 99, 235, 0.02));
+  padding: 8px 10px;
+}
+.demo-bar.is-gate {
+  border-color: rgba(154, 107, 30, 0.4);
+  background: linear-gradient(180deg, rgba(154, 107, 30, 0.06), rgba(154, 107, 30, 0.02));
+}
+.demo-bar.is-done {
+  border-color: rgba(15, 138, 158, 0.35);
+  background: linear-gradient(180deg, rgba(15, 138, 158, 0.06), rgba(15, 138, 158, 0.02));
+}
+.demo-bar-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.demo-bar-story {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: none;
+}
+.demo-story-btn {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: calc(10px * var(--font-scale, 1));
+  cursor: pointer;
+  white-space: nowrap;
+}
+.demo-story-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.demo-story-btn.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.demo-bar-stage {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.demo-stage-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  background: var(--accent-dim);
+  color: var(--accent-deep);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: calc(11px * var(--font-scale, 1));
+  font-weight: 600;
+  white-space: nowrap;
+}
+.demo-stage-chip b {
+  font-family: var(--mono);
+  font-size: calc(10px * var(--font-scale, 1));
+}
+.demo-stage-chip.is-gate {
+  border-color: rgba(154, 107, 30, 0.4);
+  background: var(--amber-dim);
+  color: var(--amber);
+}
+.demo-stage-chip.is-done {
+  border-color: rgba(15, 138, 158, 0.4);
+  background: var(--teal-dim);
+  color: var(--teal);
+}
+.demo-narration {
+  margin: 0;
+  min-width: 0;
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+}
+.demo-bar.is-gate .demo-narration {
+  color: var(--amber);
+}
+.demo-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+}
+.demo-ctrl {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 5px 9px;
+  font: inherit;
+  font-size: calc(11px * var(--font-scale, 1));
+  cursor: pointer;
+  white-space: nowrap;
+}
+.demo-ctrl:hover {
+  border-color: var(--accent);
+}
+.demo-ctrl.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.demo-ctrl.primary:hover {
+  background: var(--accent-deep);
+}
+.demo-ctrl.sign {
+  background: var(--teal-dim);
+  border-color: var(--teal);
+  color: var(--teal);
+  font-weight: 600;
+}
+.demo-bar-sub {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.demo-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: none;
+}
+.demo-rail-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 999px;
+  padding: 2px 6px;
+  font: inherit;
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+  cursor: pointer;
+}
+.demo-rail-dot i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+.demo-rail-dot:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+.demo-rail-dot.is-revealed i {
+  background: var(--teal);
+}
+.demo-rail-dot.is-active {
+  border-color: rgba(37, 99, 235, 0.35);
+  background: var(--accent-dim);
+  color: var(--accent-deep);
+}
+.demo-rail-dot.is-active i {
+  background: var(--accent);
+}
+.demo-rail-count {
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+  padding-left: 4px;
+}
+.demo-banner {
+  margin: 0;
+  min-width: 0;
+  font-size: calc(9px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--faint);
+}
+.demo-banner b {
+  color: var(--amber);
+  font-weight: 600;
+}
+
+/* Newest revealed message during a replay. */
+.message.is-demo-current .bubble {
+  outline: 1.5px solid rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+.system-line.is-demo-current {
+  background: var(--accent-dim);
+  border-radius: 999px;
+  outline: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+/* FlowDemo is player-driven: no manual controls, just a status chip. */
+.flow-controls.is-player {
+  min-height: 30px;
+  align-items: center;
+}
+.flow-controls.is-player .flow-state {
+  margin-left: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Human-gate dialogs (G1/G2/G5): the dialog collects the human's      */
+/* choice + reason; the signature stays in the local CLI.              */
+/* ------------------------------------------------------------------ */
+.gate-dialog-modal {
+  max-width: 620px;
+}
+.claim-gate-block.is-contract {
+  border-left: 3px solid var(--accent);
+}
+.gate-contract-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.55;
+  color: var(--text);
+}
+.gate-contract-list li::marker {
+  color: var(--accent);
+}
+.claim-gate-block.is-decision {
+  border-left: 3px solid var(--teal);
+}
+.gate-dialog-q {
+  margin: 8px 0 4px;
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--muted);
+  font-weight: 600;
+}
+.gate-choices {
+  display: grid;
+  gap: 5px;
+}
+.gate-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 7px 9px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.gate-choice:hover {
+  border-color: rgba(37, 99, 235, 0.3);
+}
+.gate-choice.is-on {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.gate-choice input {
+  margin-top: 2px;
+}
+.gate-choice-id {
+  flex: none;
+  font-family: var(--mono);
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+.gate-choice-text {
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+}
+.gate-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--muted);
+}
+.gate-input-row input {
+  flex: 1;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  font: inherit;
+  font-size: calc(11px * var(--font-scale, 1));
+}
+.gate-protocol {
+  margin: 0;
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  background: var(--surface-2);
+}
+.gate-protocol div {
+  display: flex;
+  gap: 10px;
+}
+.gate-protocol dt {
+  flex: none;
+  width: 52px;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.gate-protocol dd {
+  margin: 0;
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--text);
+  line-height: 1.5;
+}
+.gate-readiness {
+  display: grid;
+  gap: 4px;
+}
+.gate-ready-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px 9px;
+  font-size: calc(11px * var(--font-scale, 1));
+}
+.gate-ready-row span {
+  flex: none;
+  width: 58px;
+  font-family: var(--mono);
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--faint);
+  text-transform: uppercase;
+}
+.gate-ready-row b {
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.5;
+}
+.gate-ready-row.is-ok {
+  border-color: rgba(15, 138, 158, 0.35);
+}
+.gate-ready-row.is-ok b {
+  color: var(--teal);
+}
+.gate-ready-row.is-note b {
+  color: var(--amber);
+}
+.gate-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.55;
+  color: var(--text);
+}
+.gate-confirm input {
+  margin-top: 2px;
+}
+.gate-reason {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 7px 9px;
+  font: inherit;
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.55;
+}
+.gate-record {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.gate-record.is-ready {
+  color: var(--teal);
+}
+/* BRIEF blocker rows: the action that opens the gate dialog. */
+.brief-row-action {
+  margin-top: 6px;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent-dim);
+  color: var(--accent-deep);
+  padding: 3px 10px;
+  font: inherit;
+  font-size: calc(10px * var(--font-scale, 1));
+  font-weight: 600;
+  cursor: pointer;
+}
+.brief-row-action:hover {
+  background: var(--accent);
+  color: #fff;
+}
+/* FlowDemo: the backend contract that owns the stage. */
+.flow-module-contract {
+  margin-top: 9px;
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 8px;
+}
+.flow-module-contract > span {
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  letter-spacing: 0.05em;
+  color: var(--accent-deep);
+  text-transform: uppercase;
+}
+.flow-module-contract ul {
+  margin: 5px 0 0;
+  padding-left: 16px;
+  display: grid;
+  gap: 3px;
+}
+.flow-module-contract li {
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.brief-row {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------------------------------------------ */
+/* S1 literature ledger — read-only projection of coverage counts,     */
+/* six-facet audit, gap registry and the query plan (modules/literature). */
+/* ------------------------------------------------------------------ */
+.literature-ledger {
+  display: grid;
+  gap: 9px;
+}
+.ledger-composition {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+.ledger-composition div {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 4px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.6);
+}
+.ledger-composition b {
+  display: block;
+  font-size: calc(13px * var(--font-scale, 1));
+  color: var(--text);
+}
+.ledger-composition span {
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.ledger-composition div.is-warn {
+  border-color: rgba(154, 107, 30, 0.35);
+}
+.ledger-composition div.is-warn b,
+.ledger-composition div.is-warn span {
+  color: var(--amber);
+}
+.ledger-rule {
+  margin: 0;
+  font-size: calc(9px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--muted);
+}
+.ledger-block > b {
+  display: block;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--text);
+}
+.ledger-block > small {
+  display: block;
+  margin-top: 4px;
+  font-size: calc(9px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--faint);
+}
+.ledger-facets {
+  margin-top: 5px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+.ledger-facet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 7px;
+  font-size: calc(10px * var(--font-scale, 1));
+}
+.ledger-facet span {
+  color: var(--text);
+}
+.ledger-facet i {
+  font-style: normal;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+  white-space: nowrap;
+}
+.ledger-facet.is-covered {
+  border-color: rgba(15, 138, 158, 0.35);
+  background: var(--teal-dim);
+}
+.ledger-facet.is-covered i {
+  color: var(--teal);
+}
+.ledger-facet.is-missing {
+  border-color: rgba(217, 45, 85, 0.28);
+  background: rgba(217, 45, 85, 0.05);
+}
+.ledger-facet.is-missing i {
+  color: var(--coral);
+}
+.ledger-plan {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  padding: 6px 9px;
+}
+.ledger-plan summary {
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--accent-deep);
+  cursor: pointer;
+}
+.ledger-plan-body {
+  margin-top: 6px;
+}
+.ledger-plan-body ol {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 2px;
+}
+.ledger-plan-body li {
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--text);
+  line-height: 1.5;
+}
+.ledger-plan-body p {
+  margin: 5px 0 0;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.ledger-gap-list {
+  margin-top: 5px;
+  display: grid;
+  gap: 4px;
+}
+.ledger-gap {
+  display: flex;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.ledger-gap-id {
+  flex: none;
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--amber);
+  font-weight: 600;
+  padding-top: 2px;
+}
+.ledger-gap p {
+  margin: 0;
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+}
+.ledger-gap small {
+  display: block;
+  margin-top: 2px;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.ledger-gap-refs {
+  margin-top: 3px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.ledger-gap-refs code {
+  font-size: calc(8px * var(--font-scale, 1));
+  color: var(--accent-deep);
+  background: var(--accent-dim);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.ledger-gap-empty {
+  display: block;
+  margin-top: 4px;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.ledger-boundary {
+  margin: 0;
+  font-size: calc(8px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.ledger-boundary code {
+  font-size: calc(8px * var(--font-scale, 1));
+}
+
+/* Session-path mode: the stage the demo player is currently on. */
+.flow-stage.is-current {
+  border-left-color: var(--accent);
+}
+.flow-stage.is-current .flow-stage-id {
+  color: var(--accent-deep);
+  font-weight: 700;
+}
+.flow-stage.is-current .flow-stage-mark {
+  color: var(--accent);
+}
+
+/* Demo bar: three storylines stack compactly in the left column. */
+.demo-bar-story {
+  gap: 2px;
+}
+.demo-story-btn {
+  padding: 2px 9px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Human turns (design/145): the person's own words projected per      */
+/* stage — BRIEF rows, session-path quotes, gate-dialog quotes.        */
+/* ------------------------------------------------------------------ */
+.brief-turn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.brief-turn:hover {
+  border-color: rgba(37, 99, 235, 0.3);
+  background: #fff;
+}
+.flow-stage-human {
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--violet, #7c3aed);
+  background: rgba(124, 58, 237, 0.08);
+  border-radius: 999px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+.flow-human-turns {
+  margin-top: 8px;
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 7px;
+}
+.flow-human-turns > span {
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  letter-spacing: 0.05em;
+  color: #7c3aed;
+  text-transform: uppercase;
+}
+.flow-human-turn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(124, 58, 237, 0.04);
+  padding: 5px 8px;
+  margin-top: 4px;
+  font: inherit;
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+  cursor: pointer;
+}
+.flow-human-turn:hover {
+  border-color: rgba(124, 58, 237, 0.35);
+}
+.flow-human-turn i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+  margin-right: 6px;
+}
+.gate-quote {
+  margin-top: 10px;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  background: rgba(124, 58, 237, 0.04);
+}
+.gate-quote > b {
+  display: block;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: #7c3aed;
+}
+.gate-quote-line {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 4px 2px 0;
+  font: inherit;
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.55;
+  color: var(--text);
+  cursor: pointer;
+}
+.gate-quote-line:hover {
+  text-decoration: underline;
+}
+.gate-quote-line i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+  margin-right: 6px;
+}
+.gate-quote-line.is-decision {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+/* Claim statement under the 断言 chain node: what it asserts + scope. */
+.chain-claim {
+  margin-top: 7px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: var(--radius);
+  padding: 7px 9px;
+  background: var(--accent-dim);
+}
+.chain-claim b {
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--accent-deep);
+}
+.chain-claim p {
+  margin: 3px 0 0;
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.55;
+  color: var(--text);
+}
+.chain-claim small {
+  display: block;
+  margin-top: 2px;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--muted);
+}
+.brief-claim small {
+  display: block;
+  margin-top: 2px;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--muted);
+}
+.brief-claim p {
+  margin: 3px 0 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Method model (方法原模型, design/149): shared governance slots ×     */
+/* method profiles, rendered from the exported registry snapshot.      */
+/* ------------------------------------------------------------------ */
+.settings-callout {
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  background: var(--surface-2);
+}
+.settings-callout b {
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--accent-deep);
+}
+.settings-callout p {
+  margin: 3px 0 0;
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.55;
+  color: var(--text);
+}
+.settings-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.66);
+}
+.settings-card + .settings-card {
+  margin-top: 9px;
+}
+.settings-card-title {
+  font-size: calc(12px * var(--font-scale, 1));
+  font-weight: 600;
+  color: var(--text);
+}
+.settings-card-title small {
+  color: var(--faint);
+  font-weight: 400;
+  margin-left: 6px;
+}
+.method-slots {
+  margin-top: 7px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.method-slot {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  background: var(--surface-2);
+}
+.method-slot b {
+  font-family: var(--mono);
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--accent-deep);
+}
+.method-slot span {
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--muted);
+}
+.method-matrix {
+  margin-top: 7px;
+  display: grid;
+  gap: 2px;
+}
+.method-matrix-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.4fr) repeat(10, minmax(0, 1fr));
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  padding: 2px 4px;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.method-matrix-row:hover {
+  background: var(--accent-dim);
+}
+.method-matrix-row.is-on {
+  border-color: rgba(37, 99, 235, 0.35);
+  background: var(--accent-dim);
+}
+.method-matrix-head {
+  cursor: default;
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.method-matrix-name {
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.method-matrix-cell {
+  text-align: center;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.method-matrix-cell.is-fit {
+  color: var(--teal);
+  font-weight: 700;
+}
+.method-detail-grid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+.method-detail-grid > div > b {
+  display: block;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--text);
+}
+.method-chips {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.method-chips code {
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--accent-deep);
+  background: var(--accent-dim);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.method-chips code.is-blocker {
+  color: var(--coral);
+  background: rgba(217, 45, 85, 0.08);
+}
+.method-limits {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  display: grid;
+  gap: 3px;
+}
+.method-limits li {
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--muted);
+}
+.flow-state.is-method {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+/* Cross-task comparison (design/150): same governance skeleton, different
+   empirical instantiations. Transposed table: dims as rows, tasks as columns. */
+.task-compare {
+  margin-top: 7px;
+  display: grid;
+  gap: 3px;
+}
+.task-compare-row {
+  display: grid;
+  grid-template-columns: minmax(84px, 0.7fr) repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 9px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.task-compare-row.task-compare-head {
+  background: var(--surface-2);
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--muted);
+}
+.task-compare-row > span {
+  min-width: 0;
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+}
+.task-compare-row.task-compare-head > span {
+  font-weight: 600;
+  color: var(--accent-deep);
+}
+.task-compare-row > span > b {
+  display: block;
+  font-size: calc(10px * var(--font-scale, 1));
+}
+.task-compare-row > span > small {
+  display: block;
+  margin-top: 2px;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--muted);
+}
+.method-contrast {
+  margin-top: 7px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.method-contrast-col {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.method-contrast-col b {
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--text);
+}
+.method-contrast-col small {
+  display: block;
+  margin-top: 4px;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--muted);
+}
+.method-contrast-note {
+  margin: 7px 0 0;
+  font-size: calc(9px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--faint);
+}
+
+/* Element composition view (design/151): governance elements with declared
+   consumes/produces — the stage order is the topological order of THIS graph. */
+.element-chain {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.element-node {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 11px;
+  background: rgba(255, 255, 255, 0.66);
+}
+.element-node.is-human {
+  border-left: 3px solid var(--amber);
+}
+.element-node-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.element-node-head b {
+  font-family: var(--mono);
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--accent-deep);
+}
+.element-node.is-human .element-node-head b {
+  color: var(--amber);
+}
+.element-name {
+  font-size: calc(12px * var(--font-scale, 1));
+  font-weight: 600;
+  color: var(--text);
+}
+.element-human-tag {
+  border: 1px solid rgba(154, 107, 30, 0.4);
+  background: var(--amber-dim);
+  color: var(--amber);
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: calc(9px * var(--font-scale, 1));
+}
+.element-consumes {
+  margin-top: 6px;
+  display: grid;
+  gap: 3px;
+}
+.element-edge {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  border-left: 2px solid rgba(37, 99, 235, 0.3);
+  padding: 2px 0 2px 8px;
+  flex-wrap: wrap;
+}
+.element-edge i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--accent-deep);
+  white-space: nowrap;
+}
+.element-edge span {
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--text);
+  flex: 1;
+  min-width: 180px;
+}
+.element-edge small {
+  font-size: calc(8px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.element-produces {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.element-produces code {
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--teal);
+  background: var(--teal-dim);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* Essence card (design/152): the research-essence reference model that the
+   governance slots were derived from — definition, triad, element mapping. */
+.essence-card {
+  border-left: 3px solid var(--accent);
+}
+.essence-def {
+  margin: 6px 0 0;
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.7;
+  color: var(--text);
+}
+.essence-def b {
+  color: var(--accent-deep);
+}
+.essence-triad {
+  margin-top: 9px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.essence-layer {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 7px 9px;
+  background: var(--surface-2);
+}
+.essence-layer b {
+  display: block;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--accent-deep);
+}
+.essence-layer span {
+  display: block;
+  margin-top: 2px;
+  font-size: calc(9px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--muted);
+}
+.essence-map {
+  margin-top: 9px;
+  width: 100%;
+  border-collapse: collapse;
+}
+.essence-map th {
+  text-align: left;
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--line-strong);
+}
+.essence-map td {
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.essence-map td:first-child {
+  color: var(--accent-deep);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.essence-basis {
+  display: block;
+  margin-top: 8px;
+  font-size: calc(9px * var(--font-scale, 1));
+  line-height: 1.6;
+  color: var(--faint);
+}
+.method-evidence-kind {
+  margin: 4px 0 0;
+  font-size: calc(11px * var(--font-scale, 1));
+  font-weight: 600;
+  color: var(--teal);
+}
+.method-evidence-basis {
+  display: block;
+  margin-top: 2px;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+}
+
+/* Method detail: the three reference-model dimensions + per-slot task cards. */
+.method-dims {
+  margin-top: 4px;
+  display: grid;
+  gap: 3px;
+}
+.method-dim {
+  border-left: 2px solid rgba(37, 99, 235, 0.3);
+  padding: 2px 0 2px 8px;
+}
+.method-dim span {
+  display: block;
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+}
+.method-dim small {
+  display: block;
+  font-size: calc(8px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.method-stage-tasks {
+  margin-top: 5px;
+  display: grid;
+  gap: 4px;
+}
+.method-stage-task {
+  display: flex;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 8px;
+  background: var(--surface-2);
+}
+.method-stage-task b {
+  flex: none;
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--accent-deep);
+  padding-top: 2px;
+}
+.method-stage-task span {
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* Composition wirings (design/154): elements with typed ports; two reference
+   compositions side by side; the divergence at 方案 highlighted. */
+.composition-grid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.composition-col {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  background: rgba(255, 255, 255, 0.66);
+}
+.composition-head b {
+  display: block;
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--text);
+}
+.composition-head span {
+  display: block;
+  margin-top: 2px;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.composition-wiring {
+  list-style: none;
+  margin: 7px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.composition-step {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.composition-step b {
+  font-family: var(--mono);
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--accent-deep);
+}
+.composition-step small {
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--muted);
+}
+.composition-step.is-diverge {
+  border-color: rgba(217, 45, 85, 0.35);
+  background: rgba(217, 45, 85, 0.05);
+}
+.composition-step.is-diverge b {
+  color: var(--coral);
+}
+.composition-step.is-diverge small {
+  color: var(--coral);
+  font-weight: 600;
+}
+.composition-valid {
+  display: block;
+  margin-top: 6px;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--teal);
+}
+.composition-valid.is-bad {
+  color: var(--coral);
+}
+
+/* Tag layer (design/155): the reproducible 标签化梳理 — commonality vs
+   essential difference extracted from per-method tags. */
+.tag-group {
+  margin-top: 9px;
+}
+.tag-group-title {
+  font-size: calc(11px * var(--font-scale, 1));
+  font-weight: 600;
+  color: var(--accent-deep);
+  margin-bottom: 5px;
+}
+.tag-row {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  margin-bottom: 5px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.tag-row b {
+  font-size: calc(11px * var(--font-scale, 1));
+  color: var(--text);
+}
+.tag-row-def {
+  display: block;
+  margin: 2px 0 4px;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--muted);
+}
+.tag-row-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tag-row-methods code {
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--teal);
+  background: var(--teal-dim);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.tag-row small {
+  display: block;
+  margin-top: 3px;
+  font-size: calc(8px * var(--font-scale, 1));
+  color: var(--faint);
+}
+
+/* Per-method implications for agent design (design/157): baseline policy and
+   prompt discipline derived from the evidence kind + cannot_support. */
+.method-design-baseline,
+.method-design-prompt {
+  margin: 4px 0 0;
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.55;
+  color: var(--text);
+}
+.method-design-baseline i,
+.method-design-prompt i {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--teal);
+}
+.method-design-prompt i {
+  color: var(--coral);
+}
+.method-design-prompt code {
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--coral);
+  background: rgba(217, 45, 85, 0.07);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-right: 4px;
+}
+
+/* Task-card matrix view (design/159): the advisor's 阶段×方法 two-dimensional
+   model — cross cells carry the methodology-constrained stage task text. */
+.matrix-view-switch {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.matrix-view-btn {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--muted);
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.matrix-view-btn.is-on {
+  background: var(--accent);
+  color: #fff;
+}
+.method-matrix-cell-task {
+  text-align: left;
+  font-size: calc(8px * var(--font-scale, 1));
+  line-height: 1.4;
+  color: var(--faint);
+  min-height: 30px;
+}
+.method-matrix-cell-task.has-task {
+  color: var(--text);
+  background: rgba(37, 99, 235, 0.04);
+}
+.method-matrix-cell-task.is-fit.has-task {
+  color: var(--accent-deep);
+  background: var(--accent-dim);
+}
+
+/* Stage goals (design/160): the WHY of each governance slot. */
+.method-slot {
+  align-items: flex-start;
+  text-align: left;
+}
+.method-slot-goal {
+  display: block;
+  font-size: calc(8px * var(--font-scale, 1));
+  line-height: 1.45;
+  color: var(--faint);
+}
+.element-node .element-goal {
+  display: block;
+  margin-top: 3px;
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+}
+.element-node .element-goal i {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--accent-deep);
+  margin-right: 6px;
+}
+
+/* Resolved stage plan (design/162): the per-method ordered plan derived from
+   its composition wiring — different methods, different orders. */
+.method-plan {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.method-plan-step {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 9px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.method-plan-step b {
+  flex: none;
+  font-family: var(--mono);
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--accent-deep);
+}
+.method-plan-step span {
+  font-size: calc(10px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--text);
+}
+.method-plan-step.is-uncovered {
+  border-style: dashed;
+  opacity: 0.75;
+}
+.method-plan-step.is-uncovered small {
+  margin-left: auto;
+  font-size: calc(8px * var(--font-scale, 1));
+  color: var(--amber);
+}
+
+/* Variance control table (design/162): what is fixed, what varies by method,
+   what varies by content — and WHO controls each cell. */
+.variance-card {
+  border-left: 3px solid var(--accent);
+}
+.variance-table {
+  margin-top: 7px;
+  display: grid;
+  gap: 3px;
+}
+.variance-row,
+.variance-head {
+  display: grid;
+  grid-template-columns: minmax(70px, 0.8fr) repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 9px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.variance-head {
+  background: var(--surface-2);
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+}
+.variance-head .is-fixed { color: var(--accent-deep); }
+.variance-head .is-method { color: var(--teal); }
+.variance-head .is-content { color: var(--amber); }
+.variance-row b {
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--text);
+}
+.variance-row span,
+.variance-head span {
+  font-size: calc(9px * var(--font-scale, 1));
+  line-height: 1.5;
+  color: var(--muted);
+}
+.method-artifact-form {
+  margin: 4px 0 0;
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--text);
+  line-height: 1.5;
+}
+.method-artifact-form i {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--teal);
+  margin-right: 5px;
+}

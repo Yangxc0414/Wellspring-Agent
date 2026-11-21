@@ -1,5 +1,5 @@
 {
-  "schema": "ese-method-registry-0.1",
+  "schema": "ese-method-registry-0.5",
   "boundary": "方法注册表是数据不是门禁：它给出阶段×方法的任务卡、必填字段与检查项，检查结果只作 advisory，不改变任何 gate/claim/signature 语义。",
   "stages": [
     {
@@ -150,7 +150,39 @@
         "S1": "先写检索协议再检索；记录数据库、检索式、日期、命中数；滚雪球需给出 start set 依据",
         "S1b": "按主题×来源建矩阵；标注一致点/张力/未使用来源；报告覆盖缺口",
         "S8-S12": "按 PRISMA 与 Kitchenham 报告结构写；检索日期与计数必须可复现"
-      }
+      },
+      "inputs": [
+        "研究问题（RQ）",
+        "检索协议：检索式 / 数据库 / 检索日期",
+        "纳入与排除标准",
+        "质量评估清单"
+      ],
+      "evidence_sources": [
+        "已发表研究全文（期刊 / 会议）",
+        "预印本与灰色文献（显式声明）",
+        "各原始研究自身报告的数据（二手证据）"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "可复现性：检索与筛选可被他人重放",
+          "basis": "Kitchenham 2007 §协议与检索策略"
+        },
+        {
+          "dimension": "筛选一致性：多人按标准筛选并报告数量流",
+          "basis": "PRISMA 2020（识别/筛选/纳入）"
+        },
+        {
+          "dimension": "外部效度受原始研究集合限制",
+          "basis": "Wohlin 2014（滚雪球与数据库合并）"
+        }
+      ],
+      "tags": [
+        "预注册协议",
+        "筛选标准",
+        "质量评估",
+        "综合矩阵"
+      ],
+      "composition_id": "confirmatory"
     },
     {
       "id": "repository-mining",
@@ -265,7 +297,45 @@
         "S4": "时间切分必须先于建模；去重策略与标签来源写进预注册",
         "S5": "记录抽取脚本、快照哈希与许可证；重复运行必须得到同一快照",
         "S5b": "claim 的 scope 必须写清语言/生态/时间窗；不得外推为因果"
-      }
+      },
+      "inputs": [
+        "抽样框与项目选择规则",
+        "时间窗与时间切分定义",
+        "标签来源（path/message 启发式）",
+        "抽取脚本与许可证核对"
+      ],
+      "evidence_sources": [
+        "代码仓库历史（commit / issue / PR 记录）",
+        "仓库元数据与镜像快照（sha 固定）"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "构造效度：标签启发式是否测到目标构念",
+          "basis": "threat_focus=construct；capsule warning"
+        },
+        {
+          "dimension": "可复现性：重复运行必须得到同一快照",
+          "basis": "run contract：evidence.hash / artifacts.required"
+        },
+        {
+          "dimension": "外部效度：语言 / 生态 / 时间窗范围",
+          "basis": "threat_focus=external；claim scope 规则"
+        },
+        {
+          "dimension": "内部因果效度不可支持（观察性）",
+          "basis": "cannot_support：因果机制"
+        }
+      ],
+      "tags": [
+        "预注册协议",
+        "抽样框",
+        "时间切分",
+        "去重策略",
+        "标签启发式声明",
+        "许可核对",
+        "快照哈希"
+      ],
+      "composition_id": "exploratory"
     },
     {
       "id": "controlled-experiment",
@@ -386,7 +456,44 @@
         "S5": "执行记录分配与偏离；不得事后改主指标",
         "S5b": "claim 只能来自预注册主比较；区间跨零即 undecidable",
         "S8-S12": "按 Wohlin/Jedlitschka 结构报告，效度威胁单列"
-      }
+      },
+      "inputs": [
+        "可操控因子与水平的假设",
+        "随机化与区组计划",
+        "样本量与功效分析",
+        "分析计划与停止规则"
+      ],
+      "evidence_sources": [
+        "受控环境下对实验单元的一手测量",
+        "分配与偏离记录（随机化留痕）"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "内部效度：因果来自控制 + 随机",
+          "basis": "Cook & Campbell 1979；Wohlin 2014 效度框架"
+        },
+        {
+          "dimension": "统计结论效度：功效与检验",
+          "basis": "experiment.power / experiment.analysis_plan 检查"
+        },
+        {
+          "dimension": "构念效度：任务是否代表目标构念",
+          "basis": "threat_focus=construct"
+        },
+        {
+          "dimension": "外部效度：单元与情境的推广范围",
+          "basis": "threat_focus=external"
+        }
+      ],
+      "tags": [
+        "预注册协议",
+        "随机化",
+        "对照组",
+        "区组",
+        "功效分析",
+        "停止规则"
+      ],
+      "composition_id": "confirmatory"
     },
     {
       "id": "quasi-experiment",
@@ -467,7 +574,38 @@
         "S4": "先写识别策略与识别假设，再选数据；混杂必须逐条列",
         "S5": "记录处理暴露与时间；不得按结果挑对照组",
         "S5b": "因果主张不得超出识别策略；写清不可识别的部分"
-      }
+      },
+      "inputs": [
+        "处理定义与对照条件",
+        "分配规则（非随机）",
+        "混杂变量清单",
+        "识别策略"
+      ],
+      "evidence_sources": [
+        "自然发生分组条件下的一手测量",
+        "处理前后 / 组间可比数据"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "内部效度：选择偏倚是首要威胁",
+          "basis": "Cook & Campbell 1979"
+        },
+        {
+          "dimension": "识别策略的有效性",
+          "basis": "threat_focus=internal；quasi.identification 检查"
+        },
+        {
+          "dimension": "敏感性分析",
+          "basis": "quasi.sensitivity 检查"
+        }
+      ],
+      "tags": [
+        "对照组",
+        "识别策略",
+        "混杂清单",
+        "敏感性分析"
+      ],
+      "composition_id": "confirmatory"
     },
     {
       "id": "benchmark-evaluation",
@@ -574,7 +712,41 @@
         "S5": "固定基准版本与哈希；记录算力与预算",
         "S5b": "主张必须说明是「在该基准该预算下」，并报告 headroom",
         "S8-S12": "报 headroom 归一化曲线；不得只报绝对分"
-      }
+      },
+      "inputs": [
+        "基准数据集及版本（哈希）",
+        "被评系统与配置",
+        "预算匹配策略",
+        "基线与复现记录"
+      ],
+      "evidence_sources": [
+        "标准化任务上的自动评分（固定任务集）",
+        "污染检查记录"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "构造效度：基准是否测到宣称的能力",
+          "basis": "threat_focus=construct"
+        },
+        {
+          "dimension": "污染控制",
+          "basis": "benchmark.contamination 检查"
+        },
+        {
+          "dimension": "饱和 / headroom",
+          "basis": "benchmark.saturation 检查"
+        },
+        {
+          "dimension": "跨基准的无条件排名不可支持",
+          "basis": "cannot_support"
+        }
+      ],
+      "tags": [
+        "污染控制",
+        "饱和分析",
+        "多重比较策略"
+      ],
+      "composition_id": "confirmatory"
     },
     {
       "id": "case-study",
@@ -682,7 +854,40 @@
         "S4": "写数据收集与分析协议；伦理与匿名先于采集",
         "S5": "记录实际数据与编码过程；偏离要写",
         "S8-S12": "按 Runeson & Höst 结构报告；只做可迁移性讨论，不做统计泛化"
-      }
+      },
+      "inputs": [
+        "研究问题与案例选择协议",
+        "多源数据源清单（访谈 / 文档 / 制品）",
+        "分析策略与编码本"
+      ],
+      "evidence_sources": [
+        "访谈与观察记录",
+        "项目文档与制品",
+        "三角验证的多源对照"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "构造效度：三角验证与链式证据",
+          "basis": "Runeson & Höst 2009 §效度讨论"
+        },
+        {
+          "dimension": "可转移性（非统计泛化）",
+          "basis": "threat_focus=external；cannot_support"
+        },
+        {
+          "dimension": "成员核查（member checking）",
+          "basis": "case.member_checking 检查"
+        }
+      ],
+      "tags": [
+        "案例选择协议",
+        "三角验证",
+        "链式证据",
+        "编码本",
+        "成员核查",
+        "伦理审查"
+      ],
+      "composition_id": "exploratory"
     },
     {
       "id": "survey",
@@ -776,7 +981,35 @@
         "S1": "工具设计后必须预试；知情同意与匿名方案先定",
         "S5": "记录响应率、缺失与退出",
         "S8-S12": "报告未响应偏差；不得把自报当行为"
-      }
+      },
+      "inputs": [
+        "总体与抽样框",
+        "问卷 / 访谈提纲（预试记录）",
+        "知情同意与响应率计划"
+      ],
+      "evidence_sources": [
+        "人群自报应答（问卷 / 访谈）"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "构念效度：题目测到目标构念",
+          "basis": "threat_focus=construct；survey.instrument 检查"
+        },
+        {
+          "dimension": "无应答与响应偏倚（代表性）",
+          "basis": "cannot_support：未响应者代表性"
+        },
+        {
+          "dimension": "行为因果不可支持（自报局限）",
+          "basis": "cannot_support：行为因果"
+        }
+      ],
+      "tags": [
+        "抽样框",
+        "预试记录",
+        "伦理审查"
+      ],
+      "composition_id": "confirmatory"
     },
     {
       "id": "design-science",
@@ -865,7 +1098,35 @@
         "S2-S3": "制品的贡献类型先声明（改进/新方法/理论）",
         "S4": "评估策略（人工/案例/基准）先于实现",
         "S8-S12": "按 DSR 结构报告；效用声明必须有评估支撑"
-      }
+      },
+      "inputs": [
+        "设计问题与需求",
+        "知识基准（已有制品 / 理论）",
+        "利益相关者"
+      ],
+      "evidence_sources": [
+        "制品演示与评估记录（可混合实验 / 案例 / 模拟）",
+        "设计过程与理由"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "效用评估限于评估策略所及",
+          "basis": "cannot_support：未评估的效用声明"
+        },
+        {
+          "dimension": "贡献类型清晰度",
+          "basis": "dsr.contribution 检查"
+        },
+        {
+          "dimension": "边界条件声明",
+          "basis": "protocol_fields：boundary_conditions"
+        }
+      ],
+      "tags": [
+        "贡献声明",
+        "边界条件"
+      ],
+      "composition_id": "exploratory"
     },
     {
       "id": "action-research",
@@ -948,7 +1209,686 @@
         "S4": "写循环计划与反思机制",
         "S5": "每轮记录介入、观察、反思",
         "S8-S12": "报告研究者角色与偏差；不做统计泛化"
+      },
+      "inputs": [
+        "介入计划与利益相关者",
+        "研究者角色声明",
+        "伦理审查"
+      ],
+      "evidence_sources": [
+        "介入循环中的行动与反思记录",
+        "利益相关者反馈"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "循环完整性：诊断→行动→评估→反思",
+          "basis": "action.cycles 检查；Susman & Evered 1978"
+        },
+        {
+          "dimension": "研究者角色透明度",
+          "basis": "action.role 检查"
+        },
+        {
+          "dimension": "无介入的因果归因不可支持",
+          "basis": "cannot_support"
+        }
+      ],
+      "tags": [
+        "介入循环",
+        "研究者角色声明",
+        "伦理审查"
+      ],
+      "composition_id": "exploratory"
+    },
+    {
+      "id": "ml-iterative-experiment",
+      "name_zh": "机器学习迭代实验",
+      "name_en": "ML Iterative Experimentation",
+      "fit_stages": [
+        "S1",
+        "S2-S3",
+        "S4",
+        "S5",
+        "S5b",
+        "S6",
+        "S8-S12"
+      ],
+      "guidelines": [
+        {
+          "key": "pengsida2026",
+          "citation": "Peng Sida. learning_research: A Research Methodology Handbook (52 docs). GitHub, 2026.",
+          "mandates": "goal-driven roadmap、最小可行实验（MV 二元标准）、一次一因素、失败案例分析、实验日志五要素"
+        },
+        {
+          "key": "games003",
+          "citation": "Peng Sida. GAMES003: 科研基本能力课程（week1/3/5）. 2023.",
+          "mandates": "写作倒排（intro/method 提前交导师改）、review 清单（五被拒因素）、实验记录与 next step"
+        },
+        {
+          "key": "agarwal2021",
+          "citation": "Agarwal et al. (2021). Deep Reinforcement Learning at the Edge of the Statistical Precipice. NeurIPS.",
+          "mandates": "多种子与统计区间披露；单点比较不充分"
+        }
+      ],
+      "protocol_fields": [
+        "goal_roadmap",
+        "minimal_viable_criterion",
+        "toy_setting",
+        "exploration_points",
+        "one_factor_at_a_time",
+        "primary_metric",
+        "seeds",
+        "ablation_plan",
+        "baseline_comparison",
+        "experiment_log"
+      ],
+      "artifacts": [
+        "实验记录（目的/setting/结果/分析/next step）",
+        "最小可行实验标准",
+        "失败案例分析",
+        "消融表",
+        "对比表",
+        "多种子结果"
+      ],
+      "cannot_support": [
+        "理论证明（需形式化方法）",
+        "单次实验外推为普适结论",
+        "未披露种子的可复现声明",
+        "因果机制（除非满足受控+随机）"
+      ],
+      "checks": [
+        {
+          "id": "experiment.log",
+          "severity": "blocker",
+          "requires": [
+            "experiment_log",
+            "analysis"
+          ]
+        },
+        {
+          "id": "mv.criterion",
+          "severity": "blocker",
+          "requires": [
+            "minimal_viable_criterion"
+          ]
+        },
+        {
+          "id": "one.factor",
+          "severity": "warn",
+          "requires": [
+            "experiment_log"
+          ]
+        },
+        {
+          "id": "ablation.study",
+          "severity": "warn",
+          "requires": [
+            "ablation_plan"
+          ]
+        },
+        {
+          "id": "baseline.comparison",
+          "severity": "warn",
+          "requires": [
+            "baseline_comparison"
+          ]
+        },
+        {
+          "id": "seed.disclosure",
+          "severity": "warn",
+          "requires": [
+            "seeds"
+          ]
+        }
+      ],
+      "stage_tasks": {
+        "S1": "先 search 再 re-search：literature tree + 蒸馏开源基线代码的 tricks",
+        "S2-S3": "从新 failure case 入手收敛 idea；用 problem-driven 四问立项",
+        "S4": "设计最小可行实验（MV 二元标准）与消融/对比计划；一次只探索一件事",
+        "S5": "快速迭代：实验记录五要素；控制变量定位不 work 的技术原因",
+        "S5b": "claim 只能基于预注册主指标与多种子区间；失败结果如实保留",
+        "S6": "可视化 failure case 与消融表；图绑定实验产物",
+        "S8-S12": "按 Intro 五部分倒推/正推与 Method 三元素（motivation→design→advantage）写作"
+      },
+      "reporting_sections": [
+        "Goal 与 roadmap",
+        "最小可行实验标准",
+        "实验记录（含失败分析）",
+        "消融与对比",
+        "多种子与区间",
+        "效度威胁（toy→real 差距）",
+        "可宣称边界"
+      ],
+      "inputs": [
+        "Goal roadmap 与 literature tree",
+        "toy setting / 简化数据",
+        "开源基线代码（蒸馏 tricks）",
+        "计算预算"
+      ],
+      "evidence_sources": [
+        "实验记录（目的/setting/结果/分析/next step）",
+        "多种子测量与消融对比",
+        "failure case 可视化"
+      ],
+      "evaluation_dimensions": [
+        {
+          "dimension": "可复现性：多种子与统计区间披露",
+          "basis": "Agarwal et al. 2021（statistical precipice）"
+        },
+        {
+          "dimension": "判别力：消融能否区分各模块贡献",
+          "basis": "pengsida learning_research（ablation 实践）"
+        },
+        {
+          "dimension": "外部效度：toy setting 到真实 setting 的迁移差距",
+          "basis": "pengsida learning_research（toy experiment 原则）"
+        },
+        {
+          "dimension": "迭代有效性：失败案例是否被系统分析",
+          "basis": "pengsida learning_research（debug 五步定位法）"
+        }
+      ],
+      "tags": [
+        "消融实验",
+        "最小可行实验",
+        "一次一因素",
+        "失败案例分析",
+        "实验日志",
+        "SOTA 对比",
+        "种子披露",
+        "toy 实验"
+      ],
+      "composition_id": "exploratory"
+    }
+  ],
+  "tag_vocabulary": [
+    {
+      "tag": "预注册协议",
+      "definition": "分析计划先于数据收集/筛选冻结",
+      "basis": "Wohlin 2014（实验预注册）；Kitchenham 2007（SLR 协议）"
+    },
+    {
+      "tag": "随机化",
+      "definition": "单元到条件的分配由随机机制决定",
+      "basis": "实验两要素之一（受控+随机）；Wohlin 2014"
+    },
+    {
+      "tag": "对照组",
+      "definition": "存在明确的对照条件",
+      "basis": "受控/准实验协议字段（comparison_group）"
+    },
+    {
+      "tag": "区组",
+      "definition": "按已知干扰因素分组分配",
+      "basis": "受控实验协议字段（blocking）"
+    },
+    {
+      "tag": "功效分析",
+      "definition": "样本量与统计功效的事前计算",
+      "basis": "受控实验检查 experiment.power"
+    },
+    {
+      "tag": "停止规则",
+      "definition": "数据收集/实验终止的事前条件",
+      "basis": "受控实验协议字段（stopping_rule）"
+    },
+    {
+      "tag": "抽样框",
+      "definition": "明确的总体与抽样单位清单",
+      "basis": "survey/mining 协议字段（sampling_frame）"
+    },
+    {
+      "tag": "时间切分",
+      "definition": "按时间划分观察窗口",
+      "basis": "mining 协议字段（time_split）"
+    },
+    {
+      "tag": "去重策略",
+      "definition": "记录去重规则的事前声明",
+      "basis": "mining 协议字段（dedup_policy）"
+    },
+    {
+      "tag": "标签启发式声明",
+      "definition": "标签来源与局限的显式声明",
+      "basis": "mining 协议字段（label_source）；capsule warning"
+    },
+    {
+      "tag": "许可核对",
+      "definition": "数据许可合规检查",
+      "basis": "mining 协议字段（license_check）"
+    },
+    {
+      "tag": "快照哈希",
+      "definition": "数据/脚本快照以哈希固定",
+      "basis": "mining stage_tasks S5；run contract evidence.hash"
+    },
+    {
+      "tag": "污染控制",
+      "definition": "评测数据污染检查",
+      "basis": "benchmark 检查 benchmark.contamination"
+    },
+    {
+      "tag": "饱和分析",
+      "definition": "基准 headroom（剩余提升空间）分析",
+      "basis": "benchmark 协议字段（saturation_note）"
+    },
+    {
+      "tag": "多重比较策略",
+      "definition": "多次比较的校正策略",
+      "basis": "benchmark 协议字段（multiple_comparison_policy）"
+    },
+    {
+      "tag": "质量评估",
+      "definition": "纳入研究的质量评估",
+      "basis": "SLR 协议字段（quality_assessment）"
+    },
+    {
+      "tag": "筛选标准",
+      "definition": "纳入/排除标准的事前声明",
+      "basis": "SLR 协议字段（inclusion/exclusion_criteria）"
+    },
+    {
+      "tag": "综合矩阵",
+      "definition": "证据抽取与综合的结构化载体",
+      "basis": "SLR 产物（综合矩阵/synthesis_method）"
+    },
+    {
+      "tag": "三角验证",
+      "definition": "多源证据交叉印证",
+      "basis": "案例研究协议字段（triangulation）"
+    },
+    {
+      "tag": "链式证据",
+      "definition": "从原始数据到结论的可追溯链",
+      "basis": "案例研究协议字段（chain_of_evidence）"
+    },
+    {
+      "tag": "编码本",
+      "definition": "定性编码规则",
+      "basis": "案例研究产物（编码本）"
+    },
+    {
+      "tag": "成员核查",
+      "definition": "由被研究者核查结论",
+      "basis": "案例研究检查 case.member_checking"
+    },
+    {
+      "tag": "案例选择协议",
+      "definition": "案例选择理由与标准的事前声明",
+      "basis": "案例研究协议字段（case_selection）"
+    },
+    {
+      "tag": "伦理审查",
+      "definition": "伦理 / 知情同意核查",
+      "basis": "case/ethics、survey/consent、action/ethics 检查"
+    },
+    {
+      "tag": "识别策略",
+      "definition": "观察数据中的因果识别方法",
+      "basis": "准实验协议字段（identification_strategy）"
+    },
+    {
+      "tag": "混杂清单",
+      "definition": "混杂变量显式登记",
+      "basis": "准实验协议字段（confounders）"
+    },
+    {
+      "tag": "敏感性分析",
+      "definition": "结论对假设的敏感度检验",
+      "basis": "准实验检查 quasi.sensitivity"
+    },
+    {
+      "tag": "贡献声明",
+      "definition": "制品贡献类型的显式声明",
+      "basis": "DSR 协议字段（contribution_type）"
+    },
+    {
+      "tag": "边界条件",
+      "definition": "制品有效边界的声明",
+      "basis": "DSR 协议字段（boundary_conditions）"
+    },
+    {
+      "tag": "介入循环",
+      "definition": "诊断→行动→评估→反思的循环结构",
+      "basis": "行动研究协议字段（cycles）；Susman & Evered 1978"
+    },
+    {
+      "tag": "研究者角色声明",
+      "definition": "研究者在介入中的角色披露",
+      "basis": "行动研究协议字段（researcher_role）"
+    },
+    {
+      "tag": "预试记录",
+      "definition": "测量工具的试测记录",
+      "basis": "survey 协议字段（pilot）"
+    },
+    {
+      "tag": "消融实验",
+      "definition": "逐模块移除以验证各自贡献",
+      "basis": "ML 消融实践；pengsida learning_research（writing_template）"
+    },
+    {
+      "tag": "最小可行实验",
+      "definition": "二元可测标准的极简验证实验（MV 三步）",
+      "basis": "pengsida learning_research（minimal experiment）"
+    },
+    {
+      "tag": "一次一因素",
+      "definition": "单次实验只改一个因素",
+      "basis": "Freeman：only change one thing at a time"
+    },
+    {
+      "tag": "失败案例分析",
+      "definition": "failure case 的规律与技术原因分析",
+      "basis": "pengsida learning_research（debug 五步定位法）"
+    },
+    {
+      "tag": "实验日志",
+      "definition": "目的/setting/结果/分析/next step 五要素记录",
+      "basis": "pengsida learning_research（experiment_log）"
+    },
+    {
+      "tag": "SOTA 对比",
+      "definition": "与已发表最优方法的可复现对比",
+      "basis": "writing_template：comparison experiments"
+    },
+    {
+      "tag": "种子披露",
+      "definition": "随机种子与统计区间披露",
+      "basis": "Agarwal et al. 2021（statistical precipice）"
+    },
+    {
+      "tag": "toy 实验",
+      "definition": "保留 technical challenge 的简化 setting",
+      "basis": "pengsida learning_research（toy experiment 原则）"
+    }
+  ],
+  "elements": [
+    {
+      "id": "问题",
+      "label": "研究问题",
+      "input_kinds": [],
+      "outputs": [
+        {
+          "consumes": null,
+          "produces": "研究问题"
+        }
+      ],
+      "human": false
+    },
+    {
+      "id": "假设",
+      "label": "问题与假设",
+      "input_kinds": [
+        "研究问题",
+        "RunCapsule + EA"
+      ],
+      "outputs": [
+        {
+          "consumes": "研究问题",
+          "produces": "候选假设（可判别）"
+        },
+        {
+          "consumes": "RunCapsule + EA",
+          "produces": "提炼式假设（事后）"
+        }
+      ],
+      "human": true
+    },
+    {
+      "id": "方案",
+      "label": "研究方案（设计冻结）",
+      "input_kinds": [
+        "候选假设（可判别）",
+        "研究问题"
+      ],
+      "outputs": [
+        {
+          "consumes": "候选假设（可判别）",
+          "produces": "判别式协议"
+        },
+        {
+          "consumes": "研究问题",
+          "produces": "数据收集协议"
+        }
+      ],
+      "human": true
+    },
+    {
+      "id": "证据",
+      "label": "证据生产（执行）",
+      "input_kinds": [
+        "判别式协议",
+        "数据收集协议"
+      ],
+      "outputs": [
+        {
+          "consumes": "判别式协议",
+          "produces": "RunCapsule + EA"
+        },
+        {
+          "consumes": "数据收集协议",
+          "produces": "RunCapsule + EA"
+        }
+      ],
+      "human": false
+    },
+    {
+      "id": "判定",
+      "label": "断言与签核",
+      "input_kinds": [
+        "RunCapsule + EA"
+      ],
+      "outputs": [
+        {
+          "consumes": "RunCapsule + EA",
+          "produces": "ClaimRecord"
+        }
+      ],
+      "human": true
+    },
+    {
+      "id": "图表",
+      "label": "结果图表",
+      "input_kinds": [
+        "RunCapsule + EA"
+      ],
+      "outputs": [
+        {
+          "consumes": "RunCapsule + EA",
+          "produces": "图 manifest"
+        }
+      ],
+      "human": false
+    },
+    {
+      "id": "写作",
+      "label": "写作与评审",
+      "input_kinds": [
+        "ClaimRecord",
+        "图 manifest"
+      ],
+      "outputs": [
+        {
+          "consumes": "ClaimRecord",
+          "produces": "稿件绑定"
+        }
+      ],
+      "human": true
+    },
+    {
+      "id": "闭包",
+      "label": "闭包与导出签核",
+      "input_kinds": [
+        "ClaimRecord",
+        "RunCapsule + EA"
+      ],
+      "outputs": [
+        {
+          "consumes": "ClaimRecord",
+          "produces": "closure + 导出"
+        }
+      ],
+      "human": true
+    },
+    {
+      "id": "经验",
+      "label": "经验与自改进",
+      "input_kinds": [
+        "closure + 导出"
+      ],
+      "outputs": [
+        {
+          "consumes": "closure + 导出",
+          "produces": "任务反馈"
+        }
+      ],
+      "human": true
+    }
+  ],
+  "compositions": [
+    {
+      "id": "confirmatory",
+      "label": "验证式组合",
+      "sub": "假设在前：方案消费假设，成为判别式协议",
+      "wiring": [
+        {
+          "element": "问题",
+          "consumes": null
+        },
+        {
+          "element": "假设",
+          "consumes": "研究问题"
+        },
+        {
+          "element": "方案",
+          "consumes": "候选假设（可判别）"
+        },
+        {
+          "element": "证据",
+          "consumes": "判别式协议"
+        },
+        {
+          "element": "判定",
+          "consumes": "RunCapsule + EA"
+        },
+        {
+          "element": "图表",
+          "consumes": "RunCapsule + EA"
+        },
+        {
+          "element": "写作",
+          "consumes": "ClaimRecord"
+        },
+        {
+          "element": "闭包",
+          "consumes": "ClaimRecord"
+        },
+        {
+          "element": "经验",
+          "consumes": "closure + 导出"
+        }
+      ],
+      "slot_map": {
+        "问题": [
+          "S0"
+        ],
+        "假设": [
+          "S2-S3"
+        ],
+        "方案": [
+          "S4"
+        ],
+        "证据": [
+          "S1",
+          "S1b",
+          "S5"
+        ],
+        "判定": [
+          "S5b"
+        ],
+        "图表": [
+          "S6"
+        ],
+        "写作": [
+          "S8-S12"
+        ],
+        "闭包": [
+          "S13-S16"
+        ]
+      }
+    },
+    {
+      "id": "exploratory",
+      "label": "探索式组合",
+      "sub": "证据在前：方案只消费问题（数据收集设计），假设从证据中提炼",
+      "wiring": [
+        {
+          "element": "问题",
+          "consumes": null
+        },
+        {
+          "element": "方案",
+          "consumes": "研究问题"
+        },
+        {
+          "element": "证据",
+          "consumes": "数据收集协议"
+        },
+        {
+          "element": "假设",
+          "consumes": "RunCapsule + EA"
+        },
+        {
+          "element": "判定",
+          "consumes": "RunCapsule + EA"
+        },
+        {
+          "element": "图表",
+          "consumes": "RunCapsule + EA"
+        },
+        {
+          "element": "写作",
+          "consumes": "ClaimRecord"
+        },
+        {
+          "element": "闭包",
+          "consumes": "ClaimRecord"
+        },
+        {
+          "element": "经验",
+          "consumes": "closure + 导出"
+        }
+      ],
+      "slot_map": {
+        "问题": [
+          "S0"
+        ],
+        "方案": [
+          "S4"
+        ],
+        "证据": [
+          "S1",
+          "S1b",
+          "S5"
+        ],
+        "假设": [
+          "S2-S3"
+        ],
+        "判定": [
+          "S5b"
+        ],
+        "图表": [
+          "S6"
+        ],
+        "写作": [
+          "S8-S12"
+        ],
+        "闭包": [
+          "S13-S16"
+        ]
       }
     }
-  ]
+  ],
+  "composition_slot_maps_note": "slot_map 桥接组合要素与治理槽位；证据要素跨 S1（收集）与 S5（执行）。"
 }

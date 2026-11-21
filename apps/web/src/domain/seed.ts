@@ -9,6 +9,7 @@ import type {
   EvidenceItem,
   EvolutionCandidate,
   Gate,
+  LiteratureAnnotation,
   Message,
   Mode,
   PersistedWorkspace,
@@ -43,10 +44,10 @@ export const DEMO_LABELS: Record<
     hint: "教学演示：从文献检索一路走到结论签署与自改进，九个阶段逐条可展开；点「模拟人签」演示待签→已签。状态只在页面内存，刷新即回待签。"
   },
   "ese-ms-20261118-03": {
-    label: "真实研究·待签",
-    short: "回放·待签",
+    label: "真实研究·闭环回放",
+    short: "闭环·待签",
     tone: "pending",
-    hint: "真实 ESE 研究回放（ESE-MS-20261118-03）：3 个仓库 / 5132 提交，缺陷修复比例 +0.046，分层后 click 方向反转；claim / closure / signature 仍待人签。"
+    hint: "真实 ESE 研究的完整闭环回放（ESE-MS-20261118-03，S1→META）：3 仓库 / 5132 提交，合并 +0.046 但 click 内方向反转；S6/S8–S12 如实呈现未产出与 locked；claim / closure / signature 仍待人签。"
   },
   "e2e-closed-loop": {
     label: "端到端闭环·委托签",
@@ -610,7 +611,7 @@ export function seedEseStudy(): ResearchTask {
         id: "CLM-ESE-01",
         kind: "claim",
         status: "unsigned",
-        text: "在 click / requests / httpx 合并样本上，缺陷修复提交触碰测试的比例比其它提交高 0.0464（0.4136 vs 0.3672，置换 p=0.015）；但 click 内方向反转（−0.0067），因此不能外推到单个项目。",
+        text: "在 click / requests / httpx 合并样本上，缺陷修复提交触碰测试的比例比其它提交高 0.0464（0.4136 vs 0.3672，置换 p=0.015；分层调整后 +0.0681，Mantel-Haenszel）；但 click 内方向反转（−0.0067），因此不能外推到单个项目。",
         scope: "三仓库便利样本 · 启发式标签 · 不可外推",
         refs: ["EA-65d32e114229", "ESE-MS-20261118-03"],
         note: "待人工签署：statement 与 human_reason 需在本地 CLI 定稿，网页不代签。"
@@ -640,68 +641,204 @@ export function seedEseStudy(): ResearchTask {
     autoStages: freshStages().map((stage, index) => (index <= 4 ? { ...stage, status: "done" } : stage)),
     messages: [
       system(
-        "STATIC REPLAY · 回放一次真实 ESE 研究（ESE-MS-20261118-03）。数字来自 runtime_data 产物；claim / closure / signature 仍未人签。",
+        "STATIC REPLAY · 回放一次真实 ESE 研究的完整闭环（ESE-MS-20261118-03，S1→META）。执行与读数全部真实（3 仓库 / 5132 提交）；claim / closure / signature 未人签——门禁停在哪里，叙事就讲到哪里。",
         "22:41:02"
       ),
       user(
         "研究一个问题：Python 项目里，缺陷修复提交是不是比功能提交更常触碰测试？这个差异经项目分层后还成立吗？",
         "22:41:10"
       ),
-      agent(
-        "先把它拆成四个可检验的子问题，并在跑数之前把协议冻结。",
-        {
-          type: "plan",
-          queries: [
-            "RQ1 触碰 .py 的提交里，有多大比例同时触碰测试？",
-            "RQ2 缺陷修复提交与其它提交的比例是否不同？",
-            "RQ3 按每仓库中位日期切分，早晚是否不同？",
-            "RQ4 按项目 / 提交规模 / 生产代码共变分层后，差异是否仍在？"
-          ],
-          scope: "click / requests / httpx · 本地 clone · path+message 启发式标签",
-          budget: "3 repos · 5132 commits · 置换 1000 次（固定种子）",
-          note: "协议先于数据冻结；标签是启发式，不是人工标注。"
-        },
-        "22:41:26"
+      withStage(
+        agent(
+          "**S1 · 问题拆解与语料固定**。ESE 的 S1 不是文献检索，是语料组装：拆成四个可检验子问题，3 个仓库 HEAD 固定，path+message 启发式标签；跑数之前先冻结协议。",
+          {
+            type: "plan",
+            queries: [
+              "RQ1 触碰 .py 的提交里，有多大比例同时触碰测试？",
+              "RQ2 缺陷修复提交与其它提交的比例是否不同？",
+              "RQ3 按每仓库中位日期切分，早晚是否不同？",
+              "RQ4 按项目 / 提交规模 / 生产代码共变分层后，差异是否仍在？"
+            ],
+            scope: "click / requests / httpx · 本地 clone · path+message 启发式标签",
+            budget: "3 repos · 5132 commits · 置换 1000 次（固定种子）",
+            note: "协议先于数据冻结；标签是启发式，不是人工标注。"
+          },
+          "22:41:26"
+        ),
+        "S1"
       ),
-      agent(
-        "执行完成：3 个仓库、5132 个提交。",
-        {
-          type: "sources",
-          items: [
-            { title: "click", meta: "1328 commits · 0.4428 [0.4163, 0.4696]", status: "ok" },
-            { title: "requests", meta: "2824 commits · 0.2691 [0.2531, 0.2858]", status: "ok" },
-            { title: "httpx", meta: "980 commits · 0.5878 [0.5567, 0.6182]", status: "ok" }
-          ],
-          note: "三个仓库都是成熟开源项目；这是便利样本，不是概率抽样。"
-        },
-        "22:43:05"
+      user("标签用 path+message 启发式，会不会把标签打错？", "22:41:38"),
+      withStage(
+        agent(
+          "会，所以它被写进了边界而不是藏起来：capsule 的 warning 里明记「labels are path/message heuristics」——test/bug 标签是启发式，不是人工标注。这限制所有结论的口径：比的是「启发式标签下的提交群体」，不是人工核验过的缺陷修复。",
+          undefined,
+          "22:41:44"
+        ),
+        "S1"
       ),
-      agent(
-        "**合并读数**\n\n- 触碰测试：1924 / 5132 = **0.3749**，95% CI [0.3618, 0.3882]\n- 缺陷修复：352 / 851 = 0.4136；其它：1572 / 4281 = 0.3672\n- 差 **+0.0464**，置换检验双侧 p = **0.015**\n- 时间切分：早期 0.3091 → 晚期 0.4410，差 +0.1319（p = 0.001）\n\n> 合并样本上差异为正。是否每个项目都成立，要分层才知道。",
-        undefined,
-        "22:43:20"
+      withStage(
+        agent(
+          "**S2–S3 · G1 收敛**：四条 RQ 收敛为一条可检验断言——合并样本差值 + 分层检验（按项目 / 提交规模 / 生产代码共变）。\n\n> 候选不是 claim；收敛由人确认后写入 G1，断言本身仍需 S5b 人签。",
+          {
+            type: "gate",
+            gate: "G1",
+            title: "四条 RQ 已收敛为一条可检验断言",
+            reason: "合并样本差值 + 分层检验；置换检验双侧 p",
+            status: "pass"
+          },
+          "22:41:50"
+        ),
+        "S2–S3"
+      ),
+      withStage(
+        agent(
+          "**S4 · 分析计划**：假设、基线、主指标、分层与置换计划在此定死——\n\n- 假设：缺陷修复提交触碰测试的比例高于其它提交，且经分层调整后方向一致\n- 基线：其它提交（non-bugfix）｜主指标：test_cochange_rate｜seeds：[42]\n- 分层维度：project · commit_size_bucket · production_cochange\n- 置换检验：1000 次双侧（固定种子）",
+          {
+            type: "protocol",
+            hypothesis: "缺陷修复提交触碰测试的比例高于其它提交，且经分层调整后方向一致。",
+            baseline: "其它提交（non-bugfix）",
+            metric: "test_cochange_rate",
+            seeds: 1,
+            controls: ["project", "commit_size_bucket", "production_cochange"],
+            status: "G2 待冻结"
+          },
+          "22:42:05"
+        ),
+        "S4"
+      ),
+      user("分层和置换的细节也一起冻进去吗？", "22:42:12"),
+      withStage(
+        agent(
+          "是。分层维度、置换次数与种子全部写进 protocol；run-capsule 会绑定它的 sha256（254d1d10…），跑数之后执行器只能按冻结的计划提取与统计，改分析 = 重新走 G2。",
+          undefined,
+          "22:42:18"
+        ),
+        "S4"
+      ),
+      withStage(
+        agent(
+          "**S4 · G2 冻结**：协议已冻结，run-capsule 绑定 protocol sha256；执行器只做提取与统计。",
+          {
+            type: "gate",
+            gate: "G2",
+            title: "分层与置换计划已冻结",
+            reason: "协议先于数据；run-capsule 绑定 protocol sha256",
+            status: "pass"
+          },
+          "22:42:30"
+        ),
+        "S4"
+      ),
+      withStage(
+        agent(
+          "**S5a 执行完成**：3 个仓库、5132 个提交。",
+          {
+            type: "sources",
+            items: [
+              { title: "click", meta: "1328 commits · 0.4428 [0.4163, 0.4696]", status: "ok" },
+              { title: "requests", meta: "2824 commits · 0.2691 [0.2531, 0.2858]", status: "ok" },
+              { title: "httpx", meta: "980 commits · 0.5878 [0.5567, 0.6182]", status: "ok" }
+            ],
+            note: "三个仓库都是成熟开源项目；这是便利样本，不是概率抽样。"
+          },
+          "22:43:05"
+        ),
+        "S5a"
+      ),
+      withStage(
+        agent(
+          "**合并读数**\n\n- 触碰测试：1924 / 5132 = **0.3749**，95% CI [0.3618, 0.3882]\n- 缺陷修复：352 / 851 = 0.4136；其它：1572 / 4281 = 0.3672\n- 差 **+0.0464**，置换检验双侧 p = **0.015**\n- 分层调整后（Mantel-Haenszel）：**+0.0681**\n- 时间切分：早期 0.3091 → 晚期 0.4410，差 +0.1319（p = 0.001）\n\n> 合并样本上差异为正。是否每个项目都成立，要分层才知道。",
+          undefined,
+          "22:43:20"
+        ),
+        "S5a"
+      ),
+      withStage(
+        agent(
+          "**RunCapsule 与 run contract**\n\n- capsule：dataset `msr-corpus:click,httpx,requests`（sha256 435713f0…）· code sha256 29d53e3e… · protocol sha256 254d1d10… · seeds [42] · environment python 3.8.7\n- run contract 核对 10 项：capsule.completed / identity.protocol / identity.dataset / identity.seeds / identity.metric / metrics.finite / evidence.present / evidence.hash / artifacts.required 全部 **pass**\n- **min_delta → fail（not_verifiable）**：没有配对基线指标\n\n整体 status = **attention**。",
+          undefined,
+          "22:43:32"
+        ),
+        "S5a"
+      ),
+      user("min_delta fail 会不会把这条 run 判废？", "22:43:40"),
+      withStage(
+        agent(
+          "不会——它把能宣称的范围写死：没有与基线配对的读数，就只能报合并差值 +0.0464 与置换 p=0.015，不能说「超过基线」。run contract 的作用不是判死刑，是画边界：attention 状态如实跟着这条 run 走，面板与 BRIEF 都能看到它。",
+          undefined,
+          "22:43:46"
+        ),
+        "S5a"
       ),
       user("分层之后呢？我担心是某个项目把总体拉高了。", "22:44:01"),
-      agent(
-        "**分层结果：差异不是每个项目都成立**\n\n- click：0.4375 vs 0.4442 → **-0.0067（方向反转）**\n- httpx：0.6264 vs 0.5838 → +0.0426\n- requests：0.3581 vs 0.2513 → +0.1068\n- 提交规模 >5：0.5909 vs 0.6700 → -0.0791\n\n所以能写的只有：“在三仓库合并样本上高 0.046，但 click 内方向反转，因此不适用于单项目。” 不能写“缺陷修复提交更常改测试”。",
-        undefined,
-        "22:44:18"
+      withStage(
+        agent(
+          "**S5b · 分层结果：差异不是每个项目都成立**\n\n- click：0.4375 vs 0.4442 → **-0.0067（方向反转）**\n- httpx：0.6264 vs 0.5838 → +0.0426\n- requests：0.3581 vs 0.2513 → +0.1068\n- 提交规模 1-2：+0.0708｜3-5：+0.1530｜>5：**-0.0791**\n- 生产代码共变：无 +0.0000｜有 +0.0591\n\n所以能写的只有：“在三仓库合并样本上高 0.046，但 click 内方向反转，因此不适用于单项目。” 不能写“缺陷修复提交更常改测试”。",
+          undefined,
+          "22:44:18"
+        ),
+        "S5b"
       ),
       user("这条现在能签吗？", "22:45:02"),
-      agent(
-        "还不能。证据链五段只完成了前两段：\n\n- RunCapsule ✓ completed（metric=test_cochange_rate，seeds=[42]）\n- EA ✓ immutable（EA-65d32e114229，source=ese-exec）\n- Claim · 待人工\n- Closure · 待执行\n- Signature · 待人工\n\n后三步都是人签步骤，agent 不代签。",
-        {
-          type: "gate",
-          gate: "G5",
-          title: "结论待人工签署",
-          reason: "capsule 与 EA 已完成；claim / closure / signature 需要人执行 CLI",
-          status: "blocked"
-        },
-        "22:45:20"
+      withStage(
+        agent(
+          "**EA 已封存**：EA-65d32e114229 · kind=metric · source=ese-exec · scope=S5/ESE-MS-20261118-03 · **immutable**；evidence hash 41149c82… 钉住 metrics.json，任何改动都会被发现。\n\nclaim 已起草（CLM-ESE-01），但还不能由我签：statement 只能写三仓库合并样本口径，分层反转必须同引，human_reason 由人定稿——签名只在本地 CLI，网页不代签。",
+          {
+            type: "gate",
+            gate: "S5b",
+            title: "判定已产出，claim 待人签",
+            reason: "EA sealed（EA-65d32e114229）；statement 只能写分层口径；human_reason 由人填",
+            status: "needs_human"
+          },
+          "22:45:10"
+        ),
+        "S5b"
+      ),
+      withStage(
+        agent(
+          "**S6 结果图**：本轮未产出绑定 EA 的结果图（runtime_data/ese-ms-20261118-03 下没有 result-figure）。图不脱离 EA 单独引用；产出后若上游数据变更，会被标 stale 并暂停导出。",
+          undefined,
+          "22:45:40"
+        ),
+        "S6"
+      ),
+      withStage(
+        agent(
+          "**S8–S12 写作槽位**：claim 人签前不上数——allowed_result_numbers 为空，Results / Abstract 保持 locked；槽位只接受已签 claim / EA 引用，Limitations 由作者亲写。",
+          undefined,
+          "22:45:50"
+        ),
+        "S8–S12"
+      ),
+      withStage(
+        agent(
+          "**S13–S16 闭包口**：证据链五段走到这里——\n\n- RunCapsule ✓ completed（metric=test_cochange_rate，seeds=[42]）\n- EA ✓ immutable（EA-65d32e114229，source=ese-exec）\n- Claim · 待人工\n- Closure · 待执行\n- Signature · 待人工\n\n后三步都是人签步骤，agent 不代签。",
+          {
+            type: "gate",
+            gate: "G5",
+            title: "结论待人工签署",
+            reason: "capsule 与 EA 已完成；claim / closure / signature 需要人执行 CLI",
+            status: "blocked"
+          },
+          "22:46:00"
+        ),
+        "S13–S16"
       ),
       system(
         "等待人工：run claim --evidence-source ese-exec → closure ese-check → closure ese-sign。签完后页面的证据链会自动变为 SIGNED。",
-        "22:45:30"
+        "22:46:05"
+      ),
+      withStage(
+        agent(
+          "**META 经验登记**：本轮过程经验写入记忆——「ESE 分层数据显示 click 方向反转；引用该结论必须带分层口径」。\n\n本轮没有可准入的参数改进提案，所以不生成自进化候选：经验 ≠ 能力增益。",
+          undefined,
+          "22:46:10"
+        ),
+        "META"
+      ),
+      system(
+        "闭环叙事结束：执行与读数真实；S5b / G5 停在人工门不是缺陷，是门禁在正常工作。",
+        "22:46:20"
       )
     ]
   };
@@ -720,6 +857,42 @@ export function seedEseStudy(): ResearchTask {
  *     submission=false, which is NOT a human signature — the gate stays
  *     needs_human.
  */
+/**
+ * S1 literature facet annotations for the seeded sessions, keyed by task id.
+ * Single source for both createSeedWorkspace and the run-once migration that
+ * backfills already-persisted workspaces. Each entry is transcribed from what
+ * that session's own artifacts/messages state — see the per-task comments below.
+ */
+export const SEED_LITERATURE_ANNOTATIONS: Record<string, LiteratureAnnotation> = {
+  // Real run: transcribed from its S1 message ("只覆盖了 2/6 个检索面向
+  // （核心问题、综述），缺方法、评测、局限、近期进展") — not inferred.
+  "e2e-closed-loop": {
+    facets: [
+      { id: "core", label: "核心问题", covered: true },
+      { id: "survey", label: "综述", covered: true },
+      { id: "method", label: "方法", covered: false },
+      { id: "evaluation", label: "评测", covered: false },
+      { id: "limitation", label: "局限", covered: false },
+      { id: "recent", label: "近期进展", covered: false }
+    ],
+    source: "S1 覆盖声明（literature-ledger / 会话消息）"
+  },
+  // Teaching annotation consistent with the session's own plan card: its three
+  // subqueries probe 核心/方法/评测（配对对照）; 综述/局限/近期 were never queried.
+  // Demo data — the panel renders it under the task's demo label.
+  "full-chain-demo": {
+    facets: [
+      { id: "core", label: "核心问题", covered: true },
+      { id: "survey", label: "综述", covered: false },
+      { id: "method", label: "方法", covered: true },
+      { id: "evaluation", label: "评测", covered: true },
+      { id: "limitation", label: "局限", covered: false },
+      { id: "recent", label: "近期进展", covered: false }
+    ],
+    source: "S1 检索计划（plan 卡三个子查询的面向归属）"
+  }
+};
+
 export function seedE2EClosedLoop(): ResearchTask {
   return {
     id: "e2e-closed-loop",
@@ -784,6 +957,7 @@ export function seedE2EClosedLoop(): ResearchTask {
       note: "真实执行、fixture 语料（sklearn iris）。run contract 判 blocked：没有与基线配对的读数，只能报均值，不能宣称超过基线。"
     },
     replay: { basis: "fixture", source: "runtime_data/e2e-closed-loop" },
+    literature: SEED_LITERATURE_ANNOTATIONS["e2e-closed-loop"],
     evaluation: emptyEvaluation(),
     evolution: { status: "idle", candidate: null, lease: "", history: [] },
     auto: { running: false, paused: false, index: 8, cycle: 0, gate: "claim", gateApproved: false },
@@ -945,6 +1119,7 @@ export function seedFullChainDemo(): ResearchTask {
       status: "completed"
     },
     replay: { basis: "demo", source: "前端教学演示 · 代理指标" },
+    literature: SEED_LITERATURE_ANNOTATIONS["full-chain-demo"],
     evaluation: demoEvaluation(),
     evolution: {
       status: "proposed",

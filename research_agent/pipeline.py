@@ -145,6 +145,7 @@ class PipelineRequest:
     study_budget: int = 60
     study_root: str = ""
     adaptive_retrieval: bool = False
+    method_id: str = ""
 
 
 @dataclass
@@ -282,6 +283,24 @@ class PipelineRunner:
             raise PipelineError("language must be zh or en")
         flow_mode = validate_flow_mode(request.flow_mode)
         self._events = []  # one run = one chain; a reused runner must not splice two runs
+        # design/164: composition-driven stage resolution — when a method_id is
+        # provided, the pipeline resolves which stages the method's composition
+        # covers and emits stage_skip for uncovered ones (advisory, not a gate).
+        composition_plan = None
+        covered_pipeline_stages = None
+        if request.method_id:
+            try:
+                from .method_registry import pipeline_stage_plan
+                composition_plan = pipeline_stage_plan(request.method_id)
+                covered_pipeline_stages = set(composition_plan["covered_stages"])
+                self._emit("stage_start", "composition",
+                           "composition resolved: %s covers %s" % (
+                               composition_plan["label"], sorted(covered_pipeline_stages)),
+                           {"composition": composition_plan["composition"],
+                            "covered": sorted(covered_pipeline_stages)})
+            except Exception:
+                self._emit("stage_skip", "composition",
+                           "composition resolution failed; running all stages")
         claim_refs = list(request.claim_refs)
         claim_statements = list(request.claim_statements)
         claim_assertions = list(request.claim_assertions)
@@ -391,6 +410,9 @@ class PipelineRunner:
         )
 
         self._emit("stage_start", "literature", "检索与阅读")
+        if covered_pipeline_stages is not None and "literature" not in covered_pipeline_stages:
+            self._emit("stage_skip", "literature",
+                       "not covered by composition " + (composition_plan["composition"] if composition_plan else ""))
         if request.adaptive_retrieval:
             # The first real loopback in this runtime: the S1 coverage verdict
             # decides the next run's retrieval budget. It never crosses a gate.
@@ -444,6 +466,8 @@ class PipelineRunner:
         )
         q0 = q0_decision(literature)
         modules["q0"] = q0
+        if composition_plan:
+            modules["composition_plan"] = composition_plan
         synthesis_matrix: Dict[str, Any] = {}
         if request.synthesis_enabled:
             sources_for_synthesis: Dict[str, Dict[str, Any]] = {}
@@ -501,6 +525,8 @@ class PipelineRunner:
                 )
 
         self._emit("stage_start", "idea", "假设收敛")
+        if covered_pipeline_stages is not None and "idea" not in covered_pipeline_stages:
+            self._emit("stage_skip", "idea", "not covered by composition")
         prior_art_agent = self._agent("literature")
 
         def _prior_art_search(
@@ -704,6 +730,8 @@ class PipelineRunner:
             seeds = request.run_seeds
             budget = request.budget or "%d seeds x stratified split" % request.run_seeds
         self._emit("stage_start", "experiment", "实验设计草稿")
+        if covered_pipeline_stages is not None and "experiment" not in covered_pipeline_stages:
+            self._emit("stage_skip", "experiment", "not covered by composition")
         if request.design_file:
             payload = read_json(Path(request.design_file))
             if not isinstance(payload, dict):
@@ -1036,6 +1064,8 @@ class PipelineRunner:
             self._emit("stage_skip", "run", "no run_dataset or run_dir; result slot stays pending")
 
         self._emit("stage_start", "figure", "科研绘图")
+        if covered_pipeline_stages is not None and "figure" not in covered_pipeline_stages:
+            self._emit("stage_skip", "figure", "not covered by composition")
         nodes = [
             FigureNode("lit", "文献调研\n%d spans" % len(literature.spans), "literature", 0),
             FigureNode("idea", "假设收敛\n%d candidates" % len(idea.candidates), "idea", 1),
@@ -1104,6 +1134,8 @@ class PipelineRunner:
                     + "; ".join(study_design_audit.get("blockers") or [])[:400]
                 )
         self._emit("stage_start", "paper", "写作与槽位绑定")
+        if covered_pipeline_stages is not None and "paper" not in covered_pipeline_stages:
+            self._emit("stage_skip", "paper", "not covered by composition")
         paper = self._agent("paper").run(
             PaperRequest(
                 topic=request.topic,

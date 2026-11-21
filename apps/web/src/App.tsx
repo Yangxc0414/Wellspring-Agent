@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import type { CSSProperties } from "react";
 import { AUTO_TICK_MS } from "./domain/catalog";
+import { demoDwell } from "./domain/demoPlayer";
 import { NARROW_LAYOUT_QUERY } from "./domain/breakpoints";
 import { SHORTCUT_ACTIONS, shortcutFromEvent } from "./domain/shortcuts";
 import { selectCurrentTask, useWorkspaceStore } from "./state/workspaceStore";
@@ -39,6 +40,9 @@ const WorkspaceFilesDialog = lazy(() =>
 const ClaimGateDialog = lazy(() =>
   import("./components/ClaimGateDialog").then((module) => ({ default: module.ClaimGateDialog }))
 );
+const GateDialog = lazy(() =>
+  import("./components/GateDialog").then((module) => ({ default: module.GateDialog }))
+);
 
 import { folderStorage } from "./adapters/folderStorage";
 import { usePreviewStore } from "./state/previewStore";
@@ -66,6 +70,30 @@ export default function App() {
     const timer = window.setTimeout(() => actions.autoStep(), AUTO_TICK_MS);
     return () => window.clearTimeout(timer);
   }, [autoKey, shouldTick, actions]);
+
+  // Demo player engine: reveal the next transcript message after its dwell
+  // time (cards hold longer than plain text). Pauses happen inside demoTick —
+  // at the claim gate and at the end of the transcript.
+  const demoPlayer = useWorkspaceStore((state) => state.ui.demoPlayer);
+  const demoTask = useWorkspaceStore((state) =>
+    state.ui.demoPlayer
+      ? state.tasks.find((item) => item.id === state.ui.demoPlayer?.taskId)
+      : undefined
+  );
+  const demoNext = demoPlayer ? demoTask?.messages[demoPlayer.revealCount] : undefined;
+  const demoKey = demoPlayer
+    ? `${demoPlayer.taskId}|${demoPlayer.revealCount}|${demoPlayer.playing}|${demoPlayer.finished}`
+    : "";
+
+  useEffect(() => {
+    if (!demoPlayer || !demoPlayer.playing || demoPlayer.finished) return;
+    if (!demoNext) {
+      actions.demoTick();
+      return;
+    }
+    const timer = window.setTimeout(() => actions.demoTick(), demoDwell(demoNext));
+    return () => window.clearTimeout(timer);
+  }, [demoKey, actions]);
 
   useEffect(() => {
     let cancelled = false;
@@ -97,6 +125,10 @@ export default function App() {
         }
         if (ui.claimGateOpen) {
           actions.closeClaimGate();
+          return;
+        }
+        if (ui.gateDialog) {
+          actions.closeGateDialog();
           return;
         }
         if (ui.paletteOpen || ui.modelOpen || ui.pluginsOpen || ui.skillsOpen || ui.newTaskOpen) {
@@ -216,6 +248,7 @@ export default function App() {
         {ui.filesOpen && <WorkspaceFilesDialog />}
         {ui.permissionRequest && <PermissionDialog />}
         {ui.claimGateOpen && <ClaimGateDialog />}
+        {ui.gateDialog && <GateDialog />}
         <CommandPalette />
       </Suspense>
       <Toast />

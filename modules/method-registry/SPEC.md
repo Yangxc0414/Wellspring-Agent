@@ -2,7 +2,7 @@
 id: method-registry
 name: 研究方法注册表（阶段 × 方法）
 stage: META
-version: 0.2.0
+version: 0.3.0
 status: draft
 owner: research-agent
 inputs:
@@ -15,6 +15,7 @@ outputs:
   - StageMethodMatrix
   - TaskCard
   - MethodCheckReport
+  - PipelineStagePlan  # advisory projection: composition slots -> pipeline stage names
 tools:
   - method.list
   - method.show
@@ -80,6 +81,8 @@ invariants:
 5. 不把检查项直接接进门禁；如确需，另写设计文档并人工确认。
 
 ## Changelog
+
+- 2026-11-21 · v0.3.0 · status=draft · 新增 advisory 输出 `pipeline_stage_plan(method_id)`：把组合驱动的槽位计划投影为 pipeline 阶段名集合，供执行器记录与发事件。契约变化仅为新增只读输出；注册表本身仍是数据不是门禁，fail-closed 加载校验不变，claim/EA/closure/signature 语义不变。实现对应 design/164，测试 `PipelineStagePlanTest` 五例。
 
 - 2026-11-18 · v0.2.0 · status=draft · repository-mining 检查新增 mining.analysis（warn）：要求 analysis.stratification 与 analysis.permutation；advisory 语义不变
 - 0.1.0（2026-11-18）：首版。9 个 ESE 方法 × 10 个阶段；任务卡、矩阵、advisory 检查与 CLI；18 例测试。承接设计文档 85。

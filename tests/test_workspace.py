@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from research_agent.method_registry import load_registry
 from research_agent.workspace import (
     AgentRegistry,
     ArchiveStore,
@@ -93,6 +94,7 @@ class WorkspaceStoreTest(unittest.TestCase):
                 "command-catalog.json",
                 "custom-agents.json",
                 "evolution-policy.json",
+                "method-registry.json",
                 "orchestration-topology.json",
             ],
         )
@@ -101,6 +103,7 @@ class WorkspaceStoreTest(unittest.TestCase):
         topology = json.loads((self.root / "orchestration-topology.json").read_text(encoding="utf-8"))
         custom = json.loads((self.root / "custom-agents.json").read_text(encoding="utf-8"))
         policy = json.loads((self.root / "evolution-policy.json").read_text(encoding="utf-8"))
+        methods = json.loads((self.root / "method-registry.json").read_text(encoding="utf-8"))
         self.assertGreaterEqual(agents["count"], 12)
         self.assertNotIn("waitpoints", [agent["id"] for agent in agents["agents"]])
         self.assertGreaterEqual(commands["count"], 12)
@@ -108,15 +111,23 @@ class WorkspaceStoreTest(unittest.TestCase):
         self.assertEqual(topology["lanes"]["parallel"]["max_workers"], 3)
         self.assertIn("boundary", custom)
         self.assertIn("scopes", policy)
+        # The method registry rides the same export: the frontend method-model
+        # view must consume the same data the CLI queries (design/149).
+        self.assertGreaterEqual(result["methods"], 9)
+        self.assertEqual(methods["schema"], "ese-method-registry-0.5")
 
         committed_agents = REPO / "apps" / "web" / "public" / "agent-registry.json"
         committed_commands = REPO / "apps" / "web" / "public" / "command-catalog.json"
+        committed_methods = REPO / "apps" / "web" / "public" / "method-registry.json"
         if committed_agents.is_file():
             current = json.loads(committed_agents.read_text(encoding="utf-8"))
             self.assertEqual(current["agents"], AgentRegistry().snapshot()["agents"])
         if committed_commands.is_file():
             current = json.loads(committed_commands.read_text(encoding="utf-8"))
             self.assertEqual(current["commands"], CommandRegistry().snapshot()["commands"])
+        if committed_methods.is_file():
+            current = json.loads(committed_methods.read_text(encoding="utf-8"))
+            self.assertEqual(current, load_registry())
 
 
 

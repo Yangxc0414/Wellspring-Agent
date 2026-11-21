@@ -5,12 +5,14 @@ import { runtimeRunState } from "../domain/runtimeSnapshot";
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { ArtifactCard } from "./ArtifactCard";
 import { Composer } from "./Composer";
+import { DemoPlayerBar } from "./DemoPlayerBar";
 import { Icon } from "./Icon";
 import { RichText } from "./RichText";
 
 function TaskHeader() {
   const task = useWorkspaceStore(selectCurrentTask);
   const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const demoPlayer = useWorkspaceStore((state) => state.ui.demoPlayer);
   const actions = useWorkspaceStore((state) => state.actions);
   if (!task) return null;
   const workspace = workspaces.find((item) => item.id === task.workspaceId);
@@ -77,7 +79,9 @@ function TaskHeader() {
           <i>/</i>
           <span>{stageKicker}</span>
           <span className={`run-led ${task.auto.running && !task.auto.paused ? "is-live" : ""}`} />
-          <span>{statusLabel}</span>
+          {/* Blocked tasks already say 人签门待人签 in the kicker and gate pending
+              in the chips — a third "HUMAN GATE" here is pure repetition. */}
+          {!(task.status === "blocked" && !runtimeCard && !task.auto.running) && <span>{statusLabel}</span>}
         </div>
         <div className="task-title-line">
           <span className="task-tag">TASK</span>
@@ -89,7 +93,16 @@ function TaskHeader() {
       <div className="task-head-side">
         <div className="task-chips">
           <span className="chip blue">{meta.label}</span>
-          <span className="chip" title="这是已录完的回放进度；右侧 RESEARCH FLOW 是从第 0 步开始的教学重演，两者口径不同">回放 {completedCount}/9 stages</span>
+          <span
+            className="chip"
+            title={
+              demoPlayer
+                ? "正在回放的完整转录：消息逐步揭示中；右侧 RESEARCH FLOW 由演示播放器驱动，进度与会话一致"
+                : "这是已录完的回放进度；右侧 RESEARCH FLOW 是从第 0 步开始的教学重演，两者口径不同"
+            }
+          >
+            回放 {completedCount}/9 stages
+          </span>
           <span className={`chip${taskChip.tone ? ` ${taskChip.tone}` : ""}`}>
             {taskChip.label}
           </span>
@@ -129,10 +142,17 @@ function TaskHeader() {
 
 // Message content is immutable once appended; memo keeps the runtime poll (which
 // rewrites only the last message's card) from re-rendering the whole transcript.
-const MessageView = memo(function MessageView({ item }: { item: Message }) {
+const MessageView = memo(function MessageView({
+  item,
+  isCurrent = false
+}: {
+  item: Message;
+  /** Newest message of an active demo replay — gets the "just revealed" highlight. */
+  isCurrent?: boolean;
+}) {
   if (item.role === "system") {
     return (
-      <div className="system-line">
+      <div className={`system-line${isCurrent ? " is-demo-current" : ""}`} data-mid={item.id}>
         <span className="system-dot" />
         <span>{item.text}</span>
       </div>
@@ -141,7 +161,11 @@ const MessageView = memo(function MessageView({ item }: { item: Message }) {
 
   const isUser = item.role === "user";
   return (
-    <div className={`message${isUser ? " is-user" : ""}`} data-stage={item.stage}>
+    <div
+      className={`message${isUser ? " is-user" : ""}${isCurrent ? " is-demo-current" : ""}`}
+      data-stage={item.stage}
+      data-mid={item.id}
+    >
       <div className="avatar" aria-hidden="true">
         {isUser ? "YOU" : <Icon name="logo" size={14} />}
       </div>
@@ -188,11 +212,17 @@ function RunIndicator() {
 
 export function Conversation() {
   const task = useWorkspaceStore(selectCurrentTask);
+  const demoPlayer = useWorkspaceStore((state) => state.ui.demoPlayer);
   const autoScroll = useWorkspaceStore((state) => state.preferences.autoScroll);
   const reduceMotion = useWorkspaceStore((state) => state.preferences.reduceMotion);
   const focusStage = useWorkspaceStore((state) => state.ui.focusStage);
+  const focusMessage = useWorkspaceStore((state) => state.ui.focusMessage);
   const threadRef = useRef<HTMLDivElement>(null);
-  const messageCount = task?.messages.length ?? 0;
+  // Demo replay reveals the transcript progressively; without the player the
+  // full transcript renders unchanged.
+  const visibleMessages =
+    demoPlayer && task ? task.messages.slice(0, demoPlayer.revealCount) : task?.messages ?? [];
+  const messageCount = visibleMessages.length;
   const autoIndex = task?.auto.index ?? 0;
 
   // A static replay is a recorded walkthrough: start at the top so a demo
@@ -243,13 +273,32 @@ export function Conversation() {
     return () => window.clearTimeout(timer);
   }, [focusStage, reduceMotion]);
 
+  // Human-turn -> conversation jump: same mechanics for a specific message id,
+  // driven by BRIEF's 人的表述 rows and the flow panel's human-turn quotes.
+  useEffect(() => {
+    if (!focusMessage || !threadRef.current) return;
+    const target = threadRef.current.querySelector<HTMLElement>(
+      `[data-mid="${focusMessage.id}"]`
+    );
+    if (!target) return;
+    target.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+    target.classList.add("is-stage-focused");
+    const timer = window.setTimeout(() => target.classList.remove("is-stage-focused"), 2200);
+    return () => window.clearTimeout(timer);
+  }, [focusMessage, reduceMotion]);
+
   return (
     <main className="conversation">
       <TaskHeader />
+      {demoPlayer && <DemoPlayerBar />}
       <div className="thread" id="thread" ref={threadRef} role="log" aria-live="polite" aria-label="Agent 会话">
         <div className="thread-inner">
-          {task?.messages.map((item) => (
-            <MessageView key={item.id} item={item} />
+          {visibleMessages.map((item, index) => (
+            <MessageView
+              key={item.id}
+              item={item}
+              isCurrent={Boolean(demoPlayer && index === demoPlayer.revealCount - 1)}
+            />
           ))}
           <RunIndicator />
         </div>

@@ -122,7 +122,7 @@ export function ClaimGateDialog() {
           </button>
         </div>
         <p className="modal-lede">
-          这一步是人工门：签名只由本地 CLI 产生。面板给出真实命令、允许读取已签署产物，静态 demo 还能预览后续界面；三种路径都不会让浏览器代签或回写证据层。
+          这一步是人工门。静态演示构建里可以在网页上签署（页面内存预览，刷新即回）；真实签署用下面的 CLI 命令，或导入已签署产物。两条路都不会让浏览器产生真实签名。
         </p>
 
         <div className="claim-gate-state">
@@ -139,8 +139,8 @@ export function ClaimGateDialog() {
             <p className="claim-gate-text">
               {__STATIC_ONLY__
                 ? task?.run
-                  ? "这条任务已有 RunCapsule 与 EA，但还没有 claim draft。下一步是在本地 CLI 用 run claim 生成待签 claim；网页不代签。"
-                  : "这条是静态演示会话，没有真实 claim；用下方 DEMO 预览查看签署后的界面即可。"
+                  ? "这条任务已有 RunCapsule 与 EA，但还没有 claim draft；用下方演示签署查看签署后的界面即可。"
+                  : "这条是静态演示会话，没有真实 claim；用下方演示签署查看签署后的界面即可。"
                 : task?.run
                   ? "RunCapsule 与 EA 已就位，但还没有 claim draft。先在本地 CLI 执行 run claim 生成待签 claim，再回到这里。"
                   : "还没有 claim draft。先运行 pipeline 生成 RunCapsule / EA，再回到这里。"}
@@ -149,26 +149,40 @@ export function ClaimGateDialog() {
           <p className="claim-gate-detail">{label.detail}</p>
         </div>
 
-        {__STATIC_ONLY__ && !claim && (
+        {__STATIC_ONLY__ && (
           <section className="claim-gate-block is-demo is-first">
-            <b>③ 静态 demo：预览签署后的界面状态</b>
-            <p>这条会话没有真实 claim，不用去跑 pipeline。点下面的按钮，直接看 S8–S16 写作 / closure 在签署后是什么样——只推进浏览器状态，不产生签名、不写入证据层。</p>
-            <button type="button" className="solid-button" onClick={actions.previewDemoClaim}>
-              预览签署后的状态（DEMO）→
-            </button>
+            <b>在网页上签署（演示预览）</b>
+            <p>
+              演示时不必去 CLI：点下面的按钮，claim 按演示流程推进，会话与证据链立即反映签署后的样子。
+              <strong>不产生真实签名、不写入证据层、不解锁导出</strong>；刷新页面即回待签。
+            </p>
+            {label.state === "signed-demo" ? (
+              <button type="button" className="text-button" onClick={actions.resetDemoClaim}>
+                撤销演示签署，回到待签
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="solid-button"
+                disabled={!pending}
+                onClick={actions.previewDemoClaim}
+              >
+                在网页上签署（演示预览）→
+              </button>
+            )}
           </section>
         )}
 
         <section className="claim-gate-block">
-          <b>① 真实签署（本地 CLI）</b>
+          <b>真实签署（本地 CLI）</b>
           <p>在终端核对 EA 与数值后执行；产物是 <code>claim/claim.json</code>。占位符需替换为本次 run 的实际路径。</p>
           <GateCommandItem command={claimSignCommand({ scope: claim?.scope })} />
           <p className="claim-gate-note">{CLI_ONLY_NOTE}</p>
         </section>
 
         <section className="claim-gate-block">
-          <b>② 导入已签署产物（只读，不代签）</b>
-          <p>选择上一步生成的 <code>claim.json</code>；校验 claim_id / statement / scope / human_reason 后，工作台读取签署状态并继续展示后续阶段。</p>
+          <b>导入已签署产物（只读，不代签）</b>
+          <p>选择 CLI 生成的 <code>claim.json</code>；校验 claim_id / statement / scope / human_reason 后，工作台读取签署状态并继续展示后续阶段。</p>
           <label className="claim-gate-file">
             <input
               type="file"
@@ -181,29 +195,6 @@ export function ClaimGateDialog() {
           {error && <p className="claim-gate-error" role="alert">{error}</p>}
           {imported && <p className="claim-gate-ok">已校验并导入 {imported}</p>}
         </section>
-
-        {__STATIC_ONLY__ && claim && (
-          <section className="claim-gate-block is-demo">
-            <b>③ 仅静态 demo：预览签署后的界面状态</b>
-            <p>
-              这是展示页，不是真实工作台。预览只推进浏览器里的演示状态，用于查看 S8–S16 写作 / closure 界面；<strong>不产生签名、不写入证据层、不解锁导出签名</strong>，数值仍是 fixture。
-            </p>
-            {label.state === "signed-demo" ? (
-              <button type="button" className="text-button" onClick={actions.resetDemoClaim}>
-                撤销演示预览，回到待签
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="solid-button"
-                disabled={!pending}
-                onClick={actions.previewDemoClaim}
-              >
-                预览签署后的状态（DEMO）
-              </button>
-            )}
-          </section>
-        )}
 
         <footer className="modal-foot">
           <button type="button" className="text-button" onClick={actions.closeClaimGate}>关闭</button>

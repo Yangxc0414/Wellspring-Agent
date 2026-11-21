@@ -815,22 +815,30 @@ def export_workspace_snapshots(
     custom_snapshot = custom_store.snapshot()
     policy_snapshot = policy_store.snapshot()
     topology = topology_snapshot(custom_store.list(enabled_only=True), policy_snapshot)
+    # The method registry is data, not code (design/149): export it verbatim so
+    # the frontend method-model view consumes the same source the CLI queries.
+    from .method_registry import load_registry
+
+    method_registry = load_registry()
     _atomic_write_json(output / "agent-registry.json", agents)
     _atomic_write_json(output / "command-catalog.json", commands)
     _atomic_write_json(output / "orchestration-topology.json", topology)
     _atomic_write_json(output / "custom-agents.json", custom_snapshot)
     _atomic_write_json(output / "evolution-policy.json", policy_snapshot)
+    _atomic_write_json(output / "method-registry.json", method_registry)
     return {
         "output_dir": str(output),
         "agents": agents["count"],
         "commands": commands["count"],
         "custom_agents": custom_snapshot["count"],
         "policy_enabled": policy_snapshot["enabled"],
+        "methods": len(method_registry.get("methods", [])),
         "files": [
             "agent-registry.json",
             "command-catalog.json",
             "orchestration-topology.json",
             "custom-agents.json",
             "evolution-policy.json",
+            "method-registry.json",
         ],
     }

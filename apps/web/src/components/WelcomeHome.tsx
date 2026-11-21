@@ -109,7 +109,7 @@ export function WelcomeHome() {
   return (
     <main className="welcome">
       <div className="welcome-watermark" aria-hidden="true">
-        <span>WELLSRING</span>
+        <span>WELLSPRING</span>
         <em>AGENT</em>
       </div>
       <div className="welcome-inner">
@@ -121,7 +121,7 @@ export function WelcomeHome() {
             <circle cx="282" cy="36" r="3" fill="currentColor" opacity="0.55" />
           </svg>
           <span className="welcome-art-monogram">WA</span>
-          <span className="welcome-art-word">WELLSRING</span>
+          <span className="welcome-art-word">WELLSPRING</span>
           <span className="welcome-art-sub">AGENT · RESEARCH WORKSPACE</span>
         </div>
 
@@ -226,7 +226,41 @@ export function WelcomeHome() {
           </div>
         </div>
 
-        <p className="welcome-prompts-hint">点选示例会填入下方输入框，确认后再发送——不会自动执行。</p>
+        <div className="welcome-demo-row" aria-label="一键演示">
+          <button
+            type="button"
+            className="welcome-demo-btn"
+            onClick={() => actions.startDemoPlayer("teaching")}
+            title="逐步回放教学版九阶段（S1→META）：自动播放、可暂停、可步进；不调用模型、不写盘、不生成签名"
+          >
+            <Icon name="play" size={13} />
+            <span>一键演示完整流程</span>
+            <small>教学版 · 九阶段 · 自动播放</small>
+          </button>
+          <button
+            type="button"
+            className="welcome-demo-btn is-real"
+            onClick={() => actions.startDemoPlayer("real")}
+            title="回放真实执行的端到端闭环（iris 0.956 · EA 不可变 · 委托签非人签）：真实执行 + fixture 语料 + 委托签，三件事一起讲"
+          >
+            <Icon name="shield" size={13} />
+            <span>真实闭环 · Iris</span>
+            <small>真实执行回放 · 委托签非人签</small>
+          </button>
+          <button
+            type="button"
+            className="welcome-demo-btn is-ese"
+            onClick={() => actions.startDemoPlayer("ese")}
+            title="回放真实 ESE 研究的完整闭环（ESE-MS-20261118-03）：3 仓库 / 5132 提交，合并 +0.046 但 click 内方向反转；claim / closure / signature 待人签"
+          >
+            <Icon name="branch" size={13} />
+            <span>ESE 闭环 · 仓库挖掘</span>
+            <small>真实研究回放 · 待人签</small>
+          </button>
+        </div>
+        <p className="welcome-prompts-hint">
+          上面两个按钮直接开始播放演示（可随时暂停）；下面的示例只填入输入框，确认后再发送——不会自动执行。
+        </p>
         <div className="welcome-prompts" aria-label="起始建议">
           {PROMPTS.map((prompt) => (
             <button

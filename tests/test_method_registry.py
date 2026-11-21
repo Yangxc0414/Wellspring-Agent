@@ -27,6 +27,104 @@ class RegistryIntegrityTest(unittest.TestCase):
             self.assertTrue(method["checks"], method["id"])
             self.assertTrue(method.get("reporting_sections"), method["id"])
 
+    def test_every_method_declares_the_three_model_dimensions(self):
+        # design/153: inputs / evidence_sources / evaluation_dimensions must be
+        # declared per method and each evaluation dimension carries a literature
+        # basis — the reference model is theory-grounded, not intuition.
+        for method in self.registry["methods"]:
+            self.assertGreaterEqual(len(method["inputs"]), 2, method["id"])
+            self.assertTrue(method["evidence_sources"], method["id"])
+            self.assertGreaterEqual(len(method["evaluation_dimensions"]), 3, method["id"])
+            for dim in method["evaluation_dimensions"]:
+                self.assertTrue(dim["dimension"], method["id"])
+                self.assertTrue(dim["basis"], method["id"] + ": dimension needs a basis")
+
+    def test_registry_rejects_method_without_dimensions(self):
+        payload = json.loads(json.dumps(self.registry))
+        del payload["methods"][0]["evaluation_dimensions"]
+        with self.assertRaises(method_registry.MethodRegistryError):
+            method_registry.validate(payload)
+
+    def test_every_method_declares_vocabulary_tags(self):
+        # design/155: the 标签化梳理 todo — tags are the reproducible form of
+        # "提炼共性与差异", so they must come from the shared vocabulary.
+        vocabulary = {entry["tag"] for entry in self.registry["tag_vocabulary"]}
+        for method in self.registry["methods"]:
+            self.assertTrue(method["tags"], method["id"])
+            unknown = [tag for tag in method["tags"] if tag not in vocabulary]
+            self.assertEqual(unknown, [], method["id"])
+
+    def test_vocabulary_entries_carry_definition_and_basis(self):
+        for entry in self.registry["tag_vocabulary"]:
+            self.assertTrue(entry["definition"], entry["tag"])
+            self.assertTrue(entry["basis"], entry["tag"])
+
+    def test_tag_layer_extracts_commonality_and_difference(self):
+        # The advisor's extraction, made reproducible: tags held by >=3 methods
+        # are commonalities; single-method tags are the essential differences.
+        from collections import Counter
+
+        counter = Counter()
+        for method in self.registry["methods"]:
+            counter.update(method["tags"])
+        common = sorted(tag for tag, count in counter.items() if count >= 3)
+        difference = sorted(tag for tag, count in counter.items() if count == 1)
+        # 预注册协议 / 伦理审查 cross methods (governance commonalities);
+        # 随机化 (experiment) and 三角验证 (case study) are essential
+        # differences — the two examples the advisor gave verbatim.
+        self.assertIn("预注册协议", common)
+        self.assertIn("伦理审查", common)
+        self.assertIn("随机化", difference)
+        self.assertIn("三角验证", difference)
+
+    def test_registry_rejects_tag_outside_vocabulary(self):
+        payload = json.loads(json.dumps(self.registry))
+        payload["methods"][0]["tags"].append("不存在于词表的标签")
+        with self.assertRaises(method_registry.MethodRegistryError):
+            method_registry.validate(payload)
+
+
+class ElementCompositionTest(unittest.TestCase):
+    """design/156: the meta-model (elements with typed ports) and reference
+    wirings are registry data, fail-closed at load."""
+
+    def setUp(self):
+        self.registry = method_registry.load_registry()
+
+    def test_reference_compositions_are_legal_wirings(self):
+        for composition in self.registry["compositions"]:
+            method_registry.validate(self.registry)  # loader-level port matching
+        wiring_ids = [
+            (c["id"], [step["element"] for step in c["wiring"]])
+            for c in self.registry["compositions"]
+        ]
+        confirmatory = dict(wiring_ids)["confirmatory"]
+        self.assertIn("假设", confirmatory)
+        self.assertIn("方案", confirmatory)
+
+    def test_registry_rejects_illegal_wiring(self):
+        # 探索式组合里让方案消费假设：假设在该接线上尚未产出 → 数据层拒绝。
+        payload = json.loads(json.dumps(self.registry))
+        exploratory = [c for c in payload["compositions"] if c["id"] == "exploratory"][0]
+        exploratory["wiring"].insert(
+            2, {"element": "方案", "consumes": "候选假设（可判别）"}
+        )
+        with self.assertRaises(method_registry.MethodRegistryError) as context:
+            method_registry.validate(payload)
+        self.assertIn("has not been produced upstream", str(context.exception))
+
+    def test_registry_rejects_unknown_port(self):
+        payload = json.loads(json.dumps(self.registry))
+        payload["elements"][0]["outputs"][0]["produces"] = "不属于词表的端口"
+        with self.assertRaises(method_registry.MethodRegistryError):
+            method_registry.validate(payload)
+
+    def test_get_composition_round_trip(self):
+        composition = method_registry.get_composition("confirmatory", self.registry)
+        self.assertEqual(composition["id"], "confirmatory")
+        with self.assertRaises(method_registry.MethodRegistryError):
+            method_registry.get_composition("no-such-composition", self.registry)
+
     def test_every_method_stage_task_is_inside_fit_stages(self):
         for method in self.registry["methods"]:
             for stage in method["stage_tasks"]:
@@ -182,6 +280,54 @@ class CliTest(unittest.TestCase):
         with redirect_stdout(buffer):
             code = cli._cmd_method_show(args)
         self.assertEqual(code, 2)
+
+
+class PipelineStagePlanTest(unittest.TestCase):
+    """The advisory projection from a method's composition to pipeline stages."""
+
+    def setUp(self):
+        self.registry = method_registry.load_registry()
+
+    def test_confirmatory_slr_does_not_cover_experiment_stages(self):
+        plan = method_registry.pipeline_stage_plan("systematic-literature-review", self.registry)
+        self.assertEqual(plan["composition"], "confirmatory")
+        self.assertIn("literature", plan["covered_stages"])
+        self.assertIn("paper", plan["covered_stages"])
+        self.assertNotIn("experiment", plan["covered_stages"])
+        self.assertNotIn("run", plan["covered_stages"])
+
+    def test_exploratory_mining_covers_execution_but_not_writing(self):
+        plan = method_registry.pipeline_stage_plan("repository-mining", self.registry)
+        self.assertEqual(plan["composition"], "exploratory")
+        self.assertIn("literature", plan["covered_stages"])
+        self.assertIn("run", plan["covered_stages"])
+        self.assertNotIn("paper", plan["covered_stages"])
+
+    def test_plan_walks_each_slot_once(self):
+        plan = method_registry.pipeline_stage_plan("repository-mining", self.registry)
+        self.assertTrue(plan["plan"])
+        slots = [step["slot"] for step in plan["plan"]]
+        self.assertEqual(len(slots), len(set(slots)), "a slot must not be walked twice")
+
+    def test_uncovered_fit_slot_is_marked_not_dropped(self):
+        # No current method leaves a fit slot outside its composition; verify the
+        # extension seam with a synthetic wiring that drops one slot.
+        import copy
+        registry = copy.deepcopy(self.registry)
+        method = next(m for m in registry["methods"] if m["id"] == "repository-mining")
+        dropped = method["fit_stages"][-1]
+        for composition in registry["compositions"]:
+            if composition["id"] == method["composition_id"]:
+                for slots in composition["slot_map"].values():
+                    if dropped in slots:
+                        slots.remove(dropped)
+        plan = method_registry.stage_plan("repository-mining", registry)
+        marked = [step["slot"] for step in plan["stages"] if step.get("uncovered")]
+        self.assertIn(dropped, marked, "fit slots outside the wiring must be marked, not dropped")
+
+    def test_unknown_method_is_rejected(self):
+        with self.assertRaises(method_registry.MethodRegistryError):
+            method_registry.pipeline_stage_plan("no-such-method", self.registry)
 
 
 if __name__ == "__main__":

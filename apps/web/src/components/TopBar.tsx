@@ -97,6 +97,15 @@ export function TopBar() {
       </div>
 
       <div className="top-actions">
+        <button
+          type="button"
+          className="demo-trigger"
+          onClick={() => actions.startDemoPlayer()}
+          title="一键演示完整流程：回放教学版九阶段（S1→META），可随时暂停、步进或切换真实闭环版"
+        >
+          <Icon name="play" size={13} />
+          <span>完整演示</span>
+        </button>
         <span
           className={`sim-badge${apiConnected && !__STATIC_ONLY__ ? " is-live" : ""}`}
           title={
