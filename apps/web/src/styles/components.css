@@ -6041,6 +6041,27 @@ select.control {
   font-family: var(--sans);
 }
 
+/* design/176: 三态决策的分支建议只做 advisory 投影，颜色区分但不抢门禁的视觉层级。 */
+.verdict-branch {
+  display: block;
+  margin-top: 5px;
+  padding: 5px 8px;
+  border-left: 2px solid var(--line-strong);
+  border-radius: 0 6px 6px 0;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-family: var(--sans);
+  line-height: 1.55;
+}
+.verdict-branch[data-triad="SUPPORTED"] { border-left-color: var(--teal); }
+.verdict-branch[data-triad="REFUTED"] { border-left-color: var(--coral); }
+.verdict-branch[data-triad="INCONCLUSIVE"] { border-left-color: var(--amber); }
+.verdict-branch span {
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--faint);
+}
+
 .closure-row small.is-bad {
   color: var(--coral);
 }

@@ -6,6 +6,7 @@ import type { AutopilotSnapshot, AutoStage, Card, ClosureInventory, ContextTab, 
 import { selectCurrentTask, useWorkspaceStore } from "../state/workspaceStore";
 import { claimSignCommand, closureSignCommand, experimentApproveCommands, protocolFreezeCommand } from "../domain/gateCommands";
 import { claimSignatureLabel } from "../domain/claimSignature";
+import { overallVerdict } from "../domain/researchVerdict";
 import { describeRuntimeError, runtimeAvailable } from "../domain/capabilities";
 import { hypothesisConvergence, literatureCoverage } from "../domain/researchBrief";
 import { defaultRuntimeSource, runtimeRunState, runtimeSourceLabel } from "../domain/runtimeSnapshot";
@@ -1402,6 +1403,15 @@ function ProjectExperimentInventoryPanel() {
                   {study.verdict.undecidable ?? 0} 项——不可判定是结果，不是失败。
                 </small>
               )}
+              {!!(study.verdict?.comparisons ?? []).length && (() => {
+                const decision = overallVerdict(study.verdict!.comparisons);
+                return (
+                  <small className="verdict-branch" data-triad={decision.triad}>
+                    过程分支建议（advisory · 不改门禁）：{decision.label}
+                    <span> · {decision.triad}</span> — {decision.reason}
+                  </small>
+                );
+              })()}
             </article>
           ))}
           {!!(closures.replication?.power_audit?.decided_at_lower_power ?? 0) && (
