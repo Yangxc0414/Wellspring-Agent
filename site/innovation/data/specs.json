@@ -238,7 +238,7 @@
     "id": "run",
     "name": "S5 执行与证据",
     "stage": "S5",
-    "version": "0.9.0",
+    "version": "0.10.0",
     "status": "draft",
     "owner": "research-agent",
     "outputs": [
@@ -268,7 +268,10 @@
       "ProtocolBinding 只能由 completed capsule + EA 生成，不能修改已冻结 ProtocolCard",
       "生成实验包只能在本地 CLI 经 approve + --allow-execute 后执行；MCP/HTTP 不执行训练",
       "执行前必须校验 approval/data/spec/code 哈希；环境只允许白名单变量，不自动安装依赖",
-      "execution receipt/experiment-evidence 不是 RunCapsule/EA/Claim；Claim 只能由 CLI 人签并绑定 evidence hash"
+      "execution receipt/experiment-evidence 不是 RunCapsule/EA/Claim；Claim 只能由 CLI 人签并绑定 evidence hash",
+      "方法组合未覆盖的阶段可以真跳过，但必须留下显式 not_applicable 产物与门禁，不得伪装成 pass 或空绑定",
+      "跳过阶段的专属门（Q0/G1/G2）标 not_applicable 并写入编排理由，治理语义不随阶段顺序漂移",
+      "未声明 method_id 时仍全阶段执行（向后兼容）；组合解析失败同样回退全阶段（fail-open）"
     ],
     "spec": "modules/run/SPEC.md"
   },

@@ -2,12 +2,12 @@
 id: run
 name: S5 执行与证据
 stage: S5
-version: 0.9.0
+version: 0.10.0
 status: draft
 owner: research-agent
 inputs:
   - RunRequest
-  - PipelineRequest.method_id  # optional; advisory composition projection only
+  - PipelineRequest.method_id  # optional; composition now DRIVES stage execution when present
   - Protocol
   - protocol_sha256
 outputs:
@@ -35,6 +35,9 @@ invariants:
   - 生成实验包只能在本地 CLI 经 approve + --allow-execute 后执行；MCP/HTTP 不执行训练
   - 执行前必须校验 approval/data/spec/code 哈希；环境只允许白名单变量，不自动安装依赖
   - execution receipt/experiment-evidence 不是 RunCapsule/EA/Claim；Claim 只能由 CLI 人签并绑定 evidence hash
+  - 方法组合未覆盖的阶段可以真跳过，但必须留下显式 not_applicable 产物与门禁，不得伪装成 pass 或空绑定
+  - 跳过阶段的专属门（Q0/G1/G2）标 not_applicable 并写入编排理由，治理语义不随阶段顺序漂移
+  - 未声明 method_id 时仍全阶段执行（向后兼容）；组合解析失败同样回退全阶段（fail-open）
 ---
 
 # S5 执行与证据
@@ -95,6 +98,8 @@ invariants:
 4. 跑 `python -m unittest discover -s tests -v`。
 
 ## Changelog
+
+- 2026-11-22 · v0.10.0 · status=draft · **方法组合现在驱动阶段执行（判据 A 变绿）**：`stage_orchestration.StagePlan` 从 `composition_plan.covered_stages` 解析出实际要跑的阶段；未覆盖阶段真跳过 agent 调用，用显式 `not_applicable` 空产物替身（null object）让下游不崩溃、不伪装成证据；被跳过阶段的专属门（Q0/G1/G2）标 not_applicable 并写明编排理由，不升格为 pass。未声明 method_id 或组合解析失败仍全阶段执行（fail-open，向后兼容）。`run` 阶段跳过时不执行 S5、不写 capsule/EA/claim draft。**这不改变 run/EA/claim 的人签不变量**（跳过的 run 不产 EA，无法 claim）；closure/export 仍由人签门禁控制。实现对应 design/174；判据见 tests/test_method_orchestration.py。
 
 - 2026-11-21 · v0.9.0 · status=draft · `PipelineRequest` 增加可选 `method_id`：pipeline 启动时从方法注册表解析组合覆盖，写入 `modules["composition_plan"]` 并对未覆盖阶段发 `stage_skip` 事件。明确边界：这是 advisory 事件层，**阶段代码块仍全部执行**，组合未真正改变运行顺序；解析失败回退全阶段（fail-open）。不改变 run capsule / EA / claim 人工门 / closure。实现对应 design/164。
 

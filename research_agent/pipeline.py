@@ -56,6 +56,16 @@ from .run_events import (
     write_events,
 )
 from .specs import SpecStore
+from .stage_orchestration import (
+    NullFigure,
+    StagePlan,
+    build_stage_plan,
+    skipped_design,
+    skipped_idea,
+    skipped_literature,
+    skipped_manuscript_bundle,
+    skipped_paper,
+)
 
 
 class PipelineError(RuntimeError):
@@ -329,6 +339,9 @@ class PipelineRunner:
             except Exception:
                 self._emit("stage_skip", "composition",
                            "composition resolution failed; running all stages")
+        # design/174: the plan now DRIVES execution. Uncovered stages are truly
+        # skipped (null artifacts, not_applicable gates), not just annotated.
+        stage_plan = build_stage_plan(composition_plan)
         claim_refs = list(request.claim_refs)
         claim_statements = list(request.claim_statements)
         claim_assertions = list(request.claim_assertions)
@@ -439,11 +452,24 @@ class PipelineRunner:
             },
         )
 
-        self._emit("stage_start", "literature", "检索与阅读")
-        if covered_pipeline_stages is not None and "literature" not in covered_pipeline_stages:
+        lit_enabled = stage_plan.enabled("literature")
+        if lit_enabled:
+            self._emit("stage_start", "literature", "检索与阅读")
+        else:
             self._emit("stage_skip", "literature",
-                       "not covered by composition " + (composition_plan["composition"] if composition_plan else ""))
-        if request.adaptive_retrieval:
+                       "method composition %s does not cover literature" % stage_plan.composition)
+        if not lit_enabled:
+            literature = skipped_literature(run_id + "-lit")
+            modules["literature"] = literature.to_dict()
+            source_ledger = None
+            q0 = {
+                "gate": "Q0", "status": "not_applicable",
+                "reason": "literature stage skipped by method composition; no scope audit performed",
+            }
+            modules["q0"] = q0
+            warnings.append(q0["reason"])
+            synthesis_matrix = {}
+        elif request.adaptive_retrieval:
             # The first real loopback in this runtime: the S1 coverage verdict
             # decides the next run's retrieval budget. It never crosses a gate.
             from .research_cycle import run_literature_cycle
@@ -554,9 +580,12 @@ class PipelineRunner:
                     ],
                 )
 
-        self._emit("stage_start", "idea", "假设收敛")
-        if covered_pipeline_stages is not None and "idea" not in covered_pipeline_stages:
-            self._emit("stage_skip", "idea", "not covered by composition")
+        idea_enabled = stage_plan.enabled("idea")
+        if idea_enabled:
+            self._emit("stage_start", "idea", "假设收敛")
+        else:
+            self._emit("stage_skip", "idea",
+                       "method composition %s does not cover idea" % stage_plan.composition)
         prior_art_agent = self._agent("literature")
 
         def _prior_art_search(
@@ -641,7 +670,10 @@ class PipelineRunner:
                 mark_delegation_acted(
                     project_root, [str(event.get("wake_id")) for event in delegation]
                 )
-        if request.idea_file:
+        if not idea_enabled:
+            idea = skipped_idea(run_id + "-idea")
+            warnings.append(idea.warnings[0])
+        elif request.idea_file:
             idea = load_idea_result(request.idea_file, run_id=run_id + "-idea")
             warnings.append(
                 "idea set reused from %s: this run does not regenerate candidates, because a G1 "
@@ -708,7 +740,14 @@ class PipelineRunner:
                             {"gate": "G5", "status": "not_started", "reason": "not reached; G1 blocked"},
                         ],
                     )
-        if flow_mode == "strict" and g1_decision is None:
+        if not idea_enabled and g1_decision is None:
+            g1_decision = {
+                "gate": "G1", "status": "not_applicable", "selected_idea_id": "",
+                "reason": "idea stage skipped by method composition; G1 not applicable",
+            }
+            modules["g1_decision"] = g1_decision
+            warnings.append(g1_decision["reason"])
+        elif flow_mode == "strict" and g1_decision is None:
             reason = (
                 "human-selected idea required; provide a G1 decision file"
                 if idea.candidates
@@ -759,10 +798,16 @@ class PipelineRunner:
             controls = list(request.controls) or ["majority baseline"]
             seeds = request.run_seeds
             budget = request.budget or "%d seeds x stratified split" % request.run_seeds
-        self._emit("stage_start", "experiment", "实验设计草稿")
-        if covered_pipeline_stages is not None and "experiment" not in covered_pipeline_stages:
-            self._emit("stage_skip", "experiment", "not covered by composition")
-        if request.design_file:
+        exp_enabled = stage_plan.enabled("experiment")
+        if exp_enabled:
+            self._emit("stage_start", "experiment", "实验设计草稿")
+        else:
+            self._emit("stage_skip", "experiment",
+                       "method composition %s does not cover experiment" % stage_plan.composition)
+        if not exp_enabled:
+            design = skipped_design(run_id + "-design")
+            warnings.append(design.warnings[0])
+        elif request.design_file:
             payload = read_json(Path(request.design_file))
             if not isinstance(payload, dict):
                 raise PipelineError(
@@ -920,7 +965,11 @@ class PipelineRunner:
                         ],
                     )
                 raise PipelineError("frozen protocol rejected: " + str(exc))
-        if flow_mode == "strict" and protocol is None:
+        if not exp_enabled and protocol is None:
+            warnings.append(
+                "experiment stage skipped by method composition; G2 not applicable, no protocol frozen"
+            )
+        elif flow_mode == "strict" and protocol is None:
             reason = "S5 requires a frozen ProtocolCard matching the current design"
             return finish_early(
                 "needs_g2", "G2",
@@ -933,7 +982,12 @@ class PipelineRunner:
                 ],
             )
 
-        self._emit("stage_start", "run", "复现执行")
+        run_enabled = stage_plan.enabled("run")
+        if run_enabled:
+            self._emit("stage_start", "run", "复现执行")
+        else:
+            self._emit("stage_skip", "run",
+                       "method composition %s does not cover run" % stage_plan.composition)
         bibliography = None
         if request.bibliography_file:
             bibliography = json.loads(Path(request.bibliography_file).read_text(encoding="utf-8"))
@@ -973,9 +1027,13 @@ class PipelineRunner:
                     "manifest": json.loads(fig_manifest.read_text(encoding="utf-8")),
                     "paths": {"svg": str(run_dir / "result-figure.svg"), "manifest": str(fig_manifest)},
                 }
-            modules["run"] = run_module
-            warnings.append("reused existing RunCapsule/EA from run_dir; no new run executed")
-        elif run_dataset:
+            if not run_enabled:
+                run_module = None
+                warnings.append("run stage skipped by method composition; reused capsule ignored")
+            else:
+                modules["run"] = run_module
+                warnings.append("reused existing RunCapsule/EA from run_dir; no new run executed")
+        elif run_dataset and run_enabled:
             if self.run_output_dir is None:
                 raise PipelineError("run_dataset requires run_output_dir")
             run_result = self._agent("run").execute(
@@ -1090,50 +1148,57 @@ class PipelineRunner:
                     "reused": bool(request.run_dir),
                 },
             )
-        else:
+        elif run_enabled:
             self._emit("stage_skip", "run", "no run_dataset or run_dir; result slot stays pending")
 
-        self._emit("stage_start", "figure", "科研绘图")
-        if covered_pipeline_stages is not None and "figure" not in covered_pipeline_stages:
-            self._emit("stage_skip", "figure", "not covered by composition")
-        nodes = [
+        fig_enabled = stage_plan.enabled("figure")
+        if fig_enabled:
+            self._emit("stage_start", "figure", "科研绘图")
+        else:
+            self._emit("stage_skip", "figure",
+                       "method composition %s does not cover figure" % stage_plan.composition)
+        if not fig_enabled:
+            figure = NullFigure(run_id + "-figure")
+            modules["figure"] = figure.to_dict()
+        else:
+            nodes = [
             FigureNode("lit", "文献调研\n%d spans" % len(literature.spans), "literature", 0),
             FigureNode("idea", "假设收敛\n%d candidates" % len(idea.candidates), "idea", 1),
             FigureNode("design", "实验设计\n%s" % design.status, "experiment", 2),
             FigureNode("figure", "科研绘图\nSVG + manifest", "figure", 3),
             FigureNode("paper", "论文契约\nslots pending", "paper", 4),
-        ]
-        edges = [
-            FigureEdge("lit", "idea", "spans"),
-            FigureEdge("idea", "design", "G1"),
-            FigureEdge("design", "figure", "schematic"),
-            FigureEdge("figure", "paper", "figure_ref"),
-        ]
-        if request.grant_scheme:
-            nodes.append(FigureNode("grant", "基金申报\n%s" % request.grant_scheme.upper(), "grant", 4))
-            edges.append(FigureEdge("design", "grant", "evidence map", dashed=True))
-        figure = self._agent("figure").run(
-            FigureRequest(
-                title="研究运行时：从证据到稿件",
-                description="模块关系示意图；不是实验结果",
-                nodes=nodes,
-                edges=edges,
-                style=request.figure_style,
-                evidence_refs=[span.span_id for span in literature.spans[:4]],
-                run_id=run_id + "-figure",
+            ]
+            edges = [
+                FigureEdge("lit", "idea", "spans"),
+                FigureEdge("idea", "design", "G1"),
+                FigureEdge("design", "figure", "schematic"),
+                FigureEdge("figure", "paper", "figure_ref"),
+            ]
+            if request.grant_scheme:
+                nodes.append(FigureNode("grant", "基金申报\n%s" % request.grant_scheme.upper(), "grant", 4))
+                edges.append(FigureEdge("design", "grant", "evidence map", dashed=True))
+            figure = self._agent("figure").run(
+                FigureRequest(
+                    title="研究运行时：从证据到稿件",
+                    description="模块关系示意图；不是实验结果",
+                    nodes=nodes,
+                    edges=edges,
+                    style=request.figure_style,
+                    evidence_refs=[span.span_id for span in literature.spans[:4]],
+                    run_id=run_id + "-figure",
+                )
             )
-        )
-        modules["figure"] = {**asdict(figure), "status": "schematic_ready"}
-        warnings.append("figure is schematic; do not bind it to result.figure without run data")
-        schematic_note = "SVG + manifest ready"
-        if not figure.svg:
-            modules["figure"]["status"] = "scene_only"
-            schematic_note = "scene JSON only: the vendored schematic renderer is absent"
-            warnings.append(schematic_note)
-        self._emit(
-            "stage_end", "figure", schematic_note,
-            {"figure_id": figure.figure_id, "schematic": True, "svg": bool(figure.svg)},
-        )
+            modules["figure"] = {**asdict(figure), "status": "schematic_ready"}
+            warnings.append("figure is schematic; do not bind it to result.figure without run data")
+            schematic_note = "SVG + manifest ready"
+            if not figure.svg:
+                modules["figure"]["status"] = "scene_only"
+                schematic_note = "scene JSON only: the vendored schematic renderer is absent"
+                warnings.append(schematic_note)
+            self._emit(
+                "stage_end", "figure", schematic_note,
+                {"figure_id": figure.figure_id, "schematic": True, "svg": bool(figure.svg)},
+            )
 
         study_design = None
         study_design_audit = None
@@ -1163,87 +1228,98 @@ class PipelineRunner:
                     "study design has disclosure blockers: "
                     + "; ".join(study_design_audit.get("blockers") or [])[:400]
                 )
-        self._emit("stage_start", "paper", "写作与槽位绑定")
-        if covered_pipeline_stages is not None and "paper" not in covered_pipeline_stages:
-            self._emit("stage_skip", "paper", "not covered by composition")
-        paper = self._agent("paper").run(
-            PaperRequest(
+        paper_enabled = stage_plan.enabled("paper")
+        if paper_enabled:
+            self._emit("stage_start", "paper", "写作与槽位绑定")
+        else:
+            self._emit("stage_skip", "paper",
+                       "method composition %s does not cover paper" % stage_plan.composition)
+        if not paper_enabled:
+            paper = skipped_paper(request.topic)
+            modules["paper"] = asdict(paper)
+            warnings.extend(paper.warnings)
+            manuscript_bundle = skipped_manuscript_bundle(request.topic)
+            self._emit("stage_end", "paper", "stage skipped by method composition",
+                       {"status": "not_applicable"})
+        else:
+            paper = self._agent("paper").run(
+                PaperRequest(
+                    topic=request.topic,
+                    language=request.language,
+                    venue_type=request.venue_type,
+                    evidence_refs=[span.span_id for span in literature.spans[:4]],
+                    figure_refs=[figure.figure_id],
+                    claim_refs=claim_refs,
+                    claim_statements=claim_statements,
+                    claim_assertions=claim_assertions,
+                    study_design=study_design,
+                    study_design_audit=study_design_audit,
+                    protocol_refs=[protocol["protocol_id"]] if protocol else [],
+                    bibliography_refs=[bibliography["card_id"]] if bibliography else [],
+                    result_figure_refs=(
+                        [run_module["result_figure"]["figure_id"]]
+                        if run_module and run_module.get("result_figure") else []
+                    ),
+                    spans=list(literature.spans),
+                    literature_brief=literature.brief,
+                    synthesis=synthesis_matrix or None,
+                    idea_candidates=list(idea.candidates),
+                    design=design,
+                    run_summary=(
+                        {
+                            "status": run_module.get("status", ""),
+                            "run_id": (run_module.get("capsule") or {}).get("run_id", ""),
+                            "dataset": (run_module.get("capsule") or {}).get("dataset_id", ""),
+                            "metric": (run_module.get("capsule") or {}).get("metric_name", ""),
+                            "reused": bool(request.run_dir),
+                        }
+                        if run_module else None
+                    ),
+                    fixture_mode=fixture_mode,
+                )
+            )
+            modules["paper"] = asdict(paper)
+            warnings.extend(paper.warnings)
+            manuscript_bundle = build_manuscript(
+                paper=modules["paper"],
+                literature=modules.get("literature") or {},
+                bibliography=modules.get("bibliography"),
                 topic=request.topic,
                 language=request.language,
                 venue_type=request.venue_type,
-                evidence_refs=[span.span_id for span in literature.spans[:4]],
-                figure_refs=[figure.figure_id],
-                claim_refs=claim_refs,
-                claim_statements=claim_statements,
-                claim_assertions=claim_assertions,
-                study_design=study_design,
-                study_design_audit=study_design_audit,
-                protocol_refs=[protocol["protocol_id"]] if protocol else [],
-                bibliography_refs=[bibliography["card_id"]] if bibliography else [],
-                result_figure_refs=(
-                    [run_module["result_figure"]["figure_id"]]
-                    if run_module and run_module.get("result_figure") else []
-                ),
-                spans=list(literature.spans),
-                literature_brief=literature.brief,
-                synthesis=synthesis_matrix or None,
-                idea_candidates=list(idea.candidates),
-                design=design,
-                run_summary=(
-                    {
-                        "status": run_module.get("status", ""),
-                        "run_id": (run_module.get("capsule") or {}).get("run_id", ""),
-                        "dataset": (run_module.get("capsule") or {}).get("dataset_id", ""),
-                        "metric": (run_module.get("capsule") or {}).get("metric_name", ""),
-                        "reused": bool(request.run_dir),
-                    }
-                    if run_module else None
-                ),
-                fixture_mode=fixture_mode,
+                context={
+                    "claim_statements": claim_statements,
+                    "claim_assertions": claim_assertions,
+                    "claim_signed": claim_signed,
+                    "design": asdict(design) if design else {},
+                    "run_summary": (
+                        {
+                            "status": run_module.get("status", ""),
+                            "run_id": (run_module.get("capsule") or {}).get("run_id", ""),
+                            "dataset": (run_module.get("capsule") or {}).get("dataset_id", ""),
+                            "metric": (run_module.get("capsule") or {}).get("metric_name", ""),
+                        }
+                        if run_module else {}
+                    ),
+                    "figure_refs": [figure.figure_id] if figure else [],
+                },
             )
-        )
-        modules["paper"] = asdict(paper)
-        warnings.extend(paper.warnings)
-        manuscript_bundle = build_manuscript(
-            paper=modules["paper"],
-            literature=modules.get("literature") or {},
-            bibliography=modules.get("bibliography"),
-            topic=request.topic,
-            language=request.language,
-            venue_type=request.venue_type,
-            context={
-                "claim_statements": claim_statements,
-                "claim_assertions": claim_assertions,
-                "claim_signed": claim_signed,
-                "design": asdict(design) if design else {},
-                "run_summary": (
-                    {
-                        "status": run_module.get("status", ""),
-                        "run_id": (run_module.get("capsule") or {}).get("run_id", ""),
-                        "dataset": (run_module.get("capsule") or {}).get("dataset_id", ""),
-                        "metric": (run_module.get("capsule") or {}).get("metric_name", ""),
-                    }
-                    if run_module else {}
-                ),
-                "figure_refs": [figure.figure_id] if figure else [],
-            },
-        )
-        warnings.append(
-            "manuscript readiness: %s (%d blockers, %d warnings)"
-            % (
-                manuscript_bundle["audit"]["status"],
-                manuscript_bundle["audit"]["summary"]["blockers"],
-                manuscript_bundle["audit"]["summary"]["warnings"],
+            warnings.append(
+                "manuscript readiness: %s (%d blockers, %d warnings)"
+                % (
+                    manuscript_bundle["audit"]["status"],
+                    manuscript_bundle["audit"]["summary"]["blockers"],
+                    manuscript_bundle["audit"]["summary"]["warnings"],
+                )
             )
-        )
-        self._emit(
-            "stage_end", "paper", "paper status: %s" % paper.status,
-            {
-                "status": paper.status,
-                "slots": len(paper.slots),
-                "manuscript_status": manuscript_bundle["audit"]["status"],
-            },
-        )
+            self._emit(
+                "stage_end", "paper", "paper status: %s" % paper.status,
+                {
+                    "status": paper.status,
+                    "slots": len(paper.slots),
+                    "manuscript_status": manuscript_bundle["audit"]["status"],
+                },
+            )
 
         grant = None
         if request.grant_scheme:
@@ -1273,12 +1349,18 @@ class PipelineRunner:
         study_design_incomplete = bool(study_design) and str(
             (study_design_audit or {}).get("status") or ""
         ) == "incomplete"
+        # design/174: gates of orchestration-skipped stages stay not_applicable —
+        # never silently promoted to pass. Governance semantics do not drift.
+        g1_skipped = bool(g1_decision and g1_decision.get("status") == "not_applicable")
+        g2_skipped = not exp_enabled
         gates = [
             q0,
             {
                 "gate": "G1",
-                "status": "pass" if g1_decision else "needs_human",
+                "status": "not_applicable" if g1_skipped else ("pass" if g1_decision else "needs_human"),
                 "reason": (
+                    g1_decision.get("reason", "idea stage skipped")
+                    if g1_skipped else
                     "human-selected idea: " + g1_decision["selected_idea_id"]
                     if g1_decision else
                     "idea candidates require human convergence"
@@ -1287,10 +1369,13 @@ class PipelineRunner:
             {
                 "gate": "G2",
                 "status": (
+                    "not_applicable" if g2_skipped else
                     "blocked" if study_design_incomplete
                     else "pass" if protocol else "needs_human"
                 ),
                 "reason": (
+                    "experiment stage skipped by method composition; G2 not applicable"
+                    if g2_skipped else
                     "study design audit is incomplete: "
                     + "; ".join((study_design_audit or {}).get("blockers") or [])[:300]
                     if study_design_incomplete else
