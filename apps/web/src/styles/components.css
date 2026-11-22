@@ -8205,6 +8205,46 @@ select.control {
   color: var(--faint);
 }
 
+/* design/175: 护栏（不可改） vs 可优化策略空间（自改进的对象）。紫=可选，灰=护栏。 */
+.method-strategy-block {
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 7px;
+}
+.method-strategy-note {
+  margin: 4px 0 6px;
+  line-height: 1.6;
+}
+.method-strategy-note code {
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--muted);
+  background: var(--surface-2);
+  border-radius: 4px;
+  padding: 0 4px;
+  margin-left: 3px;
+}
+.method-strategy-point {
+  border-left: 2px solid #7c3aed;
+  background: rgba(124, 58, 237, 0.05);
+  border-radius: 0 6px 6px 0;
+  padding: 5px 8px;
+  margin: 5px 0;
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.55;
+}
+.method-strategy-stage {
+  font-family: var(--mono);
+  font-size: calc(9px * var(--font-scale, 1));
+  color: #7c3aed;
+  margin-right: 5px;
+}
+.method-strategy-point small {
+  display: block;
+  margin-top: 3px;
+  color: var(--faint);
+  font-size: calc(9px * var(--font-scale, 1));
+}
+
 /* Method detail: the three reference-model dimensions + per-slot task cards. */
 .method-dims {
   margin-top: 4px;

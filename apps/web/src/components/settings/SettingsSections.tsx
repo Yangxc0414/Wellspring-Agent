@@ -19,12 +19,14 @@ import {
   fitMap,
   iterationLabel,
   loadMethodRegistry,
+  loadStrategySpace,
   recommendMethods,
   stagePlanFor,
   tagAnalysis,
   validityName,
   type MethodRecommendation,
-  type MethodRegistryData
+  type MethodRegistryData,
+  type StrategySpaceData
 } from "../../domain/methodModel";
 import {
   COMPOSITIONS,
@@ -768,6 +770,7 @@ export function GuideSettingsPage() {
 export function MethodModelSettingsPage() {
   const tasks = useWorkspaceStore((state) => state.tasks);
   const [registry, setRegistry] = useState<MethodRegistryData | null>(null);
+  const [strategySpace, setStrategySpace] = useState<StrategySpaceData | null>(null);
   const [missing, setMissing] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [brief, setBrief] = useState("");
@@ -786,6 +789,15 @@ export function MethodModelSettingsPage() {
       } else {
         setMissing(true);
       }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    void loadStrategySpace().then((data) => {
+      if (!cancelled) setStrategySpace(data);
     });
     return () => {
       cancelled = true;
@@ -1332,6 +1344,36 @@ export function MethodModelSettingsPage() {
                 <i>停止规则：</i>{iterationLabel(active.iteration_rule?.kind)} —— {active.iteration_rule?.detail ?? "—"}
               </p>
               <small className="method-evidence-basis">{evidenceProfileFor(active.id)?.basis ?? ""}</small>
+            </div>
+            <div className="method-strategy-block">
+              <b>护栏 / 可优化空间</b>
+              {strategySpace?.methods[active.id]?.status === "modeled" ? (
+                <>
+                  <p className="method-strategy-note">
+                    硬性约束（AI 不可改）：
+                    {strategySpace.methods[active.id].hard_constraints.map((guard) => (
+                      <code key={guard}>{guard}</code>
+                    ))}
+                  </p>
+                  {strategySpace.methods[active.id].choice_points.map((point) => (
+                    <div key={point.id} className="method-strategy-point">
+                      <span className="method-strategy-stage">{point.stage}</span>
+                      <b>{point.id}</b> — {point.description}
+                      <div className="method-chips">
+                        {point.options.map((option) => (
+                          <code key={String(option)}>{String(option)}</code>
+                        ))}
+                      </div>
+                      <small>guard：{point.guard.join(" / ")} · 判定：{point.evidence_of_effect}</small>
+                    </div>
+                  ))}
+                  <small className="method-evidence-basis">{strategySpace.methods[active.id].boundary}</small>
+                </>
+              ) : (
+                <small className="method-evidence-basis">
+                  该方法尚未形式化建模可优化空间（只列护栏）；不据此处声称流程级自改进可用。
+                </small>
+              )}
             </div>
             <div>
               <b>对智能体设计的含义（Prompt 与基线）</b>

@@ -95,6 +95,7 @@ class WorkspaceStoreTest(unittest.TestCase):
                 "custom-agents.json",
                 "evolution-policy.json",
                 "method-registry.json",
+                "method-strategy-space.json",
                 "orchestration-topology.json",
             ],
         )

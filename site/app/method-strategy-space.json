@@ -1,0 +1,256 @@
+{
+  "schema": "ese-method-strategy-space-0.1",
+  "boundary": "只读建模视图：护栏权威源仍是 registry checks/protocol_fields/cannot_support 与 evolution_policy.LOCKED_SCOPES；本文件只声明范式允许的可优化空间，不改写护栏、不产生 Claim、不读门禁。",
+  "locked_scopes": [
+    "claim.statement",
+    "evidence.artifact",
+    "gate.decision",
+    "rubric",
+    "heldout",
+    "closure",
+    "signature",
+    "export"
+  ],
+  "methods": {
+    "controlled-experiment": {
+      "status": "modeled",
+      "hard_constraints": [
+        "experiment.hypothesis",
+        "experiment.design",
+        "experiment.power",
+        "experiment.analysis_plan",
+        "claim.statement",
+        "gate.decision",
+        "experiment.power"
+      ],
+      "choice_points": [
+        {
+          "id": "randomization.scheme",
+          "stage": "S4",
+          "description": "随机分配方案的选择",
+          "options": [
+            "simple_randomization",
+            "blocked_randomization",
+            "stratified_randomization"
+          ],
+          "default": "blocked_randomization",
+          "guard": [
+            "experiment.design",
+            "experiment.power"
+          ],
+          "reversible": false,
+          "evidence_of_effect": "分配记录可核验 + 功效分析满足预注册阈值"
+        },
+        {
+          "id": "measurement.instrument",
+          "stage": "S5",
+          "description": "同一构念的可替代测量方式",
+          "options": [
+            "primary_metric_only",
+            "primary_plus_secondary"
+          ],
+          "default": "primary_plus_secondary",
+          "guard": [
+            "experiment.hypothesis",
+            "experiment.analysis_plan"
+          ],
+          "reversible": false,
+          "evidence_of_effect": "主指标未被事后修改 + 区间未跨零才算 supported"
+        }
+      ],
+      "boundary": "不得事后改主指标；不得在未操控变量上作因果断言（见 cannot_support）"
+    },
+    "repository-mining": {
+      "status": "modeled",
+      "hard_constraints": [
+        "mining.sampling_frame",
+        "mining.time_split",
+        "mining.dedup",
+        "rubric",
+        "evidence.artifact"
+      ],
+      "choice_points": [
+        {
+          "id": "sampling.frame",
+          "stage": "S1",
+          "description": "仓库抽样框",
+          "options": [
+            "time_window",
+            "language_stratified",
+            "activity_stratified"
+          ],
+          "default": "time_window",
+          "guard": [
+            "mining.sampling_frame",
+            "mining.time_split"
+          ],
+          "reversible": true,
+          "evidence_of_effect": "快照 sha 固定且重跑得到同一集合"
+        },
+        {
+          "id": "label.heuristic",
+          "stage": "S5",
+          "description": "标签提取启发式",
+          "options": [
+            "keyword_match",
+            "commit_pattern",
+            "issue_link"
+          ],
+          "default": "keyword_match",
+          "guard": [
+            "mining.label_source"
+          ],
+          "reversible": true,
+          "evidence_of_effect": "构造效度检查：标签命中人工抽检一致率"
+        }
+      ],
+      "boundary": "内部因果效度不可由观察性仓库数据支持；不得声称时间/生态外推"
+    },
+    "case-study": {
+      "status": "modeled",
+      "hard_constraints": [
+        "case.questions",
+        "case.selection",
+        "case.ethics",
+        "evidence.artifact",
+        "gate.decision"
+      ],
+      "choice_points": [
+        {
+          "id": "data.collection",
+          "stage": "S1",
+          "description": "质性资料采集组合",
+          "options": [
+            "interview",
+            "observation",
+            "document"
+          ],
+          "default": [
+            "interview",
+            "document"
+          ],
+          "guard": [
+            "case.triangulation"
+          ],
+          "reversible": true,
+          "evidence_of_effect": "三角验证：至少两种独立来源指向同一结论"
+        },
+        {
+          "id": "coding.frame",
+          "stage": "S5",
+          "description": "编码框架",
+          "options": [
+            "open_coding",
+            "preset_codebook"
+          ],
+          "default": "open_coding",
+          "guard": [
+            "case.selection",
+            "case.triangulation"
+          ],
+          "reversible": true,
+          "evidence_of_effect": "证据链可从资料回溯到编码与结论"
+        }
+      ],
+      "boundary": "结论是可转移性而非统计推广；无介入的因果归因不可支持"
+    },
+    "systematic-literature-review": {
+      "status": "modeled",
+      "hard_constraints": [
+        "slr.protocol",
+        "rubric"
+      ],
+      "choice_points": [
+        {
+          "id": "query.expansion",
+          "stage": "S1",
+          "description": "检索式扩展方式",
+          "options": [
+            "synonym",
+            "boolean",
+            "backward_citation"
+          ],
+          "default": "synonym",
+          "guard": [
+            "slr.reproducible_search"
+          ],
+          "reversible": true,
+          "evidence_of_effect": "他人按同一检索式重放得到同一快照"
+        },
+        {
+          "id": "synthesis.method",
+          "stage": "S1b",
+          "description": "证据综合方法",
+          "options": [
+            "thematic_synthesis",
+            "metadata_count"
+          ],
+          "default": "thematic_synthesis",
+          "guard": [
+            "slr.quality"
+          ],
+          "reversible": true,
+          "evidence_of_effect": "每主题 source_count>=2"
+        }
+      ],
+      "boundary": "筛选须可复现；未纳入的研究不得进入结论"
+    },
+    "quasi-experiment": {
+      "status": "pending",
+      "hard_constraints": [
+        "quasi.identification",
+        "quasi.confounders"
+      ],
+      "choice_points": [],
+      "boundary": "尚未形式化建模；不得据此声称可优化空间存在"
+    },
+    "benchmark-evaluation": {
+      "status": "pending",
+      "hard_constraints": [
+        "benchmark.version",
+        "benchmark.contamination",
+        "benchmark.baselines"
+      ],
+      "choice_points": [],
+      "boundary": "尚未形式化建模；不得据此声称可优化空间存在"
+    },
+    "survey": {
+      "status": "pending",
+      "hard_constraints": [
+        "survey.sampling",
+        "survey.instrument",
+        "survey.consent"
+      ],
+      "choice_points": [],
+      "boundary": "尚未形式化建模；不得据此声称可优化空间存在"
+    },
+    "design-science": {
+      "status": "pending",
+      "hard_constraints": [
+        "dsr.problem",
+        "dsr.evaluation"
+      ],
+      "choice_points": [],
+      "boundary": "尚未形式化建模；不得据此声称可优化空间存在"
+    },
+    "action-research": {
+      "status": "pending",
+      "hard_constraints": [
+        "action.cycles",
+        "action.role",
+        "action.ethics"
+      ],
+      "choice_points": [],
+      "boundary": "尚未形式化建模；不得据此声称可优化空间存在"
+    },
+    "ml-iterative-experiment": {
+      "status": "pending",
+      "hard_constraints": [
+        "experiment.log",
+        "mv.criterion"
+      ],
+      "choice_points": [],
+      "boundary": "尚未形式化建模；不得据此声称可优化空间存在"
+    }
+  }
+}

@@ -818,14 +818,20 @@ def export_workspace_snapshots(
     # The method registry is data, not code (design/149): export it verbatim so
     # the frontend method-model view consumes the same source the CLI queries.
     from .method_registry import load_registry
+    from .method_strategy import DEFAULT_SPACE, load_json, validate_strategy_space
 
     method_registry = load_registry()
+    # design/175: the strategy space is a read-only view of the method model;
+    # validate it fail-closed before shipping, so a broken guard cannot reach the UI.
+    strategy_space = load_json(DEFAULT_SPACE)
+    validate_strategy_space(strategy_space)
     _atomic_write_json(output / "agent-registry.json", agents)
     _atomic_write_json(output / "command-catalog.json", commands)
     _atomic_write_json(output / "orchestration-topology.json", topology)
     _atomic_write_json(output / "custom-agents.json", custom_snapshot)
     _atomic_write_json(output / "evolution-policy.json", policy_snapshot)
     _atomic_write_json(output / "method-registry.json", method_registry)
+    _atomic_write_json(output / "method-strategy-space.json", strategy_space)
     return {
         "output_dir": str(output),
         "agents": agents["count"],
@@ -840,5 +846,6 @@ def export_workspace_snapshots(
             "custom-agents.json",
             "evolution-policy.json",
             "method-registry.json",
+            "method-strategy-space.json",
         ],
     }

@@ -100,6 +100,46 @@ export interface MethodRegistryData {
   }>;
 }
 
+/** design/175: 研究方法的护栏 / 可优化策略空间（只读投影，护栏权威源仍是注册表）。 */
+export interface StrategyPoint {
+  id: string;
+  stage: string;
+  description: string;
+  options: string[];
+  default: string | string[];
+  guard: string[];
+  reversible: boolean;
+  evidence_of_effect: string;
+}
+export interface MethodStrategyEntry {
+  status: "modeled" | "pending";
+  hard_constraints: string[];
+  choice_points: StrategyPoint[];
+  boundary: string;
+}
+export interface StrategySpaceData {
+  schema: string;
+  boundary: string;
+  locked_scopes: string[];
+  methods: Record<string, MethodStrategyEntry>;
+}
+
+let strategyCache: StrategySpaceData | null | undefined;
+
+/** Fetch the exported strategy-space snapshot. Missing => null (honest empty state). */
+export async function loadStrategySpace(): Promise<StrategySpaceData | null> {
+  if (strategyCache !== undefined) return strategyCache;
+  try {
+    const response = await fetch("./method-strategy-space.json", { cache: "no-cache" });
+    if (!response.ok) throw new Error(String(response.status));
+    const data = (await response.json()) as StrategySpaceData;
+    strategyCache = data.schema === "ese-method-strategy-space-0.1" ? data : null;
+  } catch {
+    strategyCache = null;
+  }
+  return strategyCache;
+}
+
 let cache: MethodRegistryData | null | undefined;
 
 /** Fetch the exported registry snapshot (same file the CLI writes). Returns
