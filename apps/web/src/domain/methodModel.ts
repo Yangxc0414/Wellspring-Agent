@@ -126,6 +126,53 @@ export interface StrategySpaceData {
 
 let strategyCache: StrategySpaceData | null | undefined;
 
+/** design/177: 元模型推导的编排计划（顺序 + 每阶段执行契约），由 CLI 导出。 */
+export interface StageContract {
+  stage: string;
+  element: string;
+  requires: string[];
+  produces: string[];
+  human: boolean;
+  gate: string;
+  iteration: { kind?: string; detail?: string };
+  tasks: string;
+  checks: string[];
+  locked_outputs: string[];
+  covered: boolean;
+  not_applicable_reason: string;
+}
+export interface OrchestrationPlan {
+  schema: string;
+  method: string;
+  composition: string;
+  full_order: string[];
+  order: string[];
+  contracts: StageContract[];
+  edges: Array<{ from: string; to: string; port: string }>;
+  boundary: string;
+}
+export interface OrchestrationPlansData {
+  schema: string;
+  boundary: string;
+  plans: Record<string, OrchestrationPlan>;
+}
+
+let orchestrationCache: OrchestrationPlansData | null | undefined;
+
+/** Fetch the exported orchestration plans. Missing => null (honest empty state). */
+export async function loadOrchestrationPlans(): Promise<OrchestrationPlansData | null> {
+  if (orchestrationCache !== undefined) return orchestrationCache;
+  try {
+    const response = await fetch("./orchestration-plans.json", { cache: "no-cache" });
+    if (!response.ok) throw new Error(String(response.status));
+    const data = (await response.json()) as OrchestrationPlansData;
+    orchestrationCache = data.schema === "ese-orchestration-plans-0.1" ? data : null;
+  } catch {
+    orchestrationCache = null;
+  }
+  return orchestrationCache;
+}
+
 /** Fetch the exported strategy-space snapshot. Missing => null (honest empty state). */
 export async function loadStrategySpace(): Promise<StrategySpaceData | null> {
   if (strategyCache !== undefined) return strategyCache;

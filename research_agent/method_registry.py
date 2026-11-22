@@ -485,13 +485,19 @@ def check(method_id: str, payload: Dict[str, Any], registry: Optional[Dict[str, 
 
 
 def pipeline_stage_plan(method_id: str, registry: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """Resolve a method's composition into pipeline stage names (design/164).
+    """Resolve a method's composition into an ordered pipeline stage plan (design/164/177).
 
-    Maps governance slots to the pipeline's stage names. Advisory only: the
-    runner records the covered set and emits stage_skip events; it does not
-    actually skip code blocks yet (that migration is SPEC-first roadmap).
+    design/177: the order now comes from the metamodel's port dependencies
+    (topological), not from the wiring array position; each covered stage also
+    carries an execution contract (requires/produces/human/gate/tasks/checks).
+    Advisory for the runner: design/174 consumes `covered_stages` to skip stages;
+    the `order` is what a runner *should* follow, and is reported honestly as a
+    plan rather than presented as the current code-block order.
     """
+    from .process_orchestration import orchestration_plan
+
     plan = stage_plan(method_id, registry)
+    orch = orchestration_plan(method_id, registry or load_registry())
     slot_to_stage = {
         "S1": "literature",
         "S1b": "literature",
@@ -507,11 +513,21 @@ def pipeline_stage_plan(method_id: str, registry: Optional[Dict[str, Any]] = Non
         stage = slot_to_stage.get(step["slot"])
         if stage:
             covered.add(stage)
+    # design/177: 实际执行序（按契约顺序映射到 pipeline 阶段名，去重保序）。
+    ordered_stages = []
+    for contract in orch["contracts"]:
+        if not contract["covered"]:
+            continue
+        stage = slot_to_stage.get(contract["stage"])
+        if stage and stage not in ordered_stages:
+            ordered_stages.append(stage)
     return {
         "method": method_id,
         "composition": plan["composition"],
         "label": plan["label"],
         "covered_stages": sorted(covered),
+        "ordered_stages": ordered_stages,
+        "stage_contracts": [c for c in orch["contracts"] if c["covered"]],
         "plan": plan["stages"],
     }
 

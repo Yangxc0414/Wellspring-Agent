@@ -819,12 +819,26 @@ def export_workspace_snapshots(
     # the frontend method-model view consumes the same source the CLI queries.
     from .method_registry import load_registry
     from .method_strategy import DEFAULT_SPACE, load_json, validate_strategy_space
+    from .process_orchestration import orchestration_plan
 
     method_registry = load_registry()
     # design/175: the strategy space is a read-only view of the method model;
     # validate it fail-closed before shipping, so a broken guard cannot reach the UI.
     strategy_space = load_json(DEFAULT_SPACE)
     validate_strategy_space(strategy_space)
+    # design/177: export the metamodel-derived plans so the frontend renders the
+    # same order the CLI derives, instead of re-implementing the topology in TS.
+    orchestration_plans = {
+        "schema": "ese-orchestration-plans-0.1",
+        "boundary": (
+            "read-only projection of elements + method data; plans are advisory and do not "
+            "reorder the pipeline's code blocks or read gates"
+        ),
+        "plans": {
+            str(method.get("id")): orchestration_plan(str(method.get("id")), method_registry)
+            for method in method_registry.get("methods", [])
+        },
+    }
     _atomic_write_json(output / "agent-registry.json", agents)
     _atomic_write_json(output / "command-catalog.json", commands)
     _atomic_write_json(output / "orchestration-topology.json", topology)
@@ -832,6 +846,7 @@ def export_workspace_snapshots(
     _atomic_write_json(output / "evolution-policy.json", policy_snapshot)
     _atomic_write_json(output / "method-registry.json", method_registry)
     _atomic_write_json(output / "method-strategy-space.json", strategy_space)
+    _atomic_write_json(output / "orchestration-plans.json", orchestration_plans)
     return {
         "output_dir": str(output),
         "agents": agents["count"],
@@ -847,5 +862,6 @@ def export_workspace_snapshots(
             "evolution-policy.json",
             "method-registry.json",
             "method-strategy-space.json",
+            "orchestration-plans.json",
         ],
     }

@@ -19,6 +19,7 @@ import {
   fitMap,
   iterationLabel,
   loadMethodRegistry,
+  loadOrchestrationPlans,
   loadStrategySpace,
   recommendMethods,
   stagePlanFor,
@@ -26,6 +27,7 @@ import {
   validityName,
   type MethodRecommendation,
   type MethodRegistryData,
+  type OrchestrationPlansData,
   type StrategySpaceData
 } from "../../domain/methodModel";
 import {
@@ -771,6 +773,7 @@ export function MethodModelSettingsPage() {
   const tasks = useWorkspaceStore((state) => state.tasks);
   const [registry, setRegistry] = useState<MethodRegistryData | null>(null);
   const [strategySpace, setStrategySpace] = useState<StrategySpaceData | null>(null);
+  const [orchestration, setOrchestration] = useState<OrchestrationPlansData | null>(null);
   const [missing, setMissing] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [brief, setBrief] = useState("");
@@ -798,6 +801,9 @@ export function MethodModelSettingsPage() {
     let cancelled = false;
     void loadStrategySpace().then((data) => {
       if (!cancelled) setStrategySpace(data);
+    });
+    void loadOrchestrationPlans().then((data) => {
+      if (!cancelled) setOrchestration(data);
     });
     return () => {
       cancelled = true;
@@ -1344,6 +1350,55 @@ export function MethodModelSettingsPage() {
                 <i>停止规则：</i>{iterationLabel(active.iteration_rule?.kind)} —— {active.iteration_rule?.detail ?? "—"}
               </p>
               <small className="method-evidence-basis">{evidenceProfileFor(active.id)?.basis ?? ""}</small>
+            </div>
+            <div className="method-orchestration-block">
+              <b>编排契约（元模型推导）</b>
+              {orchestration?.plans[active.id] ? (
+                <>
+                  <p className="method-strategy-note">
+                    实际顺序：
+                    {orchestration.plans[active.id].order.map((element, index) => (
+                      <span key={element}>
+                        {index > 0 ? " → " : ""}
+                        <code>{element}</code>
+                      </span>
+                    ))}
+                    {orchestration.plans[active.id].order.join("") !==
+                    orchestration.plans[active.id].full_order.join("") ? (
+                      <small className="method-orchestration-gap">
+                        （完整接线还含 {orchestration.plans[active.id].full_order
+                          .filter((element) => !orchestration.plans[active.id].order.includes(element))
+                          .join(" / ")}，本方法不覆盖）
+                      </small>
+                    ) : null}
+                  </p>
+                  {orchestration.plans[active.id].contracts
+                    .filter((contract) => contract.covered)
+                    .map((contract) => (
+                      <div key={contract.stage} className="method-contract-row">
+                        <span className="method-strategy-stage">{contract.stage}</span>
+                        <b>{contract.element}</b>
+                        <em className={contract.human ? "is-human" : "is-agent"}>
+                          {contract.human ? "人签" : "agent"}
+                        </em>
+                        {contract.gate ? <code className="is-gate">{contract.gate}</code> : null}
+                        <small>
+                          入：{contract.requires.join(" / ") || "—"} · 出：
+                          {contract.produces.join(" / ") || "—"}
+                          {contract.tasks ? ` · ${contract.tasks}` : ""}
+                        </small>
+                      </div>
+                    ))}
+                  <small className="method-evidence-basis">
+                    顺序由元素端口依赖拓扑推导，不由数组位置决定；门与角色来自元模型，不随方法变化。
+                  </small>
+                </>
+              ) : (
+                <small className="method-evidence-basis">
+                  编排计划快照缺失：运行 python -m research_agent workspace export 重新导出
+                  orchestration-plans.json。
+                </small>
+              )}
             </div>
             <div className="method-strategy-block">
               <b>护栏 / 可优化空间</b>

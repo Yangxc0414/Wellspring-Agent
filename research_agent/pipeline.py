@@ -447,8 +447,18 @@ class PipelineRunner:
                 "run_id": run_id,
                 "topic": request.topic,
                 "fixture_mode": fixture_mode,
+                # physical_order is what the code blocks actually do today (design/174 §5);
+                # declared_order is what the metamodel's port dependencies derive (design/177).
+                # They are reported separately on purpose: the gap must stay visible, not be
+                # papered over by printing the plan as if it were the execution.
                 "stages": [s for s in ("literature", "idea", "experiment", "run", "figure", "paper", "grant")
                            if s != "grant" or bool(request.grant_scheme)],
+                "declared_order": (
+                    (composition_plan or {}).get("ordered_stages")
+                    or [s for s in ("literature", "idea", "experiment", "run", "figure", "paper")
+                        if s != "grant" or bool(request.grant_scheme)]
+                ),
+                "order_source": "metamodel-port-dependencies" if composition_plan else "physical",
             },
         )
 

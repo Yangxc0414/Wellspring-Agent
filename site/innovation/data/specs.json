@@ -978,7 +978,7 @@
     "id": "method-registry",
     "name": "研究方法注册表（阶段 × 方法）",
     "stage": "META",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "status": "draft",
     "owner": "research-agent",
     "outputs": [
@@ -987,7 +987,8 @@
       "StageMethodMatrix",
       "TaskCard",
       "MethodCheckReport",
-      "PipelineStagePlan  # advisory projection: composition slots -> pipeline stage names",
+      "PipelineStagePlan  # ordered plan: topological stage order + per-stage execution contracts",
+      "OrchestrationPlan  # design/177: metamodel-derived order + contracts + port dependency edges",
       "MethodDiff  # structural difference between two methods (validity/evidence/order)",
       "MethodRecommendation  # advisory ranking of methods for a research brief"
     ],
@@ -1003,6 +1004,10 @@
     "gates": [],
     "invariants": [
       "注册表是数据不是门禁：检查结果只作 advisory，不改变 claim/EA/closure/signature 语义",
+      "阶段顺序由元素端口依赖推导（拓扑），不由 wiring 数组位置或方法偏好决定；声明顺序违反依赖即拒绝加载",
+      "每个阶段是元模型的契约实例：requires/produces/human/gate 来自 elements，iteration/tasks/checks 来自方法数据",
+      "人签阶段（human=true）的产物列入 locked_outputs，策略空间不得改写；gate 不随方法变化",
+      "拓扑遇到环、缺失上游端口或空 wiring 时 fail-closed，不猜顺序",
       "每个方法必须声明非空 cannot_support，否则拒绝加载",
       "每个方法必须引用至少一条指导性文献（key/citation/mandates 齐全）",
       "每个方法必须声明 `validity_focus`（主类型 + 次类型），取值限于封闭词表；主类型不得重复出现在次类型",

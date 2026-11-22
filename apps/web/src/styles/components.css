@@ -8226,6 +8226,46 @@ select.control {
   color: var(--faint);
 }
 
+/* design/177: 元模型推导的编排契约。顺序来自端口依赖，人签/门禁来自元模型。 */
+.method-orchestration-block {
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 7px;
+}
+.method-orchestration-gap {
+  color: var(--faint);
+  font-size: calc(9px * var(--font-scale, 1));
+}
+.method-contract-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px 6px;
+  margin: 4px 0;
+  border-left: 2px solid var(--line-strong);
+  background: var(--surface-2);
+  border-radius: 0 6px 6px 0;
+  font-size: calc(11px * var(--font-scale, 1));
+}
+.method-contract-row em {
+  font-style: normal;
+  font-size: calc(9px * var(--font-scale, 1));
+  padding: 0 4px;
+  border-radius: 3px;
+}
+.method-contract-row em.is-human { color: var(--coral); background: rgba(216, 90, 48, 0.1); }
+.method-contract-row em.is-agent { color: var(--teal); background: rgba(29, 158, 117, 0.1); }
+.method-contract-row code.is-gate {
+  color: var(--amber);
+  background: rgba(186, 117, 23, 0.1);
+}
+.method-contract-row small {
+  flex-basis: 100%;
+  color: var(--faint);
+  font-size: calc(9px * var(--font-scale, 1));
+  line-height: 1.5;
+}
+
 /* design/175: 护栏（不可改） vs 可优化策略空间（自改进的对象）。紫=可选，灰=护栏。 */
 .method-strategy-block {
   border-top: 1px dashed var(--line-strong);

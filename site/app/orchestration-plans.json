@@ -1,0 +1,3024 @@
+{
+  "schema": "ese-orchestration-plans-0.1",
+  "boundary": "read-only projection of elements + method data; plans are advisory and do not reorder the pipeline's code blocks or read gates",
+  "plans": {
+    "systematic-literature-review": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "systematic-literature-review",
+      "composition": "confirmatory",
+      "full_order": [
+        "问题",
+        "假设",
+        "方案",
+        "证据",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "问题",
+        "证据",
+        "写作"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "把问题收成可检索的 RQ；声明综述类型（映射式/系统式）与更新策略",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "先写检索协议再检索；记录数据库、检索式、日期、命中数；滚雪球需给出 start set 依据",
+          "checks": [
+            "slr.protocol",
+            "slr.reproducible_search",
+            "slr.screening_agreement"
+          ],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "按主题×来源建矩阵；标注一致点/张力/未使用来源；报告覆盖缺口",
+          "checks": [
+            "slr.quality"
+          ],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "按 PRISMA 与 Kitchenham 报告结构写；检索日期与计数必须可复现",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "检索协议、数据库与截止日期冻结后不再改动；不得按结果补检索"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "假设",
+          "port": "研究问题"
+        },
+        {
+          "from": "假设",
+          "to": "方案",
+          "port": "候选假设（可判别）"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "判别式协议"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    },
+    "repository-mining": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "repository-mining",
+      "composition": "exploratory",
+      "full_order": [
+        "问题",
+        "方案",
+        "证据",
+        "假设",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "方案",
+        "证据",
+        "判定"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "时间切分必须先于建模；去重策略与标签来源写进预注册",
+          "checks": [],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "确定抽样框（哪些项目、为何排除）；核对镜像仓库与复刻",
+          "checks": [
+            "mining.sampling_frame",
+            "mining.time_split",
+            "mining.dedup",
+            "mining.license"
+          ],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "记录抽取脚本、快照哈希与许可证；重复运行必须得到同一快照",
+          "checks": [
+            "mining.label_source"
+          ],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "claim 的 scope 必须写清语言/生态/时间窗；不得外推为因果",
+          "checks": [
+            "mining.analysis"
+          ],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "仓库快照与时间切分固定；不得按结果重新切分"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "方案",
+          "port": "研究问题"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "数据收集协议"
+        },
+        {
+          "from": "证据",
+          "to": "假设",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    },
+    "controlled-experiment": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "controlled-experiment",
+      "composition": "confirmatory",
+      "full_order": [
+        "问题",
+        "假设",
+        "方案",
+        "证据",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "假设",
+        "方案",
+        "证据",
+        "判定",
+        "写作"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "把假设写成可操控的因子与水平；先做功效预判再承诺样本量",
+          "checks": [
+            "experiment.hypothesis"
+          ],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "预注册：随机化、区组、主指标、分析计划、停止规则；设计冻结后才执行",
+          "checks": [
+            "experiment.design",
+            "experiment.power",
+            "experiment.analysis_plan",
+            "experiment.randomization"
+          ],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "执行记录分配与偏离；不得事后改主指标",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "claim 只能来自预注册主比较；区间跨零即 undecidable",
+          "checks": [],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "按 Wohlin/Jedlitschka 结构报告，效度威胁单列",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "预注册的 seeds 与停止规则固定；不得看结果后延长或加点"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "假设",
+          "port": "研究问题"
+        },
+        {
+          "from": "假设",
+          "to": "方案",
+          "port": "候选假设（可判别）"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "判别式协议"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    },
+    "quasi-experiment": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "quasi-experiment",
+      "composition": "confirmatory",
+      "full_order": [
+        "问题",
+        "假设",
+        "方案",
+        "证据",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "方案",
+        "证据",
+        "判定"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "先写识别策略与识别假设，再选数据；混杂必须逐条列",
+          "checks": [],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "记录处理暴露与时间；不得按结果挑对照组",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "因果主张不得超出识别策略；写清不可识别的部分",
+          "checks": [],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "识别策略与样本窗口预注册后固定；敏感性分析不改变主分析"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "假设",
+          "port": "研究问题"
+        },
+        {
+          "from": "假设",
+          "to": "方案",
+          "port": "候选假设（可判别）"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "判别式协议"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    },
+    "benchmark-evaluation": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "benchmark-evaluation",
+      "composition": "confirmatory",
+      "full_order": [
+        "问题",
+        "假设",
+        "方案",
+        "证据",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "方案",
+        "证据",
+        "判定",
+        "写作"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "先写污染检查与预算匹配；基线必须可复现",
+          "checks": [],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "固定基准版本与哈希；记录算力与预算",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "主张必须说明是「在该基准该预算下」，并报告 headroom",
+          "checks": [],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "报 headroom 归一化曲线；不得只报绝对分",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "基准版本、污染检查与多重比较策略固定"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "假设",
+          "port": "研究问题"
+        },
+        {
+          "from": "假设",
+          "to": "方案",
+          "port": "候选假设（可判别）"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "判别式协议"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    },
+    "case-study": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "case-study",
+      "composition": "exploratory",
+      "full_order": [
+        "问题",
+        "方案",
+        "证据",
+        "假设",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "问题",
+        "方案",
+        "证据",
+        "写作"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "先定案例边界与分析单位；说明为何是案例而不是实验",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "写数据收集与分析协议；伦理与匿名先于采集",
+          "checks": [],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "收集文档/制品/访谈；建立链式证据编号",
+          "checks": [
+            "case.questions",
+            "case.selection",
+            "case.ethics"
+          ],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "记录实际数据与编码过程；偏离要写",
+          "checks": [
+            "case.triangulation",
+            "case.member_checking"
+          ],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "按 Runeson & Höst 结构报告；只做可迁移性讨论，不做统计泛化",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "saturation",
+            "detail": "分析饱和：新增资料不再改变类属即停止；须在协议中声明是否采用"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "方案",
+          "port": "研究问题"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "数据收集协议"
+        },
+        {
+          "from": "证据",
+          "to": "假设",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    },
+    "survey": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "survey",
+      "composition": "confirmatory",
+      "full_order": [
+        "问题",
+        "假设",
+        "方案",
+        "证据",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "问题",
+        "证据",
+        "写作"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "先写总体与抽样框；说明为何不用已有数据",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "工具设计后必须预试；知情同意与匿名方案先定",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "记录响应率、缺失与退出",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "报告未响应偏差；不得把自报当行为",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "fixed",
+            "detail": "抽样框、预试与发放窗口固定；不得中途改题"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "假设",
+          "port": "研究问题"
+        },
+        {
+          "from": "假设",
+          "to": "方案",
+          "port": "候选假设（可判别）"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "判别式协议"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    },
+    "design-science": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "design-science",
+      "composition": "exploratory",
+      "full_order": [
+        "问题",
+        "方案",
+        "证据",
+        "假设",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "问题",
+        "方案",
+        "假设",
+        "写作"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "把工程问题写成设计问题；区分设计问题与实证问题",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "评估策略（人工/案例/基准）先于实现",
+          "checks": [],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "制品的贡献类型先声明（改进/新方法/理论）",
+          "checks": [],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "按 DSR 结构报告；效用声明必须有评估支撑",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "构建→评估→修订的回路，直到效用评估通过或按协议停止"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "方案",
+          "port": "研究问题"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "数据收集协议"
+        },
+        {
+          "from": "证据",
+          "to": "假设",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    },
+    "action-research": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "action-research",
+      "composition": "exploratory",
+      "full_order": [
+        "问题",
+        "方案",
+        "证据",
+        "假设",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "问题",
+        "方案",
+        "证据",
+        "写作"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "声明研究者介入与利益相关者；区分行动研究与咨询",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "写循环计划与反思机制",
+          "checks": [],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "每轮记录介入、观察、反思",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "报告研究者角色与偏差；不做统计泛化",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "cycle",
+            "detail": "诊断→行动→评估→反思，循环至问题缓解或约定轮次"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "方案",
+          "port": "研究问题"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "数据收集协议"
+        },
+        {
+          "from": "证据",
+          "to": "假设",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    },
+    "ml-iterative-experiment": {
+      "schema": "ese-orchestration-plan-0.1",
+      "method": "ml-iterative-experiment",
+      "composition": "exploratory",
+      "full_order": [
+        "问题",
+        "方案",
+        "证据",
+        "假设",
+        "判定",
+        "图表",
+        "写作",
+        "闭包",
+        "经验"
+      ],
+      "order": [
+        "方案",
+        "证据",
+        "假设",
+        "判定",
+        "图表",
+        "写作"
+      ],
+      "contracts": [
+        {
+          "stage": "S0",
+          "element": "问题",
+          "requires": [],
+          "produces": [
+            "研究问题"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method ml-iterative-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S4",
+          "element": "方案",
+          "requires": [
+            "候选假设（可判别）",
+            "研究问题"
+          ],
+          "produces": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "human": true,
+          "gate": "G2",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "设计最小可行实验（MV 二元标准）与消融/对比计划；一次只探索一件事",
+          "checks": [],
+          "locked_outputs": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "先 search 再 re-search：literature tree + 蒸馏开源基线代码的 tricks",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S1b",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "Q0",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": false,
+          "not_applicable_reason": "stage not in method ml-iterative-experiment fit_stages; orchestration skips it (design/174)"
+        },
+        {
+          "stage": "S5",
+          "element": "证据",
+          "requires": [
+            "判别式协议",
+            "数据收集协议"
+          ],
+          "produces": [
+            "RunCapsule + EA",
+            "RunCapsule + EA"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "快速迭代：实验记录五要素；控制变量定位不 work 的技术原因",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S2-S3",
+          "element": "假设",
+          "requires": [
+            "研究问题",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "human": true,
+          "gate": "G1",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "从新 failure case 入手收敛 idea；用 problem-driven 四问立项",
+          "checks": [],
+          "locked_outputs": [
+            "候选假设（可判别）",
+            "提炼式假设（事后）"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S5b",
+          "element": "判定",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "ClaimRecord"
+          ],
+          "human": true,
+          "gate": "S5b",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "claim 只能基于预注册主指标与多种子区间；失败结果如实保留",
+          "checks": [],
+          "locked_outputs": [
+            "ClaimRecord"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S6",
+          "element": "图表",
+          "requires": [
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "图 manifest"
+          ],
+          "human": false,
+          "gate": "",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "可视化 failure case 与消融表；图绑定实验产物",
+          "checks": [],
+          "locked_outputs": [],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S8-S12",
+          "element": "写作",
+          "requires": [
+            "ClaimRecord",
+            "图 manifest"
+          ],
+          "produces": [
+            "稿件绑定"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "按 Intro 五部分倒推/正推与 Method 三元素（motivation→design→advantage）写作",
+          "checks": [],
+          "locked_outputs": [
+            "稿件绑定"
+          ],
+          "covered": true,
+          "not_applicable_reason": ""
+        },
+        {
+          "stage": "S13-S16",
+          "element": "闭包",
+          "requires": [
+            "ClaimRecord",
+            "RunCapsule + EA"
+          ],
+          "produces": [
+            "closure + 导出"
+          ],
+          "human": true,
+          "gate": "G5",
+          "iteration": {
+            "kind": "convergence",
+            "detail": "直到消融判别力稳定；不以固定轮数代替收敛判据"
+          },
+          "tasks": "",
+          "checks": [],
+          "locked_outputs": [
+            "closure + 导出"
+          ],
+          "covered": false,
+          "not_applicable_reason": "stage not in method ml-iterative-experiment fit_stages; orchestration skips it (design/174)"
+        }
+      ],
+      "edges": [
+        {
+          "from": "问题",
+          "to": "方案",
+          "port": "研究问题"
+        },
+        {
+          "from": "方案",
+          "to": "证据",
+          "port": "数据收集协议"
+        },
+        {
+          "from": "证据",
+          "to": "假设",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "判定",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "证据",
+          "to": "图表",
+          "port": "RunCapsule + EA"
+        },
+        {
+          "from": "判定",
+          "to": "写作",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "判定",
+          "to": "闭包",
+          "port": "ClaimRecord"
+        },
+        {
+          "from": "闭包",
+          "to": "经验",
+          "port": "closure + 导出"
+        }
+      ],
+      "boundary": "read-only projection of elements + method data; it does not reorder the pipeline's code blocks (design/174 §5), does not read gates and produces no Claim"
+    }
+  }
+}

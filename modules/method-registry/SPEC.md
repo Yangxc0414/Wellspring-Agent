@@ -2,7 +2,7 @@
 id: method-registry
 name: 研究方法注册表（阶段 × 方法）
 stage: META
-version: 0.5.0
+version: 0.6.0
 status: draft
 owner: research-agent
 inputs:
@@ -17,7 +17,8 @@ outputs:
   - StageMethodMatrix
   - TaskCard
   - MethodCheckReport
-  - PipelineStagePlan  # advisory projection: composition slots -> pipeline stage names
+  - PipelineStagePlan  # ordered plan: topological stage order + per-stage execution contracts
+  - OrchestrationPlan  # design/177: metamodel-derived order + contracts + port dependency edges
   - MethodDiff  # structural difference between two methods (validity/evidence/order)
   - MethodRecommendation  # advisory ranking of methods for a research brief
 tools:
@@ -31,6 +32,10 @@ tools:
 gates: []
 invariants:
   - 注册表是数据不是门禁：检查结果只作 advisory，不改变 claim/EA/closure/signature 语义
+  - 阶段顺序由元素端口依赖推导（拓扑），不由 wiring 数组位置或方法偏好决定；声明顺序违反依赖即拒绝加载
+  - 每个阶段是元模型的契约实例：requires/produces/human/gate 来自 elements，iteration/tasks/checks 来自方法数据
+  - 人签阶段（human=true）的产物列入 locked_outputs，策略空间不得改写；gate 不随方法变化
+  - 拓扑遇到环、缺失上游端口或空 wiring 时 fail-closed，不猜顺序
   - 每个方法必须声明非空 cannot_support，否则拒绝加载
   - 每个方法必须引用至少一条指导性文献（key/citation/mandates 齐全）
   - 每个方法必须声明 `validity_focus`（主类型 + 次类型），取值限于封闭词表；主类型不得重复出现在次类型
@@ -92,6 +97,8 @@ invariants:
 5. 不把检查项直接接进门禁；如确需，另写设计文档并人工确认。
 
 ## Changelog
+
+- 2026-11-22 · v0.6.0 · status=draft · **元模型驱动编排（design/177）**：新增 `OrchestrationPlan` 输出与 `research_agent/process_orchestration.py`。阶段顺序改由 `elements` 的端口依赖做拓扑推导（Kahn），不再依赖 wiring 数组位置；每个覆盖阶段生成执行契约（requires/produces/human/gate/iteration/tasks/checks/locked_outputs）。`pipeline_stage_plan` 增加 `ordered_stages` 与 `stage_contracts`；`run_start` 事件分别声明 `stages`（物理序）与 `declared_order`（推导序），差距保持可见。环/缺失上游端口/空 wiring fail-closed。不改门禁、不产生 Claim、不重排 pipeline 代码块（后者仍属 174 §5 roadmap）。
 
 - 2026-11-21 · v0.5.0 · status=draft · 新增 `selection_signals`（每方法 6 条短语+权重）与 `recommend_methods(brief)`：按研究内容命中短语排序候选，返回 ok / insufficient / ambiguous 三态，仅在 ok 时给出 `proposed`；`pipeline --method auto` 只在 ok 时采纳，并始终写 `needs_human=true`。schema 0.6→0.7。advisory 定位不变，不改变任何门。实现对应 design/168。
 
