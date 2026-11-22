@@ -1378,13 +1378,21 @@ export function MethodModelSettingsPage() {
                       <div key={contract.stage} className="method-contract-row">
                         <span className="method-strategy-stage">{contract.stage}</span>
                         <b>{contract.element}</b>
+                        {contract.role ? (
+                          <code className="is-role">{contract.role}</code>
+                        ) : null}
                         <em className={contract.human ? "is-human" : "is-agent"}>
-                          {contract.human ? "人签" : "agent"}
+                          {contract.executor === "human" ? "人" : contract.human ? "agent+人签" : "agent"}
                         </em>
-                        {contract.gate ? <code className="is-gate">{contract.gate}</code> : null}
+                        {contract.human_sign ? (
+                          <code className="is-gate">{contract.human_sign}</code>
+                        ) : contract.gate ? (
+                          <code className="is-gate">{contract.gate}</code>
+                        ) : null}
                         <small>
                           入：{contract.requires.join(" / ") || "—"} · 出：
                           {contract.produces.join(" / ") || "—"}
+                          {contract.agent_module ? ` · 实现：${contract.agent_module}` : ""}
                           {contract.tasks ? ` · ${contract.tasks}` : ""}
                         </small>
                       </div>

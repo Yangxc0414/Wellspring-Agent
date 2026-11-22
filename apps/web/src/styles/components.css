@@ -8259,6 +8259,10 @@ select.control {
   color: var(--amber);
   background: rgba(186, 117, 23, 0.1);
 }
+.method-contract-row code.is-role {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+}
 .method-contract-row small {
   flex-basis: 100%;
   color: var(--faint);

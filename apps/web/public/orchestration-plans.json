@@ -40,7 +40,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S2-S3",
@@ -66,7 +72,13 @@
             "提炼式假设（事后）"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S4",
@@ -92,7 +104,13 @@
             "数据收集协议"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -119,7 +137,13 @@
           ],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -144,7 +168,13 @@
           ],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -167,7 +197,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S5b",
@@ -190,7 +226,13 @@
             "ClaimRecord"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -211,7 +253,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -235,7 +283,13 @@
             "稿件绑定"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -259,7 +313,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method systematic-literature-review fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [
@@ -344,7 +404,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S4",
@@ -370,7 +436,13 @@
             "数据收集协议"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -398,7 +470,13 @@
           ],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -421,7 +499,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -446,7 +530,13 @@
           ],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S2-S3",
@@ -472,7 +562,13 @@
             "提炼式假设（事后）"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S5b",
@@ -497,7 +593,13 @@
             "ClaimRecord"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -518,7 +620,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -542,7 +650,13 @@
             "稿件绑定"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -566,7 +680,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method repository-mining fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [
@@ -653,7 +773,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S2-S3",
@@ -681,7 +807,13 @@
             "提炼式假设（事后）"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S4",
@@ -712,7 +844,13 @@
             "数据收集协议"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -735,7 +873,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -758,7 +902,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -781,7 +931,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S5b",
@@ -804,7 +960,13 @@
             "ClaimRecord"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -825,7 +987,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -849,7 +1017,13 @@
             "稿件绑定"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -873,7 +1047,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method controlled-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [
@@ -958,7 +1138,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S2-S3",
@@ -984,7 +1170,13 @@
             "提炼式假设（事后）"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S4",
@@ -1010,7 +1202,13 @@
             "数据收集协议"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -1033,7 +1231,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -1056,7 +1260,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -1079,7 +1289,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S5b",
@@ -1102,7 +1318,13 @@
             "ClaimRecord"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -1123,7 +1345,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -1147,7 +1375,13 @@
             "稿件绑定"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -1171,7 +1405,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method quasi-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [
@@ -1257,7 +1497,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S2-S3",
@@ -1283,7 +1529,13 @@
             "提炼式假设（事后）"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S4",
@@ -1309,7 +1561,13 @@
             "数据收集协议"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -1332,7 +1590,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -1355,7 +1619,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -1378,7 +1648,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S5b",
@@ -1401,7 +1677,13 @@
             "ClaimRecord"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -1422,7 +1704,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -1446,7 +1734,13 @@
             "稿件绑定"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -1470,7 +1764,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method benchmark-evaluation fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [
@@ -1556,7 +1856,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S4",
@@ -1582,7 +1888,13 @@
             "数据收集协议"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -1609,7 +1921,13 @@
           ],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -1632,7 +1950,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -1658,7 +1982,13 @@
           ],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S2-S3",
@@ -1684,7 +2014,13 @@
             "提炼式假设（事后）"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S5b",
@@ -1707,7 +2043,13 @@
             "ClaimRecord"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -1728,7 +2070,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -1752,7 +2100,13 @@
             "稿件绑定"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -1776,7 +2130,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method case-study fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [
@@ -1861,7 +2221,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S2-S3",
@@ -1887,7 +2253,13 @@
             "提炼式假设（事后）"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S4",
@@ -1913,7 +2285,13 @@
             "数据收集协议"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -1936,7 +2314,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -1959,7 +2343,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -1982,7 +2372,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S5b",
@@ -2005,7 +2401,13 @@
             "ClaimRecord"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -2026,7 +2428,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -2050,7 +2458,13 @@
             "稿件绑定"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -2074,7 +2488,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method survey fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [
@@ -2160,7 +2580,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S4",
@@ -2186,7 +2612,13 @@
             "数据收集协议"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -2209,7 +2641,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -2232,7 +2670,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -2255,7 +2699,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S2-S3",
@@ -2281,7 +2731,13 @@
             "提炼式假设（事后）"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S5b",
@@ -2304,7 +2760,13 @@
             "ClaimRecord"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -2325,7 +2787,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -2349,7 +2817,13 @@
             "稿件绑定"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -2373,7 +2847,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method design-science fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [
@@ -2459,7 +2939,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S4",
@@ -2485,7 +2971,13 @@
             "数据收集协议"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -2508,7 +3000,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -2531,7 +3029,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -2554,7 +3058,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S2-S3",
@@ -2580,7 +3090,13 @@
             "提炼式假设（事后）"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S5b",
@@ -2603,7 +3119,13 @@
             "ClaimRecord"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -2624,7 +3146,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -2648,7 +3176,13 @@
             "稿件绑定"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -2672,7 +3206,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method action-research fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [
@@ -2760,7 +3300,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method ml-iterative-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method ml-iterative-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "problem-framing",
+          "executor": "agent",
+          "interface": "internal",
+          "agent_module": "task-agent",
+          "human_sign": "Q0",
+          "role_description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
         },
         {
           "stage": "S4",
@@ -2786,7 +3332,13 @@
             "数据收集协议"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "experiment",
+          "human_sign": "G2",
+          "role_description": "设计协议与统计方案；冻结由 G2 人签"
         },
         {
           "stage": "S1",
@@ -2809,7 +3361,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "literature-researcher",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
         },
         {
           "stage": "S1b",
@@ -2832,7 +3390,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": false,
-          "not_applicable_reason": "stage not in method ml-iterative-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method ml-iterative-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "literature-synthesizer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "literature",
+          "human_sign": "",
+          "role_description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
         },
         {
           "stage": "S5",
@@ -2855,7 +3419,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "experiment-runner",
+          "executor": "agent",
+          "interface": "execute",
+          "agent_module": "run",
+          "human_sign": "",
+          "role_description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
         },
         {
           "stage": "S2-S3",
@@ -2881,7 +3451,13 @@
             "提炼式假设（事后）"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "hypothesis-designer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "idea",
+          "human_sign": "G1",
+          "role_description": "生成可判别的候选假设；选哪一个由 G1 人签"
         },
         {
           "stage": "S5b",
@@ -2904,7 +3480,13 @@
             "ClaimRecord"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "claim-signer",
+          "executor": "human",
+          "interface": "sign",
+          "agent_module": "",
+          "human_sign": "S5b",
+          "role_description": "只能由人签 claim；没有 agent 可以代签"
         },
         {
           "stage": "S6",
@@ -2925,7 +3507,13 @@
           "checks": [],
           "locked_outputs": [],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "figure-renderer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "figure",
+          "human_sign": "",
+          "role_description": "生成示意图；不得绑定 result.figure"
         },
         {
           "stage": "S8-S12",
@@ -2949,7 +3537,13 @@
             "稿件绑定"
           ],
           "covered": true,
-          "not_applicable_reason": ""
+          "not_applicable_reason": "",
+          "role": "paper-writer",
+          "executor": "agent",
+          "interface": "run",
+          "agent_module": "paper",
+          "human_sign": "G5",
+          "role_description": "写作与槽位绑定；导出由 G5 人签"
         },
         {
           "stage": "S13-S16",
@@ -2973,7 +3567,13 @@
             "closure + 导出"
           ],
           "covered": false,
-          "not_applicable_reason": "stage not in method ml-iterative-experiment fit_stages; orchestration skips it (design/174)"
+          "not_applicable_reason": "stage not in method ml-iterative-experiment fit_stages; orchestration skips it (design/174)",
+          "role": "closure-checker",
+          "executor": "agent",
+          "interface": "check",
+          "agent_module": "closure",
+          "human_sign": "G5",
+          "role_description": "闭包检查与导出前置；签名仍在人工流程"
         }
       ],
       "edges": [

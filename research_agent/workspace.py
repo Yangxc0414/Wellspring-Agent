@@ -820,6 +820,7 @@ def export_workspace_snapshots(
     from .method_registry import load_registry
     from .method_strategy import DEFAULT_SPACE, load_json, validate_strategy_space
     from .process_orchestration import orchestration_plan
+    from .stage_roles import load_stage_roles
 
     method_registry = load_registry()
     # design/175: the strategy space is a read-only view of the method model;
@@ -828,6 +829,7 @@ def export_workspace_snapshots(
     validate_strategy_space(strategy_space)
     # design/177: export the metamodel-derived plans so the frontend renders the
     # same order the CLI derives, instead of re-implementing the topology in TS.
+    stage_roles = load_stage_roles()
     orchestration_plans = {
         "schema": "ese-orchestration-plans-0.1",
         "boundary": (
@@ -847,6 +849,7 @@ def export_workspace_snapshots(
     _atomic_write_json(output / "method-registry.json", method_registry)
     _atomic_write_json(output / "method-strategy-space.json", strategy_space)
     _atomic_write_json(output / "orchestration-plans.json", orchestration_plans)
+    _atomic_write_json(output / "stage-roles.json", stage_roles)
     return {
         "output_dir": str(output),
         "agents": agents["count"],
@@ -863,5 +866,6 @@ def export_workspace_snapshots(
             "method-registry.json",
             "method-strategy-space.json",
             "orchestration-plans.json",
+            "stage-roles.json",
         ],
     }

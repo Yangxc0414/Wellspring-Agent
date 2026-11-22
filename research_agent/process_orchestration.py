@@ -17,6 +17,8 @@
 
 from typing import Any, Dict, List, Optional, Set
 
+from .stage_roles import load_stage_roles, merge_into_contracts
+
 # 治理门与阶段的固定映射：门是治理层，不由方法或接线决定（design/163 不变层）。
 # 依据 ARCHITECTURE.md 的 human gates（Q0/G1/G2/S5b/G5）：
 #   Q0 覆盖问题与证据范围；G1 假设选择；G2 协议冻结；S5b 人签判定；G5 导出闭包。
@@ -210,7 +212,9 @@ def stage_contracts(method_id: str, registry: Dict[str, Any]) -> List[Dict[str, 
                 "stage not in method %s fit_stages; orchestration skips it (design/174)" % method_id,
             }
             contracts.append(contract)
-    return contracts
+    # design/178: 把 (stage, role/executor/interface/module/human_sign) 并入契约。
+    # 角色是数据，不是 pipeline 里的 if/else；人签阶段不会绑定 agent。
+    return merge_into_contracts(load_stage_roles(), contracts)
 
 
 def orchestration_plan(method_id: str, registry: Dict[str, Any]) -> Dict[str, Any]:

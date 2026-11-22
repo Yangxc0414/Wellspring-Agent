@@ -98,6 +98,7 @@ class WorkspaceStoreTest(unittest.TestCase):
                 "method-strategy-space.json",
                 "orchestration-plans.json",
                 "orchestration-topology.json",
+                "stage-roles.json",
             ],
         )
         agents = json.loads((self.root / "agent-registry.json").read_text(encoding="utf-8"))

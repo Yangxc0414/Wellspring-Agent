@@ -1,0 +1,108 @@
+{
+  "schema": "ese-stage-roles-0.1",
+  "boundary": "只读角色声明：每个治理阶段绑定一个执行角色、一个实现模块与一个签核门。它不启动 agent、不读门禁、不产生 Claim；护栏与门仍由 registry/SPEC 与 LOCKED_SCOPES 定义。",
+  "interfaces": ["internal", "run", "execute", "check", "sign", "propose"],
+  "executors": ["agent", "human", "hybrid"],
+  "sign_gates": ["Q0", "G1", "G2", "S5b", "G5", "lease"],
+  "roles": [
+    {
+      "stage": "S0",
+      "role": "problem-framing",
+      "module": "task-agent",
+      "interface": "internal",
+      "executor": "agent",
+      "human_sign": "Q0",
+      "description": "把研究内容收敛成可检索、可判别的问题；Q0 由人确认范围"
+    },
+    {
+      "stage": "S1",
+      "role": "literature-researcher",
+      "module": "literature",
+      "interface": "run",
+      "executor": "agent",
+      "human_sign": "",
+      "description": "检索与阅读，产出 SourceHit / Span / CoverageReceipt / Gap"
+    },
+    {
+      "stage": "S1b",
+      "role": "literature-synthesizer",
+      "module": "literature",
+      "interface": "run",
+      "executor": "agent",
+      "human_sign": "",
+      "description": "跨来源主题综合与矩阵，标注一致点/张力/未使用来源"
+    },
+    {
+      "stage": "S2-S3",
+      "role": "hypothesis-designer",
+      "module": "idea",
+      "interface": "run",
+      "executor": "agent",
+      "human_sign": "G1",
+      "description": "生成可判别的候选假设；选哪一个由 G1 人签"
+    },
+    {
+      "stage": "S4",
+      "role": "experiment-designer",
+      "module": "experiment",
+      "interface": "run",
+      "executor": "agent",
+      "human_sign": "G2",
+      "description": "设计协议与统计方案；冻结由 G2 人签"
+    },
+    {
+      "stage": "S5",
+      "role": "experiment-runner",
+      "module": "run",
+      "interface": "execute",
+      "executor": "agent",
+      "human_sign": "",
+      "description": "执行本地协议并产出 RunCapsule / EA；不签 claim"
+    },
+    {
+      "stage": "S5b",
+      "role": "claim-signer",
+      "module": "",
+      "interface": "sign",
+      "executor": "human",
+      "human_sign": "S5b",
+      "description": "只能由人签 claim；没有 agent 可以代签"
+    },
+    {
+      "stage": "S6",
+      "role": "figure-renderer",
+      "module": "figure",
+      "interface": "run",
+      "executor": "agent",
+      "human_sign": "",
+      "description": "生成示意图；不得绑定 result.figure"
+    },
+    {
+      "stage": "S8-S12",
+      "role": "paper-writer",
+      "module": "paper",
+      "interface": "run",
+      "executor": "agent",
+      "human_sign": "G5",
+      "description": "写作与槽位绑定；导出由 G5 人签"
+    },
+    {
+      "stage": "S13-S16",
+      "role": "closure-checker",
+      "module": "closure",
+      "interface": "check",
+      "executor": "agent",
+      "human_sign": "G5",
+      "description": "闭包检查与导出前置；签名仍在人工流程"
+    },
+    {
+      "stage": "META",
+      "role": "experience-curator",
+      "module": "rsi",
+      "interface": "propose",
+      "executor": "agent",
+      "human_sign": "lease",
+      "description": "经验提案与自改进候选；租约人签后才可消费"
+    }
+  ]
+}

@@ -140,6 +140,13 @@ export interface StageContract {
   locked_outputs: string[];
   covered: boolean;
   not_applicable_reason: string;
+  /** design/178: 角色来自 stage-roles 声明，不是 pipeline 里的 if/else。 */
+  role?: string;
+  executor?: "agent" | "human" | "hybrid";
+  interface?: string;
+  agent_module?: string;
+  human_sign?: string;
+  role_description?: string;
 }
 export interface OrchestrationPlan {
   schema: string;
