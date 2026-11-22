@@ -8226,6 +8226,32 @@ select.control {
   color: var(--faint);
 }
 
+/* design/179: 认识论声明——证据形态、推论规则、带出处的顺序约束。 */
+.method-epistemics-block {
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 7px;
+}
+.method-epi-rule {
+  margin-left: 8px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.method-epi-constraint {
+  border-left: 2px solid var(--blue, #378ADD);
+  background: rgba(55, 138, 221, 0.06);
+  border-radius: 0 6px 6px 0;
+  padding: 4px 8px;
+  margin: 4px 0;
+  font-size: calc(11px * var(--font-scale, 1));
+  line-height: 1.55;
+}
+.method-epi-constraint small {
+  display: block;
+  margin-top: 2px;
+  color: var(--faint);
+  font-size: calc(9px * var(--font-scale, 1));
+}
+
 /* design/177: 元模型推导的编排契约。顺序来自端口依赖，人签/门禁来自元模型。 */
 .method-orchestration-block {
   border-top: 1px dashed var(--line-strong);

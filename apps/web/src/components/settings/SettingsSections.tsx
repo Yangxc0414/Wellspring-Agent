@@ -18,6 +18,7 @@ import {
   evidenceProfileFor,
   fitMap,
   iterationLabel,
+  loadEpistemics,
   loadMethodRegistry,
   loadOrchestrationPlans,
   loadStrategySpace,
@@ -27,6 +28,7 @@ import {
   validityName,
   type MethodRecommendation,
   type MethodRegistryData,
+  type EpistemicsData,
   type OrchestrationPlansData,
   type StrategySpaceData
 } from "../../domain/methodModel";
@@ -774,6 +776,7 @@ export function MethodModelSettingsPage() {
   const [registry, setRegistry] = useState<MethodRegistryData | null>(null);
   const [strategySpace, setStrategySpace] = useState<StrategySpaceData | null>(null);
   const [orchestration, setOrchestration] = useState<OrchestrationPlansData | null>(null);
+  const [epistemics, setEpistemics] = useState<EpistemicsData | null>(null);
   const [missing, setMissing] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [brief, setBrief] = useState("");
@@ -804,6 +807,9 @@ export function MethodModelSettingsPage() {
     });
     void loadOrchestrationPlans().then((data) => {
       if (!cancelled) setOrchestration(data);
+    });
+    void loadEpistemics().then((data) => {
+      if (!cancelled) setEpistemics(data);
     });
     return () => {
       cancelled = true;
@@ -1350,6 +1356,37 @@ export function MethodModelSettingsPage() {
                 <i>停止规则：</i>{iterationLabel(active.iteration_rule?.kind)} —— {active.iteration_rule?.detail ?? "—"}
               </p>
               <small className="method-evidence-basis">{evidenceProfileFor(active.id)?.basis ?? ""}</small>
+            </div>
+            <div className="method-epistemics-block">
+              <b>认识论：什么算证据、允许怎么推论</b>
+              {epistemics?.methods[active.id] ? (
+                <>
+                  <p className="method-evidence-kind">
+                    {epistemics.methods[active.id].evidence_form.label}
+                    <span className="method-epi-rule">
+                      推论规则：<code>{epistemics.methods[active.id].inference_rule}</code>
+                    </span>
+                  </p>
+                  <p className="method-artifact-form">
+                    <i>可固定为：</i>{epistemics.methods[active.id].evidence_form.hashable}
+                  </p>
+                  <p className="method-artifact-form">
+                    <i>规则：</i>{epistemics.methods[active.id].rule_detail}
+                  </p>
+                  {epistemics.methods[active.id].constraints.map((constraint) => (
+                    <div key={constraint.id} className="method-epi-constraint">
+                      <span className="method-strategy-stage">{constraint.stage}</span>
+                      <b>{constraint.id}</b> — {constraint.constraint}
+                      <small>出处：{constraint.citation}</small>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <small className="method-evidence-basis">
+                  认识论快照缺失：运行 python -m research_agent workspace export 重新导出
+                  method-epistemics.json。
+                </small>
+              )}
             </div>
             <div className="method-orchestration-block">
               <b>编排契约（元模型推导）</b>

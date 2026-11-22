@@ -124,6 +124,44 @@ export interface StrategySpaceData {
   methods: Record<string, MethodStrategyEntry>;
 }
 
+/** design/179: 方法的认识论声明：什么算证据、允许怎么推论、约束的方法论出处。 */
+export interface EpistemicConstraint {
+  id: string;
+  constraint: string;
+  citation: string;
+  stage: string;
+}
+export interface MethodEpistemics {
+  status: "modeled" | "partial";
+  evidence_form: { id: string; label: string; hashable: string; unit: string };
+  inference_rule: string;
+  rule_detail: string;
+  min_independent_sources: number;
+  constraints: EpistemicConstraint[];
+}
+export interface EpistemicsData {
+  schema: string;
+  boundary: string;
+  rule_meaning: Record<string, string>;
+  methods: Record<string, MethodEpistemics>;
+}
+
+let epistemicsCache: EpistemicsData | null | undefined;
+
+/** Fetch the exported epistemics snapshot. Missing => null (honest empty state). */
+export async function loadEpistemics(): Promise<EpistemicsData | null> {
+  if (epistemicsCache !== undefined) return epistemicsCache;
+  try {
+    const response = await fetch("./method-epistemics.json", { cache: "no-cache" });
+    if (!response.ok) throw new Error(String(response.status));
+    const data = (await response.json()) as EpistemicsData;
+    epistemicsCache = data.schema === "ese-method-epistemics-0.1" ? data : null;
+  } catch {
+    epistemicsCache = null;
+  }
+  return epistemicsCache;
+}
+
 let strategyCache: StrategySpaceData | null | undefined;
 
 /** design/177: 元模型推导的编排计划（顺序 + 每阶段执行契约），由 CLI 导出。 */

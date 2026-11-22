@@ -3685,6 +3685,62 @@ def _cmd_method_check(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_method_epistemics(args: argparse.Namespace) -> int:
+    """design/179: 显示方法认识论声明（证据形态/推论规则/带出处的顺序约束）。"""
+    from .epistemics import load_epistemics
+    from .storage import read_json
+
+    payload = load_epistemics()
+    if args.method_id:
+        entry = (payload.get("methods") or {}).get(args.method_id)
+        if entry is None:
+            print("unknown method: {0}".format(args.method_id))
+            return 2
+        _print_json({"method": args.method_id, **entry})
+        return 0
+    _print_json(payload)
+    return 0
+
+
+def _cmd_method_support_check(args: argparse.Namespace) -> int:
+    """design/179: 按方法的推论规则判定证据能否支撑 claim（只读，不签署）。"""
+    from .epistemics import EpistemicsError, claim_support_check
+    from .storage import read_json
+
+    try:
+        evidence = read_json(Path(args.evidence))
+    except Exception as exc:
+        print("cannot read evidence: {0}".format(exc))
+        return 2
+    if evidence is None:
+        print("evidence file not found: {0}".format(args.evidence))
+        return 2
+    items = evidence.get("items") if isinstance(evidence, dict) else evidence
+    if not isinstance(items, list):
+        print("evidence file must be a list or an object with an items list")
+        return 2
+    assertions = None
+    if args.assertions:
+        try:
+            payload = read_json(Path(args.assertions))
+        except Exception as exc:
+            print("cannot read assertions: {0}".format(exc))
+            return 2
+        assertions = (payload or {}).get("assertions") if isinstance(payload, dict) else payload
+    try:
+        verdict = claim_support_check(
+            args.method_id,
+            evidence_items=items,
+            assertions=assertions,
+            generalises=bool(args.generalises),
+        )
+    except EpistemicsError as exc:
+        print(str(exc))
+        return 2
+    _print_json(verdict)
+    return 0
+
+
 def _cmd_workspace_export(args: argparse.Namespace) -> int:
     _print_json(export_workspace_snapshots(Path(args.output_dir)))
     return 0
@@ -6692,6 +6748,19 @@ def build_parser() -> argparse.ArgumentParser:
     method_check.add_argument("--method", dest="method_id", required=True)
     method_check.add_argument("--design", required=True)
     method_check.set_defaults(func=_cmd_method_check)
+    method_epistemics = method_sub.add_parser(
+        "epistemics", help="evidence form / inference rule / sourced order constraints"
+    )
+    method_epistemics.add_argument("--method", dest="method_id", default="")
+    method_epistemics.set_defaults(func=_cmd_method_epistemics)
+    method_support = method_sub.add_parser(
+        "support-check", help="can this evidence support a claim under the method's inference rule"
+    )
+    method_support.add_argument("--method", dest="method_id", required=True)
+    method_support.add_argument("--evidence", required=True)
+    method_support.add_argument("--assertions", default="")
+    method_support.add_argument("--generalises", action="store_true")
+    method_support.set_defaults(func=_cmd_method_support_check)
 
     research = sub.add_parser("research", help="run the fixture research queue")
     research_sub = research.add_subparsers(dest="research_command", required=True)

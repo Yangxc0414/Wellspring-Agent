@@ -1,0 +1,280 @@
+{
+  "schema": "ese-method-epistemics-0.1",
+  "boundary": "只读认识论声明：每个方法规定「什么算证据、允许怎么推论、顺序约束的方法论出处」。它不产生 Claim、不读门禁；claim 的最终签署仍由人完成。citation 只列可核查的公开方法论文献，不把领域惯例写成规范。",
+  "inference_rules": [
+    "statistical",
+    "pattern-match",
+    "thematic-synthesis",
+    "design-cycle",
+    "descriptive"
+  ],
+  "rule_meaning": {
+    "statistical": "以估计量+区间/检验判定方向；区间跨零即不可判定",
+    "pattern-match": "同一模式需在 ≥N 个独立案例中出现，且资料来源交叉印证",
+    "thematic-synthesis": "主题需 ≥N 项独立研究支持；单研究不得推断总体",
+    "design-cycle": "设计产物与评估必须成对且可追溯；缺评估即未完成一轮",
+    "descriptive": "只报分布与相关，不外推总体；须声明抽样框与应答率"
+  },
+  "methods": {
+    "systematic-literature-review": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "screened-corpus",
+        "label": "筛选记录与纳入研究",
+        "hashable": "检索式 + 命中数 + 纳入清单的 sha256",
+        "unit": "per-included-study"
+      },
+      "inference_rule": "thematic-synthesis",
+      "rule_detail": "每个主题至少 2 项独立研究支持；单研究不得推断总体",
+      "min_independent_sources": 2,
+      "constraints": [
+        {
+          "id": "protocol-before-search",
+          "constraint": "检索式与纳入排除标准必须先于检索固定，事后修改须记为偏离",
+          "citation": "Kitchenham & Charters 2007, Guidelines for SLR in SE; PRISMA 2020",
+          "stage": "S1"
+        },
+        {
+          "id": "screening-reproducible",
+          "constraint": "他人按同一检索式重放应得到同一快照与同一纳入集合",
+          "citation": "PRISMA 2020, item 16（检索可复现）",
+          "stage": "S1"
+        }
+      ]
+    },
+    "repository-mining": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "repository-snapshot",
+        "label": "仓库快照 + 标签规则",
+        "hashable": "快照 commit 范围 + 抽样规则 + 标签脚本的 sha256",
+        "unit": "per-repository-record"
+      },
+      "inference_rule": "statistical",
+      "rule_detail": "观察性数据只支持相关与预测；因果断言需要识别策略（本方法不提供）",
+      "min_independent_sources": 1,
+      "constraints": [
+        {
+          "id": "fixed-snapshot",
+          "constraint": "抽样框与时间窗在分析前固定；不得看到结果后扩大范围",
+          "citation": "Kalliamvakou et al. 2014, The Promises and Perils of Mining GitHub",
+          "stage": "S1"
+        },
+        {
+          "id": "no-causal-claim",
+          "constraint": "不得把相关性写成因果；因果需另有识别策略",
+          "citation": "Kalliamvakou et al. 2014（观察性数据的效度威胁）",
+          "stage": "S5b"
+        }
+      ]
+    },
+    "controlled-experiment": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "controlled-measurement",
+        "label": "受控测量记录",
+        "hashable": "metrics.json + run-capsule.json 的 sha256",
+        "unit": "per-seed metric"
+      },
+      "inference_rule": "statistical",
+      "rule_detail": "配对比较 + 效应量 + 区间；区间跨零即不可判定",
+      "min_independent_sources": 1,
+      "constraints": [
+        {
+          "id": "hypothesis-before-data",
+          "constraint": "假设必须在数据收集前固定；事后假设须标注为 HARKing",
+          "citation": "Kerr 1998, HARKing: Hypothesizing After the Results are Known",
+          "stage": "S2-S3"
+        },
+        {
+          "id": "assignment-recorded",
+          "constraint": "随机化/区组分配必须留痕并可核验",
+          "citation": "Wohlin et al. 2012, Experimentation in Software Engineering",
+          "stage": "S4"
+        },
+        {
+          "id": "analysis-plan-frozen",
+          "constraint": "分析计划与主指标在冻结后不得事后修改",
+          "citation": "Wohlin et al. 2012（预注册与偏离记录）",
+          "stage": "S4"
+        }
+      ]
+    },
+    "quasi-experiment": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "grouped-measurement",
+        "label": "分组测量数据集",
+        "hashable": "分组定义 + 协变量表 + 敏感性分析脚本的 sha256",
+        "unit": "per-group measurement"
+      },
+      "inference_rule": "statistical",
+      "rule_detail": "效应估计限定于声明的识别策略；须附敏感性分析",
+      "min_independent_sources": 1,
+      "constraints": [
+        {
+          "id": "identification-strategy",
+          "constraint": "必须写明识别策略（断点/工具变量/差分），不得默认无偏",
+          "citation": "Shadish, Cook & Campbell 2002, Experimental and Quasi-Experimental Designs",
+          "stage": "S4"
+        }
+      ]
+    },
+    "benchmark-evaluation": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "benchmark-scores",
+        "label": "基准评分 + 污染检查记录",
+        "hashable": "基准版本 + 提交/预算配置 + 评分输出的 sha256",
+        "unit": "per-benchmark-run"
+      },
+      "inference_rule": "statistical",
+      "rule_detail": "同预算同版本比较；多重比较须校正；跨基准排名不可宣称",
+      "min_independent_sources": 1,
+      "constraints": [
+        {
+          "id": "budget-matched",
+          "constraint": "比较必须在匹配预算与同一基准版本下进行",
+          "citation": "Dodge et al. 2019, Show Your Work: Improved Reporting of Experimental Results",
+          "stage": "S4"
+        },
+        {
+          "id": "report-variance",
+          "constraint": "须报告多次运行的方差，不得只报最佳一次",
+          "citation": "Dodge et al. 2019（报告完整性）",
+          "stage": "S5b"
+        }
+      ]
+    },
+    "case-study": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "case-corpus",
+        "label": "案例资料与编码表",
+        "hashable": "资料清单 + 编码表 + 引文索引的 sha256",
+        "unit": "per-case coded pattern"
+      },
+      "inference_rule": "pattern-match",
+      "rule_detail": "同一模式需在 ≥2 个独立案例中出现，且至少两类资料来源交叉印证；单案例只报机制假设",
+      "min_independent_sources": 2,
+      "constraints": [
+        {
+          "id": "evidence-before-hypothesis",
+          "constraint": "资料收集与编码先于假设陈述；由此形成的假设必须标注为事后归纳，不得写成事前假设",
+          "citation": "Yin 2018, Case Study Research and Applications; Eisenhardt 1989, Building Theories from Case Study Research",
+          "stage": "S5"
+        },
+        {
+          "id": "triangulation",
+          "constraint": "结论必须有 ≥2 类资料来源交叉印证（访谈/观察/文档）",
+          "citation": "Yin 2018, ch.4; Runeson & Höst 2009, Guidelines for Conducting and Reporting Case Study Research in SE",
+          "stage": "S5"
+        },
+        {
+          "id": "chain-of-evidence",
+          "constraint": "每条结论可回溯到具体引文与编码条目",
+          "citation": "Yin 2018, ch.4（chain of evidence）",
+          "stage": "S5"
+        }
+      ]
+    },
+    "survey": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "response-dataset",
+        "label": "应答数据集",
+        "hashable": "问卷版本 + 抽样框 + 回收记录的 sha256",
+        "unit": "per-respondent record"
+      },
+      "inference_rule": "descriptive",
+      "rule_detail": "只报分布与相关，不外推总体；须声明抽样框与应答率",
+      "min_independent_sources": 1,
+      "constraints": [
+        {
+          "id": "sampling-frame",
+          "constraint": "必须声明抽样框与抽样方式；便利样本不得写成代表样本",
+          "citation": "Groves et al. 2009, Survey Methodology",
+          "stage": "S1"
+        },
+        {
+          "id": "response-rate",
+          "constraint": "必须报告应答率与非应答偏差讨论",
+          "citation": "Groves et al. 2009（非应答偏差）",
+          "stage": "S5"
+        }
+      ]
+    },
+    "design-science": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "design-artifact-evaluation",
+        "label": "设计产物 + 评估记录",
+        "hashable": "产物版本 + 评估方案 + 评估输出的 sha256",
+        "unit": "per-design-cycle"
+      },
+      "inference_rule": "design-cycle",
+      "rule_detail": "产物与评估必须成对；只有产物没有评估即未完成一轮",
+      "min_independent_sources": 1,
+      "constraints": [
+        {
+          "id": "artifact-evaluation-pair",
+          "constraint": "每个设计产物必须绑定一次可核查的评估",
+          "citation": "Hevner et al. 2004, Design Science in Information Systems Research",
+          "stage": "S4"
+        },
+        {
+          "id": "design-cycle-iterate",
+          "constraint": "设计-评估-修订须记录为循环，不得把首轮产物当终局",
+          "citation": "Peffers et al. 2007, A Design Science Research Methodology",
+          "stage": "S8-S12"
+        }
+      ]
+    },
+    "action-research": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "intervention-log",
+        "label": "干预记录与反思日志",
+        "hashable": "干预时间线 + 观察记录 + 反思条目的 sha256",
+        "unit": "per-cycle"
+      },
+      "inference_rule": "design-cycle",
+      "rule_detail": "计划-行动-观察-反思须成轮；单轮结论不得写成普适规律",
+      "min_independent_sources": 1,
+      "constraints": [
+        {
+          "id": "cycle-reflection",
+          "constraint": "每轮必须包含反思并说明下一轮如何调整",
+          "citation": "Kemmis & McTaggart 2005, Participatory Action Research",
+          "stage": "S5"
+        }
+      ]
+    },
+    "ml-iterative-experiment": {
+      "status": "modeled",
+      "evidence_form": {
+        "id": "multi-seed-ablation",
+        "label": "多随机种子结果 + 消融",
+        "hashable": "种子列表 + 配置 + 逐种子指标的 sha256",
+        "unit": "per-seed metric"
+      },
+      "inference_rule": "statistical",
+      "rule_detail": "同配置多随机种子下的分布比较；单次最优不得作为结论",
+      "min_independent_sources": 1,
+      "constraints": [
+        {
+          "id": "report-seed-variance",
+          "constraint": "必须报告多种子方差，不得只报最佳种子",
+          "citation": "Henderson et al. 2018, Deep Reinforcement Learning That Matters",
+          "stage": "S5b"
+        },
+        {
+          "id": "ablation-required",
+          "constraint": "宣称某组件有效必须附消融",
+          "citation": "Henderson et al. 2018（可复现性）",
+          "stage": "S8-S12"
+        }
+      ]
+    }
+  }
+}

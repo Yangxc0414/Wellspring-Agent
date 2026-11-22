@@ -94,6 +94,7 @@ class WorkspaceStoreTest(unittest.TestCase):
                 "command-catalog.json",
                 "custom-agents.json",
                 "evolution-policy.json",
+                "method-epistemics.json",
                 "method-registry.json",
                 "method-strategy-space.json",
                 "orchestration-plans.json",
